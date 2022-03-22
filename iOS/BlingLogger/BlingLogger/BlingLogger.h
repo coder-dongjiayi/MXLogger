@@ -55,9 +55,9 @@ NS_ASSUME_NONNULL_BEGIN
     3:error
     4:fatal
  **/
-/// 设置控制台输出日志等级 默认 debug
+/// 设置控制台输出日志等级 默认 0(debug)
 @property (nonatomic,assign)NSInteger  consoleLevel;
-/// 设置写入日志文件等级  默认 info
+/// 设置写入日志文件等级  默认1( info)
 @property (nonatomic,assign)NSInteger  fileLevel;
 
 /// 开启/禁用控制台日志输出
