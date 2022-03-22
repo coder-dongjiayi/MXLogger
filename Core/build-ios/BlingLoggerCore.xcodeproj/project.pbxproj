@@ -1,0 +1,599 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		02FD66FD50404F2F8BEEC15A /* logger_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 01B8697B89C24C6DACD797AA /* logger_manager.cpp */; };
+		0440CE65FA4641F2A3017483 /* file_appender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05B39568AD34428A83DF5AB3 /* file_appender.cpp */; };
+		04C12EA09C17408C81466F25 /* pattern_formatter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EDFB5E952D74C3698EFEDE1 /* pattern_formatter.cpp */; };
+		1AA462B6088545E28A530E18 /* log_msg.cc in Sources */ = {isa = PBXBuildFile; fileRef = 9AD1C9772C854BD19527339E /* log_msg.cc */; };
+		1EA6B112164B40269B0D0F92 /* sinks.cc in Sources */ = {isa = PBXBuildFile; fileRef = 6693884C68774331A1AA0246 /* sinks.cc */; };
+		333A15C7556F4BB6A3903BB5 /* log_msg_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49A77E07C63E4397AF6BDD49 /* log_msg_buffer.cpp */; };
+		34D15B817124462BBA2C8EEB /* flag_formatter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 159DFFBDA45E48E2A1DFD0BC /* flag_formatter.cpp */; };
+		3551ED190B4A4163A4AB0801 /* async_msg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 66D76FE566094B17932C9C58 /* async_msg.cpp */; };
+		64AC9218FCC349BD8565045F /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C2C4B06B7F43463694A040BE /* logger.cpp */; };
+		74E48E0E8AF841B5B3E33428 /* thread_pool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E31D2321F381475CAF8CFAA2 /* thread_pool.cpp */; };
+		7B197B3BA83346A496CA08D7 /* format.cc in Sources */ = {isa = PBXBuildFile; fileRef = 75B2085E97C340BC85BF1FBB /* format.cc */; };
+		7E9E17155E5E4A77A96BCFEF /* mpmc_blocking_queue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67016AA8D39D492EAD6029A2 /* mpmc_blocking_queue.cpp */; };
+		91DD544CCB2E41B8B7BD515C /* file_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D63FB9E5841647BABCA8E308 /* file_sink.cpp */; };
+		9262FE71F0424EF5AB42C976 /* file_helper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47D22E251A1749A9A87F6DAE /* file_helper.cpp */; };
+		A3CB00EEAFDE4A188FA5FAB1 /* logger_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A979D15233214A9AA7333B6D /* logger_os.cpp */; };
+		BD62862B27E9B95700362E4C /* logger_enum.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 94690F36F5654C81A8BFDC82 /* logger_enum.h */; };
+		BD62862C27E9B95700362E4C /* logger_manager.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2841BC05EF924E6EB98D4E64 /* logger_manager.hpp */; };
+		C108903CFCC34546B30B46F2 /* console_sink.cc in Sources */ = {isa = PBXBuildFile; fileRef = C0EFF8FD71F7459B81C87995 /* console_sink.cc */; };
+		C1F665C48BBF48CDB73F13EA /* formatter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9ED1C662BF0E499E86AC1C8E /* formatter.cpp */; };
+		E6354C4A9CF7403D9482AAFA /* async_logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 555CBFC70F124C3CBB710481 /* async_logger.cpp */; };
+		FF45B1929C1342CAB23414B1 /* os.cc in Sources */ = {isa = PBXBuildFile; fileRef = 74713625ABD0492F852F6546 /* os.cc */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BD62862927E9B8DD00362E4C /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				BD62862B27E9B95700362E4C /* logger_enum.h in CopyFiles */,
+				BD62862C27E9B95700362E4C /* logger_manager.hpp in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		01B8697B89C24C6DACD797AA /* logger_manager.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = logger_manager.cpp; sourceTree = SOURCE_ROOT; };
+		0323A001F35640EB8D759AAF /* chrono.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = chrono.h; path = fmt/chrono.h; sourceTree = SOURCE_ROOT; };
+		05B39568AD34428A83DF5AB3 /* file_appender.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = file_appender.cpp; sourceTree = SOURCE_ROOT; };
+		082D2AF132674F7CB91E29B2 /* logger_os.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = logger_os.hpp; sourceTree = SOURCE_ROOT; };
+		14901109149642529C8A3B59 /* pattern_formatter.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = pattern_formatter.hpp; sourceTree = SOURCE_ROOT; };
+		159DFFBDA45E48E2A1DFD0BC /* flag_formatter.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = flag_formatter.cpp; sourceTree = SOURCE_ROOT; };
+		1C7DA52A566F4CD99A60FD27 /* locale.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = locale.h; path = fmt/locale.h; sourceTree = SOURCE_ROOT; };
+		20F73440FEA241A6964A9805 /* os.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = os.h; path = fmt/os.h; sourceTree = SOURCE_ROOT; };
+		2564823118404F95A4100F0F /* logger.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = logger.hpp; sourceTree = SOURCE_ROOT; };
+		2841BC05EF924E6EB98D4E64 /* logger_manager.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = logger_manager.hpp; sourceTree = SOURCE_ROOT; };
+		29C859B66A224C35AFC77890 /* ostream.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ostream.h; path = fmt/ostream.h; sourceTree = SOURCE_ROOT; };
+		2EDFB5E952D74C3698EFEDE1 /* pattern_formatter.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = pattern_formatter.cpp; sourceTree = SOURCE_ROOT; };
+		31A37FC1CA704280999E28C4 /* flag_formatter.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = flag_formatter.hpp; sourceTree = SOURCE_ROOT; };
+		384E83480A714CA089E38770 /* logger_common.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; path = logger_common.h; sourceTree = SOURCE_ROOT; };
+		39D75207C0DD491B8B376FC5 /* file_sink.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = file_sink.hpp; sourceTree = SOURCE_ROOT; };
+		47D22E251A1749A9A87F6DAE /* file_helper.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = file_helper.cpp; sourceTree = SOURCE_ROOT; };
+		49A77E07C63E4397AF6BDD49 /* log_msg_buffer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = log_msg_buffer.cpp; sourceTree = SOURCE_ROOT; };
+		555CBFC70F124C3CBB710481 /* async_logger.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = async_logger.cpp; sourceTree = SOURCE_ROOT; };
+		55D8F054543C4A8A87045C1E /* ranges.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ranges.h; path = fmt/ranges.h; sourceTree = SOURCE_ROOT; };
+		590DEB6C37944152B519459F /* async_msg.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = async_msg.hpp; sourceTree = SOURCE_ROOT; };
+		628C13A8BB98478AA3A26B62 /* format-inl.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = "format-inl.h"; path = "fmt/format-inl.h"; sourceTree = SOURCE_ROOT; };
+		6693884C68774331A1AA0246 /* sinks.cc */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = sinks.cc; sourceTree = SOURCE_ROOT; };
+		66D76FE566094B17932C9C58 /* async_msg.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = async_msg.cpp; sourceTree = SOURCE_ROOT; };
+		67016AA8D39D492EAD6029A2 /* mpmc_blocking_queue.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = mpmc_blocking_queue.cpp; sourceTree = SOURCE_ROOT; };
+		6CF2F1C013B04EB593D7C0BC /* libBlingLoggerCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libBlingLoggerCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		735871B670EE4D888A5BF54D /* args.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = args.h; path = fmt/args.h; sourceTree = SOURCE_ROOT; };
+		7385F76F6B724545AF650E36 /* color.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = color.h; path = fmt/color.h; sourceTree = SOURCE_ROOT; };
+		73914BC0BD0C4E40B41C8686 /* printf.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = printf.h; path = fmt/printf.h; sourceTree = SOURCE_ROOT; };
+		74713625ABD0492F852F6546 /* os.cc */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = os.cc; path = fmt/os.cc; sourceTree = SOURCE_ROOT; };
+		75B2085E97C340BC85BF1FBB /* format.cc */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = format.cc; path = fmt/format.cc; sourceTree = SOURCE_ROOT; };
+		7A1BA6BC3B854A0DA8680124 /* async_logger.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = async_logger.hpp; sourceTree = SOURCE_ROOT; };
+		7B0ABBAE5F464227A59C570C /* CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		82E50010F34B4A148A4D91E2 /* fmt_helper.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; path = fmt_helper.h; sourceTree = SOURCE_ROOT; };
+		86321482C5F44155808DC55C /* file_helper.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = file_helper.hpp; sourceTree = SOURCE_ROOT; };
+		898732B35C004482AEE012BD /* log_msg_buffer.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = log_msg_buffer.hpp; sourceTree = SOURCE_ROOT; };
+		94690F36F5654C81A8BFDC82 /* logger_enum.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; path = logger_enum.h; sourceTree = SOURCE_ROOT; };
+		9757EFD038634418945B8DF8 /* file_appender.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = file_appender.hpp; sourceTree = SOURCE_ROOT; };
+		9AC9E22CF94B466CA08C8BB1 /* formatter.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = formatter.hpp; sourceTree = SOURCE_ROOT; };
+		9AD1C9772C854BD19527339E /* log_msg.cc */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = log_msg.cc; sourceTree = SOURCE_ROOT; };
+		9CB3F6FE53454B75A4623072 /* mpmc_blocking_queue.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = mpmc_blocking_queue.hpp; sourceTree = SOURCE_ROOT; };
+		9ED1C662BF0E499E86AC1C8E /* formatter.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = formatter.cpp; sourceTree = SOURCE_ROOT; };
+		A0BD23CB923E415D8FFBC069 /* thread_pool.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = thread_pool.hpp; sourceTree = SOURCE_ROOT; };
+		A979D15233214A9AA7333B6D /* logger_os.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = logger_os.cpp; sourceTree = SOURCE_ROOT; };
+		AB472DBAF3AC4B3C9E08CEC6 /* console_sink.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; path = console_sink.h; sourceTree = SOURCE_ROOT; };
+		AC9BA0927C7B4CF692EE120D /* Info.plist */ = {isa = PBXFileReference; explicitFileType = sourcecode.text.plist; fileEncoding = 4; lastKnownFileType = text.plist; name = Info.plist; path = "build-ios/CMakeFiles/BlingLoggerCore.dir/Info.plist"; sourceTree = SOURCE_ROOT; };
+		BA7B1AE03EF848ECA4C18C98 /* xchar.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = xchar.h; path = fmt/xchar.h; sourceTree = SOURCE_ROOT; };
+		C0EFF8FD71F7459B81C87995 /* console_sink.cc */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = console_sink.cc; sourceTree = SOURCE_ROOT; };
+		C2C4B06B7F43463694A040BE /* logger.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = logger.cpp; sourceTree = SOURCE_ROOT; };
+		D63FB9E5841647BABCA8E308 /* file_sink.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = file_sink.cpp; sourceTree = SOURCE_ROOT; };
+		E0B1517F84AC4959893CAFB2 /* compile.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = compile.h; path = fmt/compile.h; sourceTree = SOURCE_ROOT; };
+		E31D2321F381475CAF8CFAA2 /* thread_pool.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = thread_pool.cpp; sourceTree = SOURCE_ROOT; };
+		E8E3A6C47BE048888D936513 /* CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		E984CB91420A40DA82F4C984 /* log_msg.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; path = log_msg.h; sourceTree = SOURCE_ROOT; };
+		F3344584200A4FFE9BB5290F /* format.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = format.h; path = fmt/format.h; sourceTree = SOURCE_ROOT; };
+		F44744D4DC6B408499D55A94 /* core.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = core.h; path = fmt/core.h; sourceTree = SOURCE_ROOT; };
+		F6DF094808CA4300892661FA /* sinks.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; path = sinks.h; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C1F8B2BCA4BB44A9B52B5EF5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4488D4C54FB44055BE702C2B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AC9BA0927C7B4CF692EE120D /* Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		4EF167811F9B4CCFB10B644E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5C7C9054E9194287A8F88EB1 = {
+			isa = PBXGroup;
+			children = (
+				A292CF4446E346B1AC04951C /* BlingLoggerCore */,
+				8BA2DC38442D46F4A2A4F8BE /* ALL_BUILD */,
+				7793C382F48740368405C0E3 /* Products */,
+				4EF167811F9B4CCFB10B644E /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		7376D6780F29434980CF4A7E /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				7A1BA6BC3B854A0DA8680124 /* async_logger.hpp */,
+				590DEB6C37944152B519459F /* async_msg.hpp */,
+				AB472DBAF3AC4B3C9E08CEC6 /* console_sink.h */,
+				9757EFD038634418945B8DF8 /* file_appender.hpp */,
+				86321482C5F44155808DC55C /* file_helper.hpp */,
+				39D75207C0DD491B8B376FC5 /* file_sink.hpp */,
+				31A37FC1CA704280999E28C4 /* flag_formatter.hpp */,
+				735871B670EE4D888A5BF54D /* args.h */,
+				0323A001F35640EB8D759AAF /* chrono.h */,
+				7385F76F6B724545AF650E36 /* color.h */,
+				E0B1517F84AC4959893CAFB2 /* compile.h */,
+				F44744D4DC6B408499D55A94 /* core.h */,
+				628C13A8BB98478AA3A26B62 /* format-inl.h */,
+				F3344584200A4FFE9BB5290F /* format.h */,
+				1C7DA52A566F4CD99A60FD27 /* locale.h */,
+				20F73440FEA241A6964A9805 /* os.h */,
+				29C859B66A224C35AFC77890 /* ostream.h */,
+				73914BC0BD0C4E40B41C8686 /* printf.h */,
+				55D8F054543C4A8A87045C1E /* ranges.h */,
+				BA7B1AE03EF848ECA4C18C98 /* xchar.h */,
+				82E50010F34B4A148A4D91E2 /* fmt_helper.h */,
+				9AC9E22CF94B466CA08C8BB1 /* formatter.hpp */,
+				E984CB91420A40DA82F4C984 /* log_msg.h */,
+				898732B35C004482AEE012BD /* log_msg_buffer.hpp */,
+				2564823118404F95A4100F0F /* logger.hpp */,
+				384E83480A714CA089E38770 /* logger_common.h */,
+				94690F36F5654C81A8BFDC82 /* logger_enum.h */,
+				2841BC05EF924E6EB98D4E64 /* logger_manager.hpp */,
+				082D2AF132674F7CB91E29B2 /* logger_os.hpp */,
+				9CB3F6FE53454B75A4623072 /* mpmc_blocking_queue.hpp */,
+				14901109149642529C8A3B59 /* pattern_formatter.hpp */,
+				F6DF094808CA4300892661FA /* sinks.h */,
+				A0BD23CB923E415D8FFBC069 /* thread_pool.hpp */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		7793C382F48740368405C0E3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6CF2F1C013B04EB593D7C0BC /* libBlingLoggerCore.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7FB80E1B49D546288357ED56 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		8BA2DC38442D46F4A2A4F8BE /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				7FB80E1B49D546288357ED56 /* CMake Rules */,
+				E8E3A6C47BE048888D936513 /* CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		A292CF4446E346B1AC04951C /* BlingLoggerCore */ = {
+			isa = PBXGroup;
+			children = (
+				C7716184909B42F6B8C7E950 /* Source Files */,
+				7376D6780F29434980CF4A7E /* Header Files */,
+				4488D4C54FB44055BE702C2B /* Resources */,
+				7B0ABBAE5F464227A59C570C /* CMakeLists.txt */,
+			);
+			name = BlingLoggerCore;
+			sourceTree = "<group>";
+		};
+		C7716184909B42F6B8C7E950 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				555CBFC70F124C3CBB710481 /* async_logger.cpp */,
+				66D76FE566094B17932C9C58 /* async_msg.cpp */,
+				C0EFF8FD71F7459B81C87995 /* console_sink.cc */,
+				05B39568AD34428A83DF5AB3 /* file_appender.cpp */,
+				47D22E251A1749A9A87F6DAE /* file_helper.cpp */,
+				D63FB9E5841647BABCA8E308 /* file_sink.cpp */,
+				159DFFBDA45E48E2A1DFD0BC /* flag_formatter.cpp */,
+				75B2085E97C340BC85BF1FBB /* format.cc */,
+				74713625ABD0492F852F6546 /* os.cc */,
+				9ED1C662BF0E499E86AC1C8E /* formatter.cpp */,
+				9AD1C9772C854BD19527339E /* log_msg.cc */,
+				49A77E07C63E4397AF6BDD49 /* log_msg_buffer.cpp */,
+				C2C4B06B7F43463694A040BE /* logger.cpp */,
+				01B8697B89C24C6DACD797AA /* logger_manager.cpp */,
+				A979D15233214A9AA7333B6D /* logger_os.cpp */,
+				67016AA8D39D492EAD6029A2 /* mpmc_blocking_queue.cpp */,
+				2EDFB5E952D74C3698EFEDE1 /* pattern_formatter.cpp */,
+				6693884C68774331A1AA0246 /* sinks.cc */,
+				E31D2321F381475CAF8CFAA2 /* thread_pool.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CB99A3573125438CBE4A4C10 /* BlingLoggerCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 13C828E6AA234FE19A8F2AAA /* Build configuration list for PBXNativeTarget "BlingLoggerCore" */;
+			buildPhases = (
+				BFC8E8548A6F47AF8D4C21A5 /* Sources */,
+				C1F8B2BCA4BB44A9B52B5EF5 /* Frameworks */,
+				BD62862927E9B8DD00362E4C /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BlingLoggerCore;
+			productName = BlingLoggerCore;
+			productReference = 6CF2F1C013B04EB593D7C0BC /* libBlingLoggerCore.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B1DACA18506E49AFA01F8C2B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1240;
+				TargetAttributes = {
+					CB99A3573125438CBE4A4C10 = {
+						DevelopmentTeam = UBX9CH9GDX;
+					};
+				};
+			};
+			buildConfigurationList = 44FF4933BB8A4E6495534205 /* Build configuration list for PBXProject "BlingLoggerCore" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 5C7C9054E9194287A8F88EB1;
+			projectDirPath = ../;
+			projectRoot = "";
+			targets = (
+				CB99A3573125438CBE4A4C10 /* BlingLoggerCore */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BFC8E8548A6F47AF8D4C21A5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E6354C4A9CF7403D9482AAFA /* async_logger.cpp in Sources */,
+				3551ED190B4A4163A4AB0801 /* async_msg.cpp in Sources */,
+				C108903CFCC34546B30B46F2 /* console_sink.cc in Sources */,
+				0440CE65FA4641F2A3017483 /* file_appender.cpp in Sources */,
+				9262FE71F0424EF5AB42C976 /* file_helper.cpp in Sources */,
+				91DD544CCB2E41B8B7BD515C /* file_sink.cpp in Sources */,
+				34D15B817124462BBA2C8EEB /* flag_formatter.cpp in Sources */,
+				7B197B3BA83346A496CA08D7 /* format.cc in Sources */,
+				FF45B1929C1342CAB23414B1 /* os.cc in Sources */,
+				C1F665C48BBF48CDB73F13EA /* formatter.cpp in Sources */,
+				1AA462B6088545E28A530E18 /* log_msg.cc in Sources */,
+				333A15C7556F4BB6A3903BB5 /* log_msg_buffer.cpp in Sources */,
+				64AC9218FCC349BD8565045F /* logger.cpp in Sources */,
+				02FD66FD50404F2F8BEEC15A /* logger_manager.cpp in Sources */,
+				A3CB00EEAFDE4A188FA5FAB1 /* logger_os.cpp in Sources */,
+				7E9E17155E5E4A77A96BCFEF /* mpmc_blocking_queue.cpp in Sources */,
+				04C12EA09C17408C81466F25 /* pattern_formatter.cpp in Sources */,
+				1EA6B112164B40269B0D0F92 /* sinks.cc in Sources */,
+				74E48E0E8AF841B5B3E33428 /* thread_pool.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2A5927096A484890916473EF /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				"ARCHS[sdk=iphoneos*]" = arm64;
+				BITCODE_GENERATION_MODE = bitcode;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				DEVELOPMENT_TEAM = UBX9CH9GDX;
+				ENABLE_BITCODE = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.4.sdk;
+				SYMROOT = "/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios/build";
+				"VALID_ARCHS[sdk=iphoneos*]" = arm64;
+			};
+			name = RelWithDebInfo;
+		};
+		39744DE89E464A24BFAF85EE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					arm64,
+					x86_64,
+				);
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					FORCE_POSIX,
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Users/dongjiayi/Documents/github/BlingLogger/Core,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DNDEBUG",
+					"-fPIC",
+					"'-std=c++17'",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = BlingLoggerCore;
+				SDKROOT = macosx;
+				SECTORDER_FLAGS = "";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SYMROOT = "/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios";
+				USE_HEADERMAP = NO;
+				VALID_ARCHS = arm64;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Release;
+		};
+		40D8D785EE29470D96AA1E06 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					arm64,
+					x86_64,
+				);
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					FORCE_POSIX,
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Users/dongjiayi/Documents/github/BlingLogger/Core,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DNDEBUG",
+					"-fPIC",
+					"'-std=c++17'",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = BlingLoggerCore;
+				SDKROOT = macosx;
+				SECTORDER_FLAGS = "";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SYMROOT = "/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios";
+				USE_HEADERMAP = NO;
+				VALID_ARCHS = arm64;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = RelWithDebInfo;
+		};
+		564CD184604644A2BA52B6D5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				"ARCHS[sdk=iphoneos*]" = arm64;
+				BITCODE_GENERATION_MODE = bitcode;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				DEVELOPMENT_TEAM = UBX9CH9GDX;
+				ENABLE_BITCODE = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.4.sdk;
+				SYMROOT = "/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios/build";
+				"VALID_ARCHS[sdk=iphoneos*]" = arm64;
+			};
+			name = Debug;
+		};
+		7EDD8EBC873D4DEB8A407744 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				"ARCHS[sdk=iphoneos*]" = arm64;
+				BITCODE_GENERATION_MODE = bitcode;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				DEVELOPMENT_TEAM = UBX9CH9GDX;
+				ENABLE_BITCODE = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.4.sdk;
+				SYMROOT = "/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios/build";
+				"VALID_ARCHS[sdk=iphoneos*]" = arm64;
+			};
+			name = Release;
+		};
+		89FE42B87CEB44D9A860BB7E /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					arm64,
+					x86_64,
+				);
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					FORCE_POSIX,
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Users/dongjiayi/Documents/github/BlingLogger/Core,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DNDEBUG",
+					"-fPIC",
+					"'-std=c++17'",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = BlingLoggerCore;
+				SDKROOT = macosx;
+				SECTORDER_FLAGS = "";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SYMROOT = "/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios";
+				USE_HEADERMAP = NO;
+				VALID_ARCHS = arm64;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = MinSizeRel;
+		};
+		F5EE475F2A3E4373A5277E71 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				"ARCHS[sdk=iphoneos*]" = arm64;
+				BITCODE_GENERATION_MODE = bitcode;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				DEVELOPMENT_TEAM = UBX9CH9GDX;
+				ENABLE_BITCODE = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.4.sdk;
+				SYMROOT = "/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios/build";
+				"VALID_ARCHS[sdk=iphoneos*]" = arm64;
+			};
+			name = MinSizeRel;
+		};
+		F9662AB29FF249DFAB42D050 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					arm64,
+					x86_64,
+				);
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					FORCE_POSIX,
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Users/dongjiayi/Documents/github/BlingLogger/Core,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"'-std=c++17'",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = BlingLoggerCore;
+				SDKROOT = macosx;
+				SECTORDER_FLAGS = "";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SYMROOT = "/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios";
+				USE_HEADERMAP = NO;
+				VALID_ARCHS = arm64;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		13C828E6AA234FE19A8F2AAA /* Build configuration list for PBXNativeTarget "BlingLoggerCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9662AB29FF249DFAB42D050 /* Debug */,
+				39744DE89E464A24BFAF85EE /* Release */,
+				89FE42B87CEB44D9A860BB7E /* MinSizeRel */,
+				40D8D785EE29470D96AA1E06 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		44FF4933BB8A4E6495534205 /* Build configuration list for PBXProject "BlingLoggerCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				564CD184604644A2BA52B6D5 /* Debug */,
+				7EDD8EBC873D4DEB8A407744 /* Release */,
+				F5EE475F2A3E4373A5277E71 /* MinSizeRel */,
+				2A5927096A484890916473EF /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B1DACA18506E49AFA01F8C2B /* Project object */;
+}
