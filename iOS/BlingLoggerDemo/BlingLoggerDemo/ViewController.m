@@ -16,19 +16,42 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [BlingLogger shareManager].fileHeader = @"版本号:1.0.0 平台:iOS";
     [BlingLogger shareManager].maxDiskAge = 60 * 60 * 24 * 7; // 一个星期
     [BlingLogger shareManager].maxDiskSize = 1024 * 1024 * 100; // 100M
     
-    [BlingLogger shareManager].consoleLevel = 0;
-    [BlingLogger shareManager].fileLevel = 1;
-    
-    [BlingLogger shareManager].consolePattern = @"[%d][%p]%m";
-    [BlingLogger shareManager].filePattern = @" [%d][%t][%p]%m";
-    
-    [BlingLogger shareManager].fileHeader = @"版本号:1.0.0 平台:iOS";
-    
     NSString * path = [BlingLogger shareManager].diskCachePath;
     NSLog(@"日志文件路径:%@",path);
+    
+    /**下面这些设置都是默认设置 不写也行 **/
+    
+    [BlingLogger shareManager].storagePolicy = @"yyyy_MM_dd";
+    
+    [BlingLogger shareManager].shouldRemoveExpiredDataWhenEnterBackground = YES;
+    
+    [BlingLogger shareManager].shouldRemoveExpiredDataWhenTerminate = YES;
+    
+    [BlingLogger shareManager].fileName = @"blinglog";
+    
+    [BlingLogger shareManager].consoleLevel = 0;
+    /// 默认情况下 debug数据不会写入到文件中 如果设置 [BlingLogger shareManager].fileLevel = 0 那么debug数据才会写入到日志文件
+    [BlingLogger shareManager].fileLevel = 1;
+    
+    //设置为NO 控制台不再打印数据
+    [BlingLogger shareManager].consoleEnable = YES;
+    
+    //设置为NO 不再写入日志文件
+    [BlingLogger shareManager].fileEnable = YES;
+    
+    //控制台输出格式
+    [BlingLogger shareManager].consolePattern = @"[%d][%p]%m";
+    //问价输出格式
+    [BlingLogger shareManager].filePattern = @" [%d][%t][%p]%m";
+    
+    [BlingLogger shareManager].isAsync = YES;
+   
+    
+    
  
     
     
@@ -59,7 +82,12 @@
 
 
 - (IBAction)defaultButtonAction:(id)sender {
-    [BlingLogger info:@"这是一条infoLog，会输出到控制台"];
+    [BlingLogger debug:@"这是一条debug,会输出到控制台"];
+    [BlingLogger info:@"这是一条infoLog,会输出到控制台"];
+    [BlingLogger warn:@"这是一条warn,会输出到控制台"];
+    [BlingLogger error:@"这是一条error,会输出到控制台"];
+    [BlingLogger fatal:@"这是一条fatal,会输出到控制台"];
+   
 }
 - (IBAction)syncLogAction:(id)sender {
     
