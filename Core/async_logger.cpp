@@ -8,7 +8,7 @@
 #include "async_logger.hpp"
 #include "thread_pool.hpp"
 #include "sinks.h"
-namespace blinglog{
+namespace mxlogger{
 
 
 

@@ -9,7 +9,7 @@
 #include "logger_common.h"
 #include <stdio.h>
 
-namespace blinglog {
+namespace mxlogger {
 namespace details {
 struct log_msg{
     

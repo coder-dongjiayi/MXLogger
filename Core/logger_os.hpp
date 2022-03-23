@@ -8,7 +8,7 @@
 #ifndef logger_os_hpp
 #define logger_os_hpp
 #include <stdio.h>
-namespace blinglog {
+namespace mxlogger {
 namespace details{
 class logger_os{
 public:

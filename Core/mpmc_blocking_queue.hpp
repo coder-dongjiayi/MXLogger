@@ -11,7 +11,7 @@
 #include <vector>
 #include <condition_variable>
 #include <mutex>
-namespace blinglog{
+namespace mxlogger{
 namespace details{
 
 template<typename T>

@@ -9,7 +9,7 @@
 #include <chrono>
 #include <ctime>
 #include "fmt_helper.h"
-namespace blinglog {
+namespace mxlogger {
 namespace details{
 
 // [2022-03-02-16:49:57.912]

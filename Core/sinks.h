@@ -12,7 +12,7 @@
 #include "log_msg.h"
 
 #include <mutex>
-namespace blinglog {
+namespace mxlogger {
 namespace mutex{
 
 struct console_mutex{
@@ -27,7 +27,7 @@ struct console_mutex{
 }
 
 
-namespace blinglog {
+namespace mxlogger {
 namespace sinks{
 class sink{
     

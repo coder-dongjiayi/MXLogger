@@ -8,7 +8,7 @@
 #ifndef file_appender_hpp
 #define file_appender_hpp
 #include "fmt_helper.h"
-namespace blinglog{
+namespace mxlogger{
 namespace details{
 class file_appender {
  

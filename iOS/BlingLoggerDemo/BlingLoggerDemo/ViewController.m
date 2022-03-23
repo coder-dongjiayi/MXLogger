@@ -16,6 +16,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
     [BlingLogger shareManager].fileHeader = @"版本号:1.0.0 平台:iOS";
     [BlingLogger shareManager].maxDiskAge = 60 * 60 * 24 * 7; // 一个星期
     [BlingLogger shareManager].maxDiskSize = 1024 * 1024 * 100; // 100M

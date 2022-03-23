@@ -56,14 +56,14 @@ IF(UNIX AND (NOT APPLE))
 ENDIF()
 
 
-project(BlingLoggerCore)
+project(MXLoggerCore)
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
-add_library(BlingLoggerCore
+add_library(MXLoggerCore
 
         # Sets the library as a shared library.
         STATIC
@@ -125,14 +125,14 @@ add_library(BlingLoggerCore
        
         )
 
-target_include_directories(BlingLoggerCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(MXLoggerCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-set_target_properties(BlingLoggerCore PROPERTIES
+set_target_properties(MXLoggerCore PROPERTIES
         CXX_STANDARD 17
         CXX_EXTENSIONS OFF
         POSITION_INDEPENDENT_CODE ON
         )
 
 
-target_link_libraries(BlingLoggerCore)
+target_link_libraries(MXLoggerCore)
 

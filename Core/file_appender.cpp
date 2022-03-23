@@ -8,10 +8,10 @@
 #include "file_appender.hpp"
 
 
-namespace blinglog{
+namespace mxlogger{
 namespace details{
 
-file_appender::file_appender():policy_(policy::storage_policy::yyyy_MM_dd),filename_("blinglog"){
+file_appender::file_appender():policy_(policy::storage_policy::yyyy_MM_dd),filename_("mxlog"){
     handle_date_(policy_);
 }
 

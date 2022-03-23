@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "logger.hpp"
 
-namespace blinglog{
+namespace mxlogger{
 
 class thread_pool;
 

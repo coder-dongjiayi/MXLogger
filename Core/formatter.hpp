@@ -9,7 +9,7 @@
 #define formatter_hpp
 #include "log_msg.h"
 #include <stdio.h>
-namespace blinglog{
+namespace mxlogger{
 
 class formatter{
 private:

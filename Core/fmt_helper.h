@@ -9,7 +9,7 @@
 #define fmt_helper_h
 
 #include "logger_common.h"
-namespace blinglog{
+namespace mxlogger{
 namespace  details{
 namespace  fmt_helper{
 

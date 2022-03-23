@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "log_msg.h"
-namespace blinglog {
+namespace mxlogger {
 namespace details {
 
 

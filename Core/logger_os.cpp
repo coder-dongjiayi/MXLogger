@@ -11,18 +11,18 @@
 #include <unistd.h>
 #include <thread>
 #include <stdio.h>
-#ifndef BLINGLOG_NO_TLS
+#ifndef MXLOG_NO_TLS
 #    if (defined(_MSC_VER) && (_MSC_VER < 1900)) || defined(__cplusplus_winrt)
 #        define SPDLOG_NO_TLS 1
 #    endif
 #endif
 
-namespace blinglog {
+namespace mxlogger {
 namespace details{
 size_t logger_os::thread_id(){
   
     
-#if defined(SPDLOG_NO_TLS)
+#if defined(MXLOG_NO_TLS)
     return _thread_id();
 #else // cache thread id in tls
     static thread_local const size_t tid = thread_id_();

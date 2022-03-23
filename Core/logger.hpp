@@ -14,7 +14,7 @@
 #include "logger_common.h"
 #include "log_msg.h"
 
-namespace blinglog {
+namespace mxlogger {
 class logger{
 public:
    

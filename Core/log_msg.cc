@@ -8,7 +8,7 @@
 #include "log_msg.h"
 #include <chrono>
 #include "logger_os.hpp"
-namespace blinglog {
+namespace mxlogger {
 namespace details {
 
 

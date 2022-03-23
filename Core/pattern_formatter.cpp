@@ -8,7 +8,7 @@
 #include "pattern_formatter.hpp"
 #include "logger_common.h"
 
-namespace blinglog {
+namespace mxlogger {
 
 pattern_formatter::pattern_formatter():pattern_formatter("[%d][%p]%m"){}
 

@@ -1,3 +1,3 @@
-/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios/CMakeFiles/BlingLoggerCore.dir
+/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios/CMakeFiles/MXLoggerCore.dir
 /Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios/CMakeFiles/ALL_BUILD.dir
 /Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios/CMakeFiles/ZERO_CHECK.dir

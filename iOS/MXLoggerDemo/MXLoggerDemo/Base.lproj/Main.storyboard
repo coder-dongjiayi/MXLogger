@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="63a-Lo-GkM">
+                                <rect key="frame" x="178.5" y="144" width="57" height="30"/>
+                                <state key="normal" title="默认Log"/>
+                                <connections>
+                                    <action selector="defaultButttonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mGm-JK-sdr"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="30C-OO-5k3">
+                                <rect key="frame" x="178.5" y="255" width="57" height="30"/>
+                                <state key="normal" title="同步Log"/>
+                                <connections>
+                                    <action selector="syncButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Qmb-8w-d0r"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JSv-wc-5fU">
+                                <rect key="frame" x="178.5" y="362" width="57" height="30"/>
+                                <state key="normal" title="异步Log"/>
+                                <connections>
+                                    <action selector="asyncButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ozd-gw-dWP"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HQK-MC-3Mh">
+                                <rect key="frame" x="161" y="434" width="92" height="30"/>
+                                <state key="normal" title="日志文件大小"/>
+                                <connections>
+                                    <action selector="logSizeButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="dx3-ec-MyH"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XuW-Ki-bnb">
+                                <rect key="frame" x="160.5" y="190" width="93" height="30"/>
+                                <state key="normal" title="写10万条数据"/>
+                                <connections>
+                                    <action selector="tenThousandButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Q9c-sd-Q4W"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="HQK-MC-3Mh" firstAttribute="top" secondItem="JSv-wc-5fU" secondAttribute="bottom" constant="42" id="0Dl-jc-i6s"/>
+                            <constraint firstItem="HQK-MC-3Mh" firstAttribute="centerX" secondItem="JSv-wc-5fU" secondAttribute="centerX" id="0pK-8K-zH6"/>
+                            <constraint firstItem="JSv-wc-5fU" firstAttribute="top" secondItem="30C-OO-5k3" secondAttribute="bottom" constant="77" id="2DI-H8-D9T"/>
+                            <constraint firstItem="XuW-Ki-bnb" firstAttribute="top" secondItem="63a-Lo-GkM" secondAttribute="bottom" constant="16" id="70U-e6-sVl"/>
+                            <constraint firstItem="63a-Lo-GkM" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="AmQ-xF-TaX"/>
+                            <constraint firstItem="JSv-wc-5fU" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="g3S-vh-cFn"/>
+                            <constraint firstItem="30C-OO-5k3" firstAttribute="top" secondItem="63a-Lo-GkM" secondAttribute="bottom" constant="81" id="hFt-GH-exJ"/>
+                            <constraint firstItem="30C-OO-5k3" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="qpV-6Y-yAs"/>
+                            <constraint firstItem="63a-Lo-GkM" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="100" id="w7H-n9-dZB"/>
+                            <constraint firstItem="XuW-Ki-bnb" firstAttribute="centerX" secondItem="63a-Lo-GkM" secondAttribute="centerX" id="x5X-0i-Lls"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="7" y="84"/>
+        </scene>
+    </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

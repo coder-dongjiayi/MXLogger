@@ -9,7 +9,7 @@
 #include <iostream>
 #include "pattern_formatter.hpp"
 #include "logger_common.h"
-namespace blinglog{
+namespace mxlogger{
 namespace sinks{
 
 
@@ -40,7 +40,7 @@ void console_sink::flush(){
 
 void console_sink::set_pattern(const std::string &pattern){
     // 构建fommater
-    formatter_ = std::unique_ptr<blinglog::formatter>(new pattern_formatter(pattern));
+    formatter_ = std::unique_ptr<mxlogger::formatter>(new pattern_formatter(pattern));
 };
 
 console_sink::console_sink(FILE * target_file):  target_file_(target_file),formatter_(make_unique<pattern_formatter>()){

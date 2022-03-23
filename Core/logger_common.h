@@ -16,7 +16,7 @@
 #include "fmt/chrono.h"
 #include "fmt/format.h"
 #include "logger_enum.h"
-namespace blinglog {
+namespace mxlogger {
 namespace sinks{
 class sink;
 };

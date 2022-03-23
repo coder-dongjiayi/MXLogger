@@ -19,15 +19,6 @@ APPLE:BOOL=TRUE
 //No help, variable specified on the command line.
 ARCHS:UNINITIALIZED=arm64
 
-//Value Computed by CMake
-BlingLoggerCore_BINARY_DIR:STATIC=/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios
-
-//Value Computed by CMake
-BlingLoggerCore_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-BlingLoggerCore_SOURCE_DIR:STATIC=/Users/dongjiayi/Documents/github/BlingLogger/Core
-
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=CMAKE_ADDR2LINE-NOTFOUND
 
@@ -149,7 +140,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=BlingLoggerCore
+CMAKE_PROJECT_NAME:STATIC=MXLoggerCore
 
 CMAKE_RANLIB:FILEPATH=ranlib
 
@@ -240,6 +231,15 @@ ENABLE_VISIBILITY_INT:BOOL=TRUE
 
 IOS:BOOL=TRUE
 
+//Value Computed by CMake
+MXLoggerCore_BINARY_DIR:STATIC=/Users/dongjiayi/Documents/github/BlingLogger/Core/build-ios
+
+//Value Computed by CMake
+MXLoggerCore_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+MXLoggerCore_SOURCE_DIR:STATIC=/Users/dongjiayi/Documents/github/BlingLogger/Core
+
 //No help, variable specified on the command line.
 PLATFORM:UNINITIALIZED=OS64
 
@@ -254,10 +254,8 @@ XCODEBUILD_EXECUTABLE:FILEPATH=/usr/bin/xcodebuild
 ########################
 
 //Stored Xcode object GUID
-ALL_BUILD_GUID_CMAKE:INTERNAL=4B650B3F8EB74E88BF0A65B6
+ALL_BUILD_GUID_CMAKE:INTERNAL=5DDEE45FC5F4438D93AB2992
 APPLE_TARGET_TRIPLE:INTERNAL=arm64-apple-ios12.2
-//Stored Xcode object GUID
-BlingLoggerCore_GUID_CMAKE:INTERNAL=CB99A3573125438CBE4A4C10
 //ADVANCED property for variable: CMAKE_ADDR2LINE
 CMAKE_ADDR2LINE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_AR
@@ -411,8 +409,10 @@ CMAKE_UNAME:INTERNAL=/usr/bin/uname
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 DEPLOYMENT_TARGET:INTERNAL=12.2
 //Stored Xcode object GUID
-PROJECT_BlingLoggerCore_GUID_CMAKE:INTERNAL=B1DACA18506E49AFA01F8C2B
+MXLoggerCore_GUID_CMAKE:INTERNAL=4079F6F4866545BC813E16C7
+//Stored Xcode object GUID
+PROJECT_MXLoggerCore_GUID_CMAKE:INTERNAL=057A832402F9428084E66C94
 XCODE_VERSION_INT:INTERNAL=12.4
 //Stored Xcode object GUID
-ZERO_CHECK_GUID_CMAKE:INTERNAL=1BDDAC7DA53B40BDBF98EB1C
+ZERO_CHECK_GUID_CMAKE:INTERNAL=7CDF5BCF8C7A41669477DCE5
 

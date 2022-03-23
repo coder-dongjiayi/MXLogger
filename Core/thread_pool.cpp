@@ -6,7 +6,7 @@
 //
 
 #include "thread_pool.hpp"
-namespace blinglog{
+namespace mxlogger{
 
 thread_pool::thread_pool(size_t queue_max_items,size_t threads_number) : queue_(queue_max_items){
     if(threads_number < 0 || threads_number > 1000){

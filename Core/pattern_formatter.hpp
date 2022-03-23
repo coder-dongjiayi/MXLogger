@@ -11,7 +11,7 @@
 #include "formatter.hpp"
 #include "flag_formatter.hpp"
 #include <vector>
-namespace blinglog{
+namespace mxlogger{
 class pattern_formatter final : public  formatter{
     
 public:

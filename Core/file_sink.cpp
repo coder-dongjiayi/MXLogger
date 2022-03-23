@@ -7,7 +7,7 @@
 
 #include "file_sink.hpp"
 
-namespace blinglog{
+namespace mxlogger{
 namespace sinks{
 
 file_sink::file_sink(): formatter_(make_unique<pattern_formatter>()){
@@ -80,7 +80,7 @@ void file_sink::log(const details::log_msg &msg){
 
 void file_sink::set_pattern(const std::string &pattern){
     // 构建fommater
-    formatter_ = std::unique_ptr<blinglog::formatter>(new pattern_formatter(pattern));
+    formatter_ = std::unique_ptr<mxlogger::formatter>(new pattern_formatter(pattern));
 };
 
 void file_sink::flush(){

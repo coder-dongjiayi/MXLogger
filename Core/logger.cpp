@@ -7,7 +7,7 @@
 
 #include "logger.hpp"
 #include "sinks.h"
-namespace blinglog {
+namespace mxlogger {
 
 
 
@@ -37,7 +37,7 @@ void logger::set_pattern(const std::string &pattern){
     current_sink->set_pattern(pattern);
     
 }
-bool blinglog::logger::should_log(level::level_enum msg_level){
+bool mxlogger::logger::should_log(level::level_enum msg_level){
     return  msg_level >= level_.load(std::memory_order_relaxed);
 }
 

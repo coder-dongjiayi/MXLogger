@@ -14,7 +14,7 @@
 #include "fmt_helper.h"
 #include <map>
 
-namespace blinglog{
+namespace mxlogger{
 namespace details{
 
 file_helper::file_helper() : max_disk_size_(0),max_disk_age_(0){

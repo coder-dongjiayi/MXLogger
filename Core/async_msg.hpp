@@ -10,7 +10,7 @@
 #include "async_logger.hpp"
 #include <stdio.h>
 #include "log_msg_buffer.hpp"
-namespace blinglog {
+namespace mxlogger {
 
 namespace details{
 using async_logger_ptr = std::shared_ptr<async_logger>;

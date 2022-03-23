@@ -7,7 +7,7 @@
 
 #include "log_msg_buffer.hpp"
 
-namespace blinglog {
+namespace mxlogger {
 namespace details {
 
  log_msg_buffer::log_msg_buffer(const log_msg &orig_msg)

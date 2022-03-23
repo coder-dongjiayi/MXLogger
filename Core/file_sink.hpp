@@ -15,7 +15,7 @@
 #include "file_appender.hpp"
 
 #include <mutex>
-namespace blinglog {
+namespace mxlogger {
 namespace  sinks{
 
 class file_sink final : public sink{
@@ -53,7 +53,7 @@ private:
     details::file_helper file_helper_;
     details::file_appender file_appender_;
     
-    std::unique_ptr<blinglog::formatter> formatter_;
+    std::unique_ptr<mxlogger::formatter> formatter_;
     
 };
 

@@ -12,7 +12,7 @@
 
 #include "formatter.hpp"
 
-namespace blinglog{
+namespace mxlogger{
 namespace sinks{
 
 class console_sink : public sink{
@@ -34,7 +34,7 @@ private:
     
     std::string pattern_;
     
-    std::unique_ptr<blinglog::formatter> formatter_;
+    std::unique_ptr<mxlogger::formatter> formatter_;
     
     //打印输出
     void print_range_(const memory_buf_t &formatted,size_t start,size_t end);
