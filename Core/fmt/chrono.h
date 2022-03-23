@@ -10,8 +10,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cmath>    // std::isfinite
-#include <cstring>  // std::memcpy
 #include <ctime>
 #include <iterator>
 #include <locale>
@@ -323,13 +321,14 @@ constexpr const size_t codecvt_result<CodeUnit>::max_size;
 template <typename CodeUnit>
 void write_codecvt(codecvt_result<CodeUnit>& out, string_view in_buf,
                    const std::locale& loc) {
+  using codecvt = std::codecvt<CodeUnit, char, std::mbstate_t>;
 #if FMT_CLANG_VERSION
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wdeprecated"
-  auto& f = std::use_facet<std::codecvt<CodeUnit, char, std::mbstate_t>>(loc);
+  auto& f = std::use_facet<codecvt>(loc);
 #  pragma clang diagnostic pop
 #else
-  auto& f = std::use_facet<std::codecvt<CodeUnit, char, std::mbstate_t>>(loc);
+  auto& f = std::use_facet<codecvt>(loc);
 #endif
   auto mb = std::mbstate_t();
   const char* from_next = nullptr;
@@ -563,10 +562,10 @@ inline void write_digit2_separated(char* buf, unsigned a, unsigned b,
   constexpr const size_t len = 8;
   if (const_check(is_big_endian())) {
     char tmp[len];
-    std::memcpy(tmp, &digits, len);
+    memcpy(tmp, &digits, len);
     std::reverse_copy(tmp, tmp + len, buf);
   } else {
-    std::memcpy(buf, &digits, len);
+    memcpy(buf, &digits, len);
   }
 }
 
@@ -1215,7 +1214,7 @@ template <typename OutputIt, typename Char> class tm_writer {
     char buf[10];
     size_t offset = 0;
     if (year >= 0 && year < 10000) {
-      copy2(buf, digits2(static_cast<size_t>(year / 100)));
+      copy2(buf, digits2(to_unsigned(year / 100)));
     } else {
       offset = 4;
       write_year_extended(year);
@@ -1471,23 +1470,14 @@ inline std::chrono::duration<Rep, std::milli> get_milliseconds(
 #endif
 }
 
-// Counts the number of fractional digits in the range [0, 18] according to the
+// Returns the number of fractional digits in the range [0, 18] according to the
 // C++20 spec. If more than 18 fractional digits are required then returns 6 for
 // microseconds precision.
-template <long long Num, long long Den, int N = 0,
-          bool Enabled =
-              (N < 19) && (Num <= std::numeric_limits<long long>::max() / 10)>
-struct count_fractional_digits {
-  static constexpr int value =
-      Num % Den == 0 ? N : count_fractional_digits<Num * 10, Den, N + 1>::value;
-};
-
-// Base case that doesn't instantiate any more templates
-// in order to avoid overflow.
-template <long long Num, long long Den, int N>
-struct count_fractional_digits<Num, Den, N, false> {
-  static constexpr int value = (Num % Den == 0) ? N : 6;
-};
+constexpr int count_fractional_digits(long long num, long long den, int n = 0) {
+  return num % den == 0
+             ? n
+             : (n > 18 ? 6 : count_fractional_digits(num * 10, den, n + 1));
+}
 
 constexpr long long pow10(std::uint32_t n) {
   return n == 0 ? 1 : 10 * pow10(n - 1);
@@ -1673,11 +1663,9 @@ struct chrono_formatter {
     out = format_decimal<char_type>(out, n, num_digits).end;
   }
 
-  template <typename Duration> void write_fractional_seconds(Duration d) {
-    FMT_ASSERT(!std::is_floating_point<typename Duration::rep>::value, "");
+  template <class Duration> void write_fractional_seconds(Duration d) {
     constexpr auto num_fractional_digits =
-        count_fractional_digits<Duration::period::num,
-                                Duration::period::den>::value;
+        count_fractional_digits(Duration::period::num, Duration::period::den);
 
     using subsecond_precision = std::chrono::duration<
         typename std::common_type<typename Duration::rep,
@@ -1686,9 +1674,12 @@ struct chrono_formatter {
     if (std::ratio_less<typename subsecond_precision::period,
                         std::chrono::seconds::period>::value) {
       *out++ = '.';
-      auto fractional =
-          detail::abs(d) - std::chrono::duration_cast<std::chrono::seconds>(d);
-      auto subseconds =
+      // Don't convert long double to integer seconds to avoid overflow.
+      using sec = conditional_t<
+          std::is_same<typename Duration::rep, long double>::value,
+          std::chrono::duration<long double>, std::chrono::seconds>;
+      auto fractional = detail::abs(d) - std::chrono::duration_cast<sec>(d);
+      const auto subseconds =
           std::chrono::treat_as_floating_point<
               typename subsecond_precision::rep>::value
               ? fractional.count()
@@ -1779,22 +1770,8 @@ struct chrono_formatter {
     if (handle_nan_inf()) return;
 
     if (ns == numeric_system::standard) {
-      if (std::is_floating_point<rep>::value) {
-        constexpr auto num_fractional_digits =
-            count_fractional_digits<Period::num, Period::den>::value;
-        auto buf = memory_buffer();
-        format_to(std::back_inserter(buf), runtime("{:.{}f}"),
-                  std::fmod(val * static_cast<rep>(Period::num) /
-                                static_cast<rep>(Period::den),
-                            60),
-                  num_fractional_digits);
-        if (negative) *out++ = '-';
-        if (buf.size() < 2 || buf[1] == '.') *out++ = '0';
-        out = std::copy(buf.begin(), buf.end(), out);
-      } else {
-        write(second(), 2);
-        write_fractional_seconds(std::chrono::duration<rep, Period>(val));
-      }
+      write(second(), 2);
+      write_fractional_seconds(std::chrono::duration<rep, Period>{val});
       return;
     }
     auto time = tm();

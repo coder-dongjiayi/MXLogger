@@ -21,9 +21,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    flavorDimensions "stl_mode"
+    productFlavors {
+        DefaultCpp.dimension = "stl_mode"
+        StaticCpp.dimension = "stl_mode"
+        SharedCpp.dimension = "stl_mode"
     }
     buildFeatures {
         viewBinding true
@@ -32,6 +41,7 @@ android {
 
 dependencies {
 
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':blinglogger')
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.5.0'

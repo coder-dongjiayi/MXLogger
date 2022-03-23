@@ -1,47 +1,45 @@
 /*
-  Formatting library for C++
+ Formatting library for C++
 
-  Copyright (c) 2012 - present, Victor Zverovich
+ Copyright (c) 2012 - present, Victor Zverovich
 
-  Permission is hereby granted, free of charge, to any person obtaining
-  a copy of this software and associated documentation files (the
-  "Software"), to deal in the Software without restriction, including
-  without limitation the rights to use, copy, modify, merge, publish,
-  distribute, sublicense, and/or sell copies of the Software, and to
-  permit persons to whom the Software is furnished to do so, subject to
-  the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
 
-  The above copyright notice and this permission notice shall be
-  included in all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-  --- Optional exception to the license ---
+ --- Optional exception to the license ---
 
-  As an exception, if, as a result of your compiling your source code, portions
-  of this Software are embedded into a machine-executable object form of such
-  source code, you may redistribute such embedded portions in such object form
-  without including the above copyright and permission notices.
+ As an exception, if, as a result of your compiling your source code, portions
+ of this Software are embedded into a machine-executable object form of such
+ source code, you may redistribute such embedded portions in such object form
+ without including the above copyright and permission notices.
  */
 
 #ifndef FMT_FORMAT_H_
 #define FMT_FORMAT_H_
 
 #include <cmath>         // std::signbit
-#include <cstddef>       // std::byte
 #include <cstdint>       // uint32_t
-#include <cstring>       // std::memcpy
 #include <limits>        // std::numeric_limits
 #include <memory>        // std::uninitialized_copy
 #include <stdexcept>     // std::runtime_error
 #include <system_error>  // std::system_error
-
+#include <utility>       // std::swap
 
 #ifdef __cpp_lib_bit_cast
 #  include <bit>  // std::bitcast
@@ -160,12 +158,10 @@ FMT_END_NAMESPACE
 // __builtin_ctz is broken in Intel Compiler Classic on Windows:
 // https://github.com/fmtlib/fmt/issues/2510.
 #ifndef __ICL
-#  if FMT_HAS_BUILTIN(__builtin_ctz) || FMT_GCC_VERSION || FMT_ICC_VERSION || \
-      FMT_NVCOMPILER_VERSION
+#  if FMT_HAS_BUILTIN(__builtin_ctz) || FMT_GCC_VERSION || FMT_ICC_VERSION
 #    define FMT_BUILTIN_CTZ(n) __builtin_ctz(n)
 #  endif
-#  if FMT_HAS_BUILTIN(__builtin_ctzll) || FMT_GCC_VERSION || \
-      FMT_ICC_VERSION || FMT_NVCOMPILER_VERSION
+#  if FMT_HAS_BUILTIN(__builtin_ctzll) || FMT_GCC_VERSION || FMT_ICC_VERSION
 #    define FMT_BUILTIN_CTZLL(n) __builtin_ctzll(n)
 #  endif
 #endif
@@ -288,8 +284,9 @@ template <typename Streambuf> class formatbuf : public Streambuf {
 };
 
 // Implementation of std::bit_cast for pre-C++20.
-template <typename To, typename From, FMT_ENABLE_IF(sizeof(To) == sizeof(From))>
+template <typename To, typename From>
 FMT_CONSTEXPR20 auto bit_cast(const From& from) -> To {
+  static_assert(sizeof(To) == sizeof(From), "size mismatch");
 #ifdef __cpp_lib_bit_cast
   if (is_constant_evaluated()) return std::bit_cast<To>(from);
 #endif
@@ -313,63 +310,29 @@ inline auto is_big_endian() -> bool {
 #endif
 }
 
-class uint128_fallback {
- private:
-  uint64_t lo_, hi_;
-  constexpr uint128_fallback(uint64_t hi, uint64_t lo) : lo_(lo), hi_(hi) {}
+// A fallback implementation of uintptr_t for systems that lack it.
+struct fallback_uintptr {
+  unsigned char value[sizeof(void*)];
 
- public:
-  constexpr uint128_fallback(uint64_t value = 0) : lo_(value), hi_(0) {}
-
-  template <typename T, FMT_ENABLE_IF(std::is_integral<T>::value)>
-  constexpr explicit operator T() const {
-    return static_cast<T>(lo_);
-  }
-
-  friend auto operator==(const uint128_fallback& lhs,
-                         const uint128_fallback& rhs) -> bool {
-    return lhs.hi_ == rhs.hi_ && lhs.lo_ == rhs.lo_;
-  }
-  friend auto operator!=(const uint128_fallback& lhs,
-                         const uint128_fallback& rhs) -> bool {
-    return !(lhs == rhs);
-  }
-  friend auto operator|(const uint128_fallback& lhs,
-                        const uint128_fallback& rhs) -> uint128_fallback {
-    return {lhs.hi_ | rhs.hi_, lhs.lo_ | rhs.lo_};
-  }
-  friend auto operator&(const uint128_fallback& lhs,
-                        const uint128_fallback& rhs) -> uint128_fallback {
-    return {lhs.hi_ & rhs.hi_, lhs.lo_ & rhs.lo_};
-  }
-  friend auto operator-(const uint128_fallback& lhs, uint64_t rhs)
-      -> uint128_fallback {
-    FMT_ASSERT(lhs.lo_ >= rhs, "");
-    return {lhs.hi_, lhs.lo_ - rhs};
-  }
-  FMT_CONSTEXPR auto operator>>(int shift) const -> uint128_fallback {
-    if (shift == 64) return {0, hi_};
-    return {hi_ >> shift, (hi_ << (64 - shift)) | (lo_ >> shift)};
-  }
-  FMT_CONSTEXPR auto operator<<(int shift) const -> uint128_fallback {
-    if (shift == 64) return {lo_, 0};
-    return {hi_ << shift | (lo_ >> (64 - shift)), (lo_ << shift)};
-  }
-  FMT_CONSTEXPR auto operator>>=(int shift) -> uint128_fallback& {
-    return *this = *this >> shift;
-  }
-  FMT_CONSTEXPR void operator+=(uint64_t n) {
-    lo_ += n;
-    if (lo_ < n) ++hi_;
+  fallback_uintptr() = default;
+  explicit fallback_uintptr(const void* p) {
+    *this = bit_cast<fallback_uintptr>(p);
+    if (const_check(is_big_endian())) {
+      for (size_t i = 0, j = sizeof(void*) - 1; i < j; ++i, --j)
+        std::swap(value[i], value[j]);
+    }
   }
 };
-
-using uint128_t = conditional_t<FMT_USE_INT128, uint128_opt, uint128_fallback>;
-
 #ifdef UINTPTR_MAX
 using uintptr_t = ::uintptr_t;
+inline auto to_uintptr(const void* p) -> uintptr_t {
+  return bit_cast<uintptr_t>(p);
+}
 #else
-using uintptr_t = uint128_t;
+using uintptr_t = fallback_uintptr;
+inline auto to_uintptr(const void* p) -> fallback_uintptr {
+  return fallback_uintptr(p);
+}
 #endif
 
 // Returns the largest possible value for type T. Same as
@@ -381,31 +344,16 @@ template <typename T> constexpr auto num_bits() -> int {
   return std::numeric_limits<T>::digits;
 }
 // std::numeric_limits<T>::digits may return 0 for 128-bit ints.
-template <> constexpr auto num_bits<int128_opt>() -> int { return 128; }
+template <> constexpr auto num_bits<int128_t>() -> int { return 128; }
 template <> constexpr auto num_bits<uint128_t>() -> int { return 128; }
-
-// A heterogeneous bit_cast used for converting 96-bit long double to uint128_t
-// and 128-bit pointers to uint128_fallback.
-template <typename To, typename From, FMT_ENABLE_IF(sizeof(To) > sizeof(From))>
-inline auto bit_cast(const From& from) -> To {
-  constexpr auto size = static_cast<int>(sizeof(From) / sizeof(unsigned));
-  struct data_t {
-    unsigned value[static_cast<unsigned>(size)];
-  } data = bit_cast<data_t>(from);
-  auto result = To();
-  if (const_check(is_big_endian())) {
-    for (int i = 0; i < size; ++i)
-      result = (result << num_bits<unsigned>()) | data.value[i];
-  } else {
-    for (int i = size - 1; i >= 0; --i)
-      result = (result << num_bits<unsigned>()) | data.value[i];
-  }
-  return result;
+template <> constexpr auto num_bits<fallback_uintptr>() -> int {
+  return static_cast<int>(sizeof(void*) *
+                          std::numeric_limits<unsigned char>::digits);
 }
 
 FMT_INLINE void assume(bool condition) {
   (void)condition;
-#if FMT_HAS_BUILTIN(__builtin_assume) && !FMT_ICC_VERSION
+#if FMT_HAS_BUILTIN(__builtin_assume)
   __builtin_assume(condition);
 #endif
 }
@@ -776,7 +724,6 @@ class basic_memory_buffer final : public detail::buffer<T> {
       // Set pointer to the inline array so that delete is not called
       // when deallocating.
       other.set(other.store_, 0);
-      other.clear();
     }
     this->resize(size);
   }
@@ -788,7 +735,8 @@ class basic_memory_buffer final : public detail::buffer<T> {
     of the other object to it.
     \endrst
    */
-  FMT_CONSTEXPR20 basic_memory_buffer(basic_memory_buffer&& other) noexcept {
+  FMT_CONSTEXPR20 basic_memory_buffer(basic_memory_buffer&& other)
+      FMT_NOEXCEPT {
     move(other);
   }
 
@@ -797,7 +745,8 @@ class basic_memory_buffer final : public detail::buffer<T> {
     Moves the content of the other ``basic_memory_buffer`` object to this one.
     \endrst
    */
-  auto operator=(basic_memory_buffer&& other) noexcept -> basic_memory_buffer& {
+  auto operator=(basic_memory_buffer&& other) FMT_NOEXCEPT
+      -> basic_memory_buffer& {
     FMT_ASSERT(this != &other, "");
     deallocate();
     move(other);
@@ -871,7 +820,7 @@ class FMT_API format_error : public std::runtime_error {
   format_error& operator=(const format_error&) = default;
   format_error(format_error&&) = default;
   format_error& operator=(format_error&&) = default;
-  ~format_error() noexcept override FMT_MSC_DEFAULT;
+  ~format_error() FMT_NOEXCEPT override FMT_MSC_DEFAULT;
 };
 
 /**
@@ -883,8 +832,8 @@ class FMT_API format_error : public std::runtime_error {
   \endrst
  */
 template <typename... Args, typename S, typename Char = char_t<S>>
-FMT_DEPRECATED FMT_INLINE auto make_args_checked(
-    const S& fmt, const remove_reference_t<Args>&... args)
+FMT_INLINE auto make_args_checked(const S& fmt,
+                                  const remove_reference_t<Args>&... args)
     -> format_arg_store<buffer_context<Char>, remove_reference_t<Args>...> {
   static_assert(
       detail::count<(
@@ -925,13 +874,13 @@ constexpr auto compile_string_to_view(detail::std_string_view<Char> s)
 FMT_BEGIN_DETAIL_NAMESPACE
 
 template <typename T> struct is_integral : std::is_integral<T> {};
-template <> struct is_integral<int128_opt> : std::true_type {};
+template <> struct is_integral<int128_t> : std::true_type {};
 template <> struct is_integral<uint128_t> : std::true_type {};
 
 template <typename T>
 using is_signed =
     std::integral_constant<bool, std::numeric_limits<T>::is_signed ||
-                                     std::is_same<T, int128_opt>::value>;
+                                     std::is_same<T, int128_t>::value>;
 
 // Returns true if value is negative, false otherwise.
 // Same as `value < 0` but doesn't produce warnings if T is an unsigned type.
@@ -957,10 +906,9 @@ template <typename T>
 using uint32_or_64_or_128_t =
     conditional_t<num_bits<T>() <= 32 && !FMT_REDUCE_INT_INSTANTIATIONS,
                   uint32_t,
-                  conditional_t<num_bits<T>() <= 64, uint64_t, uint128_opt>>;
+                  conditional_t<num_bits<T>() <= 64, uint64_t, uint128_t>>;
 template <typename T>
-using uint64_or_128_t =
-    conditional_t<num_bits<T>() <= 64, uint64_t, uint128_opt>;
+using uint64_or_128_t = conditional_t<num_bits<T>() <= 64, uint64_t, uint128_t>;
 
 #define FMT_POWERS_OF_10(factor)                                             \
   factor * 10, (factor)*100, (factor)*1000, (factor)*10000, (factor)*100000, \
@@ -1000,7 +948,7 @@ template <typename T> FMT_CONSTEXPR auto count_digits_fallback(T n) -> int {
   }
 }
 #if FMT_USE_INT128
-FMT_CONSTEXPR inline auto count_digits(uint128_opt n) -> int {
+FMT_CONSTEXPR inline auto count_digits(uint128_t n) -> int {
   return count_digits_fallback(n);
 }
 #endif
@@ -1041,7 +989,7 @@ FMT_CONSTEXPR20 inline auto count_digits(uint64_t n) -> int {
 template <int BITS, typename UInt>
 FMT_CONSTEXPR auto count_digits(UInt n) -> int {
 #ifdef FMT_BUILTIN_CLZ
-  if (!is_constant_evaluated() && num_bits<UInt>() == 32)
+  if (num_bits<UInt>() == 32)
     return (FMT_BUILTIN_CLZ(static_cast<uint32_t>(n) | 1) ^ 31) / BITS + 1;
 #endif
   // Lambda avoids unreachable code warnings from NVHPC.
@@ -1053,6 +1001,8 @@ FMT_CONSTEXPR auto count_digits(UInt n) -> int {
     return num_digits;
   }(n);
 }
+
+template <> auto count_digits<4>(detail::fallback_uintptr n) -> int;
 
 #ifdef FMT_BUILTIN_CLZ
 // It is a separate function rather than a part of count_digits to workaround
@@ -1089,11 +1039,15 @@ FMT_CONSTEXPR20 inline auto count_digits(uint32_t n) -> int {
   return count_digits_fallback(n);
 }
 
-template <typename Int> constexpr auto digits10() noexcept -> int {
+template <typename Int> constexpr auto digits10() FMT_NOEXCEPT -> int {
   return std::numeric_limits<Int>::digits10;
 }
-template <> constexpr auto digits10<int128_opt>() noexcept -> int { return 38; }
-template <> constexpr auto digits10<uint128_t>() noexcept -> int { return 38; }
+template <> constexpr auto digits10<int128_t>() FMT_NOEXCEPT -> int {
+  return 38;
+}
+template <> constexpr auto digits10<uint128_t>() FMT_NOEXCEPT -> int {
+  return 38;
+}
 
 template <typename Char> struct thousands_sep_result {
   std::string grouping;
@@ -1188,11 +1142,33 @@ FMT_CONSTEXPR auto format_uint(Char* buffer, UInt value, int num_digits,
   Char* end = buffer;
   do {
     const char* digits = upper ? "0123456789ABCDEF" : "0123456789abcdef";
-    unsigned digit = static_cast<unsigned>(value & ((1 << BASE_BITS) - 1));
+    unsigned digit = (value & ((1 << BASE_BITS) - 1));
     *--buffer = static_cast<Char>(BASE_BITS < 4 ? static_cast<char>('0' + digit)
                                                 : digits[digit]);
   } while ((value >>= BASE_BITS) != 0);
   return end;
+}
+
+template <unsigned BASE_BITS, typename Char>
+auto format_uint(Char* buffer, detail::fallback_uintptr n, int num_digits,
+                 bool = false) -> Char* {
+  auto char_digits = std::numeric_limits<unsigned char>::digits / 4;
+  int start = (num_digits + char_digits - 1) / char_digits - 1;
+  if (int start_digits = num_digits % char_digits) {
+    unsigned value = n.value[start--];
+    buffer = format_uint<BASE_BITS>(buffer, value, start_digits);
+  }
+  for (; start >= 0; --start) {
+    unsigned value = n.value[start];
+    buffer += char_digits;
+    auto p = buffer;
+    for (int i = 0; i < char_digits; ++i) {
+      unsigned digit = (value & ((1 << BASE_BITS) - 1));
+      *--p = static_cast<Char>("0123456789abcdef"[digit]);
+      value >>= BASE_BITS;
+    }
+  }
+  return buffer;
 }
 
 template <unsigned BASE_BITS, typename Char, typename It, typename UInt>
@@ -1224,7 +1200,7 @@ class utf8_to_utf16 {
 namespace dragonbox {
 
 // Type-specific information that Dragonbox uses.
-template <typename T, typename Enable = void> struct float_info;
+template <class T> struct float_info;
 
 template <> struct float_info<float> {
   using carrier_uint = uint32_t;
@@ -1242,6 +1218,9 @@ template <> struct float_info<float> {
   static const int cache_bits = 64;
   static const int divisibility_check_by_5_threshold = 39;
   static const int case_fc_pm_half_lower_threshold = -1;
+  static const int case_fc_pm_half_upper_threshold = 6;
+  static const int case_fc_lower_threshold = -2;
+  static const int case_fc_upper_threshold = 6;
   static const int case_shorter_interval_left_endpoint_lower_threshold = 2;
   static const int case_shorter_interval_left_endpoint_upper_threshold = 3;
   static const int shorter_interval_tie_lower_threshold = -35;
@@ -1265,20 +1244,14 @@ template <> struct float_info<double> {
   static const int cache_bits = 128;
   static const int divisibility_check_by_5_threshold = 86;
   static const int case_fc_pm_half_lower_threshold = -2;
+  static const int case_fc_pm_half_upper_threshold = 9;
+  static const int case_fc_lower_threshold = -4;
+  static const int case_fc_upper_threshold = 9;
   static const int case_shorter_interval_left_endpoint_lower_threshold = 2;
   static const int case_shorter_interval_left_endpoint_upper_threshold = 3;
   static const int shorter_interval_tie_lower_threshold = -77;
   static const int shorter_interval_tie_upper_threshold = -77;
   static const int max_trailing_zeros = 16;
-};
-
-// 80-bit extended precision long double.
-template <typename T>
-struct float_info<T, enable_if_t<std::is_same<T, long double>::value &&
-                                 std::numeric_limits<T>::digits == 64>> {
-  using carrier_uint = detail::uint128_t;
-  static const int significand_bits = 64;
-  static const int exponent_bits = 15;
 };
 
 template <typename T> struct decimal_fp {
@@ -1287,7 +1260,8 @@ template <typename T> struct decimal_fp {
   int exponent;
 };
 
-template <typename T> FMT_API auto to_decimal(T x) noexcept -> decimal_fp<T>;
+template <typename T>
+FMT_API auto to_decimal(T x) FMT_NOEXCEPT -> decimal_fp<T>;
 }  // namespace dragonbox
 
 template <typename T>
@@ -1330,14 +1304,11 @@ template <typename T>
 auto snprintf_float(T value, int precision, float_specs specs,
                     buffer<char>& buf) -> int;
 
-template <typename T>
-using convert_float_result =
-    conditional_t<std::is_same<T, float>::value || sizeof(T) == sizeof(double),
-                  double, T>;
-
-template <typename T>
-constexpr auto convert_float(T value) -> convert_float_result<T> {
-  return static_cast<convert_float_result<T>>(value);
+template <typename T> constexpr auto promote_float(T value) -> T {
+  return value;
+}
+constexpr auto promote_float(float value) -> double {
+  return static_cast<double>(value);
 }
 
 template <typename OutputIt, typename Char>
@@ -1406,173 +1377,11 @@ auto write_ptr(OutputIt out, UIntPtr value,
                : base_iterator(out, write(reserve(out, size)));
 }
 
-// Returns true iff the code point cp is printable.
-FMT_API auto is_printable(uint32_t cp) -> bool;
-
-inline auto needs_escape(uint32_t cp) -> bool {
-  return cp < 0x20 || cp == 0x7f || cp == '"' || cp == '\\' ||
-         !is_printable(cp);
-}
-
-template <typename Char> struct find_escape_result {
-  const Char* begin;
-  const Char* end;
-  uint32_t cp;
-};
-
-template <typename Char>
-using make_unsigned_char =
-    typename conditional_t<std::is_integral<Char>::value,
-                           std::make_unsigned<Char>,
-                           type_identity<uint32_t>>::type;
-
-template <typename Char>
-auto find_escape(const Char* begin, const Char* end)
-    -> find_escape_result<Char> {
-  for (; begin != end; ++begin) {
-    uint32_t cp = static_cast<make_unsigned_char<Char>>(*begin);
-    if (sizeof(Char) == 1 && cp >= 0x80) continue;
-    if (needs_escape(cp)) return {begin, begin + 1, cp};
-  }
-  return {begin, nullptr, 0};
-}
-
-inline auto find_escape(const char* begin, const char* end)
-    -> find_escape_result<char> {
-  if (!is_utf8()) return find_escape<char>(begin, end);
-  auto result = find_escape_result<char>{end, nullptr, 0};
-  for_each_codepoint(string_view(begin, to_unsigned(end - begin)),
-                     [&](uint32_t cp, string_view sv) {
-                       if (needs_escape(cp)) {
-                         result = {sv.begin(), sv.end(), cp};
-                         return false;
-                       }
-                       return true;
-                     });
-  return result;
-}
-
-#define FMT_STRING_IMPL(s, base, explicit)                                 \
-  [] {                                                                     \
-    /* Use the hidden visibility as a workaround for a GCC bug (#1973). */ \
-    /* Use a macro-like name to avoid shadowing warnings. */               \
-    struct FMT_GCC_VISIBILITY_HIDDEN FMT_COMPILE_STRING : base {           \
-      using char_type = fmt::remove_cvref_t<decltype(s[0])>;               \
-      FMT_MAYBE_UNUSED FMT_CONSTEXPR explicit                              \
-      operator fmt::basic_string_view<char_type>() const {                 \
-        return fmt::detail_exported::compile_string_to_view<char_type>(s); \
-      }                                                                    \
-    };                                                                     \
-    return FMT_COMPILE_STRING();                                           \
-  }()
-
-/**
-  \rst
-  Constructs a compile-time format string from a string literal *s*.
-
-  **Example**::
-
-    // A compile-time error because 'd' is an invalid specifier for strings.
-    std::string s = fmt::format(FMT_STRING("{:d}"), "foo");
-  \endrst
- */
-#define FMT_STRING(s) FMT_STRING_IMPL(s, fmt::compile_string, )
-
-template <typename Char, typename OutputIt>
-auto write_escaped_string(OutputIt out, basic_string_view<Char> str)
-    -> OutputIt {
-  return copy_str<Char>(str.data(), str.data() + str.size(), out);
-}
-
-template <typename OutputIt, typename Char>
-auto write_escaped_cp(OutputIt out, const find_escape_result<Char>& escape)
-    -> OutputIt {
-  auto c = static_cast<Char>(escape.cp);
-  switch (escape.cp) {
-  case '\n':
-    *out++ = '\\';
-    c = 'n';
-    break;
-  case '\r':
-    *out++ = '\\';
-    c = 'r';
-    break;
-  case '\t':
-    *out++ = '\\';
-    c = 't';
-    break;
-  case '"':
-    FMT_FALLTHROUGH;
-  case '\'':
-    FMT_FALLTHROUGH;
-  case '\\':
-    *out++ = '\\';
-    break;
-  default:
-    if (is_utf8()) {
-      if (escape.cp < 0x100) {
-        return format_to(out, FMT_STRING("\\x{:02x}"), escape.cp);
-      }
-      if (escape.cp < 0x10000) {
-        return format_to(out, FMT_STRING("\\u{:04x}"), escape.cp);
-      }
-      if (escape.cp < 0x110000) {
-        return format_to(out, FMT_STRING("\\U{:08x}"), escape.cp);
-      }
-    }
-    for (char escape_char : basic_string_view<Char>(
-             escape.begin, to_unsigned(escape.end - escape.begin))) {
-      out = format_to(out, FMT_STRING("\\x{:02x}"),
-                      static_cast<make_unsigned_char<Char>>(escape_char));
-    }
-    return out;
-  }
-  *out++ = c;
-  return out;
-}
-
-template <typename OutputIt>
-auto write_escaped_string(OutputIt out, basic_string_view<char> str)
-    -> OutputIt {
-  *out++ = '"';
-  auto begin = str.begin(), end = str.end();
-  do {
-    auto escape = find_escape(begin, end);
-    out = copy_str<char>(begin, escape.begin, out);
-    begin = escape.end;
-    if (!begin) break;
-    out = write_escaped_cp(out, escape);
-  } while (begin != end);
-  *out++ = '"';
-  return out;
-}
-
-template <typename Char, typename OutputIt>
-auto write_escaped_char(OutputIt out, Char v) -> OutputIt {
-  *out++ = v;
-  return out;
-}
-
-template <typename OutputIt>
-auto write_escaped_char(OutputIt out, char v) -> OutputIt {
-  *out++ = '\'';
-  if ((needs_escape(static_cast<uint32_t>(v)) && v != '"') || v == '\'') {
-    out = write_escaped_cp(
-        out, find_escape_result<char>{&v, &v + 1, static_cast<uint32_t>(v)});
-  } else {
-    *out++ = v;
-  }
-  *out++ = '\'';
-  return out;
-}
-
 template <typename Char, typename OutputIt>
 FMT_CONSTEXPR auto write_char(OutputIt out, Char value,
                               const basic_format_specs<Char>& specs)
     -> OutputIt {
-  bool is_debug = specs.type == presentation_type::debug;
   return write_padded(out, specs, 1, [=](reserve_iterator<OutputIt> it) {
-    if (is_debug) return write_escaped_char(it, value);
     *it++ = value;
     return it;
   });
@@ -1838,45 +1647,6 @@ FMT_CONSTEXPR FMT_INLINE auto write(OutputIt out, T value,
   return write_int(out, make_write_int_arg(value, specs.sign), specs, loc);
 }
 
-// An output iterator that counts the number of objects written to it and
-// discards them.
-class counting_iterator {
- private:
-  size_t count_;
-
- public:
-  using iterator_category = std::output_iterator_tag;
-  using difference_type = std::ptrdiff_t;
-  using pointer = void;
-  using reference = void;
-  using _Unchecked_type = counting_iterator;  // Mark iterator as checked.
-
-  struct value_type {
-    template <typename T> void operator=(const T&) {}
-  };
-
-  counting_iterator() : count_(0) {}
-
-  size_t count() const { return count_; }
-
-  counting_iterator& operator++() {
-    ++count_;
-    return *this;
-  }
-  counting_iterator operator++(int) {
-    auto it = *this;
-    ++*this;
-    return it;
-  }
-
-  friend counting_iterator operator+(counting_iterator it, difference_type n) {
-    it.count_ += static_cast<size_t>(n);
-    return it;
-  }
-
-  value_type operator*() const { return {}; }
-};
-
 template <typename Char, typename OutputIt>
 FMT_CONSTEXPR auto write(OutputIt out, basic_string_view<Char> s,
                          const basic_format_specs<Char>& specs) -> OutputIt {
@@ -1884,17 +1654,10 @@ FMT_CONSTEXPR auto write(OutputIt out, basic_string_view<Char> s,
   auto size = s.size();
   if (specs.precision >= 0 && to_unsigned(specs.precision) < size)
     size = code_point_index(s, to_unsigned(specs.precision));
-  bool is_debug = specs.type == presentation_type::debug;
-  size_t width = 0;
-  if (specs.width != 0) {
-    if (is_debug)
-      width = write_escaped_string(counting_iterator{}, s).count();
-    else
-      width = compute_width(basic_string_view<Char>(data, size));
-  }
+  auto width =
+      specs.width != 0 ? compute_width(basic_string_view<Char>(data, size)) : 0;
   return write_padded(out, specs, size, width,
                       [=](reserve_iterator<OutputIt> it) {
-                        if (is_debug) return write_escaped_string(it, s);
                         return copy_str<Char>(data, data + size, it);
                       });
 }
@@ -1912,7 +1675,7 @@ FMT_CONSTEXPR auto write(OutputIt out, const Char* s,
     -> OutputIt {
   return check_cstring_type_spec(specs.type)
              ? write(out, basic_string_view<Char>(s), specs, {})
-             : write_ptr<Char>(out, bit_cast<uintptr_t>(s), &specs);
+             : write_ptr<Char>(out, to_uintptr(s), &specs);
 }
 
 template <typename Char, typename OutputIt>
@@ -1984,7 +1747,7 @@ inline auto write_significand(Char* out, UInt significand, int significand_size,
   int floating_size = significand_size - integral_size;
   for (int i = floating_size / 2; i > 0; --i) {
     out -= 2;
-    copy2(out, digits2(static_cast<std::size_t>(significand % 100)));
+    copy2(out, digits2(significand % 100));
     significand /= 100;
   }
   if (floating_size % 2 != 0) {
@@ -2102,9 +1865,8 @@ FMT_CONSTEXPR20 auto do_write_float(OutputIt out, const DecimalFP& fp,
       throw std::runtime_error("fuzz mode - avoiding excessive cpu use");
 #endif
     if (fspecs.showpoint) {
-      ++size;
       if (num_zeros <= 0 && fspecs.format != float_format::fixed) num_zeros = 1;
-      if (num_zeros > 0) size += to_unsigned(num_zeros);
+      if (num_zeros > 0) size += to_unsigned(num_zeros) + 1;
     }
     auto grouping = Grouping(loc, fspecs.locale);
     size += to_unsigned(grouping.count_separators(significand_size));
@@ -2246,7 +2008,7 @@ FMT_CONSTEXPR20 auto write(OutputIt out, T value,
   memory_buffer buffer;
   if (fspecs.format == float_format::hex) {
     if (fspecs.sign) buffer.push_back(detail::sign<char>(fspecs.sign));
-    snprintf_float(convert_float(value), specs.precision, fspecs, buffer);
+    snprintf_float(promote_float(value), specs.precision, fspecs, buffer);
     return write_bytes<align::right>(out, {buffer.data(), buffer.size()},
                                      specs);
   }
@@ -2258,11 +2020,10 @@ FMT_CONSTEXPR20 auto write(OutputIt out, T value,
       throw_format_error("number is too big");
     else
       ++precision;
-  } else if (fspecs.format != float_format::fixed && precision == 0) {
-    precision = 1;
   }
   if (const_check(std::is_same<T, float>())) fspecs.binary32 = true;
-  int exp = format_float(convert_float(value), precision, fspecs, buffer);
+  if (!is_fast_float<T>()) fspecs.fallback = true;
+  int exp = format_float(promote_float(value), precision, fspecs, buffer);
   fspecs.precision = precision;
   auto fp = big_decimal_fp{buffer.data(), static_cast<int>(buffer.size()), exp};
   return write_float(out, fp, specs, fspecs, loc);
@@ -2271,8 +2032,9 @@ FMT_CONSTEXPR20 auto write(OutputIt out, T value,
 template <typename Char, typename OutputIt, typename T,
           FMT_ENABLE_IF(is_fast_float<T>::value)>
 FMT_CONSTEXPR20 auto write(OutputIt out, T value) -> OutputIt {
-  if (is_constant_evaluated())
+  if (is_constant_evaluated()) {
     return write(out, value, basic_format_specs<Char>());
+  }
 
   if (const_check(!is_supported_floating_point(value))) return out;
 
@@ -2354,7 +2116,8 @@ template <
             type::custom_type,
     FMT_ENABLE_IF(check)>
 FMT_CONSTEXPR auto write(OutputIt out, T value) -> OutputIt {
-  return write<Char>(out, static_cast<underlying_t<T>>(value));
+  return write<Char>(
+      out, static_cast<typename std::underlying_type<T>::type>(value));
 }
 
 template <typename Char, typename OutputIt, typename T,
@@ -2392,7 +2155,7 @@ auto write(OutputIt out, const T* value,
            const basic_format_specs<Char>& specs = {}, locale_ref = {})
     -> OutputIt {
   check_pointer_type_spec(specs.type, error_handler());
-  return write_ptr<Char>(out, bit_cast<uintptr_t>(value), &specs);
+  return write_ptr<Char>(out, to_uintptr(value), &specs);
 }
 
 // A write overload that handles implicit conversions.
@@ -2593,13 +2356,39 @@ FMT_CONSTEXPR void handle_dynamic_spec(int& value,
   }
 }
 
+#define FMT_STRING_IMPL(s, base, explicit)                                 \
+  [] {                                                                     \
+    /* Use the hidden visibility as a workaround for a GCC bug (#1973). */ \
+    /* Use a macro-like name to avoid shadowing warnings. */               \
+    struct FMT_GCC_VISIBILITY_HIDDEN FMT_COMPILE_STRING : base {           \
+      using char_type = fmt::remove_cvref_t<decltype(s[0])>;               \
+      FMT_MAYBE_UNUSED FMT_CONSTEXPR explicit                              \
+      operator fmt::basic_string_view<char_type>() const {                 \
+        return fmt::detail_exported::compile_string_to_view<char_type>(s); \
+      }                                                                    \
+    };                                                                     \
+    return FMT_COMPILE_STRING();                                           \
+  }()
+
+/**
+  \rst
+  Constructs a compile-time format string from a string literal *s*.
+
+  **Example**::
+
+    // A compile-time error because 'd' is an invalid specifier for strings.
+    std::string s = fmt::format(FMT_STRING("{:d}"), "foo");
+  \endrst
+ */
+#define FMT_STRING(s) FMT_STRING_IMPL(s, fmt::compile_string, )
+
 #if FMT_USE_USER_DEFINED_LITERALS
 template <typename Char> struct udl_formatter {
   basic_string_view<Char> str;
 
   template <typename... T>
   auto operator()(T&&... args) const -> std::basic_string<Char> {
-    return vformat(str, fmt::make_format_args<buffer_context<Char>>(args...));
+    return vformat(str, fmt::make_args_checked<T...>(str, args...));
   }
 };
 
@@ -2652,10 +2441,10 @@ auto vformat(const Locale& loc, basic_string_view<Char> format_str,
 using format_func = void (*)(detail::buffer<char>&, int, const char*);
 
 FMT_API void format_error_code(buffer<char>& out, int error_code,
-                               string_view message) noexcept;
+                               string_view message) FMT_NOEXCEPT;
 
 FMT_API void report_error(format_func func, int error_code,
-                          const char* message) noexcept;
+                          const char* message) FMT_NOEXCEPT;
 FMT_END_DETAIL_NAMESPACE
 
 FMT_API auto vsystem_error(int error_code, string_view format_str,
@@ -2701,11 +2490,12 @@ auto system_error(int error_code, format_string<T...> fmt, T&&... args)
   \endrst
  */
 FMT_API void format_system_error(detail::buffer<char>& out, int error_code,
-                                 const char* message) noexcept;
+                                 const char* message) FMT_NOEXCEPT;
 
 // Reports a system error without throwing an exception.
 // Can be used to report errors from destructors.
-FMT_API void report_system_error(int error_code, const char* message) noexcept;
+FMT_API void report_system_error(int error_code,
+                                 const char* message) FMT_NOEXCEPT;
 
 /** Fast integer formatter. */
 class format_int {
@@ -2786,6 +2576,28 @@ formatter<T, Char,
   }
   return detail::write<Char>(ctx.out(), val, specs_, ctx.locale());
 }
+
+#define FMT_FORMAT_AS(Type, Base)                                        \
+  template <typename Char>                                               \
+  struct formatter<Type, Char> : formatter<Base, Char> {                 \
+    template <typename FormatContext>                                    \
+    auto format(Type const& val, FormatContext& ctx) const               \
+        -> decltype(ctx.out()) {                                         \
+      return formatter<Base, Char>::format(static_cast<Base>(val), ctx); \
+    }                                                                    \
+  }
+
+FMT_FORMAT_AS(signed char, int);
+FMT_FORMAT_AS(unsigned char, unsigned);
+FMT_FORMAT_AS(short, int);
+FMT_FORMAT_AS(unsigned short, unsigned);
+FMT_FORMAT_AS(long, long long);
+FMT_FORMAT_AS(unsigned long, unsigned long long);
+FMT_FORMAT_AS(Char*, const Char*);
+FMT_FORMAT_AS(std::basic_string<Char>, basic_string_view<Char>);
+FMT_FORMAT_AS(std::nullptr_t, const void*);
+FMT_FORMAT_AS(detail::byte, unsigned char);
+FMT_FORMAT_AS(detail::std_string_view<Char>, basic_string_view<Char>);
 
 template <typename Char>
 struct formatter<void*, Char> : formatter<const void*, Char> {
@@ -2875,33 +2687,6 @@ template <typename T> auto ptr(const std::unique_ptr<T>& p) -> const void* {
 template <typename T> auto ptr(const std::shared_ptr<T>& p) -> const void* {
   return p.get();
 }
-
-/**
-  \rst
-  Converts ``e`` to the underlying type.
-
-  **Example**::
-
-    enum class color { red, green, blue };
-    auto s = fmt::format("{}", fmt::underlying(color::red));
-  \endrst
- */
-template <typename Enum>
-constexpr auto underlying(Enum e) noexcept -> underlying_t<Enum> {
-  return static_cast<underlying_t<Enum>>(e);
-}
-
-namespace enums {
-template <typename Enum, FMT_ENABLE_IF(std::is_enum<Enum>::value)>
-constexpr auto format_as(Enum e) noexcept -> underlying_t<Enum> {
-  return static_cast<underlying_t<Enum>>(e);
-}
-}  // namespace enums
-
-#ifdef __cpp_lib_byte
-inline auto format_as(std::byte b) -> unsigned char { return underlying(b); }
-FMT_FORMAT_AS(std::byte, unsigned char);
-#endif
 
 class bytes {
  private:
@@ -3033,8 +2818,8 @@ struct formatter<join_view<It, Sentinel, Char>, Char> {
   }
 
   template <typename FormatContext>
-  auto format(const join_view<It, Sentinel, Char>& value,
-              FormatContext& ctx) const -> decltype(ctx.out()) {
+  auto format(const join_view<It, Sentinel, Char>& value, FormatContext& ctx)
+      -> decltype(ctx.out()) {
     auto it = value.begin;
     auto out = ctx.out();
     if (it != value.end) {

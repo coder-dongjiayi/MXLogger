@@ -8,9 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
-
-import com.blingabc.blinglogger.NativeLib;
+import com.blingabc.blinglogger.BlingLogger;
 import com.example.blingloggerdemo.databinding.FragmentFirstBinding;
 
 public class FirstFragment extends Fragment {
@@ -34,11 +32,10 @@ public class FirstFragment extends Fragment {
         binding.buttonFirst.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NativeLib nativeLib = new NativeLib();
-                String t =  nativeLib.stringFromJNI();
 
-                Log.d("",t);
+                String v = BlingLogger.version();
 
+                Log.d("",v);
 //                NavHostFragment.findNavController(FirstFragment.this)
 //                        .navigate(R.id.action_FirstFragment_to_SecondFragment);
             }

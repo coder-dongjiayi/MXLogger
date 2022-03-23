@@ -15,7 +15,8 @@ android {
         consumerProguardFiles "consumer-rules.pro"
         externalNativeBuild {
             cmake {
-                cppFlags ""
+
+
             }
         }
     }
@@ -23,13 +24,58 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            externalNativeBuild {
+                cmake {
+                    arguments "-DANDROID_STL=c++_shared"    // Specify Android STL
+                    arguments "-DBUILD_SHARED_LIBS=true"    // Build shared object
+                    cppFlags "-fvisibility=hidden", "-funwind-tables", "-fasynchronous-unwind-tables"
+                }
+            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            jniDebuggable true
         }
     }
     externalNativeBuild {
         cmake {
-            path "src/main/cpp/CMakeLists.txt"
-            version "3.10.2"
+            path "CMakeLists.txt"
+
+        }
+    }
+
+    flavorDimensions "stl_mode"
+
+    productFlavors {
+        DefaultCpp {
+            dimension "stl_mode"
+            ext.artifactIdSuffix = ''
+            externalNativeBuild {
+                cmake {
+                    arguments = ["-DANDROID_STL=c++_static"]
+                    cppFlags "-DMMKV_STL_SHARED=0"
+                }
+            }
+        }
+        StaticCpp {
+            dimension "stl_mode"
+            ext.artifactIdSuffix = 'static'
+            externalNativeBuild {
+                cmake {
+                    arguments = ["-DANDROID_STL=c++_static"]
+                    cppFlags "-DMMKV_STL_SHARED=0"
+                }
+            }
+        }
+        SharedCpp {
+            dimension "stl_mode"
+            ext.artifactIdSuffix = 'shared'
+            externalNativeBuild {
+                cmake {
+                    arguments = ["-DANDROID_STL=c++_shared"]
+                    cppFlags "-DMMKV_STL_SHARED=1"
+                }
+            }
         }
     }
     compileOptions {
@@ -37,7 +83,9 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
-
+configurations {
+    javadocDeps
+}
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.4.1'

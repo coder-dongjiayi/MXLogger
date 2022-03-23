@@ -7,6 +7,8 @@
 
 #include "logger_os.hpp"
 #include <sys/types.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 #include <thread>
 #include <stdio.h>
 #ifndef BLINGLOG_NO_TLS
@@ -28,6 +30,7 @@ size_t logger_os::thread_id(){
 #endif
 }
 size_t logger_os::thread_id_(){
+
 #ifdef _WIN32
     return static_cast<size_t>(::GetCurrentThreadId());
 #elif defined(__linux__)

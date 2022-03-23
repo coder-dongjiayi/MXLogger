@@ -9,13 +9,43 @@
 #include "console_sink.h"
 #include "file_sink.hpp"
 #include "thread_pool.hpp"
-
+#ifdef  __APPLE__
 #include <sys/sysctl.h>
+#endif
 
 #include <unistd.h>
 namespace blinglog{
 
+
+
 static bool is_debuging_() {
+#ifdef __ANDROID__
+    const char* filename = "/proc/self/status";
+    int fd = open(filename, O_RDONLY);
+    if(fd < 0)
+    {
+        return false;
+    }
+
+    char buffer[1000];
+    ssize_t bytesRead = read(fd, buffer, sizeof(buffer) - 1);
+    close(fd);
+    if(bytesRead <= 0)
+    {
+        return false;
+    }
+
+    buffer[bytesRead] = 0;
+    const char tracerPidText[] = "TracerPid:";
+    const char* tracerPointer = strstr(buffer, tracerPidText);
+    if(tracerPointer == NULL)
+    {
+        return false;
+    }
+
+    tracerPointer += sizeof(tracerPidText);
+    return atoi(tracerPointer) > 0;
+#elif __APPLE__
     struct kinfo_proc procInfo;
     size_t structSize = sizeof(procInfo);
     int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
@@ -27,6 +57,9 @@ static bool is_debuging_() {
     }
     
     return (procInfo.kp_proc.p_flag & P_TRACED) != 0;
+#else
+    return false;
+#endif
 }
 
 logger_manager::logger_manager():enable_(true),console_enable_(true),file_enable_(true){

@@ -326,6 +326,8 @@
 				ARCHS = arm64;
 				"ARCHS[sdk=iphoneos*]" = arm64;
 				BITCODE_GENERATION_MODE = bitcode;
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGNING_REQUIRED = NO;
 				DEVELOPMENT_TEAM = UBX9CH9GDX;
@@ -432,6 +434,8 @@
 				ARCHS = arm64;
 				"ARCHS[sdk=iphoneos*]" = arm64;
 				BITCODE_GENERATION_MODE = bitcode;
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGNING_REQUIRED = NO;
 				DEVELOPMENT_TEAM = UBX9CH9GDX;
@@ -451,6 +455,8 @@
 				ARCHS = arm64;
 				"ARCHS[sdk=iphoneos*]" = arm64;
 				BITCODE_GENERATION_MODE = bitcode;
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGNING_REQUIRED = NO;
 				DEVELOPMENT_TEAM = UBX9CH9GDX;
@@ -513,6 +519,8 @@
 				ARCHS = arm64;
 				"ARCHS[sdk=iphoneos*]" = arm64;
 				BITCODE_GENERATION_MODE = bitcode;
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGNING_REQUIRED = NO;
 				DEVELOPMENT_TEAM = UBX9CH9GDX;
