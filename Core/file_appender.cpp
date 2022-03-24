@@ -25,6 +25,7 @@ void file_appender::set_policy(policy::storage_policy policy){
 void file_appender::set_filename(const std::string filename){
     
     filename_ = filename;
+    handle_date_(policy_);
 }
 std::string file_appender::calc_filename(){
     return calculator_filename_;

@@ -30,7 +30,7 @@
     
     [MXLogger shareManager].shouldRemoveExpiredDataWhenTerminate = YES;
     
-    [MXLogger shareManager].fileName = @"blinglog";
+    [MXLogger shareManager].fileName = @"blinglog6666";
     
     [MXLogger shareManager].consoleLevel = 0;
     /// 默认情况下 debug数据不会写入到文件中 如果设置 [BlingLogger shareManager].fileLevel = 0 那么debug数据才会写入到日志文件
