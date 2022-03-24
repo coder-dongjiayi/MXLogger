@@ -93,8 +93,8 @@ add_library(MXLoggerCore
         log_msg.h
         logger_common.h
         logger_enum.h
-        logger_manager.cpp
-        logger_manager.hpp
+        mxlogger_manager.cpp
+        mxlogger_manager.hpp
         logger_os.cpp
         logger_os.hpp
         logger.cpp
