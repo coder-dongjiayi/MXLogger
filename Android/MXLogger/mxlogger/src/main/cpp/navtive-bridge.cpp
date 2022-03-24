@@ -5,6 +5,7 @@
 #include <jni.h>
 #include <string>
 #include <cstdint>
+#include "mxlogger_manager.hpp"
 static JavaVM *g_currentJVM = nullptr;
 static jclass g_cls = nullptr;
 
@@ -38,19 +39,29 @@ extern "C" JNIEXPORT JNICALL jint  JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_6;
 }
 
-#define BLINGLOGGER_JNI static
-namespace blinglogger{
+#define MXLOGGER_JNI static
+namespace mxlogger{
     static jstring string2jstring(JNIEnv *env, const std::string &str) {
         return env->NewStringUTF(str.c_str());
     }
 
-    BLINGLOGGER_JNI jstring version(JNIEnv *env, jclass type){
+    MXLOGGER_JNI jstring version(JNIEnv *env, jclass type){
         std::string v = "1.2.3";
         return string2jstring(env,v);
     }
+
+    /// 初始化MXLogger 日志目录
+    MXLOGGER_JNI void jniInitialize(JNIEnv *env, jobject obj,jstring diskCachePath){
+        if (diskCachePath == nullptr) return;
+
+       const char *disk_cache_path = env ->GetStringUTFChars(diskCachePath, nullptr);
+       mx_logger &logger = mx_logger ::instance();
+        logger.set_file_dir(disk_cache_path);
+    }
 }
 static JNINativeMethod g_methods[] = {
-        {"version", "()Ljava/lang/String;", (void *) blinglogger::version},
+        {"version", "()Ljava/lang/String;", (void *) mxlogger::version},
+        {"jniInitialize","(Ljava/lang/String;)V",(void *)mxlogger::jniInitialize}
 };
 static int registerNativeMethods(JNIEnv *env, jclass cls) {
     return env->RegisterNatives(cls, g_methods, sizeof(g_methods) / sizeof(g_methods[0]));
