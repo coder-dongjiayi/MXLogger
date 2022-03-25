@@ -28,6 +28,20 @@ public class MXLogger {
 
     private static @NonNull String storagePolicy;
 
+    /**
+     %d 日志生成时间
+     %p 日志等级
+     %t 线程id
+     %m 日志信息 msg
+     %a tag
+     默认: 控制台输出格式化  [%d][%p]%m
+     */
+
+    private static @NonNull String consolePattern;
+    /**
+     * 默认 写入文件格式化  [%d][%t][%p]%m
+     * */
+    private static @NonNull String filePattern;
 
     /**
      * 初始化MXLogger
@@ -155,6 +169,26 @@ public class MXLogger {
         return diskCachePath;
     }
 
+    @NonNull
+    public static String getConsolePattern() {
+        return consolePattern;
+    }
+
+    public static void setConsolePattern(@NonNull String consolePattern) {
+        native_consolePattern(consolePattern);
+        MXLogger.consolePattern = consolePattern;
+    }
+
+    @NonNull
+    public static String getFilePattern() {
+        return filePattern;
+    }
+
+    public static void setFilePattern(@NonNull String filePattern) {
+        native_filePattern(filePattern);
+        MXLogger.filePattern = filePattern;
+    }
+
     private static native String version();
    /**
    * 初始化日志文件目录
@@ -164,4 +198,6 @@ public class MXLogger {
    private  static  native  void log(int logType,String name,int level,String msg,String tag,boolean mainThread);
 
    private  static  native void native_storagePolicy(String policy);
+   private  static  native void native_consolePattern(String pattern);
+   private  static  native void native_filePattern(String pattern);
 }

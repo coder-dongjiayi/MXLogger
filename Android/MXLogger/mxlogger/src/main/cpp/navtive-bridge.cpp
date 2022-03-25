@@ -63,7 +63,18 @@ namespace mxlogger{
         std::string v = "0.0.1";
         return string2jstring(env,v);
     }
+    MXLOGGER_JNI void native_consolePattern(JNIEnv *env, jobject obj,jstring pattern){
+        if (pattern == nullptr) return;
+        std::string  console = jstring2string(env,pattern);
 
+        mx_logger ::instance().set_console_pattern(console);
+    }
+    MXLOGGER_JNI void native_filePattern(JNIEnv *env, jobject obj,jstring pattern){
+        if (pattern == nullptr) return;
+        std::string  file = jstring2string(env,pattern);
+
+        mx_logger ::instance().set_file_pattern(file);
+    }
     MXLOGGER_JNI void native_storagePolicy(JNIEnv *env, jobject obj,jstring policy){
         if (policy == nullptr) return;
         policy::storage_policy  storage_policy = policy::storage_policy::yyyy_MM_dd;
@@ -134,7 +145,9 @@ static JNINativeMethod g_methods[] = {
         {"version", "()Ljava/lang/String;", (void *) mxlogger::version},
         {"jniInitialize","(Ljava/lang/String;)V",(void *)mxlogger::jniInitialize},
         {"log","(ILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::log},
-        {"native_storagePolicy","(Ljava/lang/String;)V",(void *)mxlogger::native_storagePolicy}
+        {"native_storagePolicy","(Ljava/lang/String;)V",(void *)mxlogger::native_storagePolicy},
+        {"native_consolePattern","(Ljava/lang/String;)V",(void *)mxlogger::native_consolePattern},
+        {"native_filePattern","(Ljava/lang/String;)V",(void *)mxlogger::native_filePattern}
 };
 static int registerNativeMethods(JNIEnv *env, jclass cls) {
     return env->RegisterNatives(cls, g_methods, sizeof(g_methods) / sizeof(g_methods[0]));

@@ -39,7 +39,6 @@ public class FirstFragment extends Fragment {
             public void onClick(View view) {
 
 
-//        MXLogger.setStoragePolicy("yyyy_MM_dd_HH");
 
                 MXLogger.info("存储策略", "这是存储策略");
 

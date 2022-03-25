@@ -33,7 +33,8 @@ public class MainActivity extends AppCompatActivity {
        MXLogger.initialize(MainActivity.this);
 
         MXLogger.setStoragePolicy("yyyy_MM_dd_HH");
-
+        MXLogger.setConsolePattern("[%d][%t][%p]%m");
+        MXLogger.setFilePattern("[%d][%t][%p]%m");
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
