@@ -98,7 +98,7 @@ mxlogger_manager::mxlogger_manager():enable_(true),console_enable_(true),file_en
     
     is_async_ = true;
     debug_traceing_ = is_debuging_();
-    
+
     if (!debug_traceing_) {
         console_enable_ = false;
     }
@@ -147,18 +147,18 @@ long long mxlogger_manager::file_size(){
  
     return sync_file_sink_() -> file_size();
 }
-void mxlogger_manager::set_file_dir(const std::string &filedir){
+void mxlogger_manager::set_file_dir(const std::string& filedir){
   
     async_file_sink_() -> set_filedir(filedir);
     sync_file_sink_() -> set_filedir(filedir);
 }
-void mxlogger_manager::set_file_levle(level::level_enum lvl){
+void mxlogger_manager::set_file_level(level::level_enum lvl){
 
     async_file_sink_() -> set_level(lvl);
     sync_file_sink_() -> set_level(lvl);
 }
 
-void mxlogger_manager::set_console_levle(level::level_enum lvl){
+void mxlogger_manager::set_console_level(level::level_enum lvl){
     
     console_logger_ -> set_level(lvl);
 }

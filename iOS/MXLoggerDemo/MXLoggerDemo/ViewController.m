@@ -50,7 +50,7 @@
     [MXLogger shareManager].isAsync = YES;
 }
 - (IBAction)defaultButttonAction:(id)sender {
-    [MXLogger debug:@"这是一条debug,会输出到控制台"];
+    [MXLogger debug:@"这是一条debug,会输出到控制台" tag:@"TAG"];
     [MXLogger info:@"这是一条infoLog,会输出到控制台"];
     [MXLogger warn:@"这是一条warn,会输出到控制台"];
     [MXLogger error:@"这是一条error,会输出到控制台"];

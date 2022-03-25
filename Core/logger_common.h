@@ -25,7 +25,6 @@ using sink_ptr = std::shared_ptr<sinks::sink>;
 
 using log_clock = std::chrono::system_clock;
 
-using sinks_init_list = std::initializer_list<sink_ptr>;
 
 }
 
@@ -33,9 +32,8 @@ static const char *default_eol = "\n";
 
 namespace fmt_lib = fmt;
 
-
 using string_view_t = fmt::basic_string_view<char>;
-using memory_buf_t  = fmt::basic_memory_buffer<char,5>;
+using memory_buf_t  = fmt::basic_memory_buffer<char,100>;
 
 using log_clock = std::chrono::system_clock;
 

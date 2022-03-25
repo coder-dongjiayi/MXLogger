@@ -54,6 +54,7 @@ void pattern_formatter:: handle_flag_(char flag){
   
     
     switch (flag) {
+       
         case ('d'):
             formatters_.push_back(make_unique<details::time_formatter>());
             break;
@@ -75,15 +76,17 @@ void pattern_formatter:: handle_flag_(char flag){
 void pattern_formatter::format(const details::log_msg &log_msg, memory_buf_t &dest){
    
 
-    
     std::tm ltm =  fmt_lib::localtime(log_clock::to_time_t(log_msg.time));
     
     for (auto &f : formatters_) {
+    
+       
         f->format(log_msg, ltm, dest);
     }
-    
+
     details::fmt_helper::append_string_view(default_eol, dest);
-    
+
+
 }
 
 

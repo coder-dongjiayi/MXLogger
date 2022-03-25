@@ -13,6 +13,9 @@
 #include <stdio.h>
 #include "fmt_helper.h"
 #include <map>
+#ifdef  __ANDROID__
+#include <android/log.h>
+#endif
 
 namespace mxlogger{
 namespace details{
@@ -226,14 +229,19 @@ void file_helper::write(const memory_buf_t &buf,const std::string &fname){
     auto data = buf.data();
 
     if( std::fwrite(data, 1, msg_size, fd_) != msg_size){
+#ifdef __ANDROID__
+        __android_log_print(ANDROID_LOG_ERROR, "file_helper::fwrite", "%s", "文件写入异常");
+#elif __APPLE__
         printf("文件写入异常");
+#endif
+
     }
 }
 void file_helper::set_header(memory_buf_t &header){
     header_buffer_ = std::move(header);
     
 }
-void file_helper::set_dir(const std::string &dir){
+void file_helper::set_dir(const std::string dir){
     dir_ = dir;
     create_dir_(dir);
 }

@@ -17,11 +17,7 @@ public class FirstFragment extends Fragment {
 
     private FragmentFirstBinding binding;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-    }
 
     @Override
     public View onCreateView(
@@ -41,12 +37,14 @@ public class FirstFragment extends Fragment {
         binding.buttonFirst.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-           String v = MXLogger.version();
-                Log.d("",v);
 
 
-//                NavHostFragment.findNavController(FirstFragment.this)
-//                        .navigate(R.id.action_FirstFragment_to_SecondFragment);
+//        MXLogger.setStoragePolicy("yyyy_MM_dd_HH");
+
+                MXLogger.info("存储策略", "这是存储策略");
+
+
+
             }
         });
     }

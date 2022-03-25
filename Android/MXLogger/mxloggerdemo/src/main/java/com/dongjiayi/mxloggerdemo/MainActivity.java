@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         // 初始化日志目录
        MXLogger.initialize(MainActivity.this);
 
-        Log.i("MXLogger",MXLogger.diskCachePath);
+        MXLogger.setStoragePolicy("yyyy_MM_dd_HH");
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

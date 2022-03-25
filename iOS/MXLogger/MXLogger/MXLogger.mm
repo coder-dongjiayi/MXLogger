@@ -157,9 +157,9 @@ static MXLogger *_manager;
     level::level_enum l = [MXLogger _level:lvl];
     
     if (type == 0) {
-        mx_logger::instance().set_console_levle(l);
+        mx_logger::instance().set_console_level(l);
     }else{
-        mx_logger::instance().set_file_levle(l);
+        mx_logger::instance().set_file_level(l);
     }
 }
 // 默认缓存目录 library

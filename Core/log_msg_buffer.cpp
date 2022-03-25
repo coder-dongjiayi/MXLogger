@@ -52,8 +52,8 @@ namespace details {
 
  void log_msg_buffer::update_string_views()
 {
-    prefix = string_view_t{prefix.data(), prefix.size()};
-    tag = string_view_t{tag.data(), tag.size()};
+    prefix = string_view_t{buffer.data(), prefix.size()};
+    tag = string_view_t{buffer.data(), tag.size()};
     payload = string_view_t{buffer.data() + prefix.size() + tag.size(), payload.size()};
 }
 

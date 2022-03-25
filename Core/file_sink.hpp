@@ -23,7 +23,7 @@ public:
     explicit file_sink();
    
   
-    void set_filedir(const std::string &filedir);
+    void set_filedir(const std::string filedir);
     
     void set_file_header(const std::string &header);
     void set_file_policy(policy::storage_policy policy);

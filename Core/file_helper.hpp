@@ -28,7 +28,7 @@ public:
     
     void close();
     ///设置保存日志的目录
-    void set_dir(const std::string &dir);
+    void set_dir(const std::string dir);
     
     //设置文件头
     void set_header(memory_buf_t &header);

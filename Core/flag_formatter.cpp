@@ -14,10 +14,12 @@ namespace details{
 
 // [2022-03-02-16:49:57.912]
 void time_formatter::format(const details::log_msg &log_msg, const std::tm &tm_time,memory_buf_t &dest){
-   
+
+
+
     cached_datetime_.clear();
-    
-    using std::chrono:: milliseconds;
+
+        using std::chrono:: milliseconds;
     fmt_helper::append_int(tm_time.tm_year + 1900, cached_datetime_);
     cached_datetime_.push_back('-');
     fmt_helper::pad2(tm_time.tm_mon + 1, cached_datetime_);
@@ -30,10 +32,12 @@ void time_formatter::format(const details::log_msg &log_msg, const std::tm &tm_t
     cached_datetime_.push_back(':');
     fmt_helper::pad2(tm_time.tm_sec, cached_datetime_);
     cached_datetime_.push_back('.');
+
     auto micro = fmt_helper::time_fraction<std::chrono::microseconds>(log_msg.time);
 
     fmt_helper::pad3(static_cast<uint32_t>(micro.count()), cached_datetime_);
 
+    
 
     dest.append(cached_datetime_.begin(), cached_datetime_.end());
 }
@@ -57,10 +61,11 @@ void aggregate_formatter::format(const details::log_msg &log_msg, const std::tm 
 
 void tag_formatter:: format(const details::log_msg &msg, const std::tm &tm_time, memory_buf_t &dest){
     if(msg.tag.data() == nullptr || msg.tag == "") return;
-    
-    fmt_helper::append_string_view("{",dest);
+
+    fmt_helper::append_string_view("<",dest);
     fmt_helper::append_string_view(msg.tag, dest);
-    fmt_helper::append_string_view("}",dest);
+    fmt_helper::append_string_view(">",dest);
+
 }
 
 void prefix_formatter:: format(const details::log_msg &msg, const std::tm &tm_time, memory_buf_t &dest){

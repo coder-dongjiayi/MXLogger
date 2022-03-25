@@ -20,6 +20,9 @@ private:
     
 public:
      formatter();
+    // 判断tag 是否存在，不存在就不显示
+    bool is_tag = false;
+    
     virtual void format(const details::log_msg &msg, memory_buf_t &dest) = 0;
     virtual ~formatter() = default;
     

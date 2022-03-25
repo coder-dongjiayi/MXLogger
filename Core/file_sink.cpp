@@ -45,7 +45,7 @@ void file_sink::remove_all(){
 void file_sink::remove_expire_data(){
     file_helper_.remove_expire_data();
 }
-void file_sink::set_filedir(const std::string &filedir){
+void file_sink::set_filedir(const std::string filedir){
     std::lock_guard<std::mutex> lock(mutex_t);
    
     file_helper_.set_dir(filedir);
@@ -61,8 +61,7 @@ void file_sink::set_file_header(const std::string &header){
     details::fmt_helper::append_string_view(default_eol, formatted);
 
     file_helper_.set_header(formatted);
-    
-    file_helper_.remove_expire_data();
+
     
 }
 void file_sink::log(const details::log_msg &msg){

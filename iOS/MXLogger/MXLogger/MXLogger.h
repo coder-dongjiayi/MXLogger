@@ -39,12 +39,13 @@ NS_ASSUME_NONNULL_BEGIN
  %p 日志等级
  %t 线程id
  %m 日志信息 msg
+ %a tag
  */
-///  控制台输出格式化  [%d][%p]%m
+///  控制台输出格式化  [%d][%p]<%a>%m
 
 @property(nonatomic,copy,nonnull) NSString * consolePattern;
 
-/// 写入文件格式化  [%d][%t][%p]%m
+/// 写入文件格式化  [%d][%t][%p]<%a>%m
 
 @property(nonatomic,copy,nonnull) NSString * filePattern;
 /*

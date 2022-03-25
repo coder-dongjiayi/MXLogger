@@ -111,9 +111,9 @@ public:
     
     void set_file_async(bool is_async);
     
-    void set_console_levle(level::level_enum lvl);
+    void set_console_level(level::level_enum lvl);
     
-    void set_file_levle(level::level_enum lvl);
+    void set_file_level(level::level_enum lvl);
     
     void set_console_pattern(const std::string &pattern);
     
