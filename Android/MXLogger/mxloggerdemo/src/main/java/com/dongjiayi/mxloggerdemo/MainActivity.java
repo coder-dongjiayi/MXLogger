@@ -32,9 +32,19 @@ public class MainActivity extends AppCompatActivity {
         // 初始化日志目录
        MXLogger.initialize(MainActivity.this);
 
+       MXLogger.setFileName("customName");
+        MXLogger.setFileHeader("平台:android");
         MXLogger.setStoragePolicy("yyyy_MM_dd_HH");
         MXLogger.setConsolePattern("[%d][%t][%p]%m");
         MXLogger.setFilePattern("[%d][%t][%p]%m");
+
+        MXLogger.setConsoleLevel(0);
+        MXLogger.setFileLevel(1);
+
+        MXLogger.setConsoleEnable(true);
+        MXLogger.setFileEnable(true);
+
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 

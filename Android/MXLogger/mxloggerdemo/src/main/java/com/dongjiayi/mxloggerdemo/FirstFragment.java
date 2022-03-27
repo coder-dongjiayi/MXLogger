@@ -39,9 +39,9 @@ public class FirstFragment extends Fragment {
             public void onClick(View view) {
 
 
-
-                MXLogger.info("存储策略", "这是存储策略");
-
+                MXLogger.debug("debug","这是debug设置");
+                MXLogger.info("这是info信息");
+                MXLogger.error("error信息");
 
 
             }

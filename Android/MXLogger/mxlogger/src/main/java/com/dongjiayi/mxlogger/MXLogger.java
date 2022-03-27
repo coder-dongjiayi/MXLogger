@@ -42,7 +42,43 @@ public class MXLogger {
      * 默认 写入文件格式化  [%d][%t][%p]%m
      * */
     private static @NonNull String filePattern;
+    /**
+        参数：
+         0:debug
+        1:info
+        2:warn
+         3:error
+        4:fatal
+     设置控制台输出等级
+    **/
+    private static int consoleLevel;
+ /**
+  * 写入文件日志设置等级
+  * */
+    private static  int fileLevel;
 
+
+    /**
+   * 开启/禁用控制台日志输出
+   *  默认情况下 如果当前设备连接AndroidStudio正在调试，那么 consoleEnable = YES，
+   *  会在控制台输出日志。非调试状态下不会把日志输出到控制台
+  * */
+    private static boolean consoleEnable;
+ /**
+  * 开启/禁用日志写入 默认YES
+  * */
+    private static boolean fileEnable;
+
+    /**
+  设置文件名，配合storagePolicy字段，如果 fileName =@"appname" storagePolicy = @“yyyy_MM_dd”
+ 那么最终存储的文件名为 appname_2022-03-15.log
+
+ 默认值:mxlog
+ **/
+    private static String fileName;
+
+    /** 设置每次创建文件的时候 写入的文件头信息 比如可以把当前设备型号，用户信息等等 写进去*/
+    private static String fileHeader;
     /**
      * 初始化MXLogger
      * */
@@ -189,6 +225,57 @@ public class MXLogger {
         MXLogger.filePattern = filePattern;
     }
 
+    public static int getConsoleLevel() {
+        return consoleLevel;
+    }
+
+    public static void setConsoleLevel(int consoleLevel) {
+        native_consoleLevel(consoleLevel);
+        MXLogger.consoleLevel = consoleLevel;
+    }
+
+    public static int getFileLevel() {
+        return fileLevel;
+    }
+
+    public static void setFileLevel(int fileLevel) {
+        native_fileLevel(fileLevel);
+        MXLogger.fileLevel = fileLevel;
+    }
+    public static boolean isConsoleEnable() {
+        return consoleEnable;
+    }
+
+    public static void setConsoleEnable(boolean consoleEnable) {
+        native_consoleEnable(consoleEnable);
+        MXLogger.consoleEnable = consoleEnable;
+    }
+
+    public static boolean isFileEnable() {
+        return fileEnable;
+    }
+
+    public static void setFileEnable(boolean fileEnable) {
+        native_fileEnable(fileEnable);
+        MXLogger.fileEnable = fileEnable;
+    }
+    public static String getFileName() {
+        return fileName;
+    }
+
+    public static void setFileName(String fileName) {
+        native_fileName(fileName);
+        MXLogger.fileName = fileName;
+    }
+
+    public static String getFileHeader() {
+        return fileHeader;
+    }
+
+    public static void setFileHeader(String fileHeader) {
+        native_fileHeader(fileHeader);
+        MXLogger.fileHeader = fileHeader;
+    }
     private static native String version();
    /**
    * 初始化日志文件目录
@@ -197,7 +284,14 @@ public class MXLogger {
 
    private  static  native  void log(int logType,String name,int level,String msg,String tag,boolean mainThread);
 
+
    private  static  native void native_storagePolicy(String policy);
    private  static  native void native_consolePattern(String pattern);
    private  static  native void native_filePattern(String pattern);
+   private  static  native void native_consoleLevel(int level);
+   private  static  native void native_fileLevel(int level);
+   private  static  native void native_fileEnable(boolean enable);
+   private  static  native void native_consoleEnable(boolean enable);
+   private  static  native void native_fileName(String fileName);
+   private  static  native void native_fileHeader(String fileHeader);
 }
