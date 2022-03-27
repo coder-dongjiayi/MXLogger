@@ -28,7 +28,7 @@ static bool is_debuging_() {
     }
 
     char buffer[1000];
-    ssize_t bytesRead = read(fd, buffer, sizeof(buffer) - 1);
+    int bytesRead = read(fd, buffer, sizeof(buffer) - 1);
     close(fd);
     if(bytesRead <= 0)
     {
@@ -57,9 +57,9 @@ static bool is_debuging_() {
     }
     
     return (procInfo.kp_proc.p_flag & P_TRACED) != 0;
-#else
-    return false;
+
 #endif
+    return false;
 }
 
 mxlogger_manager::mxlogger_manager():enable_(true),console_enable_(true),file_enable_(true){
@@ -143,7 +143,7 @@ void mxlogger_manager::set_file_header(const char* header){
     sync_file_sink_() -> set_file_header(header);
     
 }
-long long mxlogger_manager::file_size(){
+long mxlogger_manager::file_size(){
  
     return sync_file_sink_() -> file_size();
 }

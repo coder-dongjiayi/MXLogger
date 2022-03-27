@@ -38,7 +38,7 @@ public:
     // 文件最大存储大小 默认为0 不限制
     void set_file_max_disk_size(long long max_size);
     
-    long long file_size() const;
+    long  file_size() const;
     void remove_all();
     
     void remove_expire_data();

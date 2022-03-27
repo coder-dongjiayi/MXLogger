@@ -124,11 +124,11 @@ static MXLogger *_manager;
     _fileHeader = fileHeader;
     mx_logger::instance().set_file_header([fileHeader UTF8String]);
 }
-- (NSUInteger)logSize{
+- (long)logSize{
    
     return mx_logger::instance().file_size();
 }
-- (bool)isDebugTraceing{
+- (bool)isDebugTracking{
     return mx_logger::instance().is_debuging();
 }
 

@@ -25,7 +25,7 @@ void file_sink::set_file_policy(policy::storage_policy policy){
     file_appender_.set_policy(policy);
     
 }
-long long file_sink::file_size() const{
+ long file_sink::file_size() const{
     std::lock_guard<std::mutex> lock(mutex_t);
     return  file_helper_.file_size();
 }

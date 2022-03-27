@@ -75,13 +75,41 @@ public class MXLogger {
 
  默认值:mxlog
  **/
-    private static String fileName;
+    private static @NonNull String fileName;
 
     /** 设置每次创建文件的时候 写入的文件头信息 比如可以把当前设备型号，用户信息等等 写进去*/
-    private static String fileHeader;
+    private static @NonNull String fileHeader;
+
+    /**
+     * 日志文件最大存储时长(s) 默认0  不限制 比如 60 * 60 *24 *7 就是一星期
+     * */
+    private static long maxDiskAge;
+
+
+    /**
+     *  日志文件最大存储字节数(byte) 默认为0 不限制 比如 1024 * 1024 * 10 就是 10M
+     * */
+    private static long maxDiskSize;
+
+
+    // 设置写入日志同步还是异步 默认异步
+    private static  boolean isAsync;
+
+    // 获取日志文件大小
+    public static long getLogSize() {
+        return native_logSize();
+    }
+
+    public static boolean isIsDebugTracking() {
+        return native_isDebugTracking();
+    }
+
+
     /**
      * 初始化MXLogger
      * */
+
+
    public  static  void  initialize(Context context){
       initWithNamespace(context,"mxlog");
    }
@@ -96,7 +124,6 @@ public class MXLogger {
       diskCachePath = directory + "/" + nameSpace + "/";
       jniInitialize(diskCachePath);
     }
-
 
     public  static void debug(@Nullable String msg){
        debug(null,msg);
@@ -116,7 +143,6 @@ public class MXLogger {
     public  static void fatal(@Nullable String msg){
       fatal(null,msg);
     }
-
 
 
     public  static void debug(@Nullable String tag,@Nullable String msg){
@@ -139,8 +165,6 @@ public class MXLogger {
     }
 
 
-
-
     public  static void debug(@Nullable String name, @Nullable String tag,@Nullable String msg){
         log(name,0,tag,msg);
     }
@@ -160,12 +184,32 @@ public class MXLogger {
         log(name,4,tag,msg);
     }
 
-
     public static  void log(@Nullable String name,@NonNull int level,@Nullable String tag,@Nullable String msg){
         innerLog(0,name,level,msg,tag);
     }
 
+    // 异步写入文件，不会在控制台打印日志  isAsync对这个方法无效
+    public static  void asyncLogFile(@Nullable String name,@NonNull int level,@Nullable String tag,@Nullable String msg){
 
+        boolean mainThread = Looper.myLooper() == Looper.getMainLooper();
+        native_async_file_log(name,level,msg,tag,mainThread);
+    }
+
+    // 同步写入文件，不会在控制台打印日志  isAsync对这个方法无效
+    public static  void syncLogFile(@Nullable String name,@NonNull int level,@Nullable String tag,@Nullable String msg){
+
+        boolean mainThread = Looper.myLooper() == Looper.getMainLooper();
+        native_sync_file_log(name,level,msg,tag,mainThread);
+    }
+
+    //删除全部过期文件
+    public static void removeExpireData(){
+     native_removeExpireData();
+    }
+    // 删除全部日志文件
+    public static void removeAll(){
+       native_removeAll();
+    }
     /**
      * 设置默认存储目录
      * */
@@ -183,11 +227,8 @@ public class MXLogger {
 
        boolean mainThread = Looper.myLooper() == Looper.getMainLooper();
 
-        log(logType,name,level,msg,tag,mainThread);
+        native_log(logType,name,level,msg,tag,mainThread);
     }
-
-
-
 
     @NonNull
     public static String getStoragePolicy() {
@@ -198,7 +239,6 @@ public class MXLogger {
         native_storagePolicy(storagePolicy);
         MXLogger.storagePolicy = storagePolicy;
     }
-
 
     @NonNull
     public static String getDiskCachePath() {
@@ -259,10 +299,12 @@ public class MXLogger {
         native_fileEnable(fileEnable);
         MXLogger.fileEnable = fileEnable;
     }
+    @NonNull
     public static String getFileName() {
         return fileName;
     }
 
+    @NonNull
     public static void setFileName(String fileName) {
         native_fileName(fileName);
         MXLogger.fileName = fileName;
@@ -276,16 +318,44 @@ public class MXLogger {
         native_fileHeader(fileHeader);
         MXLogger.fileHeader = fileHeader;
     }
+
+    public static long getMaxDiskAge() {
+        return maxDiskAge;
+    }
+
+    public static void setMaxDiskAge(long maxDiskAge) {
+        native_maxDiskAge(maxDiskAge);
+        MXLogger.maxDiskAge = maxDiskAge;
+    }
+
+    public static long getMaxDiskSize() {
+        return maxDiskSize;
+    }
+
+    public static void setMaxDiskSize(long maxDiskSize) {
+        native_maxDiskSize(maxDiskSize);
+        MXLogger.maxDiskSize = maxDiskSize;
+    }
+
+
+    public static boolean isIsAsync() {
+        return isAsync;
+    }
+
+    public static void setIsAsync(boolean isAsync) {
+        native_isAsync(isAsync);
+        MXLogger.isAsync = isAsync;
+    }
+
+
     private static native String version();
-   /**
-   * 初始化日志文件目录
-   */
    private  static  native  void jniInitialize(String diskCachePath);
 
-   private  static  native  void log(int logType,String name,int level,String msg,String tag,boolean mainThread);
+   private  static  native  void native_log(int logType,String name,int level,String msg,String tag,boolean mainThread);
+   private  static  native  void native_async_file_log(String name,int level,String msg,String tag,boolean mainThread);
+   private  static  native  void native_sync_file_log(String name,int level,String msg,String tag,boolean mainThread);
 
-
-   private  static  native void native_storagePolicy(String policy);
+    private  static  native void native_storagePolicy(String policy);
    private  static  native void native_consolePattern(String pattern);
    private  static  native void native_filePattern(String pattern);
    private  static  native void native_consoleLevel(int level);
@@ -294,4 +364,11 @@ public class MXLogger {
    private  static  native void native_consoleEnable(boolean enable);
    private  static  native void native_fileName(String fileName);
    private  static  native void native_fileHeader(String fileHeader);
+   private  static  native void native_maxDiskAge(long maxDiskAge);
+   private  static  native void native_maxDiskSize(long maxDiskSize);
+   private  static  native long native_logSize();
+   private  static  native boolean native_isDebugTracking();
+   private  static native  void native_isAsync(boolean isAsync);
+   private  static native  void native_removeExpireData();
+   private  static native  void native_removeAll();
 }

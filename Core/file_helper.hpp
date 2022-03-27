@@ -48,7 +48,7 @@ public:
     void remove_all();
     
     //当前日志文件大小
-    long long file_size() const;
+    long  file_size() const;
     
     std::string &filename() ;
     

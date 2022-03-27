@@ -104,7 +104,7 @@ public:
     void remove_all();
     
     // 缓存日志文件大小(byte)
-    long long file_size();
+    long  file_size();
     
     // 是否正在被调试
     bool is_debuging() const;

@@ -32,10 +32,14 @@ public class MainActivity extends AppCompatActivity {
         // 初始化日志目录
        MXLogger.initialize(MainActivity.this);
 
-       MXLogger.setFileName("customName");
+
+        MXLogger.setFileName("customName");
         MXLogger.setFileHeader("平台:android");
+        MXLogger.setMaxDiskAge(60 * 60 * 24 * 7);
+        MXLogger.setMaxDiskSize(1024 * 1024 * 100);
+
         MXLogger.setStoragePolicy("yyyy_MM_dd_HH");
-        MXLogger.setConsolePattern("[%d][%t][%p]%m");
+        MXLogger.setConsolePattern("[%d][%p]%m");
         MXLogger.setFilePattern("[%d][%t][%p]%m");
 
         MXLogger.setConsoleLevel(0);
@@ -44,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
         MXLogger.setConsoleEnable(true);
         MXLogger.setFileEnable(true);
 
+
+        MXLogger.debug("当前日志大小:" + Long.toString(MXLogger.getLogSize()));
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

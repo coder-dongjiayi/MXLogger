@@ -81,11 +81,11 @@ void file_helper::close(){
         fd_ = nullptr;
     }
 }
-long long file_helper::file_size() const{
+long  file_helper::file_size() const{
     DIR *dir;
     struct dirent *entry;
     struct stat statbuf;
-    long long  current_cache_size=0;
+    long   current_cache_size=0;
     if ((dir = opendir(dir_.c_str())) == nullptr){
         
         fprintf(stderr, "Cannot open dir: %s\n", dir_.c_str());

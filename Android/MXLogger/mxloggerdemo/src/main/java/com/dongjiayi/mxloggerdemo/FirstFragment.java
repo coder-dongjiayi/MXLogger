@@ -38,10 +38,14 @@ public class FirstFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
+                MXLogger.info("MXLogger","tag","正在debug");
 
-                MXLogger.debug("debug","这是debug设置");
-                MXLogger.info("这是info信息");
-                MXLogger.error("error信息");
+                if (MXLogger.isIsDebugTracking()){
+                    MXLogger.info("正在debug");
+                }else{
+                    MXLogger.info("非debug状态");
+                }
+
 
 
             }

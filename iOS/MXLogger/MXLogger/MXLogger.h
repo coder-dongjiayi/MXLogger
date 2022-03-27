@@ -94,10 +94,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (assign, nonatomic) NSUInteger maxDiskSize;
 
 // 日志文件大小(byte)
-@property (nonatomic,assign,readonly) NSUInteger logSize;
+@property (nonatomic,assign,readonly) long logSize;
 
 // 是否正在被调试
-@property (nonatomic,assign,readonly) BOOL isDebugTraceing;
+@property (nonatomic,assign,readonly) BOOL isDebugTracking;
 
 // 日志写入同步还是异步 默认异步(控制台打印全都是同步，不支持异步)
 @property (nonatomic,assign)BOOL isAsync;
