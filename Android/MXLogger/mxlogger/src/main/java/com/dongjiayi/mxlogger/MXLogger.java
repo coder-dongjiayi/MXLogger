@@ -2,13 +2,39 @@ package com.dongjiayi.mxlogger;
 
 import android.content.Context;
 import android.os.Looper;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
 
-import javax.crypto.interfaces.PBEKey;
+import androidx.lifecycle.LifecycleOwner;
 
-public class MXLogger {
+
+public class MXLogger implements LifecycleEventObserver {
+
+    @Override
+    public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
+
+        if (event == Lifecycle.Event.ON_STOP){
+            if (MXLogger.shouldRemoveExpiredDataWhenEnterBackground == true){
+                removeExpireData();
+                MXLogger.debug("MXLogger","removeExpireData","程序进入后台清理过期日志文件");
+            }
+
+        }
+        if (event == Lifecycle.Event.ON_DESTROY){
+            if (MXLogger.shouldRemoveExpiredDataWhenTerminate == true){
+                removeExpireData();
+            }
+        }
+    }
+    /// 程序进入后台的时候是否清理过期的日志文件
+    public static boolean shouldRemoveExpiredDataWhenEnterBackground = true;
+    /// 程序退出的时候是否清理过期的日志文件
+    public static boolean shouldRemoveExpiredDataWhenTerminate = true;
+
+    private static boolean isInitialize = false;
+
     private static @NonNull String defaultDiskCacheDirectory;
 
     /**
@@ -117,12 +143,20 @@ public class MXLogger {
        initWithNamespace(context,nameSpace,null);
    }
     public  static void initWithNamespace(Context context,@NonNull String nameSpace, @Nullable String directory){
+
+
+
+      if (isInitialize == true) return;
+        isInitialize = true;
         System.loadLibrary("mxlogger");
       if (directory == null){
           directory = defaultDiskCacheDirectory(context);
       }
+
+
       diskCachePath = directory + "/" + nameSpace + "/";
       jniInitialize(diskCachePath);
+
     }
 
     public  static void debug(@Nullable String msg){

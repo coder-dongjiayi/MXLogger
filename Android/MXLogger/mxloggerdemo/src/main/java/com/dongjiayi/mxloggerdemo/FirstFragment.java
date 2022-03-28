@@ -40,12 +40,6 @@ public class FirstFragment extends Fragment {
 
                 MXLogger.info("MXLogger","tag","正在debug");
 
-                if (MXLogger.isIsDebugTracking()){
-                    MXLogger.info("正在debug");
-                }else{
-                    MXLogger.info("非debug状态");
-                }
-
 
 
             }
