@@ -23,11 +23,6 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            externalNativeBuild {
-                cmake {
-                    cppFlags "-fvisibility=hidden", "-funwind-tables", "-fasynchronous-unwind-tables"
-                }
-            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

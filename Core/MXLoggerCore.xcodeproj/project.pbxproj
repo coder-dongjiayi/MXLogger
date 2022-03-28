@@ -1,0 +1,430 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BD406E1F27F19E8E002C76D5 /* async_msg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406DFB27F19E8D002C76D5 /* async_msg.cpp */; };
+		BD406E2027F19E8E002C76D5 /* log_msg_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406DFC27F19E8D002C76D5 /* log_msg_buffer.cpp */; };
+		BD406E2127F19E8E002C76D5 /* mxlogger_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406DFF27F19E8D002C76D5 /* mxlogger_manager.cpp */; };
+		BD406E2227F19E8E002C76D5 /* file_helper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E0227F19E8D002C76D5 /* file_helper.cpp */; };
+		BD406E2327F19E8E002C76D5 /* thread_pool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E0427F19E8D002C76D5 /* thread_pool.cpp */; };
+		BD406E2427F19E8E002C76D5 /* flag_formatter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E0527F19E8D002C76D5 /* flag_formatter.cpp */; };
+		BD406E2527F19E8E002C76D5 /* formatter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E0B27F19E8D002C76D5 /* formatter.cpp */; };
+		BD406E2627F19E8E002C76D5 /* sinks.cc in Sources */ = {isa = PBXBuildFile; fileRef = BD406E0D27F19E8D002C76D5 /* sinks.cc */; };
+		BD406E2727F19E8E002C76D5 /* file_appender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E0E27F19E8D002C76D5 /* file_appender.cpp */; };
+		BD406E2827F19E8E002C76D5 /* log_msg.cc in Sources */ = {isa = PBXBuildFile; fileRef = BD406E1127F19E8D002C76D5 /* log_msg.cc */; };
+		BD406E2927F19E8E002C76D5 /* async_logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E1327F19E8D002C76D5 /* async_logger.cpp */; };
+		BD406E2A27F19E8E002C76D5 /* logger_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E1527F19E8D002C76D5 /* logger_os.cpp */; };
+		BD406E2B27F19E8E002C76D5 /* file_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E1727F19E8D002C76D5 /* file_sink.cpp */; };
+		BD406E2C27F19E8E002C76D5 /* pattern_formatter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E1927F19E8D002C76D5 /* pattern_formatter.cpp */; };
+		BD406E2D27F19E8E002C76D5 /* mpmc_blocking_queue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E1B27F19E8D002C76D5 /* mpmc_blocking_queue.cpp */; };
+		BD406E2E27F19E8E002C76D5 /* console_sink.cc in Sources */ = {isa = PBXBuildFile; fileRef = BD406E1C27F19E8D002C76D5 /* console_sink.cc */; };
+		BD406E2F27F19E8E002C76D5 /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD406E1E27F19E8E002C76D5 /* logger.cpp */; };
+		BD406E4327F19EBB002C76D5 /* format.cc in Sources */ = {isa = PBXBuildFile; fileRef = BD406E3827F19EBA002C76D5 /* format.cc */; };
+		BD406E4427F19EBB002C76D5 /* os.cc in Sources */ = {isa = PBXBuildFile; fileRef = BD406E3E27F19EBA002C76D5 /* os.cc */; };
+		BD406E5D27F1A032002C76D5 /* mxlogger_manager.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD406E1A27F19E8D002C76D5 /* mxlogger_manager.hpp */; };
+		BD406E5F27F1A039002C76D5 /* logger_enum.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD406E0C27F19E8D002C76D5 /* logger_enum.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BD406D9527F19C76002C76D5 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				BD406E5F27F1A039002C76D5 /* logger_enum.h in CopyFiles */,
+				BD406E5D27F1A032002C76D5 /* mxlogger_manager.hpp in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		BD406D9727F19C76002C76D5 /* libMXLoggerCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMXLoggerCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD406DFA27F19E8D002C76D5 /* file_appender.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = file_appender.hpp; sourceTree = "<group>"; };
+		BD406DFB27F19E8D002C76D5 /* async_msg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = async_msg.cpp; sourceTree = "<group>"; };
+		BD406DFC27F19E8D002C76D5 /* log_msg_buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log_msg_buffer.cpp; sourceTree = "<group>"; };
+		BD406DFD27F19E8D002C76D5 /* log_msg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = log_msg.h; sourceTree = "<group>"; };
+		BD406DFE27F19E8D002C76D5 /* sinks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sinks.h; sourceTree = "<group>"; };
+		BD406DFF27F19E8D002C76D5 /* mxlogger_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mxlogger_manager.cpp; sourceTree = "<group>"; };
+		BD406E0027F19E8D002C76D5 /* file_sink.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = file_sink.hpp; sourceTree = "<group>"; };
+		BD406E0127F19E8D002C76D5 /* log_msg_buffer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = log_msg_buffer.hpp; sourceTree = "<group>"; };
+		BD406E0227F19E8D002C76D5 /* file_helper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file_helper.cpp; sourceTree = "<group>"; };
+		BD406E0327F19E8D002C76D5 /* mpmc_blocking_queue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mpmc_blocking_queue.hpp; sourceTree = "<group>"; };
+		BD406E0427F19E8D002C76D5 /* thread_pool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = thread_pool.cpp; sourceTree = "<group>"; };
+		BD406E0527F19E8D002C76D5 /* flag_formatter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = flag_formatter.cpp; sourceTree = "<group>"; };
+		BD406E0627F19E8D002C76D5 /* logger_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = logger_common.h; sourceTree = "<group>"; };
+		BD406E0727F19E8D002C76D5 /* logger_os.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = logger_os.hpp; sourceTree = "<group>"; };
+		BD406E0827F19E8D002C76D5 /* async_logger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = async_logger.hpp; sourceTree = "<group>"; };
+		BD406E0927F19E8D002C76D5 /* pattern_formatter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pattern_formatter.hpp; sourceTree = "<group>"; };
+		BD406E0A27F19E8D002C76D5 /* flag_formatter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = flag_formatter.hpp; sourceTree = "<group>"; };
+		BD406E0B27F19E8D002C76D5 /* formatter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = formatter.cpp; sourceTree = "<group>"; };
+		BD406E0C27F19E8D002C76D5 /* logger_enum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = logger_enum.h; sourceTree = "<group>"; };
+		BD406E0D27F19E8D002C76D5 /* sinks.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sinks.cc; sourceTree = "<group>"; };
+		BD406E0E27F19E8D002C76D5 /* file_appender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file_appender.cpp; sourceTree = "<group>"; };
+		BD406E0F27F19E8D002C76D5 /* fmt_helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmt_helper.h; sourceTree = "<group>"; };
+		BD406E1027F19E8D002C76D5 /* thread_pool.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = thread_pool.hpp; sourceTree = "<group>"; };
+		BD406E1127F19E8D002C76D5 /* log_msg.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log_msg.cc; sourceTree = "<group>"; };
+		BD406E1227F19E8D002C76D5 /* async_msg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = async_msg.hpp; sourceTree = "<group>"; };
+		BD406E1327F19E8D002C76D5 /* async_logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = async_logger.cpp; sourceTree = "<group>"; };
+		BD406E1427F19E8D002C76D5 /* file_helper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = file_helper.hpp; sourceTree = "<group>"; };
+		BD406E1527F19E8D002C76D5 /* logger_os.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger_os.cpp; sourceTree = "<group>"; };
+		BD406E1627F19E8D002C76D5 /* formatter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = formatter.hpp; sourceTree = "<group>"; };
+		BD406E1727F19E8D002C76D5 /* file_sink.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file_sink.cpp; sourceTree = "<group>"; };
+		BD406E1827F19E8D002C76D5 /* console_sink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = console_sink.h; sourceTree = "<group>"; };
+		BD406E1927F19E8D002C76D5 /* pattern_formatter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pattern_formatter.cpp; sourceTree = "<group>"; };
+		BD406E1A27F19E8D002C76D5 /* mxlogger_manager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_manager.hpp; sourceTree = "<group>"; };
+		BD406E1B27F19E8D002C76D5 /* mpmc_blocking_queue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mpmc_blocking_queue.cpp; sourceTree = "<group>"; };
+		BD406E1C27F19E8D002C76D5 /* console_sink.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = console_sink.cc; sourceTree = "<group>"; };
+		BD406E1D27F19E8E002C76D5 /* logger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = logger.hpp; sourceTree = "<group>"; };
+		BD406E1E27F19E8E002C76D5 /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger.cpp; sourceTree = "<group>"; };
+		BD406E3227F19EBA002C76D5 /* args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = args.h; sourceTree = "<group>"; };
+		BD406E3327F19EBA002C76D5 /* color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = color.h; sourceTree = "<group>"; };
+		BD406E3427F19EBA002C76D5 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = core.h; sourceTree = "<group>"; };
+		BD406E3627F19EBA002C76D5 /* locale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = locale.h; sourceTree = "<group>"; };
+		BD406E3727F19EBA002C76D5 /* chrono.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chrono.h; sourceTree = "<group>"; };
+		BD406E3827F19EBA002C76D5 /* format.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = format.cc; sourceTree = "<group>"; };
+		BD406E3927F19EBA002C76D5 /* format-inl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "format-inl.h"; sourceTree = "<group>"; };
+		BD406E3A27F19EBA002C76D5 /* ostream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ostream.h; sourceTree = "<group>"; };
+		BD406E3B27F19EBA002C76D5 /* ranges.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ranges.h; sourceTree = "<group>"; };
+		BD406E3C27F19EBA002C76D5 /* compile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = compile.h; sourceTree = "<group>"; };
+		BD406E3D27F19EBA002C76D5 /* os.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = os.h; sourceTree = "<group>"; };
+		BD406E3E27F19EBA002C76D5 /* os.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = os.cc; sourceTree = "<group>"; };
+		BD406E3F27F19EBA002C76D5 /* xchar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xchar.h; sourceTree = "<group>"; };
+		BD406E4027F19EBB002C76D5 /* printf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = printf.h; sourceTree = "<group>"; };
+		BD406E4127F19EBB002C76D5 /* format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = format.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BD406D9427F19C76002C76D5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BD406D8E27F19C76002C76D5 = {
+			isa = PBXGroup;
+			children = (
+				BD406E3127F19E9C002C76D5 /* fmt */,
+				BD406E1327F19E8D002C76D5 /* async_logger.cpp */,
+				BD406E0827F19E8D002C76D5 /* async_logger.hpp */,
+				BD406DFB27F19E8D002C76D5 /* async_msg.cpp */,
+				BD406E1227F19E8D002C76D5 /* async_msg.hpp */,
+				BD406E1C27F19E8D002C76D5 /* console_sink.cc */,
+				BD406E1827F19E8D002C76D5 /* console_sink.h */,
+				BD406E0E27F19E8D002C76D5 /* file_appender.cpp */,
+				BD406DFA27F19E8D002C76D5 /* file_appender.hpp */,
+				BD406E0227F19E8D002C76D5 /* file_helper.cpp */,
+				BD406E1427F19E8D002C76D5 /* file_helper.hpp */,
+				BD406E1727F19E8D002C76D5 /* file_sink.cpp */,
+				BD406E0027F19E8D002C76D5 /* file_sink.hpp */,
+				BD406E0527F19E8D002C76D5 /* flag_formatter.cpp */,
+				BD406E0A27F19E8D002C76D5 /* flag_formatter.hpp */,
+				BD406E0F27F19E8D002C76D5 /* fmt_helper.h */,
+				BD406E0B27F19E8D002C76D5 /* formatter.cpp */,
+				BD406E1627F19E8D002C76D5 /* formatter.hpp */,
+				BD406DFC27F19E8D002C76D5 /* log_msg_buffer.cpp */,
+				BD406E0127F19E8D002C76D5 /* log_msg_buffer.hpp */,
+				BD406E1127F19E8D002C76D5 /* log_msg.cc */,
+				BD406DFD27F19E8D002C76D5 /* log_msg.h */,
+				BD406E0627F19E8D002C76D5 /* logger_common.h */,
+				BD406E0C27F19E8D002C76D5 /* logger_enum.h */,
+				BD406E1527F19E8D002C76D5 /* logger_os.cpp */,
+				BD406E0727F19E8D002C76D5 /* logger_os.hpp */,
+				BD406E1E27F19E8E002C76D5 /* logger.cpp */,
+				BD406E1D27F19E8E002C76D5 /* logger.hpp */,
+				BD406E1B27F19E8D002C76D5 /* mpmc_blocking_queue.cpp */,
+				BD406E0327F19E8D002C76D5 /* mpmc_blocking_queue.hpp */,
+				BD406DFF27F19E8D002C76D5 /* mxlogger_manager.cpp */,
+				BD406E1A27F19E8D002C76D5 /* mxlogger_manager.hpp */,
+				BD406E1927F19E8D002C76D5 /* pattern_formatter.cpp */,
+				BD406E0927F19E8D002C76D5 /* pattern_formatter.hpp */,
+				BD406E0D27F19E8D002C76D5 /* sinks.cc */,
+				BD406DFE27F19E8D002C76D5 /* sinks.h */,
+				BD406E0427F19E8D002C76D5 /* thread_pool.cpp */,
+				BD406E1027F19E8D002C76D5 /* thread_pool.hpp */,
+				BD406D9827F19C76002C76D5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BD406D9827F19C76002C76D5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD406D9727F19C76002C76D5 /* libMXLoggerCore.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD406E3127F19E9C002C76D5 /* fmt */ = {
+			isa = PBXGroup;
+			children = (
+				BD406E3227F19EBA002C76D5 /* args.h */,
+				BD406E3727F19EBA002C76D5 /* chrono.h */,
+				BD406E3327F19EBA002C76D5 /* color.h */,
+				BD406E3C27F19EBA002C76D5 /* compile.h */,
+				BD406E3427F19EBA002C76D5 /* core.h */,
+				BD406E3927F19EBA002C76D5 /* format-inl.h */,
+				BD406E3827F19EBA002C76D5 /* format.cc */,
+				BD406E4127F19EBB002C76D5 /* format.h */,
+				BD406E3627F19EBA002C76D5 /* locale.h */,
+				BD406E3E27F19EBA002C76D5 /* os.cc */,
+				BD406E3D27F19EBA002C76D5 /* os.h */,
+				BD406E3A27F19EBA002C76D5 /* ostream.h */,
+				BD406E4027F19EBB002C76D5 /* printf.h */,
+				BD406E3B27F19EBA002C76D5 /* ranges.h */,
+				BD406E3F27F19EBA002C76D5 /* xchar.h */,
+			);
+			path = fmt;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BD406D9627F19C76002C76D5 /* MXLoggerCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD406DA027F19C76002C76D5 /* Build configuration list for PBXNativeTarget "MXLoggerCore" */;
+			buildPhases = (
+				BD406D9327F19C76002C76D5 /* Sources */,
+				BD406D9427F19C76002C76D5 /* Frameworks */,
+				BD406D9527F19C76002C76D5 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MXLoggerCore;
+			productName = MXLoggerCore;
+			productReference = BD406D9727F19C76002C76D5 /* libMXLoggerCore.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BD406D8F27F19C76002C76D5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1240;
+				TargetAttributes = {
+					BD406D9627F19C76002C76D5 = {
+						CreatedOnToolsVersion = 12.4;
+					};
+				};
+			};
+			buildConfigurationList = BD406D9227F19C76002C76D5 /* Build configuration list for PBXProject "MXLoggerCore" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BD406D8E27F19C76002C76D5;
+			productRefGroup = BD406D9827F19C76002C76D5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BD406D9627F19C76002C76D5 /* MXLoggerCore */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BD406D9327F19C76002C76D5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD406E2027F19E8E002C76D5 /* log_msg_buffer.cpp in Sources */,
+				BD406E4327F19EBB002C76D5 /* format.cc in Sources */,
+				BD406E2C27F19E8E002C76D5 /* pattern_formatter.cpp in Sources */,
+				BD406E2727F19E8E002C76D5 /* file_appender.cpp in Sources */,
+				BD406E2827F19E8E002C76D5 /* log_msg.cc in Sources */,
+				BD406E2127F19E8E002C76D5 /* mxlogger_manager.cpp in Sources */,
+				BD406E2427F19E8E002C76D5 /* flag_formatter.cpp in Sources */,
+				BD406E2927F19E8E002C76D5 /* async_logger.cpp in Sources */,
+				BD406E2527F19E8E002C76D5 /* formatter.cpp in Sources */,
+				BD406E2627F19E8E002C76D5 /* sinks.cc in Sources */,
+				BD406E4427F19EBB002C76D5 /* os.cc in Sources */,
+				BD406E2B27F19E8E002C76D5 /* file_sink.cpp in Sources */,
+				BD406E2E27F19E8E002C76D5 /* console_sink.cc in Sources */,
+				BD406E1F27F19E8E002C76D5 /* async_msg.cpp in Sources */,
+				BD406E2D27F19E8E002C76D5 /* mpmc_blocking_queue.cpp in Sources */,
+				BD406E2F27F19E8E002C76D5 /* logger.cpp in Sources */,
+				BD406E2227F19E8E002C76D5 /* file_helper.cpp in Sources */,
+				BD406E2327F19E8E002C76D5 /* thread_pool.cpp in Sources */,
+				BD406E2A27F19E8E002C76D5 /* logger_os.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		BD406D9E27F19C76002C76D5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		BD406D9F27F19C76002C76D5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BD406DA127F19C76002C76D5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S3ATYAJ48Q;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BD406DA227F19C76002C76D5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S3ATYAJ48Q;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BD406D9227F19C76002C76D5 /* Build configuration list for PBXProject "MXLoggerCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD406D9E27F19C76002C76D5 /* Debug */,
+				BD406D9F27F19C76002C76D5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD406DA027F19C76002C76D5 /* Build configuration list for PBXNativeTarget "MXLoggerCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD406DA127F19C76002C76D5 /* Debug */,
+				BD406DA227F19C76002C76D5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BD406D8F27F19C76002C76D5 /* Project object */;
+}
