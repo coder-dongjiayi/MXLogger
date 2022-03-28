@@ -9,7 +9,7 @@
 #define FMT_OS_H_
 
 #include <cerrno>
-#include <clocale>  // locale_t
+//#include <clocale>  // locale_t
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>       // strtod_l
