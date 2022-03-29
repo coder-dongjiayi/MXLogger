@@ -1,5 +1,9 @@
 
+library flutter_mxx_logger;
+
 import 'dart:async';
+
+export 'src/flutter_mx_logger.dart';
 
 import 'package:flutter/services.dart';
 

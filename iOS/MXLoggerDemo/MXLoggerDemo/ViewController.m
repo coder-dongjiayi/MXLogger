@@ -20,8 +20,8 @@
     [MXLogger shareManager].maxDiskSize = 1024 * 1024 * 100; // 100M
     
     NSString * path = [MXLogger shareManager].diskCachePath;
-    NSLog(@"日志文件路径:%@",path);
-    
+   
+    [MXLogger debug:[NSString stringWithFormat:@"日志文件路径:%@",path]];
     /**下面这些设置都是默认设置 不写也行 **/
     
     [MXLogger shareManager].storagePolicy = @"yyyy_MM_dd";
@@ -44,8 +44,8 @@
     
     //控制台输出格式
     [MXLogger shareManager].consolePattern = @"[%d][%p]%m";
-    //问价输出格式
-    [MXLogger shareManager].filePattern = @" [%d][%t][%p]%m";
+    //文件输出格式
+    [MXLogger shareManager].filePattern = @"[%d][%t][%p]%m";
     
     [MXLogger shareManager].isAsync = YES;
 }

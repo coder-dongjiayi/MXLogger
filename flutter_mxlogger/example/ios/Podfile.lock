@@ -2,10 +2,10 @@ PODS:
   - Flutter (1.0.0)
   - flutter_mxlogger (0.0.1):
     - Flutter
-    - MMKV (~> 1.2.12)
-  - MMKV (1.2.12):
-    - MMKVCore (~> 1.2.12)
-  - MMKVCore (1.2.12)
+    - MXLogger (~> 0.0.2)
+  - MXLogger (0.0.2):
+    - MXLoggerCore (~> 0.0.2)
+  - MXLoggerCore (0.0.2)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -13,8 +13,8 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - MMKV
-    - MMKVCore
+    - MXLogger
+    - MXLoggerCore
 
 EXTERNAL SOURCES:
   Flutter:
@@ -24,10 +24,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
-  flutter_mxlogger: 1092cb2c7a691c5773efc1e041c25044c362593b
-  MMKV: f281020c9d9be5eb7a03ae746dc4deb570e46c23
-  MMKVCore: df0565f6b58463604731a68ba6cd89bc0b2d1d55
+  flutter_mxlogger: 6218758fd3b5ac884f2032ca60effd2780fb2c32
+  MXLogger: 6fd1ae6ed097cff28bb0855382573ac6077ac627
+  MXLoggerCore: 79816f06f642a7ad5d7348fae03a3e679da11d04
 
-PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
+PODFILE CHECKSUM: ef4e7ff4d645e3bb04e1fa0d38c6c1af3b0e23e3
 
 COCOAPODS: 1.11.2

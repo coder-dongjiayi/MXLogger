@@ -16,35 +16,30 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+   String? path =   MXLogger.getdDiskcachePath();
+   MXLogger.debug("日志磁盘路径为:$path");
+   int size =  MXLogger.logSize();
+    MXLogger.debug("日志文件大小:$size byte");
+    
+    /**下面这些设置都是默认设置 不写也行 **/
+    MXLogger.setFileName("mxlog");
+    MXLogger.setStoragePolicy("yyyy_MM_dd");
+    MXLogger.shouldRemoveExpiredDataWhenEnterBackground(true);
+    MXLogger.shouldRemoveExpiredDataWhenTerminate(true);
+    MXLogger.setFileLevel(1);
+    MXLogger.setConsoleLevel(2);
+    MXLogger.setFileEnable(true);
+    MXLogger.setConsoleEnable(true);
+    MXLogger.setFilePattern("[%d][%t][%p]%m");
+    MXLogger.setConsolePattern("[%d][%p]%m");
+    MXLogger.setAsync(true);
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =
-          await FlutterMxlogger.platformVersion ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +49,31 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Column(
+            children: [
+
+              ElevatedButton(onPressed: (){
+                MXLogger.debug("这是debug数据");
+
+              }, child: Text("debug")),
+              ElevatedButton(onPressed: (){
+                MXLogger.info("这是info数据");
+
+              }, child: Text("info")),
+              ElevatedButton(onPressed: (){
+                MXLogger.warn("这是warn数据");
+
+              }, child: Text("warn")),
+              ElevatedButton(onPressed: (){
+                MXLogger.error("这是erro数据");
+
+              }, child: Text("error")),
+              ElevatedButton(onPressed: (){
+                MXLogger.fatal("这是fatal数据");
+
+              }, child: Text("fatal"))
+            ],
+          )
         ),
       ),
     );
