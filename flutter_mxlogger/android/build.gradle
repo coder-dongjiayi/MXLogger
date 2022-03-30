@@ -5,9 +5,13 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url 'https://jitpack.io'
+        }
     }
 
     dependencies {
+        implementation 'com.github.coder-dongjiayi:MXLogger:0.0.2'
         classpath 'com.android.tools.build:gradle:4.1.0'
     }
 }

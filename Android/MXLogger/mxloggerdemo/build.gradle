@@ -38,7 +38,6 @@ android {
 
 dependencies {
 
-
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':mxlogger')
     implementation 'androidx.lifecycle:lifecycle-process:2.3.1'
