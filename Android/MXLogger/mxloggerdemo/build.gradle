@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdkVersion 31
 
     defaultConfig {
         applicationId "com.dongjiayi.mxloggerdemo"
-        minSdk 29
-        targetSdk 31
+        minSdkVersion 29
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
 
@@ -27,13 +27,13 @@ android {
         StaticCpp.dimension = "stl_mode"
         SharedCpp.dimension = "stl_mode"
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    buildFeatures {
-        viewBinding true
-    }
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_15
+//        targetCompatibility JavaVersion.VERSION_15
+//    }
+//    buildFeatures {
+//        viewBinding true
+//    }
 }
 
 dependencies {

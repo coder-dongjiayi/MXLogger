@@ -1,13 +1,12 @@
-plugins {
-    id 'com.android.library'
-}
-
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+group='com.github.coder-dongjiayi'
 android {
-    compileSdk 31
+    compileSdkVersion 31
 
     defaultConfig {
-        minSdk 29
-        targetSdk 31
+        minSdkVersion 29
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
 
@@ -66,10 +65,10 @@ android {
             }
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_15
+//        targetCompatibility JavaVersion.VERSION_15
+//    }
 }
 
 dependencies {
@@ -80,4 +79,15 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+}
+
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        //JitPack插件
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+    }
 }
