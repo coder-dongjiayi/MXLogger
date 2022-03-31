@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.10.0)
 
 project("mxlogger")
 
-add_subdirectory(../../../Core Core)
+add_subdirectory(../../Core Core)
 
 add_library(
         mxlogger
