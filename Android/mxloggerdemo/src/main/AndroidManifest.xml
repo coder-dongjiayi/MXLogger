@@ -8,13 +8,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:name=".MyApplication"
-        android:theme="@style/Theme.MXLogger">
+        android:theme="@style/Theme.MXLoggerDemo">
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.MXLogger.NoActionBar">
+            android:theme="@style/Theme.MXLoggerDemo.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

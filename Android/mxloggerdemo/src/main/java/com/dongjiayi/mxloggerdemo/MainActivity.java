@@ -2,12 +2,10 @@ package com.dongjiayi.mxloggerdemo;
 
 import android.os.Bundle;
 
-import com.dongjiayi.mxlogger.MXLogger;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.util.Log;
 import android.view.View;
 
 import androidx.navigation.NavController;
@@ -19,20 +17,19 @@ import com.dongjiayi.mxloggerdemo.databinding.ActivityMainBinding;
 
 import android.view.Menu;
 import android.view.MenuItem;
-
+import com.dongjiayi.mxlogger.MXLogger;
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         // 初始化日志目录
-       MXLogger.initialize(MainActivity.this);
+        MXLogger.initialize(MainActivity.this);
 
 
         MXLogger.setFileName("customName");
@@ -52,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         MXLogger.debug("当前日志大小:" + Long.toString(MXLogger.getLogSize()));
+
+
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

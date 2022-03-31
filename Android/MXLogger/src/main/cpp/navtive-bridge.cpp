@@ -6,6 +6,7 @@
 #include <string>
 #include <cstdint>
 #include "mxlogger_manager.hpp"
+
 static JavaVM *g_currentJVM = nullptr;
 static jclass g_cls = nullptr;
 
