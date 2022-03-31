@@ -1,17 +1,93 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.4'
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+group='com.github.coder-dongjiayi'
+android {
+    compileSdkVersion 31
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+    defaultConfig {
+        minSdkVersion 29
+        targetSdkVersion 31
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+        externalNativeBuild {
+            cmake {
+
+            }
+        }
     }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+            version "3.10.2"
+        }
+    }
+    flavorDimensions "stl_mode"
+
+    productFlavors {
+        DefaultCpp {
+            dimension "stl_mode"
+            ext.artifactIdSuffix = ''
+            externalNativeBuild {
+                cmake {
+                    arguments = ["-DANDROID_STL=c++_static"]
+                    cppFlags "-DMMKV_STL_SHARED=0"
+                }
+            }
+        }
+        StaticCpp {
+            dimension "stl_mode"
+            ext.artifactIdSuffix = 'static'
+            externalNativeBuild {
+                cmake {
+                    arguments = ["-DANDROID_STL=c++_static"]
+                    cppFlags "-DMMKV_STL_SHARED=0"
+                }
+            }
+        }
+        SharedCpp {
+            dimension "stl_mode"
+            ext.artifactIdSuffix = 'shared'
+            externalNativeBuild {
+                cmake {
+                    arguments = ["-DANDROID_STL=c++_shared"]
+                    cppFlags "-DMMKV_STL_SHARED=1"
+                }
+            }
+        }
+    }
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_15
+//        targetCompatibility JavaVersion.VERSION_15
+//    }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.lifecycle:lifecycle-process:2.3.1'
+    implementation 'com.google.android.material:material:1.5.0'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+}
+
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        //JitPack插件
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+    }
 }
