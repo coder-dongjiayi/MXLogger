@@ -1,9 +1,9 @@
 plugins {
     id 'com.android.library'
-    id 'maven-publish'
+//    id 'maven-publish'
 }
-group = 'com.github.coder-dongjiayi'
-version = '1.0'
+//group = 'com.github.coder-dongjiayi'
+//version = '1.0'
 
 android {
     compileSdk 31
@@ -80,17 +80,6 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
 
-                groupId = 'com.dongjiayi'
-                artifactId = 'mxlogger'
-                version = '1.0'
-            }
-        }
-    }
-}
 
 
