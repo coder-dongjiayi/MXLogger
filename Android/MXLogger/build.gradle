@@ -1,11 +1,11 @@
 plugins {
     id 'com.android.library'
-//    id 'maven-publish'
+
 }
-//group = 'com.github.coder-dongjiayi'
-//version = '1.0'
+
 
 android {
+    defaultPublishConfig "DefaultCppRelease"
     compileSdk 31
 
     defaultConfig {
@@ -73,13 +73,19 @@ android {
 }
 
 dependencies {
-
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'androidx.annotation:annotation:1.3.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.5.0'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }
 
+ext {
+    PUBLISH_ARTIFACT_ID = "mxlogger"
+}
 
+apply from: '../publish.gradle'
 
