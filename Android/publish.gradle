@@ -14,11 +14,6 @@ ext {
     PUBLISH_VERSION = '0.0.2'
 }
 
-ext["signing.keyId"] = 'E2008EED'
-ext["signing.password"] = 'dongjiayi123'
-ext["signing.secretKeyRingFile"] = 'secring.gpg'
-ext["ossrhUsername"] = 'dongjiayi'
-ext["ossrhPassword"] = 'gitHub123!@#'
 
 File secretPropsFile = project.rootProject.file('local.properties')
 if (secretPropsFile.exists()) {
@@ -94,8 +89,8 @@ publishing {
             // any other name that's descriptive for you
             name = "mavencentral"
 
-            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
             // You only need this if you want to publish snapshots, otherwise just set the URL
             // to the release repo directly
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
