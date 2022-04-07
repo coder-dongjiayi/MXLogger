@@ -39,5 +39,6 @@ android {
     }
 }
 dependencies {
-    implementation 'com.github.helen-x:JitpackReleaseDemo:0.1'
+
+    implementation 'com.dongjiayi.mxlogger:0.0.2'
 }

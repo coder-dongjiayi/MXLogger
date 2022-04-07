@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MXLogger.iml" filepath="$PROJECT_DIR$/.idea/modules/MXLogger.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mxloggerdemo.iml" filepath="$PROJECT_DIR$/.idea/modules/mxloggerdemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mxlogger/mxloggerdemo.mxlogger.iml" filepath="$PROJECT_DIR$/.idea/modules/mxlogger/mxloggerdemo.mxlogger.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/mxloggerdemo.mxloggerdemo.iml" filepath="$PROJECT_DIR$/.idea/modules/app/mxloggerdemo.mxloggerdemo.iml" />
     </modules>
   </component>
 </project>
