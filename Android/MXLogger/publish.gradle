@@ -1,19 +1,11 @@
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
+
 task androidSourcesJar(type: Jar) {
     classifier = 'sources'
     from android.sourceSets.main.java.source
-
-    exclude "**/R.class"
-    exclude "**/BuildConfig.class"
 }
-
-ext {
-    PUBLISH_GROUP_ID = 'io.github.coder-dongjiayi'
-    PUBLISH_VERSION = '0.0.2.1'
-}
-
 
 File secretPropsFile = project.rootProject.file('local.properties')
 if (secretPropsFile.exists()) {
