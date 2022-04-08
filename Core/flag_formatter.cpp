@@ -69,10 +69,15 @@ void tag_formatter:: format(const details::log_msg &msg, const std::tm &tm_time,
 }
 
 void prefix_formatter:: format(const details::log_msg &msg, const std::tm &tm_time, memory_buf_t &dest){
-    if(msg.prefix.data() == nullptr || msg.prefix == "") return;
+    
     
     fmt_helper::append_string_view("[",dest);
-    fmt_helper::append_string_view(msg.prefix, dest);
+    if(msg.prefix.data() == nullptr || msg.prefix == "") {
+        fmt_helper::append_string_view("MXLogger", dest);
+    }else{
+        fmt_helper::append_string_view(msg.prefix, dest);
+    }
+    
     fmt_helper::append_string_view("]",dest);
     fmt_helper::append_string_view(":",dest);
 }

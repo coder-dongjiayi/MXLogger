@@ -20,31 +20,33 @@ namespace mxlogger{
 
 static bool is_debuging_() {
 #ifdef __ANDROID__
-    const char* filename = "/proc/self/status";
-    int fd = open(filename, O_RDONLY);
-    if(fd < 0)
-    {
-        return false;
-    }
-
-    char buffer[1000];
-    int bytesRead = read(fd, buffer, sizeof(buffer) - 1);
-    close(fd);
-    if(bytesRead <= 0)
-    {
-        return false;
-    }
-
-    buffer[bytesRead] = 0;
-    const char tracerPidText[] = "TracerPid:";
-    const char* tracerPointer = strstr(buffer, tracerPidText);
-    if(tracerPointer == NULL)
-    {
-        return false;
-    }
-
-    tracerPointer += sizeof(tracerPidText);
-    return atoi(tracerPointer) > 0;
+    
+    return true;
+//    const char* filename = "/proc/self/status";
+//    int fd = open(filename, O_RDONLY);
+//    if(fd < 0)
+//    {
+//        return false;
+//    }
+//
+//    char buffer[1000];
+//    int bytesRead = read(fd, buffer, sizeof(buffer) - 1);
+//    close(fd);
+//    if(bytesRead <= 0)
+//    {
+//        return false;
+//    }
+//
+//    buffer[bytesRead] = 0;
+//    const char tracerPidText[] = "TracerPid:";
+//    const char* tracerPointer = strstr(buffer, tracerPidText);
+//    if(tracerPointer == NULL)
+//    {
+//        return false;
+//    }
+//
+//    tracerPointer += sizeof(tracerPidText);
+//    return atoi(tracerPointer) > 0;
 #elif __APPLE__
     struct kinfo_proc procInfo;
     size_t structSize = sizeof(procInfo);
