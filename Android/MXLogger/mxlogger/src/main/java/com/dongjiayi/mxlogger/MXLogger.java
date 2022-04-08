@@ -144,8 +144,6 @@ public class MXLogger implements LifecycleEventObserver {
    }
     public  static void initWithNamespace(Context context,@NonNull String nameSpace, @Nullable String directory){
 
-
-
       if (isInitialize == true) return;
         isInitialize = true;
         System.loadLibrary("mxlogger");

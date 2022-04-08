@@ -19,6 +19,7 @@ public class FlutterMxloggerPlugin implements FlutterPlugin, MethodCallHandler {
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+
     channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "flutter_mxlogger");
     channel.setMethodCallHandler(this);
   }
@@ -31,6 +32,7 @@ public class FlutterMxloggerPlugin implements FlutterPlugin, MethodCallHandler {
       result.notImplemented();
     }
   }
+
 
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {

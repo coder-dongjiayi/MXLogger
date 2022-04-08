@@ -22,7 +22,7 @@ class MXLogger {
 
     return   _enable == true;
   }
-  ///不掉这个方法也行 一切都有默认值
+  ///不调这个方法也行 一切都有默认值
   static void initialize({String? nameSpace, String? directory}) {
    if(_isEnable() == false) return;
 
