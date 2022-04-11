@@ -82,6 +82,6 @@ dependencies {
 ext {
     PUBLISH_ARTIFACT_ID = "mxlogger"
     PUBLISH_GROUP_ID = 'io.github.coder-dongjiayi'
-    PUBLISH_VERSION = '0.0.2.3'
+    PUBLISH_VERSION = '0.0.2.4'
 }
 apply from: '../publish.gradle'

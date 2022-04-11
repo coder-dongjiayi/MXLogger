@@ -153,10 +153,9 @@ const char* mxlogger_manager::file_diskcache_path(){
     return diskcache_path_;
 }
 void mxlogger_manager::set_file_dir(const std::string& filedir){
-  
-    diskcache_path_ = filedir.c_str();
+
     
-    
+    std::strcpy(diskcache_path_, filedir.c_str());
     async_file_sink_() -> set_filedir(filedir);
     sync_file_sink_() -> set_filedir(filedir);
 }

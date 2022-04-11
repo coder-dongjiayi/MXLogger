@@ -3,11 +3,10 @@
 //
 
 #include "mxlogger_manager.hpp"
-
 using namespace mxlogger;
 using namespace std;
 
-#    define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
+#define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #define MXLOGGERR_FUNC(func) flutter_mxlogger_ ## func
 level::level_enum _get_level(int level){
     level::level_enum lvl = level::level_enum::debug;
@@ -36,16 +35,20 @@ level::level_enum _get_level(int level){
 
 MXLOGGER_EXPORT int MXLOGGERR_FUNC(initWithNamespace)(const char* ns,const char* directory){
 
-   char file_path [255];
+    char file_path [255];
 
     sprintf(file_path,"%s/%s/",directory,ns);
 
-    mx_logger ::instance().set_file_dir(file_path);
+    char dir[255];
+
+    strcpy(dir, file_path);
+
+    mx_logger ::instance().set_file_dir(dir);
 
     return 1;
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_level)(int lvl){
-     mxlogger_manager::instance().set_file_level(_get_level(lvl));
+    mxlogger_manager::instance().set_file_level(_get_level(lvl));
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_enable)(int enable){
     mxlogger_manager::instance().set_file_enable(enable == 1 ? true : false);
@@ -111,7 +114,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_pattern)(const char*pattern){
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(log)(const char* name, int lvl,const char* msg,const char* tag){
 
     // flutter 屏蔽了 stdout和stderr 无法输出到控制台
-    mx_logger ::instance().log(log_type::file,_get_level(lvl),name,msg,tag,false);
+    mx_logger ::instance().log(log_type::all,_get_level(lvl),name,msg,tag,false);
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(async_log_file)(const char* name, int lvl,const char* msg,const char* tag){
 
@@ -122,7 +125,5 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(sync_log_file)(const char* name, int lvl,con
 
     mx_logger ::instance().log_sync_file(_get_level(lvl),name,msg,tag,false);
 }
-
-
 
 

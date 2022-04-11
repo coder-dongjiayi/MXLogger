@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 # pod lib lint --allow-warnings --verbose --skip-import-validation
   s.name         = "MXLoggerCore"
-  s.version      = "0.0.2.1"
+  s.version      = "0.0.2.2"
   s.summary      = "MXLoggerCore 客户端夸平台日志收集"
 
   s.description  = <<-DESC

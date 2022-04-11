@@ -13,29 +13,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetDropDown.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mxlogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../Core/MXLoggerCore.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/MXLoggerCore.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../Core/mxlogger_manager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger_manager.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../Core/mxlogger_manager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger_manager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../MXLogger.podspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../MXLogger.podspec" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/flutter-bridge.mm" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/flutter-bridge.mm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/ios/flutter_mxlogger.podspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/ios/flutter_mxlogger.podspec" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/lib/src/flutter_mx_logger.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/lib/src/flutter_mx_logger.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.mm" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.mm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcschemes/xcschememanagement.plist" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcschemes/xcschememanagement.plist" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,7 +116,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Android App.app">
+  <component name="RunManager" selected="Gradle.MXLogger [publishReleasePublicationToMavencentralRepository]">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="mxloggerdemo.mxloggerdemo" />
       <option name="DEPLOY" value="true" />

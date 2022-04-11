@@ -31,7 +31,7 @@ class MXLogger {
     Pointer<Utf8> nsPtr = ns.toNativeUtf8();
     if(directory == null){
       Directory  d =  Platform.isIOS ?  await getLibraryDirectory() :  await getApplicationSupportDirectory();
-      directory = d.path + "com.mxlog.LoggerCache";
+      directory = d.path + "/com.mxlog.LoggerCache";
     }
     Pointer<Utf8> directoryPtr = directory.toNativeUtf8();
 
@@ -39,12 +39,6 @@ class MXLogger {
     calloc.free(nsPtr);
     calloc.free(directoryPtr);
 
-    ///如果再flutter端初始化 屏幕原生层面的后台清理，请在flutter app 中监听后台事件 调用
-   ///removeExpireData() 方法
-   if(Platform.isIOS){
-     _shouldRemoveExpiredDataWhenEnterBackground(0);
-     _shouldRemoveExpiredDataWhenTerminate(0);
-   }
 
 
   }
@@ -214,10 +208,10 @@ class MXLogger {
   static void log(int lvl, String msg, {bool? isAsync, String? name, String? tag}) {
     if (_isEnable() == false) return;
 
-    if(_consoleEnable == true && isDebugTraceing() == true ){
-
-       _consoleLog.log(lvl, msg, name: name, tag: tag);
-    }
+    // if(_consoleEnable == true && isDebugTraceing() == true ){
+    //
+    //    _consoleLog.log(lvl, msg, name: name, tag: tag);
+    // }
 
 
     Pointer<Utf8> namePtr = name != null ? name.toNativeUtf8() : nullptr;

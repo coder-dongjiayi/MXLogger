@@ -47,7 +47,7 @@ private:
     inline  sinks::file_sink *async_file_sink_();
     inline sinks::file_sink *sync_file_sink_();
     
-    const char * diskcache_path_;
+    char diskcache_path_[255];
     
     bool enable_;
     bool console_enable_;
