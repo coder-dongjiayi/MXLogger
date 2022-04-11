@@ -1,11 +1,8 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
-import 'package:path_provider/path_provider.dart';
+
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await MXLogger.initialize();
