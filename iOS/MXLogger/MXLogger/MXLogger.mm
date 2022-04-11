@@ -11,7 +11,7 @@
 static NSString * _defaultDiskCacheDirectory;
 
 @interface MXLogger()
-
+@property (nonatomic, copy, nonnull, readwrite) NSString *diskCachePath;
 @property (nonatomic, strong, nullable) dispatch_queue_t ioQueue;
 @end
 
@@ -60,6 +60,8 @@ static MXLogger *_manager;
         
 
         mx_logger &log =  mx_logger::instance();
+        
+        
         
         log.set_file_dir([_diskCachePath UTF8String]);
         
@@ -123,6 +125,10 @@ static MXLogger *_manager;
 -(void)setFileHeader:(NSString *)fileHeader{
     _fileHeader = fileHeader;
     mx_logger::instance().set_file_header([fileHeader UTF8String]);
+}
+- (NSString *)diskCachePath{
+    const char* path = mx_logger::instance().file_diskcache_path();
+    return [NSString stringWithUTF8String:path];
 }
 - (long)logSize{
    

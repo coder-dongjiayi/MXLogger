@@ -9,8 +9,6 @@ android {
     defaultConfig {
         minSdk 29
         targetSdk 31
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -84,6 +82,6 @@ dependencies {
 ext {
     PUBLISH_ARTIFACT_ID = "mxlogger"
     PUBLISH_GROUP_ID = 'io.github.coder-dongjiayi'
-    PUBLISH_VERSION = '0.0.2.2'
+    PUBLISH_VERSION = '0.0.2.3'
 }
 apply from: '../publish.gradle'

@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
-
-void main() {
+import 'package:path_provider/path_provider.dart';
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await MXLogger.initialize();
   runApp(const MyApp());
 }
 
@@ -20,25 +24,24 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+
    String? path =   MXLogger.getdDiskcachePath();
    MXLogger.debug("日志磁盘路径为:$path");
    int size =  MXLogger.logSize();
     MXLogger.debug("日志文件大小:$size byte");
-    
+
     /**下面这些设置都是默认设置 不写也行 **/
     MXLogger.setFileName("mxlog");
     MXLogger.setStoragePolicy("yyyy_MM_dd");
-    MXLogger.shouldRemoveExpiredDataWhenEnterBackground(true);
-    MXLogger.shouldRemoveExpiredDataWhenTerminate(true);
     MXLogger.setFileLevel(1);
-    MXLogger.setConsoleLevel(2);
+    MXLogger.setConsoleLevel(0);
     MXLogger.setFileEnable(true);
     MXLogger.setConsoleEnable(true);
     MXLogger.setFilePattern("[%d][%t][%p]%m");
     MXLogger.setConsolePattern("[%d][%p]%m");
     MXLogger.setAsync(true);
-  }
 
+  }
 
 
   @override

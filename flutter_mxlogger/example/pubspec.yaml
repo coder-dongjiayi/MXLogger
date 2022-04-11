@@ -18,6 +18,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  path_provider: ^2.0.9
+
   flutter_mxlogger:
     # When depending on this package from a real application you should use:
     #   flutter_mxlogger: ^x.y.z

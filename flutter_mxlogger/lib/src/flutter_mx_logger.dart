@@ -1,8 +1,9 @@
 
 import 'dart:ffi';
+import 'dart:io';
 import 'package:ffi/ffi.dart';
 import 'flutter_mx_console.dart';
-
+import 'package:path_provider/path_provider.dart';
 typedef LoggerFunction = Void Function(
     Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
 
@@ -12,7 +13,7 @@ typedef FlutterLogFunction = void Function(
 
 class MXLogger {
   static final ConsoleLog _consoleLog = ConsoleLog();
-  static bool _consoleEnable = false;
+  static bool _consoleEnable = true;
 
   static bool _enable = true;
 
@@ -23,17 +24,29 @@ class MXLogger {
     return   _enable == true;
   }
   ///不调这个方法也行 一切都有默认值
-  static void initialize({String? nameSpace, String? directory}) {
+  static Future<void> initialize({String? nameSpace,  String? directory}) async{
    if(_isEnable() == false) return;
 
-    String ns = nameSpace ?? "default";
+    String ns = nameSpace ?? "mxlog";
     Pointer<Utf8> nsPtr = ns.toNativeUtf8();
-    Pointer<Utf8> directoryPtr =
-        directory == null ? nullptr : directory.toNativeUtf8();
+    if(directory == null){
+      Directory  d =  Platform.isIOS ?  await getLibraryDirectory() :  await getApplicationSupportDirectory();
+      directory = d.path + "com.mxlog.LoggerCache";
+    }
+    Pointer<Utf8> directoryPtr = directory.toNativeUtf8();
 
     _initWithNamespace(nsPtr, directoryPtr);
     calloc.free(nsPtr);
     calloc.free(directoryPtr);
+
+    ///如果再flutter端初始化 屏幕原生层面的后台清理，请在flutter app 中监听后台事件 调用
+   ///removeExpireData() 方法
+   if(Platform.isIOS){
+     _shouldRemoveExpiredDataWhenEnterBackground(0);
+     _shouldRemoveExpiredDataWhenTerminate(0);
+   }
+
+
   }
 
   /// 设置写入日志文件等级
@@ -57,17 +70,17 @@ class MXLogger {
     _setFileHeader(fileNamePtr);
     calloc.free(fileNamePtr);
   }
-  /// 程序进入后台的时候是否清理过期文件 默认 YES
-  static void shouldRemoveExpiredDataWhenEnterBackground(bool should) {
-    if(_isEnable() == false) return;
-    _shouldRemoveExpiredDataWhenEnterBackground(should == true ? 1 : 0);
-  }
-
-  /// 是否在程序退出的的时候清理过期文件 默认YES
-  static void shouldRemoveExpiredDataWhenTerminate(bool should) {
-    if(_isEnable() == false) return;
-    _shouldRemoveExpiredDataWhenTerminate(should == true ? 1 : 0);
-  }
+  // /// 程序进入后台的时候是否清理过期文件 默认 YES
+  // static void _shouldRemoveExpiredDataWhenEnterBackground(bool should) {
+  //   if(_isEnable() == false) return;
+  //   _shouldRemoveExpiredDataWhenEnterBackground(should == true ? 1 : 0);
+  // }
+  //
+  // /// 是否在程序退出的的时候清理过期文件 默认YES
+  // static void _shouldRemoveExpiredDataWhenTerminate(bool should) {
+  //   if(_isEnable() == false) return;
+  //   _shouldRemoveExpiredDataWhenTerminate(should == true ? 1 : 0);
+  // }
 
   /// 设置是否禁用日志写入功能
   static void setFileEnable(bool enable) {
@@ -165,6 +178,9 @@ class MXLogger {
   static String? getdDiskcachePath() {
     if(_isEnable() == false) return null;
     Pointer<Int8> result = _getdDiskcachePath();
+    if(result == nullptr){
+      return null;
+    }
     String path =  result.cast<Utf8>().toDartString();
     return path;
   }
@@ -222,7 +238,7 @@ class MXLogger {
   }
 }
 
-final DynamicLibrary _nativeLib = DynamicLibrary.process();
+final DynamicLibrary _nativeLib = Platform.isAndroid ?DynamicLibrary.open("libmxlogger.so") : DynamicLibrary.process() ;
 
 String _mxlogger_function(String funcName) {
   return "flutter_mxlogger_" + funcName;

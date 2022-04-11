@@ -1,8 +1,5 @@
 //
-//  flutter-bridge.m
-//  Logger
-//
-//  Created by 董家祎 on 2022/3/11.
+// Created by 董家祎 on 2022/4/11.
 //
 
 #include "mxlogger_manager.hpp"
@@ -10,7 +7,7 @@
 using namespace mxlogger;
 using namespace std;
 
-#define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
+#    define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #define MXLOGGERR_FUNC(func) flutter_mxlogger_ ## func
 level::level_enum _get_level(int level){
     level::level_enum lvl = level::level_enum::debug;
@@ -127,9 +124,5 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(sync_log_file)(const char* name, int lvl,con
 }
 
 
-@interface MXLoggerDummy : NSObject
-@end
 
-@implementation MXLoggerDummy
-@end
 

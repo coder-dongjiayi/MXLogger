@@ -47,6 +47,8 @@ private:
     inline  sinks::file_sink *async_file_sink_();
     inline sinks::file_sink *sync_file_sink_();
     
+    const char * diskcache_path_;
+    
     bool enable_;
     bool console_enable_;
     bool file_enable_;
@@ -118,6 +120,9 @@ public:
     void set_console_pattern(const std::string &pattern);
     
     void set_file_pattern(const std::string &pattern);
+    
+    //磁盘路径
+    const char* file_diskcache_path();
     
     void log_all(level::level_enum lvl,const char* prefix,const char* msg,const char* tag,bool is_main_thread);
     

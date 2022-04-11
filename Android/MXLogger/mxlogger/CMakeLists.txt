@@ -14,7 +14,9 @@ add_subdirectory(../../../Core Core)
 add_library(
         mxlogger
         SHARED
-        src/main/cpp/navtive-bridge.cpp)
+        src/main/cpp/navtive-bridge.cpp
+        src/main/cpp/flutter-bridge.cpp
+)
 
 set_target_properties(mxlogger PROPERTIES
         CXX_STANDARD 17
