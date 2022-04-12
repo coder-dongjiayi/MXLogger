@@ -5,7 +5,7 @@ import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  await MXLogger.initialize();
+  await MXLogger.initialize(enable: true);
   runApp(const MyApp());
 }
 

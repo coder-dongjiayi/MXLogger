@@ -32,7 +32,7 @@ class MXLogger{
   
   static late MXLoggerObserver _observer;
 
-  static bool _enable = true;
+  static bool _enable = false;
 
   static bool _shouldRemoveExpiredDataWhenEnterBackground = true;
   static bool? _isTracking;
@@ -42,7 +42,10 @@ class MXLogger{
     return   _enable == true;
   }
 
-  static Future<void> initialize({String? nameSpace,  String? directory}) async{
+  static Future<void> initialize({bool enable = false, String? nameSpace,  String? directory}) async{
+
+    _enable =  enable;
+
    if(_isEnable() == false) return;
 
    _observer =  MXLoggerObserver();
@@ -166,6 +169,7 @@ class MXLogger{
 
   /// 设置写入日志文件同步还是异步
   static void setAsync(bool isAsync){
+    if(_isEnable() == false) return;
     _setAsync(isAsync == true ? 1 : 0);
   }
 
@@ -217,12 +221,6 @@ class MXLogger{
   /// 写入日志文件默认为异步，可以通过 setAsync 或者设置  isAsync == false 为同步
   static void log(int lvl, String msg, {bool? isAsync, String? name, String? tag}) {
     if (_isEnable() == false) return;
-
-    // if(_consoleEnable == true && isDebugTraceing() == true ){
-    //
-    //    _consoleLog.log(lvl, msg, name: name, tag: tag);
-    // }
-
 
     Pointer<Utf8> namePtr = name != null ? name.toNativeUtf8() : nullptr;
     Pointer<Utf8> tagPtr = tag != null ? tag.toNativeUtf8() : nullptr;
