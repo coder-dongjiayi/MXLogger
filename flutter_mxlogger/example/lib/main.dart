@@ -24,11 +24,12 @@ class _MyAppState extends State<MyApp> {
 
    String? path =   MXLogger.getdDiskcachePath();
    MXLogger.debug("日志磁盘路径为:$path");
-   int size =  MXLogger.logSize();
+    int size =  MXLogger.logSize();
     MXLogger.debug("日志文件大小:$size byte");
 
     /**下面这些设置都是默认设置 不写也行 **/
     MXLogger.setFileName("mxlog");
+    MXLogger.shouldRemoveExpiredDataWhenEnterBackground(true);
     MXLogger.setStoragePolicy("yyyy_MM_dd");
     MXLogger.setFileLevel(1);
     MXLogger.setConsoleLevel(0);

@@ -44,7 +44,7 @@ android {
 
 
     implementation 'io.github.coder-dongjiayi:mxlogger:0.0.2.5'
-        implementation (name:"mxlogger-DefaultCpp-release",ext:"aar")
+//        implementation (name:"mxlogger-DefaultCpp-release",ext:"aar")
 
     }
 }

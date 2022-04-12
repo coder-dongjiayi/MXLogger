@@ -2,6 +2,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:path_provider/path_provider.dart';
 typedef LoggerFunction = Void Function(
@@ -10,12 +11,25 @@ typedef LoggerFunction = Void Function(
 typedef FlutterLogFunction = void Function(
     Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
 
+class MXLoggerObserver with WidgetsBindingObserver{
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
 
-class MXLogger {
+    if(state == AppLifecycleState.paused && MXLogger._shouldRemoveExpiredDataWhenEnterBackground == true){
+      MXLogger.removeExpireData();
+    }
 
+  }
+}
+
+class MXLogger{
+
+
+  static late MXLoggerObserver _observer;
 
   static bool _enable = true;
 
+  static bool _shouldRemoveExpiredDataWhenEnterBackground = true;
   static bool? _isTracking;
 
   static bool _isEnable(){
@@ -25,6 +39,10 @@ class MXLogger {
 
   static Future<void> initialize({String? nameSpace,  String? directory}) async{
    if(_isEnable() == false) return;
+
+   _observer =  MXLoggerObserver();
+
+   WidgetsBinding.instance!.addObserver(_observer);
 
     String ns = nameSpace ?? "mxlog";
     Pointer<Utf8> nsPtr = ns.toNativeUtf8();
@@ -37,9 +55,11 @@ class MXLogger {
     _initWithNamespace(nsPtr, directoryPtr);
     calloc.free(nsPtr);
     calloc.free(directoryPtr);
+  }
 
-
-
+  /// 程序进入后台的时候是否去清理过期文件 默认为YES
+  static void shouldRemoveExpiredDataWhenEnterBackground(bool should){
+    _shouldRemoveExpiredDataWhenEnterBackground =  should;
   }
 
   /// 设置写入日志文件等级
