@@ -69,10 +69,13 @@ class _MyAppState extends State<MyApp> {
                 MXLogger.error("这是erro数据");
 
               }, child: Text("error")),
-              ElevatedButton(onPressed: (){
-                MXLogger.fatal("这是fatal数据");
+              ElevatedButton(onPressed: () async{
+               String? zipPath = await MXLogger.compressLogFile();
+               if(zipPath != null){
+                 print("zipPath:${zipPath}");
+               }
 
-              }, child: Text("fatal"))
+              }, child: Text("压缩文件夹"))
             ],
           )
         ),

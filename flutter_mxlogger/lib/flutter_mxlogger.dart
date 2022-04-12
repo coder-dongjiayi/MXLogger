@@ -2,12 +2,12 @@
 library flutter_mxlogger;
 import 'dart:ffi';
 import 'dart:io';
+import 'package:archive/archive_io.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-
 export 'flutter_mxlogger.dart';
-
+import 'package:archive/archive.dart';
 typedef LoggerFunction = Void Function(
     Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
 
@@ -59,6 +59,32 @@ class MXLogger{
   /// 程序进入后台的时候是否去清理过期文件 默认为YES
   static void shouldRemoveExpiredDataWhenEnterBackground(bool should){
     _shouldRemoveExpiredDataWhenEnterBackground =  should;
+  }
+
+  static Future<String?> compressLogFile() async{
+    if(_isEnable() == false) return null;
+    String? diskPath = getdDiskcachePath();
+    if(diskPath == null) return null;
+    Directory directory = Directory(diskPath);
+
+    ZipFileEncoder encoder =  ZipFileEncoder();
+   List<String> directorList =  directory.path.split("/");
+    directorList.removeAt(directorList.length-1);
+   String zipPath =  directorList.join("/");
+    encoder.zipDirectory(directory,filename: zipPath + ".zip");
+
+   return encoder.zipPath;
+
+  }
+
+  static Future<bool> removeZip(String zipPath) async{
+    if(_isEnable() == false) return false;
+    String? diskPath = getdDiskcachePath();
+    if(diskPath == null) return false;
+
+    Directory directory = Directory(zipPath);
+    await directory.delete();
+    return true;
   }
 
   /// 设置写入日志文件等级
