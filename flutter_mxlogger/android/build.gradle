@@ -38,12 +38,12 @@ android {
 
     defaultConfig {
 
-        minSdkVersion 29
+        minSdkVersion 21
     }
     dependencies {
 
 
-    implementation 'io.github.coder-dongjiayi:mxlogger:0.0.2.5'
+    implementation 'io.github.coder-dongjiayi:mxlogger:0.0.2.6'
 //        implementation (name:"mxlogger-DefaultCpp-release",ext:"aar")
 
     }
