@@ -13,22 +13,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mxlogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/MXLoggerCore.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/MXLoggerCore.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger_manager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger_manager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger_manager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger_manager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../MXLogger.podspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../MXLogger.podspec" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/flutter-bridge.mm" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/flutter-bridge.mm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/ios/flutter_mxlogger.podspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/ios/flutter_mxlogger.podspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/lib/src/flutter_mx_console.dart" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/lib/src/flutter_mx_logger.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/lib/src/flutter_mx_logger.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -65,6 +54,12 @@
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="mxloggerdemo" type="f1a62948:ProjectNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="mxloggerdemo" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />

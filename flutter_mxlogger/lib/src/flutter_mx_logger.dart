@@ -2,7 +2,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
-import 'flutter_mx_console.dart';
+
 import 'package:path_provider/path_provider.dart';
 typedef LoggerFunction = Void Function(
     Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
@@ -12,8 +12,7 @@ typedef FlutterLogFunction = void Function(
 
 
 class MXLogger {
-  static final ConsoleLog _consoleLog = ConsoleLog();
-  static bool _consoleEnable = true;
+
 
   static bool _enable = true;
 
@@ -23,7 +22,7 @@ class MXLogger {
 
     return   _enable == true;
   }
-  ///不调这个方法也行 一切都有默认值
+
   static Future<void> initialize({String? nameSpace,  String? directory}) async{
    if(_isEnable() == false) return;
 
@@ -53,37 +52,29 @@ class MXLogger {
     if(_isEnable() == false) return;
     _setFileLevel(lvl);
   }
+
   static void setConsoleLevel(int lvl){
-    _consoleLog.level = lvl;
+    if(_isEnable() == false) return;
+    _setConsoleLevel(lvl);
   }
 
   /// 设置文件名
   static void setFileName(String fileName){
     if(_isEnable() == false) return;
     Pointer<Utf8> fileNamePtr = fileName.toNativeUtf8();
-    _setFileHeader(fileNamePtr);
+    _setFileName(fileNamePtr);
     calloc.free(fileNamePtr);
   }
-  // /// 程序进入后台的时候是否清理过期文件 默认 YES
-  // static void _shouldRemoveExpiredDataWhenEnterBackground(bool should) {
-  //   if(_isEnable() == false) return;
-  //   _shouldRemoveExpiredDataWhenEnterBackground(should == true ? 1 : 0);
-  // }
-  //
-  // /// 是否在程序退出的的时候清理过期文件 默认YES
-  // static void _shouldRemoveExpiredDataWhenTerminate(bool should) {
-  //   if(_isEnable() == false) return;
-  //   _shouldRemoveExpiredDataWhenTerminate(should == true ? 1 : 0);
-  // }
 
   /// 设置是否禁用日志写入功能
   static void setFileEnable(bool enable) {
     if(_isEnable() == false) return;
     _setFileEnable(enable == true ? 1 : 0);
   }
-
+  /// 设置是否禁用控制台输出功能
   static void setConsoleEnable(bool enable){
-    _consoleEnable =  enable;
+    if(_isEnable() == false) return;
+    _setConsoleEnable(enable == true ? 1 : 0);
   }
   /// 设置文件头
   static void setFileHeader(String header) {
@@ -151,7 +142,10 @@ class MXLogger {
     calloc.free(patternPtr);
   }
   static void setConsolePattern(String pattern){
-    _consoleLog.pattern = pattern;
+    if(_isEnable() == false) return;
+    Pointer<Utf8> patternPtr = pattern.toNativeUtf8();
+    _setConsolePattern(patternPtr);
+    calloc.free(patternPtr);
   }
 
   /// 设置写入日志文件同步还是异步
@@ -282,9 +276,20 @@ final void Function(int) _setFileLevel = _nativeLib
     _mxlogger_function("set_file_level"))
     .asFunction();
 
+final void Function(int) _setConsoleLevel = _nativeLib
+    .lookup<NativeFunction<Void Function(Int32)>>(
+    _mxlogger_function("set_console_level"))
+    .asFunction();
+
 final void Function(int) _setFileEnable = _nativeLib
     .lookup<NativeFunction<Void Function(Int32)>>(
     _mxlogger_function("set_file_enable"))
+    .asFunction();
+
+
+final void Function(int) _setConsoleEnable = _nativeLib
+    .lookup<NativeFunction<Void Function(Int32)>>(
+    _mxlogger_function("set_console_enable"))
     .asFunction();
 
 final void Function(Pointer<Utf8>) _setFileHeader = _nativeLib
@@ -302,16 +307,7 @@ final Pointer<Int8> Function() _getdDiskcachePath = _nativeLib
     _mxlogger_function("get_diskcache_path"))
     .asFunction();
 
-final void Function(int) _shouldRemoveExpiredDataWhenEnterBackground =
-    _nativeLib
-        .lookup<NativeFunction<Void Function(Int32)>>(
-        _mxlogger_function("set_remove_exporeddata_background"))
-        .asFunction();
 
-final void Function(int) _shouldRemoveExpiredDataWhenTerminate = _nativeLib
-    .lookup<NativeFunction<Void Function(Int32)>>(
-    _mxlogger_function("set_remove_exporeddata_terminate"))
-    .asFunction();
 
 final void Function(int) _setMaxdiskAge = _nativeLib
     .lookup<NativeFunction<Void Function(Int32)>>(
@@ -331,6 +327,11 @@ final void Function(Pointer<Utf8>) _setStoragePolicy = _nativeLib
 final void Function(Pointer<Utf8>) _setFilePattern = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Utf8>)>>(
     _mxlogger_function("set_file_pattern"))
+    .asFunction();
+
+final void Function(Pointer<Utf8>) _setConsolePattern = _nativeLib
+    .lookup<NativeFunction<Void Function(Pointer<Utf8>)>>(
+    _mxlogger_function("set_console_pattern"))
     .asFunction();
 
 final void Function() _removeExpireData = _nativeLib

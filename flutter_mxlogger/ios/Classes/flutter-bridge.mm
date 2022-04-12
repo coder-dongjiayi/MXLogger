@@ -54,8 +54,15 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(initWithNamespace)(const char* ns,const char*
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_level)(int lvl){
      mxlogger_manager::instance().set_file_level(_get_level(lvl));
 }
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_level)(int lvl){
+     mxlogger_manager::instance().set_console_level(_get_level(lvl));
+}
+
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_enable)(int enable){
     mxlogger_manager::instance().set_file_enable(enable == 1 ? true : false);
+}
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_enable)(int enable){
+    mxlogger_manager::instance().set_console_enable(enable == 1 ? true : false);
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_header)(const char* header){
     if(header == nullptr) return;
@@ -115,9 +122,14 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_pattern)(const char*pattern){
     mx_logger ::instance().set_file_pattern(pattern);
 
 }
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_pattern)(const char*pattern){
+    if(pattern == nullptr) return;
+    mx_logger ::instance().set_console_pattern(pattern);
+
+}
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(log)(const char* name, int lvl,const char* msg,const char* tag){
 
-    // flutter 屏蔽了 stdout和stderr 无法输出到控制台
+
     mx_logger ::instance().log(log_type::all,_get_level(lvl),name,msg,tag,false);
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(async_log_file)(const char* name, int lvl,const char* msg,const char* tag){
