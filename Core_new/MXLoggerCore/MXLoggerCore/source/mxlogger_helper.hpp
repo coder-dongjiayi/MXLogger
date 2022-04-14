@@ -9,7 +9,7 @@
 #define mxlogger_helper_hpp
 
 #include <stdio.h>
-
+#include <chrono>
 #include <memory>
 #include <string>
 #include <stdexcept>
@@ -25,12 +25,19 @@ std::string string_format( const std::string& format, Args ... args )
     return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
 }
 
-std::tm localtime(const std::time_t &time_tt)
+inline std::tm localtime(const std::time_t &time_tt)
 {
     std::tm tm;
     ::localtime_r(&time_tt, &tm);
     return tm;
 }
+inline std::tm now(){
+
+    const std::time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    return localtime(tt);
+}
+
 
 template<typename ToDuration>
 inline ToDuration time_fraction(std::chrono::system_clock::time_point tp)
