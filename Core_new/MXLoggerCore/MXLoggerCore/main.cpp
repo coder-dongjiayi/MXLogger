@@ -6,14 +6,18 @@
 //
 
 #include <iostream>
-#include "mxlog.hpp"
+#include "mxlogger.hpp"
 
 
 int main(int argc, const char * argv[]) {
     // insert code here...
     
     const char * path = "/user/cc";
-    mxlog::mxlog *l = new mxlog::mxlog(path);
+    mxlogger::mxlogger _log(path);
+    const char * name = "mxlogger";
+    const char * msg = "thisismsg";
+    const char * tag = "net";
     
+    _log.log(0, 0, name, msg, tag, true);
     return 0;
 }

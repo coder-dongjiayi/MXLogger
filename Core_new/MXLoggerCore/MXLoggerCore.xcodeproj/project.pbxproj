@@ -8,7 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		BD7BA6C32806A36B00EDA6AC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA6C22806A36B00EDA6AC /* main.cpp */; };
-		BD7BA6D32806A58000EDA6AC /* mxlog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA6D12806A58000EDA6AC /* mxlog.cpp */; };
+		BD7BA6D32806A58000EDA6AC /* mxlogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA6D12806A58000EDA6AC /* mxlogger.cpp */; };
+		BD7BA6D82806BC9500EDA6AC /* sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA6D62806BC9500EDA6AC /* sink.cpp */; };
+		BD7BA6DC2806BDA500EDA6AC /* log_msg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA6DA2806BDA500EDA6AC /* log_msg.cpp */; };
+		BD7BA6E42806C3BA00EDA6AC /* console_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA6E22806C3BA00EDA6AC /* console_sink.cpp */; };
+		BD7BA6E92806CF4000EDA6AC /* pattern_formatter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA6E72806CF4000EDA6AC /* pattern_formatter.cpp */; };
+		BD7BA6ED2806D7A600EDA6AC /* flag_formatter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA6EC2806D7A600EDA6AC /* flag_formatter.cpp */; };
+		BD7BA6F62807BDC800EDA6AC /* logger_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA6F52807BDC800EDA6AC /* logger_os.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,8 +32,22 @@
 /* Begin PBXFileReference section */
 		BD7BA6BF2806A36B00EDA6AC /* MXLoggerCore */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MXLoggerCore; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD7BA6C22806A36B00EDA6AC /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		BD7BA6D12806A58000EDA6AC /* mxlog.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mxlog.cpp; sourceTree = "<group>"; };
-		BD7BA6D22806A58000EDA6AC /* mxlog.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mxlog.hpp; sourceTree = "<group>"; };
+		BD7BA6D12806A58000EDA6AC /* mxlogger.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mxlogger.cpp; sourceTree = "<group>"; };
+		BD7BA6D22806A58000EDA6AC /* mxlogger.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mxlogger.hpp; sourceTree = "<group>"; };
+		BD7BA6D62806BC9500EDA6AC /* sink.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sink.cpp; sourceTree = "<group>"; };
+		BD7BA6D72806BC9500EDA6AC /* sink.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sink.hpp; sourceTree = "<group>"; };
+		BD7BA6DA2806BDA500EDA6AC /* log_msg.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = log_msg.cpp; sourceTree = "<group>"; };
+		BD7BA6DB2806BDA500EDA6AC /* log_msg.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = log_msg.hpp; sourceTree = "<group>"; };
+		BD7BA6DF2806BFD600EDA6AC /* log_enum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = log_enum.h; sourceTree = "<group>"; };
+		BD7BA6E22806C3BA00EDA6AC /* console_sink.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = console_sink.cpp; sourceTree = "<group>"; };
+		BD7BA6E32806C3BA00EDA6AC /* console_sink.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = console_sink.hpp; sourceTree = "<group>"; };
+		BD7BA6E72806CF4000EDA6AC /* pattern_formatter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pattern_formatter.cpp; sourceTree = "<group>"; };
+		BD7BA6E82806CF4000EDA6AC /* pattern_formatter.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pattern_formatter.hpp; sourceTree = "<group>"; };
+		BD7BA6EB2806D7A600EDA6AC /* flag_formatter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = flag_formatter.hpp; sourceTree = "<group>"; };
+		BD7BA6EC2806D7A600EDA6AC /* flag_formatter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = flag_formatter.cpp; sourceTree = "<group>"; };
+		BD7BA6F02806E0AF00EDA6AC /* mxlogger_helper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_helper.hpp; sourceTree = "<group>"; };
+		BD7BA6F42807BDC800EDA6AC /* logger_os.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = logger_os.hpp; sourceTree = "<group>"; };
+		BD7BA6F52807BDC800EDA6AC /* logger_os.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger_os.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,11 +80,33 @@
 		BD7BA6C12806A36B00EDA6AC /* MXLoggerCore */ = {
 			isa = PBXGroup;
 			children = (
+				BD7BA6DE2806BFBF00EDA6AC /* source */,
 				BD7BA6C22806A36B00EDA6AC /* main.cpp */,
-				BD7BA6D12806A58000EDA6AC /* mxlog.cpp */,
-				BD7BA6D22806A58000EDA6AC /* mxlog.hpp */,
 			);
 			path = MXLoggerCore;
+			sourceTree = "<group>";
+		};
+		BD7BA6DE2806BFBF00EDA6AC /* source */ = {
+			isa = PBXGroup;
+			children = (
+				BD7BA6F52807BDC800EDA6AC /* logger_os.cpp */,
+				BD7BA6F42807BDC800EDA6AC /* logger_os.hpp */,
+				BD7BA6EC2806D7A600EDA6AC /* flag_formatter.cpp */,
+				BD7BA6EB2806D7A600EDA6AC /* flag_formatter.hpp */,
+				BD7BA6DF2806BFD600EDA6AC /* log_enum.h */,
+				BD7BA6D12806A58000EDA6AC /* mxlogger.cpp */,
+				BD7BA6D22806A58000EDA6AC /* mxlogger.hpp */,
+				BD7BA6D62806BC9500EDA6AC /* sink.cpp */,
+				BD7BA6D72806BC9500EDA6AC /* sink.hpp */,
+				BD7BA6DA2806BDA500EDA6AC /* log_msg.cpp */,
+				BD7BA6DB2806BDA500EDA6AC /* log_msg.hpp */,
+				BD7BA6E22806C3BA00EDA6AC /* console_sink.cpp */,
+				BD7BA6E32806C3BA00EDA6AC /* console_sink.hpp */,
+				BD7BA6E72806CF4000EDA6AC /* pattern_formatter.cpp */,
+				BD7BA6E82806CF4000EDA6AC /* pattern_formatter.hpp */,
+				BD7BA6F02806E0AF00EDA6AC /* mxlogger_helper.hpp */,
+			);
+			path = source;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -123,8 +165,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BD7BA6DC2806BDA500EDA6AC /* log_msg.cpp in Sources */,
 				BD7BA6C32806A36B00EDA6AC /* main.cpp in Sources */,
-				BD7BA6D32806A58000EDA6AC /* mxlog.cpp in Sources */,
+				BD7BA6E42806C3BA00EDA6AC /* console_sink.cpp in Sources */,
+				BD7BA6D32806A58000EDA6AC /* mxlogger.cpp in Sources */,
+				BD7BA6D82806BC9500EDA6AC /* sink.cpp in Sources */,
+				BD7BA6E92806CF4000EDA6AC /* pattern_formatter.cpp in Sources */,
+				BD7BA6ED2806D7A600EDA6AC /* flag_formatter.cpp in Sources */,
+				BD7BA6F62807BDC800EDA6AC /* logger_os.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
