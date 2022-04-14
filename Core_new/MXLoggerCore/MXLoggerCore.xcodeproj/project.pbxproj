@@ -17,6 +17,7 @@
 		BD7BA6F62807BDC800EDA6AC /* logger_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA6F52807BDC800EDA6AC /* logger_os.cpp */; };
 		BD7BA7042807CEDD00EDA6AC /* file_appender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA7022807CEDD00EDA6AC /* file_appender.cpp */; };
 		BD7BA70D2807EE4200EDA6AC /* mx_file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA70B2807EE4200EDA6AC /* mx_file.cpp */; };
+		BD7BA7172807F6BE00EDA6AC /* file_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA7152807F6BE00EDA6AC /* file_sink.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -54,6 +55,8 @@
 		BD7BA7032807CEDD00EDA6AC /* file_appender.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = file_appender.hpp; sourceTree = "<group>"; };
 		BD7BA70B2807EE4200EDA6AC /* mx_file.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mx_file.cpp; sourceTree = "<group>"; };
 		BD7BA70C2807EE4200EDA6AC /* mx_file.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mx_file.hpp; sourceTree = "<group>"; };
+		BD7BA7152807F6BE00EDA6AC /* file_sink.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_sink.cpp; sourceTree = "<group>"; };
+		BD7BA7162807F6BE00EDA6AC /* file_sink.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = file_sink.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +118,8 @@
 				BD7BA6E72806CF4000EDA6AC /* pattern_formatter.cpp */,
 				BD7BA6E82806CF4000EDA6AC /* pattern_formatter.hpp */,
 				BD7BA6F02806E0AF00EDA6AC /* mxlogger_helper.hpp */,
+				BD7BA7152807F6BE00EDA6AC /* file_sink.cpp */,
+				BD7BA7162807F6BE00EDA6AC /* file_sink.hpp */,
 			);
 			path = source;
 			sourceTree = "<group>";
@@ -178,6 +183,7 @@
 				BD7BA6DC2806BDA500EDA6AC /* log_msg.cpp in Sources */,
 				BD7BA7042807CEDD00EDA6AC /* file_appender.cpp in Sources */,
 				BD7BA6C32806A36B00EDA6AC /* main.cpp in Sources */,
+				BD7BA7172807F6BE00EDA6AC /* file_sink.cpp in Sources */,
 				BD7BA70D2807EE4200EDA6AC /* mx_file.cpp in Sources */,
 				BD7BA6E42806C3BA00EDA6AC /* console_sink.cpp in Sources */,
 				BD7BA6D32806A58000EDA6AC /* mxlogger.cpp in Sources */,

@@ -19,6 +19,9 @@ class pattern_formatter {
     
 public:
     pattern_formatter(const std::string &pattern);
+    ~pattern_formatter(){
+        printf("pattern_formatter 释放\n");
+    };
     void format(const details::log_msg &msg, string &dest);
 private:
     std::string pattern_;

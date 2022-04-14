@@ -17,7 +17,9 @@ class console_sink : public sink{
 public:
     console_sink(FILE *target_file);
     
-    ~console_sink() override = default;
+    ~console_sink(){
+        printf("console_sink 释放\n");
+    };
     
     void log(const details::log_msg &msg) override;
     

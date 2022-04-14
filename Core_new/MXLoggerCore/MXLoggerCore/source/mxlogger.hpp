@@ -14,12 +14,17 @@
 namespace mxlogger{
 namespace sinks {
 class console_sink;
+class file_sink;
 }
+
 
 class mxlogger{
 private:
     
     std::shared_ptr<sinks::console_sink> console_sink_;
+   
+    
+    std::shared_ptr<sinks::file_sink> file_sink_;
     
 public:
     mxlogger(const char *diskcache_path);
@@ -28,6 +33,8 @@ public:
     void set_enable(bool enable);
     void set_console_enable(bool enable);
     void set_file_enable(bool enbale);
+    
+    
     
     /// 记录日志
     /// @param type 1 输出到控制台 2 写入文件 0 先输出到控制台再写入文件

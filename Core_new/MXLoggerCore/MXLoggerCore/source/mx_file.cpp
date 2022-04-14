@@ -21,10 +21,11 @@ namespace mxlogger{
 namespace details{
 
 mx_file::mx_file() : max_disk_size_(0),max_disk_age_(0){
-    
+
 }
 
 mx_file::~mx_file(){
+    printf("mx_file 释放\n");
     close();
 }
 
@@ -51,7 +52,7 @@ void mx_file::open(){
        fd_ =  fopen(filepath.c_str(), mode.c_str());
         if (fd_ != nullptr) {
           
-            if (header_buffer_.data() != nullptr) {
+            if (header_buffer_.data() != nullptr && strcmp(header_buffer_.data(), "")!=0) {
                 struct stat statbuf;
                 
                 lstat(filepath.c_str(), &statbuf);

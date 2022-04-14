@@ -17,7 +17,7 @@ file_appender::file_appender():policy_(policy::storage_policy::yyyy_MM_dd),filen
 
 
 file_appender::~file_appender(){
-    
+    printf("file_appender 释放\n");
 }
 void file_appender::set_policy(policy::storage_policy policy){
     handle_date_(policy);
