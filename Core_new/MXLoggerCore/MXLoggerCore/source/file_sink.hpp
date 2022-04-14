@@ -29,6 +29,9 @@ public:
     
     void flush() override;
     
+    void set_policy(policy::storage_policy policy);
+    void set_filename(const std::string filename);
+    
     std::shared_ptr<details::mx_file> mxfile;
     
 private:

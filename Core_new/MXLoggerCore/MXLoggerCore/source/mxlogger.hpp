@@ -23,8 +23,11 @@ private:
     
     std::shared_ptr<sinks::console_sink> console_sink_;
    
-    
     std::shared_ptr<sinks::file_sink> file_sink_;
+     
+    bool enable_;
+    bool console_enable_;
+    bool file_enable_;
     
 public:
     mxlogger(const char *diskcache_path);
@@ -32,9 +35,40 @@ public:
 
     void set_enable(bool enable);
     void set_console_enable(bool enable);
-    void set_file_enable(bool enbale);
+    void set_file_enable(bool enable);
     
     
+    void set_file_policy(const char* policy);
+    
+    
+     void set_file_name(const char* filename);
+    
+    
+     void set_file_header(const char* header);
+    
+    
+    // 设置日志文件最大字节数(byte)
+    void set_file_max_size(const  long max_size);
+    
+    // 设置日志文件最大存储时长(s)
+    void set_file_max_age(const  long max_age);
+    
+    // 清理过期文件
+    void remove_expire_data();
+    
+    //删除所有日志文件
+    void remove_all();
+    
+    // 缓存日志文件大小(byte)
+    long  file_size();
+    
+    void set_console_level(int level);
+    
+    void set_file_level(int level);
+    
+    void set_console_pattern(const char * pattern);
+    
+    void set_file_pattern(const char * pattern);
     
     /// 记录日志
     /// @param type 1 输出到控制台 2 写入文件 0 先输出到控制台再写入文件

@@ -31,7 +31,7 @@ public:
     void set_dir(const std::string dir);
     
     //设置文件头
-    void set_header(std::string &header);
+    void set_header(std::string header);
     
     void write(const std::string &buf,const std::string &fname);
     

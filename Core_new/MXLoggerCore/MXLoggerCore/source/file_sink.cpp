@@ -25,10 +25,17 @@ void file_sink::set_pattern(const std::string &pattern){
     formatter_ =  std::unique_ptr<mxlogger::pattern_formatter>(new mxlogger::pattern_formatter(pattern));
 }
 
+void file_sink::set_policy(policy::storage_policy policy){
+    file_appender_.set_policy(policy);
+}
+void file_sink::set_filename(const std::string filename){
+    file_appender_.set_filename(filename);
+}
+
 
 
 void file_sink::flush() {
-    
+    mxfile -> flush();
 }
 };
 

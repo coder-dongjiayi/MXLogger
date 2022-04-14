@@ -17,7 +17,9 @@ int main(int argc, const char * argv[]) {
     const char * name = "mxlogger";
     const char * msg = "thisismsg";
     const char * tag = "net";
-    
+    _log.set_file_name("test");
+    _log.set_file_policy("yyyy_MM_dd_HH");
+    _log.set_file_header("SecretID:1234");
     _log.log(0, 1, name, msg, tag, true);
     return 0;
 }

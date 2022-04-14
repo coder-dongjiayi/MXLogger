@@ -238,8 +238,8 @@ void mx_file::write(const std::string &buf,const std::string &fname){
 
     }
 }
-void mx_file::set_header(std::string &header){
-    header_buffer_ = std::move(header);
+void mx_file::set_header(std::string header){
+    header_buffer_ = std::move(header) + "\n";
     
 }
 void mx_file::set_dir(const std::string dir){
