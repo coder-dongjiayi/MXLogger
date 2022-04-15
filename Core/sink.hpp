@@ -1,42 +1,28 @@
 //
-//  yjdlog.hpp
-//  Logger
+//  sink.hpp
+//  MXLoggerCore
 //
-//  Created by 董家祎 on 2022/2/24.
+//  Created by 董家祎 on 2022/4/13.
 //
 
-#pragma once
+#ifndef sink_hpp
+#define sink_hpp
 
 #include <stdio.h>
+#include "log_msg.hpp"
+#include "pattern_formatter.hpp"
+namespace mxlogger{
+namespace sinks {
 
-#include "log_msg.h"
-
-#include <mutex>
-namespace mxlogger {
-namespace mutex{
-
-struct console_mutex{
-    using mutex_t = std::mutex;
-    static mutex_t &mutex(){
-        static mutex_t s_mutex;
-        return s_mutex;
-    }
-};
-}
-
-}
-
-
-namespace mxlogger {
-namespace sinks{
 class sink{
-    
 protected:
-    //默认日志输出等级 debug
-    level_t level_{level::debug};
-public:
-    using mutex_t = typename mutex::console_mutex;
+    std::atomic_int level_{level::debug};
     
+    std::string pattern_;
+    
+    std::unique_ptr<pattern_formatter> formatter_;
+    
+public:
     virtual ~sink() = default;
            
     virtual void log(const details::log_msg &msg) = 0;
@@ -53,9 +39,8 @@ public:
     
     // 获取日志等级
     level::level_enum level() const;
-   
 };
-}
-}
+};
 
-
+};
+#endif /* sink_hpp */

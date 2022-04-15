@@ -7,7 +7,9 @@
 
 #ifndef file_appender_hpp
 #define file_appender_hpp
-#include "fmt_helper.h"
+#include "log_enum.h"
+#include <string>
+
 namespace mxlogger{
 namespace details{
 class file_appender {

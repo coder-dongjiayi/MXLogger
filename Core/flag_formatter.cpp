@@ -6,92 +6,83 @@
 //
 
 #include "flag_formatter.hpp"
-#include <chrono>
-#include <ctime>
-#include "fmt_helper.h"
+#include "mxlogger_helper.hpp"
+
+static const char *level_names[]{"DEBUG","INFO","WARN","ERROR","FATAL"};
 namespace mxlogger {
 namespace details{
 
 // [2022-03-02-16:49:57.912]
-void time_formatter::format(const details::log_msg &log_msg, const std::tm &tm_time,memory_buf_t &dest){
-
-
-
+void time_formatter::format(const details::log_msg &log_msg, string &dest){
     cached_datetime_.clear();
-
-        using std::chrono:: milliseconds;
-    fmt_helper::append_int(tm_time.tm_year + 1900, cached_datetime_);
-    cached_datetime_.push_back('-');
-    fmt_helper::pad2(tm_time.tm_mon + 1, cached_datetime_);
-    cached_datetime_.push_back('-');
-    fmt_helper::pad2(tm_time.tm_mday, cached_datetime_);
-    cached_datetime_.push_back(' ');
-    fmt_helper::pad2(tm_time.tm_hour, cached_datetime_);
-    cached_datetime_.push_back(':');
-    fmt_helper::pad2(tm_time.tm_min, cached_datetime_);
-    cached_datetime_.push_back(':');
-    fmt_helper::pad2(tm_time.tm_sec, cached_datetime_);
-    cached_datetime_.push_back('.');
-
-    auto micro = fmt_helper::time_fraction<std::chrono::microseconds>(log_msg.time);
-
-    fmt_helper::pad3(static_cast<uint32_t>(micro.count()), cached_datetime_);
-
     
-
-    dest.append(cached_datetime_.begin(), cached_datetime_.end());
+    std::tm tm_time = mxlogger_helper::localtime(std::chrono::system_clock::to_time_t(log_msg.time));
+    
+    auto micro = mxlogger_helper::time_fraction<std::chrono::microseconds>(log_msg.time);
+    
+    using std::chrono:: milliseconds;
+    cached_datetime_ =  mxlogger_helper::string_format("%04d-%02d-%02d %02d:%02d:%02d.%06d", tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday, tm_time.tm_hour,tm_time.tm_min,tm_time.tm_sec,micro);
+    
+   
+    dest.append(cached_datetime_);
 }
 
 
-void level_formatter::format(const details::log_msg &log_msg, const std::tm &tm_time, memory_buf_t &dest){
+void level_formatter::format(const details::log_msg &log_msg, string &dest){
     
-    string_view_t level_name{level_names[log_msg.level]};
-    
-    fmt_helper::append_string_view(level_name, dest);
+    string level_name{level_names[log_msg.level]};
+    dest.append(level_name);
 }
 
-void message_formatter::format(const details::log_msg &log_msg, const std::tm &tm_time, memory_buf_t &dest){
+void message_formatter::format(const details::log_msg &log_msg, string &dest){
     
-    fmt_helper::append_string_view(log_msg.payload, dest);
+    dest.append(log_msg.msg);
 }
-void aggregate_formatter::format(const details::log_msg &log_msg, const std::tm &tm_time, memory_buf_t &dest){
+void aggregate_formatter::format(const details::log_msg &log_msg, string &dest){
     
-    fmt_helper::append_string_view(str_, dest);
+    dest.append(str_);
 }
 
-void tag_formatter:: format(const details::log_msg &msg, const std::tm &tm_time, memory_buf_t &dest){
+void tag_formatter:: format(const details::log_msg &msg,  string &dest){
+   
     if(msg.tag.data() == nullptr || msg.tag == "") return;
 
-    fmt_helper::append_string_view("<",dest);
-    fmt_helper::append_string_view(msg.tag, dest);
-    fmt_helper::append_string_view(">",dest);
-
+    dest.append("<");
+    dest.append(msg.tag);
+    dest.append(">");
+   
 }
 
-void prefix_formatter:: format(const details::log_msg &msg, const std::tm &tm_time, memory_buf_t &dest){
+void prefix_formatter:: format(const details::log_msg &msg, string &dest){
     
-    
-    fmt_helper::append_string_view("[",dest);
-    if(msg.prefix.data() == nullptr || msg.prefix == "") {
-        fmt_helper::append_string_view("MXLogger", dest);
+    dest.append("[");
+
+    if(msg.name.data() == nullptr || msg.name == "") {
+        dest.append("mxlogger");
+       
     }else{
-        fmt_helper::append_string_view(msg.prefix, dest);
+        dest.append(msg.name);
+        
     }
+    dest.append("]");
+    dest.append(":");
     
-    fmt_helper::append_string_view("]",dest);
-    fmt_helper::append_string_view(":",dest);
-}
-void thread_formatter:: format(const details::log_msg &msg, const std::tm &tm_time, memory_buf_t &dest){
-  
-     
 
-    fmt_helper::append_string_view( std::to_string(msg.thread_id), dest);
+    
+}
+void thread_formatter:: format(const details::log_msg &msg, string &dest){
+  
+    dest.append(std::to_string(msg.thread_id));
+    
     if (msg.is_main_thread == true) {
-        fmt_helper::append_string_view(":main",dest);
+        dest.append(":main");
+
     }else{
-        fmt_helper::append_string_view(":child",dest);
+        dest.append(":child");
+  
     }
    
+
    
    
    

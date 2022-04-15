@@ -5,8 +5,8 @@
 //  Created by 董家祎 on 2022/3/11.
 //
 
-#ifndef logger_enum_h
-#define logger_enum_h
+#ifndef log_enum_h
+#define log_enum_h
 namespace policy {
 enum storage_policy: int {
     yyyy_MM = 0,
@@ -30,4 +30,4 @@ enum   level_enum : int {
 
 }
 
-#endif /* logger_enum_h */
+#endif /* log_enum_h */

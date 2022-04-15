@@ -5,13 +5,13 @@
 //  Created by 董家祎 on 2022/3/4.
 //
 
-#include "file_helper.hpp"
+#include "mx_file.hpp"
 #include <sys/stat.h>
 #include <thread>
 #include <dirent.h>
 #include <vector>
 #include <stdio.h>
-#include "fmt_helper.h"
+#include "mxlogger_helper.hpp"
 #include <map>
 #ifdef  __ANDROID__
 #include <android/log.h>
@@ -20,25 +20,26 @@
 namespace mxlogger{
 namespace details{
 
-file_helper::file_helper() : max_disk_size_(0),max_disk_age_(0){
-    
+mx_file::mx_file() : max_disk_size_(0),max_disk_age_(0){
+
 }
 
-file_helper::~file_helper(){
+mx_file::~mx_file(){
+    printf("mx_file 释放\n");
     close();
 }
 
 
-void file_helper::set_max_disk_age(long long max_age){
+void mx_file::set_max_disk_age(long long max_age){
     max_disk_age_ = max_age;
 }
 
 
-void file_helper::set_max_disk_size(long long max_size){
+void mx_file::set_max_disk_size(long long max_size){
     max_disk_size_ = max_size;
 }
 
-void file_helper::open(){
+void mx_file::open(){
     close();
     
     std::string mode = "ab";
@@ -51,7 +52,7 @@ void file_helper::open(){
        fd_ =  fopen(filepath.c_str(), mode.c_str());
         if (fd_ != nullptr) {
           
-            if (header_buffer_.data() != nullptr) {
+            if (header_buffer_.data() != nullptr && strcmp(header_buffer_.data(), "")!=0) {
                 struct stat statbuf;
                 
                 lstat(filepath.c_str(), &statbuf);
@@ -68,20 +69,20 @@ void file_helper::open(){
     }
 }
 
-std::string &file_helper::filename() {
+std::string &mx_file::filename() {
     return filename_ ;
 }
 
-void file_helper::flush(){
+void mx_file::flush(){
     std::fflush(fd_);
 }
-void file_helper::close(){
+void mx_file::close(){
     if (fd_ != nullptr) {
         std::fclose(fd_);
         fd_ = nullptr;
     }
 }
-long  file_helper::file_size() const{
+long  mx_file::file_size() const{
     DIR *dir;
     struct dirent *entry;
     struct stat statbuf;
@@ -110,7 +111,7 @@ long  file_helper::file_size() const{
     
   
 }
-void file_helper::remove_all(){
+void mx_file::remove_all(){
     DIR *dir;
     struct dirent *entry;
     if ((dir = opendir(dir_.c_str())) == nullptr){
@@ -133,7 +134,7 @@ void file_helper::remove_all(){
     closedir(dir);
 }
 
-void file_helper::remove_expire_data(){
+void mx_file::remove_expire_data(){
    
 
     DIR *dir;
@@ -148,7 +149,7 @@ void file_helper::remove_expire_data(){
     
     std::map<long long ,char*,std::less<long long >>  cache_name_files_;
     
-    std::tm tm_time =   fmt_lib::localtime(log_clock::now());
+    std::tm tm_time = mxlogger_helper::now();
     
     long long int timestamp =  mktime(&tm_time);
     long long int expiration_tp = timestamp - max_disk_age_;
@@ -218,7 +219,7 @@ void file_helper::remove_expire_data(){
 }
 
 
-void file_helper::write(const memory_buf_t &buf,const std::string &fname){
+void mx_file::write(const std::string &buf,const std::string &fname){
     
     if (fd_ == nullptr || filename_.compare(fname) != 0 || path_exists(dir_ + filename_) == false) {
         filename_ = fname;
@@ -237,15 +238,15 @@ void file_helper::write(const memory_buf_t &buf,const std::string &fname){
 
     }
 }
-void file_helper::set_header(memory_buf_t &header){
-    header_buffer_ = std::move(header);
+void mx_file::set_header(std::string header){
+    header_buffer_ = std::move(header) + "\n";
     
 }
-void file_helper::set_dir(const std::string dir){
+void mx_file::set_dir(const std::string dir){
     dir_ = dir;
     create_dir_(dir);
 }
-bool file_helper::create_dir_(const std::string &path){
+bool mx_file::create_dir_(const std::string &path){
     
     auto pos = path.find_last_of("/");
 
@@ -276,11 +277,11 @@ bool file_helper::create_dir_(const std::string &path){
     return true;
 }
 
-bool file_helper::path_exists(const std::string &path){
+bool mx_file::path_exists(const std::string &path){
     struct stat buffer;
     return (::stat(path.c_str(), &buffer) == 0);
 }
-bool file_helper::makedir_(const std::string &path){
+bool mx_file::makedir_(const std::string &path){
     
     return ::mkdir(path.c_str(),mode_t(0755)) == 0;
 }

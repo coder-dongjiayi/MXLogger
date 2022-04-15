@@ -11,6 +11,7 @@
 #include "file_sink.hpp"
 #include "mx_file.hpp"
 #include <mutex>
+
 namespace mxlogger{
 
 namespace mutex{
@@ -89,6 +90,9 @@ mxlogger::~mxlogger(){
     printf("log 已经释放\n");
 }
 
+const char* mxlogger::diskcache_path() const{
+    return diskcache_path_.c_str();
+}
 void mxlogger::set_enable(bool enable){
     
     enable_ = enable;

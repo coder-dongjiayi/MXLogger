@@ -7,17 +7,17 @@
 
 #ifndef file_helper_hpp
 #define file_helper_hpp
-#include "logger_common.h"
-#include "fmt/os.h"
+
+#include <string>
 namespace mxlogger {
 namespace details{
 
-class file_helper{
+class mx_file{
   
 public:
-    file_helper();
+    mx_file();
     
-    ~file_helper();
+    ~mx_file();
     
     //文件名
     void open();
@@ -31,9 +31,9 @@ public:
     void set_dir(const std::string dir);
     
     //设置文件头
-    void set_header(memory_buf_t &header);
+    void set_header(std::string header);
     
-    void write(const memory_buf_t &buf,const std::string &fname);
+    void write(const std::string &buf,const std::string &fname);
     
     // 文件最大存储时间 默认为0 不限制
     void set_max_disk_age(long long max_age);
@@ -64,7 +64,7 @@ private:
     
     std::FILE *fd_{nullptr};
     
-    memory_buf_t header_buffer_;
+    std::string header_buffer_;
     //文件名
     std::string filename_;
     //文件目录

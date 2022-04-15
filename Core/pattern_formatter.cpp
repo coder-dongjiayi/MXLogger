@@ -1,21 +1,16 @@
 //
 //  pattern_formatter.cpp
-//  Logger
+//  MXLoggerCore
 //
-//  Created by 董家祎 on 2022/3/2.
+//  Created by 董家祎 on 2022/4/13.
 //
 
 #include "pattern_formatter.hpp"
-#include "logger_common.h"
 
-namespace mxlogger {
+namespace mxlogger{
 
-pattern_formatter::pattern_formatter():pattern_formatter("[%d][%p]%m"){}
-
-pattern_formatter::pattern_formatter(std::string pattern) : pattern_(std::move(pattern)){
-    
-    compile_pattern_(pattern_);
-    
+pattern_formatter::pattern_formatter(const std::string &pattern):pattern_(pattern){
+    compile_pattern_(pattern);
 }
 
 void pattern_formatter::compile_pattern_(const std::string pattern){
@@ -51,7 +46,6 @@ void pattern_formatter::compile_pattern_(const std::string pattern){
 
 void pattern_formatter:: handle_flag_(char flag){
     
-  
     
     switch (flag) {
        
@@ -73,21 +67,14 @@ void pattern_formatter:: handle_flag_(char flag){
     }
 }
 
-void pattern_formatter::format(const details::log_msg &log_msg, memory_buf_t &dest){
-   
-
-    std::tm ltm =  fmt_lib::localtime(log_clock::to_time_t(log_msg.time));
-    
+void pattern_formatter::format(const details::log_msg &msg, string &dest){
+  
     for (auto &f : formatters_) {
-    
-       
-        f->format(log_msg, ltm, dest);
+        f -> format(msg, dest);
+        
     }
-
-    details::fmt_helper::append_string_view(default_eol, dest);
-
-
+    
+    dest.append("\n");
+    
 }
-
-
 }
