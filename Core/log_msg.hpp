@@ -19,9 +19,7 @@ namespace details{
 
 struct log_msg{
     log_msg() = default;
-    ~log_msg(){
-        printf("log_msg 释放\n");
-    };
+    ~log_msg() = default;
     log_msg(level::level_enum level, string_view name,string_view tag,string_view msg,bool is_main_thread);
     string_view name;
     

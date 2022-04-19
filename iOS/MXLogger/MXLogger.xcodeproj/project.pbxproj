@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BD406E5227F19F9B002C76D5 /* libMXLoggerCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD406E4E27F19F39002C76D5 /* libMXLoggerCore.a */; };
 		BD62872E27EB2BA900362E4C /* MXLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD62872427EB2BA900362E4C /* MXLogger.framework */; };
 		BD62873327EB2BA900362E4C /* MXLoggerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD62873227EB2BA900362E4C /* MXLoggerTests.m */; };
 		BD62874D27EB2C1700362E4C /* MXLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = BD62874B27EB2C1700362E4C /* MXLogger.h */; };
 		BD62874E27EB2C1700362E4C /* MXLogger.mm in Sources */ = {isa = PBXBuildFile; fileRef = BD62874C27EB2C1700362E4C /* MXLogger.mm */; };
 		BD62875B27EB2F1800362E4C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD62875A27EB2F1800362E4C /* UIKit.framework */; };
 		BD6287B327EB301000362E4C /* MXLogger.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD62874B27EB2C1700362E4C /* MXLogger.h */; };
+		BDA28466280E639D00C833A3 /* libMXLoggerCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD406E4E27F19F39002C76D5 /* libMXLoggerCore.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,19 +24,19 @@
 			remoteGlobalIDString = BD406D9727F19C76002C76D5;
 			remoteInfo = MXLoggerCore;
 		};
-		BD406E5327F19FA0002C76D5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BD406E4927F19F39002C76D5 /* MXLoggerCore.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = BD406D9627F19C76002C76D5;
-			remoteInfo = MXLoggerCore;
-		};
 		BD62872F27EB2BA900362E4C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BD62871B27EB2BA900362E4C /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = BD62872327EB2BA900362E4C;
 			remoteInfo = MXLogger;
+		};
+		BDA28467280E63A200C833A3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD406E4927F19F39002C76D5 /* MXLoggerCore.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = BD406D9627F19C76002C76D5;
+			remoteInfo = MXLoggerCore;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -70,7 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BD406E5227F19F9B002C76D5 /* libMXLoggerCore.a in Frameworks */,
+				BDA28466280E639D00C833A3 /* libMXLoggerCore.a in Frameworks */,
 				BD62875B27EB2F1800362E4C /* UIKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -168,7 +168,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				BD406E5427F19FA0002C76D5 /* PBXTargetDependency */,
+				BDA28468280E63A200C833A3 /* PBXTargetDependency */,
 			);
 			name = MXLogger;
 			productName = MXLogger;
@@ -281,15 +281,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		BD406E5427F19FA0002C76D5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = MXLoggerCore;
-			targetProxy = BD406E5327F19FA0002C76D5 /* PBXContainerItemProxy */;
-		};
 		BD62873027EB2BA900362E4C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BD62872327EB2BA900362E4C /* MXLogger */;
 			targetProxy = BD62872F27EB2BA900362E4C /* PBXContainerItemProxy */;
+		};
+		BDA28468280E63A200C833A3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MXLoggerCore;
+			targetProxy = BDA28467280E63A200C833A3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

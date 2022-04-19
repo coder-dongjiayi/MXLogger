@@ -13,7 +13,28 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+extern "C"
+   {
+#include "md5/md5.h"
+   }
+
 namespace mxlogger_helper{
+
+
+template <typename T>
+inline std::string mx_md5(const std::basic_string<T> &value) {
+ 
+    uint8_t md[16] = {};
+    char tmp[3] = {}, buf[33] = {};
+    MD5((const uint8_t *) value.c_str(), value.size() * (sizeof(T) / sizeof(uint8_t)), md);
+    for (auto ch : md) {
+        snprintf(tmp, sizeof(tmp), "%2.2x", ch);
+        strcat(buf, tmp);
+    }
+    return {buf};
+}
+
+
 template<typename ... Args>
 std::string string_format( const std::string& format, Args ... args )
 {

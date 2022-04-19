@@ -11,8 +11,11 @@
 #include "file_sink.hpp"
 #include "mx_file.hpp"
 #include <mutex>
-
+#include <unordered_map>
+#include "mxlogger_helper.hpp"
 namespace mxlogger{
+
+std::unordered_map<string, mxlogger *> *global_instanceDic_ =  new unordered_map<string, mxlogger *>;
 
 namespace mutex{
 
@@ -24,6 +27,7 @@ struct console_mutex{
     }
 };
 }
+
 
 using mutex_t = typename mutex::console_mutex;
 
@@ -65,6 +69,45 @@ static policy::storage_policy policy_(const char* storage_policy){
 
 
 
+mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory){
+    
+    
+    if (directory == nullptr) {
+        return nullptr;
+    }
+    if (ns == nullptr) {
+        ns = "default";
+    }
+    std::string  directory_s = string{directory};
+    
+    std::string ns_s = string{ns};
+    
+    std::string diskcache_path = directory_s + "/" + ns_s + "/";
+    
+    std::string map_key =  mxlogger_helper::mx_md5(diskcache_path);
+    
+    auto itr = global_instanceDic_ -> find(map_key);
+    if (itr != global_instanceDic_ -> end()) {
+        mxlogger * logger = itr -> second;
+        return logger;
+    }
+    
+    auto logger = new mxlogger(diskcache_path.c_str());
+    logger -> map_key = map_key;
+    (*global_instanceDic_)[map_key] = logger;
+    return logger;
+}
+void mxlogger::destroy(){
+    
+    for (auto &pair : *global_instanceDic_) {
+        mxlogger *logger = pair.second;
+        delete logger;
+        pair.second = nullptr;
+    }
+  
+    
+}
+
 mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path){
     
     enable_ = true;
@@ -87,12 +130,14 @@ mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path)
 }
 
 mxlogger::~mxlogger(){
-    printf("log 已经释放\n");
+ 
+    
 }
 
 const char* mxlogger::diskcache_path() const{
     return diskcache_path_.c_str();
 }
+
 void mxlogger::set_enable(bool enable){
     
     enable_ = enable;
@@ -105,6 +150,7 @@ void mxlogger::set_file_enable(bool enable){
     
 }
 void mxlogger::set_file_policy(const char* policy){
+    
     file_sink_->set_policy(policy_(policy));
 }
 
