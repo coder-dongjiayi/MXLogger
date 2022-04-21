@@ -9,7 +9,7 @@
 #import <MXLogger/MXLogger.h>
 @interface ViewController ()
 {
-    MXLogger * _logger;
+   MXLogger * _logger;
 }
 @end
 
@@ -18,12 +18,17 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    _logger =   [[MXLogger alloc] initWithNamespace:@"default2" diskCacheDirectory:NULL];
-     NSLog(@"日志文件磁盘缓存目录:%@",_logger.diskCachePath);
-    _logger.storagePolicy = @"yyyy_MM_dd";
-    _logger.fileName = @"mxlog";
-    _logger.fileHeader =  @"版本号:1.0.0 平台:iOS";
-    [_logger info:NULL msg:@"msg" tag:NULL];
+    
+       _logger =   [[MXLogger alloc] initWithNamespace:@"default2" diskCacheDirectory:NULL];
+         NSLog(@"日志文件磁盘缓存目录:%@",_logger.diskCachePath);
+        _logger.storagePolicy = @"yyyy_MM_dd";
+        _logger.fileName = @"mxlog";
+        _logger.fileHeader =  @"版本号:1.0.0 平台:iOS";
+        [_logger info:NULL msg:@"msg" tag:NULL];
+    
+    
+    NSLog(@"执行代码");
+  
     
 //    [MXLogger testMXLogger:@"user/test/ssss"];
 //    [MXLogger shareManager].fileHeader = @"版本号:1.0.0 平台:iOS";
@@ -69,24 +74,22 @@
    
 }
 - (IBAction)tenThousandButtonAction:(id)sender {
-    /// 同步写入测试
-//    [MXLogger shareManager].isAsync = NO;
+
+//    NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
+//    NSTimeInterval start =[dateStart timeIntervalSince1970];
+//    NSLog(@"开始写入日志");
+//    for (int i = 0; i < 100000; i++) {
 //
-    NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
-    NSTimeInterval start =[dateStart timeIntervalSince1970];
-    NSLog(@"开始写入日志");
-    for (int i = 0; i < 100000; i++) {
+//        NSString * string = [NSString stringWithFormat:@"第%d条数据",i];
+//        [_logger info:@"name" msg:string tag:@"tag"];
+//    }
+//
+//    NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
+//    NSTimeInterval end =[dateEnd timeIntervalSince1970];
+//
+//    [sender setTitle:[NSString stringWithFormat:@"写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
 
-        NSString * string = [NSString stringWithFormat:@"第%d条数据",i];
-        [_logger info:@"name" msg:string tag:@"tag"];
-    }
-
-    NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
-    NSTimeInterval end =[dateEnd timeIntervalSince1970];
-
-    [sender setTitle:[NSString stringWithFormat:@"写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
-
-    NSLog(@"时间:%f",end - start);
+//    NSLog(@"时间:%f",end - start);
 }
 
 - (IBAction)syncButtonAction:(id)sender {

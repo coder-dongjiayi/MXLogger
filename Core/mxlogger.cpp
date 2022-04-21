@@ -150,7 +150,7 @@ mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path)
 }
 
 mxlogger::~mxlogger(){
- 
+    printf("mxlogger 释放");
     
 }
 

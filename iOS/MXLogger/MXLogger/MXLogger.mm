@@ -13,8 +13,13 @@ static NSString * _defaultDiskCacheDirectory;
 @interface MXLogger()
 {
     mx_logger *_logger;
+    NSString * _nameSpace;
+    NSString * _directory;
+    
 }
 @property (nonatomic, copy, nonnull, readwrite) NSString *diskCachePath;
+
+
 @end
 
 @implementation MXLogger
@@ -26,12 +31,18 @@ static NSString * _defaultDiskCacheDirectory;
         if (!directory) {
             directory = [MXLogger defaultDiskCacheDirectory];
         }
+        _nameSpace = nameSpace;
+        _directory = directory;
         _logger =  mx_logger::initialize_namespace(nameSpace.UTF8String, directory.UTF8String);
     }
     return self;
 }
 
-
+- (void)dealloc
+{
+    mx_logger::delete_namespace(_nameSpace.UTF8String, _directory.UTF8String);
+    
+}
 - (void)setStoragePolicy:(NSString *)storagePolicy{
     _storagePolicy = storagePolicy;
     _logger -> set_file_policy(storagePolicy.UTF8String);
