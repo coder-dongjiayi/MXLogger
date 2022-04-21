@@ -23,6 +23,7 @@
     _logger.storagePolicy = @"yyyy_MM_dd";
     _logger.fileName = @"mxlog";
     _logger.fileHeader =  @"版本号:1.0.0 平台:iOS";
+    [_logger info:NULL msg:@"msg" tag:NULL];
     
 //    [MXLogger testMXLogger:@"user/test/ssss"];
 //    [MXLogger shareManager].fileHeader = @"版本号:1.0.0 平台:iOS";

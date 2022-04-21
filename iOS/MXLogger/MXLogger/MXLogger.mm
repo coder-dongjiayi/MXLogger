@@ -18,7 +18,9 @@ static NSString * _defaultDiskCacheDirectory;
 @end
 
 @implementation MXLogger
-
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace{
+    return [self initWithNamespace:nameSpace diskCacheDirectory:nil];
+}
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory{
     if (self = [super init]) {
         if (!directory) {
@@ -56,18 +58,82 @@ static NSString * _defaultDiskCacheDirectory;
     _fileEnable = fileEnable;
     _logger -> set_file_enable(fileEnable);
 }
+-(void)setMaxDiskAge:(NSUInteger)maxDiskAge{
+    _maxDiskAge = maxDiskAge;
+    
+    _logger -> set_file_max_age([NSNumber numberWithUnsignedInteger:maxDiskAge].longValue);
+    
+}
+- (void)setMaxDiskSize:(NSUInteger)maxDiskSize{
+    _maxDiskSize = maxDiskSize;
+    
+    _logger -> set_file_max_size([NSNumber numberWithUnsignedInteger:maxDiskSize].longValue);
+}
 
--(void)info:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
+-(void)removeExpireData{
+    _logger -> remove_expire_data();
+}
+
+-(void)removeAllData{
+    _logger -> remove_all();
+}
+
+- (NSUInteger)logSize{
+   long size =  _logger -> file_size();
+    return [[NSNumber numberWithLong:size] unsignedIntegerValue];
+}
+- (void)setFileLevel:(NSInteger)fileLevel{
+    _fileLevel = fileLevel;
+    _logger -> set_file_level([NSNumber numberWithInteger:fileLevel].intValue);
+}
+- (void)setConsoleLevel:(NSInteger)consoleLevel{
+    _consoleLevel = consoleLevel;
+    
+    _logger -> set_console_level([NSNumber numberWithInteger:consoleLevel].intValue);
+}
+
+- (void)setConsolePattern:(NSString *)consolePattern{
+    _consolePattern = consolePattern;
+    if ([consolePattern isKindOfClass:[NSNull class]]) {
+        return;
+    }
+    _logger -> set_console_pattern(consolePattern.UTF8String);
+}
+
+- (void)setFilePattern:(NSString *)filePattern{
+    _filePattern = filePattern;
+    if ([filePattern isKindOfClass:[NSNull class]]) {
+        return;
+    }
+    _logger -> set_file_pattern(filePattern.UTF8String);
+}
+-(void)debug:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    [self log:0 name:name msg:msg tag:tag];
+}
+-(void)info:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
     [self log:1 name:name msg:msg tag:tag];
 }
--(void)log:(NSInteger)level name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag {
+
+-(void)warn:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    [self log:2 name:name msg:msg tag:tag];
+}
+
+-(void)error:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    [self log:3 name:name msg:msg tag:tag];
+}
+
+-(void)fatal:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    [self log:4 name:name msg:msg tag:tag];
+}
+
+-(void)log:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
     [self innerLogWithType:0 level:level name:name msg:msg tag:tag];
 }
 
--(void)innerLogWithType:(NSInteger) type level:(NSInteger)level name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag {
+-(void)innerLogWithType:(NSInteger) type level:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
     BOOL isMainThread = [NSThread isMainThread];
-    
-    _logger -> log([NSNumber numberWithInteger:type].intValue, [NSNumber numberWithInteger:level].intValue, name.UTF8String, msg.UTF8String, tag.UTF8String, isMainThread);
+  
+    _logger -> log([NSNumber numberWithInteger:type].intValue, [NSNumber numberWithInteger:level].intValue,[name UTF8String], [msg UTF8String], [tag UTF8String], isMainThread);
 }
 
 

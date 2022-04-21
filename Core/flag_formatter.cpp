@@ -56,14 +56,7 @@ void tag_formatter:: format(const details::log_msg &msg,  string &dest){
 void prefix_formatter:: format(const details::log_msg &msg, string &dest){
     
     dest.append("[");
-
-    if(msg.name.data() == nullptr || msg.name == "") {
-        dest.append("mxlogger");
-       
-    }else{
-        dest.append(msg.name);
-        
-    }
+    dest.append(msg.name);
     dest.append("]");
     dest.append(":");
     

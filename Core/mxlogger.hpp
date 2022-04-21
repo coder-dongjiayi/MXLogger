@@ -31,11 +31,17 @@ private:
     bool console_enable_;
     bool file_enable_;
     
+    static std::string get_diskcache_path_(const char* ns,const char* directory);
+    
 public:
    
 
   
+    // 初始化 logger
     static mxlogger *initialize_namespace(const char* ns,const char* directory);
+    
+    /// 释放 logger
+    static void delete_namespace(const char* ns,const char* directory);
     
     static void destroy();
     

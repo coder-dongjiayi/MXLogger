@@ -17,13 +17,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
 
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace;
 
 /// 禁用日志
 @property (nonatomic,assign)BOOL enable;
-
 /// 禁用/开启 控制台输出
 @property (nonatomic,assign)BOOL consoleEnable;
-
 
 /// 禁用/开启 文件写入
 @property (nonatomic,assign)BOOL fileEnable;
@@ -35,17 +34,42 @@ NS_ASSUME_NONNULL_BEGIN
 ///  yyyy_MM_dd_HH       按小时存储
 @property (nonatomic,copy)NSString * storagePolicy;
 
-
 /// 每次创建一个新的日志文件 写入文件头的信息
 @property (nonatomic,copy)NSString * fileHeader;
 
 /// 自定义日志文件名 默认值:mxlog
-
 @property (nonatomic,copy)NSString *fileName;
-
 
 /// 日志文件磁盘缓存目录
 @property (nonatomic, copy, nonnull, readonly) NSString *diskCachePath;
+
+/// 日志文件最大字节数 默认0 无限制
+@property (nonatomic,assign)NSUInteger maxDiskSize;
+
+/// 日志文件存储最长时间 默认0 无限制
+@property (nonatomic,assign)NSUInteger maxDiskAge;
+
+/// 日志文件大小
+@property (nonatomic,assign,readonly)NSUInteger logSize;
+
+
+/// 设置控制台日志输出等级
+@property (nonatomic,assign)NSInteger consoleLevel;
+
+/// 设置写入文件日志等级
+@property (nonatomic,assign)NSInteger fileLevel;
+
+/// 控制台输出样式
+@property (nonatomic,copy)NSString * consolePattern;
+
+/// 写入文件输出样式
+@property (nonatomic,copy)NSString * filePattern;
+
+/// 清理过期文件
+-(void)removeExpireData;
+
+/// 清理全部日志文件
+-(void)removeAllData;
 
 
 /// 输出日志
@@ -53,9 +77,20 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param name name
 /// @param tag tag
 /// @param msg msg
--(void)log:(NSInteger)level name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag;
+-(void)log:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
 
--(void)info:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag;
+
+-(void)debug:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+
+-(void)info:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+
+-(void)warn:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+
+-(void)error:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+
+-(void)fatal:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+
+
 
 @end
 

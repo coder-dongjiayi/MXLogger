@@ -67,13 +67,9 @@ static policy::storage_policy policy_(const char* storage_policy){
     return policy::storage_policy::yyyy_MM_dd;
 }
 
-
-
-mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory){
-    
-    
+std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     if (directory == nullptr) {
-        return nullptr;
+        return std::string{nullptr};
     }
     if (ns == nullptr) {
         ns = "default";
@@ -83,6 +79,15 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory){
     std::string ns_s = string{ns};
     
     std::string diskcache_path = directory_s + "/" + ns_s + "/";
+    return diskcache_path;
+}
+
+mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory){
+    
+    std::string diskcache_path = get_diskcache_path_(ns,directory);
+    if (diskcache_path.data() == nullptr) {
+        return nullptr;
+    }
     
     std::string map_key =  mxlogger_helper::mx_md5(diskcache_path);
     
@@ -96,6 +101,21 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory){
     logger -> map_key = map_key;
     (*global_instanceDic_)[map_key] = logger;
     return logger;
+}
+
+void mxlogger::delete_namespace(const char* ns,const char* directory){
+    std::string diskcache_path = get_diskcache_path_(ns,directory);
+    if (diskcache_path.data() == nullptr) {
+        return;
+    }
+    std::string map_key =  mxlogger_helper::mx_md5(diskcache_path);
+    for (auto &pair : *global_instanceDic_) {
+         std::string key = pair.first;
+        if (key == map_key) {
+            delete pair.second;
+            pair.second = nullptr;
+        }
+    }
 }
 void mxlogger::destroy(){
     
@@ -215,7 +235,13 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
     
     level::level_enum lvl = level_(level);
     
-    details::log_msg log_msg(lvl,name,tag,msg,is_main_thread);
+    string_view _name = name == nullptr ? string_view{"mxlogger"} : name;
+    
+    string_view _tag = tag == nullptr ? string_view{} : tag;
+    
+    string_view _msg = msg == nullptr ? string_view{"nullptr"} : msg;
+    
+    details::log_msg log_msg(lvl,_name,_tag,_msg,is_main_thread);
 
     if (console_enable_ == true) {
         console_sink_->log(log_msg);
