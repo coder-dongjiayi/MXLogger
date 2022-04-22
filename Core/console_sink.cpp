@@ -18,16 +18,15 @@ void console_sink::log(const details::log_msg &msg)
 {
  
     if (should_log(msg.level) == false) return;
-    
+   
     std:: string formatted;
     
     formatter_ -> format(msg, formatted);
+    size_t msg_size = formatted.size();
+    std::fwrite(formatted.data(), 1, msg_size, target_file_);
+ 
+    fflush(target_file_);
     
-   const char * ptr = formatted.data();
-
-    size_t length = formatted.length();
-    
-    fwrite(ptr, sizeof(char), length, target_file_);
 }
 
 void console_sink::flush(){

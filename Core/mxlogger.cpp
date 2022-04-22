@@ -243,10 +243,11 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
     
     details::log_msg log_msg(lvl,_name,_tag,_msg,is_main_thread);
 
-    if (console_enable_ == true) {
+ 
+   if (console_enable_ == true) {
         console_sink_->log(log_msg);
     }
-   
+
     if (file_enable_ == true) {
         file_sink_ -> log(log_msg);
     }

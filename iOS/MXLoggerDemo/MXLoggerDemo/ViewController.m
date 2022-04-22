@@ -75,21 +75,23 @@
 }
 - (IBAction)tenThousandButtonAction:(id)sender {
 
-//    NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
-//    NSTimeInterval start =[dateStart timeIntervalSince1970];
-//    NSLog(@"开始写入日志");
-//    for (int i = 0; i < 100000; i++) {
-//
-//        NSString * string = [NSString stringWithFormat:@"第%d条数据",i];
-//        [_logger info:@"name" msg:string tag:@"tag"];
-//    }
-//
-//    NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
-//    NSTimeInterval end =[dateEnd timeIntervalSince1970];
-//
-//    [sender setTitle:[NSString stringWithFormat:@"写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
+    NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
+    NSTimeInterval start =[dateStart timeIntervalSince1970];
+    NSInteger index = 0;
+    NSLog(@"开始写入日志");
+    for (int i = 0; i < 100000; i++) {
 
-//    NSLog(@"时间:%f",end - start);
+        NSString * string = [NSString stringWithFormat:@"第%d条数据",i];
+//        [_logger info:@"name" msg:string tag:@"tag"];
+        NSLog(@"%@",string);
+    }
+
+    NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
+    NSTimeInterval end =[dateEnd timeIntervalSince1970];
+
+    [sender setTitle:[NSString stringWithFormat:@"写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
+    NSLog(@"index = %ld",index);
+    NSLog(@"时间:%f",end - start);
 }
 
 - (IBAction)syncButtonAction:(id)sender {
