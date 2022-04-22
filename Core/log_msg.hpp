@@ -20,16 +20,16 @@ namespace details{
 struct log_msg{
     log_msg() = default;
     ~log_msg() = default;
-    log_msg(level::level_enum level, string_view name,string_view tag,string_view msg,bool is_main_thread);
-    string_view name;
+    log_msg(level::level_enum level, string name,string tag,string msg,bool is_main_thread);
+    string name;
     
-    string_view tag;
+    string tag;
     
     size_t thread_id{0};
     
     bool is_main_thread;
     
-    string_view msg;
+    string msg;
     
     std::chrono::system_clock::time_point time;
     

@@ -52,11 +52,11 @@ void pattern_formatter:: handle_flag_(char flag){
         case ('d'):
             formatters_.push_back(make_unique<details::time_formatter>());
             break;
+      
         case ('p'):
             formatters_.push_back(make_unique<details::level_formatter>());
             break;
         case ('m'):
-            formatters_.push_back(make_unique<details::tag_formatter>());
             formatters_.push_back(make_unique<details::message_formatter>());
             break;
         case ('t'):

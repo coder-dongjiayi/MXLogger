@@ -25,8 +25,7 @@ public:
 class time_formatter final : public flag_formatter{
 public:
     void format(const details::log_msg &msg,  string &dest) override;
-private:
-    string cached_datetime_;
+
 
 };
 

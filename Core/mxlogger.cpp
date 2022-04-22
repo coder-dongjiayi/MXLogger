@@ -235,11 +235,11 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
     
     level::level_enum lvl = level_(level);
     
-    string_view _name = name == nullptr ? string_view{"mxlogger"} : name;
+    string _name = name == nullptr ? string{"mxlogger"} : name;
     
-    string_view _tag = tag == nullptr ? string_view{} : tag;
+    string _tag = tag == nullptr ? string{} : tag;
     
-    string_view _msg = msg == nullptr ? string_view{"nullptr"} : msg;
+    string _msg = msg == nullptr ? string{"nullptr"} : msg;
     
     details::log_msg log_msg(lvl,_name,_tag,_msg,is_main_thread);
 

@@ -82,8 +82,8 @@
     for (int i = 0; i < 100000; i++) {
 
         NSString * string = [NSString stringWithFormat:@"第%d条数据",i];
-//        [_logger info:@"name" msg:string tag:@"tag"];
-        NSLog(@"%@",string);
+        [_logger info:@"name" msg:string tag:@"net"];
+        
     }
 
     NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
