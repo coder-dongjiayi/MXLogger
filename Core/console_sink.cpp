@@ -6,7 +6,9 @@
 //
 
 #include "console_sink.hpp"
-
+#ifdef  __ANDROID__
+#include <android/log.h>
+#endif
 namespace mxlogger{
 
 namespace sinks{
@@ -23,9 +25,42 @@ void console_sink::log(const details::log_msg &msg)
     
     formatter_ -> format(msg, formatted);
     size_t msg_size = formatted.size();
+    
+#ifdef __ANDROID__
+    android_LogPriority priority;
+    switch (msg.level) {
+        case level::level_enum::debug:
+            priority = ANDROID_LOG_DEBUG;
+            break;
+        case level::level_enum::info:
+            priority = ANDROID_LOG_INFO;
+            break;
+        case level::level_enum::warn:
+            priority = ANDROID_LOG_WARN;
+            break;
+        case level::level_enum::error:
+            priority = ANDROID_LOG_ERROR;
+            break;
+        case level::level_enum::fatal:
+            priority = ANDROID_LOG_FATAL;
+            break;
+        default:
+            priority = ANDROID_LOG_DEBUG;
+            break;
+
+    }
+    formatted.append('\0');
+
+    const char *msg_output = formatted.data();
+
+    __android_log_write(priority, msg.tag.data(), msg_output);
+
+#elif __APPLE__
     std::fwrite(formatted.data(), 1, msg_size, target_file_);
  
     fflush(target_file_);
+#endif
+   
     
 }
 
