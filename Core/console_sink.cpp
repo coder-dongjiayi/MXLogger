@@ -24,7 +24,7 @@ void console_sink::log(const details::log_msg &msg)
     std:: string formatted;
     
     formatter_ -> format(msg, formatted);
-    size_t msg_size = formatted.size();
+
     
 #ifdef __ANDROID__
     android_LogPriority priority;
@@ -49,14 +49,15 @@ void console_sink::log(const details::log_msg &msg)
             break;
 
     }
-    formatted.append('\0');
+    formatted.append("\0");
 
     const char *msg_output = formatted.data();
 
     __android_log_write(priority, msg.tag.data(), msg_output);
 
 #elif __APPLE__
-    std::fwrite(formatted.data(), 1, msg_size, target_file_);
+    size_t msg_size = formatted.size();
+    std::fwrite(formatted.data(), sizeof(char), msg_size, target_file_);
  
     fflush(target_file_);
 #endif

@@ -69,60 +69,30 @@ add_library(MXLoggerCore
         STATIC
 
         # Provides a relative path to your source file(s).
-        async_logger.cpp
-        async_logger.hpp
-        async_msg.cpp
-        async_msg.hpp
-       
-        console_sink.cc
-        console_sink.h
+        console_sink.cpp
+        console_sink.hpp
         file_appender.cpp
         file_appender.hpp
-        file_helper.cpp
-        file_helper.hpp
         file_sink.cpp
         file_sink.hpp
         flag_formatter.cpp
         flag_formatter.hpp
-        fmt_helper.h
-        formatter.cpp
-        formatter.hpp
-        log_msg_buffer.cpp
-         log_msg_buffer.hpp
-         log_msg.cc
-        log_msg.h
-        logger_common.h
-        logger_enum.h
-        mxlogger_manager.cpp
-        mxlogger_manager.hpp
+        log_enum.h
+        log_msg.cpp
+        log_msg.hpp
         logger_os.cpp
         logger_os.hpp
-        logger.cpp
-        logger.hpp
-        mpmc_blocking_queue.cpp
-        mpmc_blocking_queue.hpp
+        mx_file.cpp
+        mx_file.hpp
+        mxlogger_helper.hpp
+        mxlogger.cpp
+        mxlogger.hpp
         pattern_formatter.cpp
         pattern_formatter.hpp
-        sinks.cc
-        sinks.h
-        thread_pool.cpp
-        thread_pool.hpp
-        fmt/xchar.h
-        fmt/args.h
-        fmt/chrono.h
-        fmt/color.h
-        fmt/compile.h
-        fmt/core.h
-        fmt/format-inl.h
-        fmt/format.cc
-        fmt/format.h
-        fmt/locale.h
-        fmt/os.cc
-        fmt/os.h
-        fmt/ostream.h
-        fmt/printf.h
-        fmt/ranges.h
-       
+        sink.cpp
+        sink.hpp
+        md5/md5.h
+        md5/md5.c
         )
 
 target_include_directories(MXLoggerCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

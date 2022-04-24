@@ -5,7 +5,7 @@
 #include <jni.h>
 #include <string>
 #include <cstdint>
-#include "mxlogger_manager.hpp"
+#include "mxlogger.hpp"
 
 static JavaVM *g_currentJVM = nullptr;
 static jclass g_cls = nullptr;
