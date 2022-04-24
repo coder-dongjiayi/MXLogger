@@ -24,20 +24,6 @@
                                     <action selector="defaultButttonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mGm-JK-sdr"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="30C-OO-5k3">
-                                <rect key="frame" x="178.5" y="255" width="57" height="30"/>
-                                <state key="normal" title="同步Log"/>
-                                <connections>
-                                    <action selector="syncButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Qmb-8w-d0r"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JSv-wc-5fU">
-                                <rect key="frame" x="178.5" y="362" width="57" height="30"/>
-                                <state key="normal" title="异步Log"/>
-                                <connections>
-                                    <action selector="asyncButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ozd-gw-dWP"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HQK-MC-3Mh">
                                 <rect key="frame" x="161" y="434" width="92" height="30"/>
                                 <state key="normal" title="日志文件大小"/>
@@ -56,14 +42,10 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="HQK-MC-3Mh" firstAttribute="top" secondItem="JSv-wc-5fU" secondAttribute="bottom" constant="42" id="0Dl-jc-i6s"/>
-                            <constraint firstItem="HQK-MC-3Mh" firstAttribute="centerX" secondItem="JSv-wc-5fU" secondAttribute="centerX" id="0pK-8K-zH6"/>
-                            <constraint firstItem="JSv-wc-5fU" firstAttribute="top" secondItem="30C-OO-5k3" secondAttribute="bottom" constant="77" id="2DI-H8-D9T"/>
                             <constraint firstItem="XuW-Ki-bnb" firstAttribute="top" secondItem="63a-Lo-GkM" secondAttribute="bottom" constant="16" id="70U-e6-sVl"/>
                             <constraint firstItem="63a-Lo-GkM" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="AmQ-xF-TaX"/>
-                            <constraint firstItem="JSv-wc-5fU" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="g3S-vh-cFn"/>
-                            <constraint firstItem="30C-OO-5k3" firstAttribute="top" secondItem="63a-Lo-GkM" secondAttribute="bottom" constant="81" id="hFt-GH-exJ"/>
-                            <constraint firstItem="30C-OO-5k3" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="qpV-6Y-yAs"/>
+                            <constraint firstItem="HQK-MC-3Mh" firstAttribute="centerX" secondItem="XuW-Ki-bnb" secondAttribute="centerX" id="VED-FZ-Z8t"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="HQK-MC-3Mh" secondAttribute="bottom" constant="398" id="r4D-RL-nu0"/>
                             <constraint firstItem="63a-Lo-GkM" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="100" id="w7H-n9-dZB"/>
                             <constraint firstItem="XuW-Ki-bnb" firstAttribute="centerX" secondItem="63a-Lo-GkM" secondAttribute="centerX" id="x5X-0i-Lls"/>
                         </constraints>

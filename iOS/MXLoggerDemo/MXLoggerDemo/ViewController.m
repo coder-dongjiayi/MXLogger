@@ -18,59 +18,40 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    _logger =   [[MXLogger alloc] initWithNamespace:@"mxLogger" diskCacheDirectory:NULL];
     
-       _logger =   [[MXLogger alloc] initWithNamespace:@"default2" diskCacheDirectory:NULL];
-         NSLog(@"日志文件磁盘缓存目录:%@",_logger.diskCachePath);
-        _logger.storagePolicy = @"yyyy_MM_dd";
-        _logger.fileName = @"mxlog";
-        _logger.fileHeader =  @"版本号:1.0.0 平台:iOS";
-        [_logger info:NULL msg:@"msg" tag:NULL];
+    NSString * isDebug = _logger.isDebugTracking == YES ? @"正在调试" : @"非调试状态";
+        _logger.fileHeader =  [NSString stringWithFormat:@"版本号:1.0.0 平台:iOS isDebug:%@",isDebug];
     
+    [_logger info:@"mxlogger" msg:[NSString stringWithFormat:@"%@",isDebug] tag:@"isDebug"];
+    [_logger info:@"mxlogger" msg:_logger.diskCachePath tag:@"日志目录"];
     
-    NSLog(@"执行代码");
-  
+    //    /**下面这些设置都是默认设置 不写也行 **/
     
-//    [MXLogger testMXLogger:@"user/test/ssss"];
-//    [MXLogger shareManager].fileHeader = @"版本号:1.0.0 平台:iOS";
-//    [MXLogger shareManager].maxDiskAge = 60 * 60 * 24 * 7; // 一个星期
-//    [MXLogger shareManager].maxDiskSize = 1024 * 1024 * 100; // 100M
-//
-//    NSString * path = [MXLogger shareManager].diskCachePath;
-//
-//    [MXLogger debug:[NSString stringWithFormat:@"日志文件路径:%@",path]];
-//    /**下面这些设置都是默认设置 不写也行 **/
-//
-//    [MXLogger shareManager].storagePolicy = @"yyyy_MM_dd";
-//
-//    [MXLogger shareManager].shouldRemoveExpiredDataWhenEnterBackground = YES;
-//
-//    [MXLogger shareManager].shouldRemoveExpiredDataWhenTerminate = YES;
-//
-//    [MXLogger shareManager].fileName = @"mxlog";
-//
-//    [MXLogger shareManager].consoleLevel = 0;
-//    /// 默认情况下 debug数据不会写入到文件中 如果设置 [BlingLogger shareManager].fileLevel = 0 那么debug数据才会写入到日志文件
-//    [MXLogger shareManager].fileLevel = 1;
-//
-//    //设置为NO 控制台不再打印数据
-//    [MXLogger shareManager].consoleEnable = YES;
-   // 2022-04-19 11:33:27.606018+0800
-//    //设置为NO 不再写入日志文件
-//    [MXLogger shareManager].fileEnable = YES;
-//
-//    //控制台输出格式
-//    [MXLogger shareManager].consolePattern = @"[%d][%p]%m";
-//    //文件输出格式
-//    [MXLogger shareManager].filePattern = @"[%d][%t][%p]%m";
-//
-//    [MXLogger shareManager].isAsync = YES;
+    _logger.maxDiskAge = 60 * 60 * 24 * 7; // 一个星期
+    _logger.maxDiskSize = 1024 * 1024 * 10; // 10M
+
+    _logger.storagePolicy = @"yyyy_MM_dd";
+    _logger.fileName = @"mxlog";
+    
+    _logger.shouldRemoveExpiredDataWhenEnterBackground = YES;
+
+    _logger.shouldRemoveExpiredDataWhenTerminate = YES;
+
+    _logger.consoleLevel = 0;
+    _logger.fileLevel = 1;
+    
+    _logger.consolePattern = @"[%d][%p]%m";
+    _logger.filePattern = @"[%d][%t][%p]%m";
+
+
 }
 - (IBAction)defaultButttonAction:(id)sender {
-//    [MXLogger debug:@"这是一条debug,会输出到控制台" tag:@"TAG"];
-//    [MXLogger info:@"这是一条infoLog,会输出到控制台"];
-//    [MXLogger warn:@"这是一条warn,会输出到控制台"];
-//    [MXLogger error:@"这是一条error,会输出到控制台"];
-//    [MXLogger fatal:@"这是一条fatal,会输出到控制台"];
+    [_logger debug:@"mxlogger" msg:@"这是info信息" tag:NULL];
+    [_logger info:@"mxlogger" msg:@"这是info信息" tag:NULL];
+    [_logger warn:@"mxlogger" msg:@"这是info信息" tag:NULL];
+    [_logger error:@"mxlogger" msg:@"这是info信息" tag:NULL];
+    [_logger fatal:@"mxlogger" msg:@"这是info信息" tag:NULL];
    
 }
 - (IBAction)tenThousandButtonAction:(id)sender {
@@ -79,10 +60,12 @@
     NSTimeInterval start =[dateStart timeIntervalSince1970];
     NSInteger index = 0;
     NSLog(@"开始写入日志");
-    for (int i = 0; i < 100000; i++) {
+ 
+    for (NSInteger i = 0; i < 100000; i++) {
 
-        NSString * string = [NSString stringWithFormat:@"第%d条数据",i];
+        NSString * string = [NSString stringWithFormat:@"第%ld条数据",(long)i];
         [_logger info:@"name" msg:string tag:@"net"];
+     
         
     }
 
@@ -94,17 +77,12 @@
     NSLog(@"时间:%f",end - start);
 }
 
-- (IBAction)syncButtonAction:(id)sender {
-//    [MXLogger syncLogFile:NULL level:1 msg:@"这是同步方法，只写入文件不会输出到控制台" tag:NULL];
-}
-- (IBAction)asyncButtonAction:(id)sender {
-//    [MXLogger asyncLogFile:NULL level:1 msg:@"这是异步方法，只写入文件不会输出到控制台" tag:NULL];
-}
+
 - (IBAction)logSizeButtonAction:(id)sender {
-//    NSUInteger logSize =   [MXLogger shareManager].logSize;
-//      double size =  logSize/1024.0/1024.0;
-//
-//    [sender setTitle:[NSString stringWithFormat:@"日志大小:%0.2fM",size] forState:UIControlStateNormal];
+    NSUInteger logSize =   _logger.logSize;
+      double size =  logSize/1024.0/1024.0;
+
+    [sender setTitle:[NSString stringWithFormat:@"日志大小:%0.2fM",size] forState:UIControlStateNormal];
 }
 
 @end

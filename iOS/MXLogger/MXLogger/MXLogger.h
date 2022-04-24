@@ -14,14 +14,36 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MXLogger : NSObject
 
+/// 便捷初始化
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace;
 
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
+
+
+
+/// 初始化MXLogger
+/// @param nameSpace 命名空间
+/// @param directory 目录
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
 
+
+/// 默认路径初始化
+/// @param nameSpace 默认在 Library目录下
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace;
+
+
+/// 程序结束的时候是否清理过期文件 默认YES
+@property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenTerminate;
+
+/// 程序进入后台的时候是否清理过期文件 默认YES
+@property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenEnterBackground;
+
+/// 当前进程是否正在被调试
+@property(nonatomic,assign,readonly)BOOL isDebugTracking;
 
 /// 禁用日志
 @property (nonatomic,assign)BOOL enable;
-/// 禁用/开启 控制台输出
+/// 禁用/开启 控制台输出 默认情况下 如果进程处于被调试状态(isDebugTracking = YES) 那么就会在控制台输出日志信息，如果处于非调试状态(isDebugTracking = NO)下则只会写入文件不会输出到控制台
 @property (nonatomic,assign)BOOL consoleEnable;
 
 /// 禁用/开启 文件写入

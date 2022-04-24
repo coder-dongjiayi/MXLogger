@@ -57,6 +57,7 @@ void pattern_formatter:: handle_flag_(char flag){
             formatters_.push_back(make_unique<details::level_formatter>());
             break;
         case ('m'):
+            formatters_.push_back(make_unique<details::tag_formatter>());
             formatters_.push_back(make_unique<details::message_formatter>());
             break;
         case ('t'):

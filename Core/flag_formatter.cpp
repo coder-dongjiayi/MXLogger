@@ -47,7 +47,9 @@ void tag_formatter:: format(const details::log_msg &msg,  string &dest){
    
     if(msg.tag.data() == nullptr || msg.tag == "") return;
 
+    dest.append("<");
     dest.append(msg.tag);
+    dest.append(">");
    
 }
 

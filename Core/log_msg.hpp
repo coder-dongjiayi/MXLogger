@@ -31,7 +31,7 @@ struct log_msg{
     
     string msg;
     
-    std::chrono::system_clock::time_point time;
+    chrono::system_clock::time_point time;
     
     level::level_enum level{level::debug};
 };

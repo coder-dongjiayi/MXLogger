@@ -26,10 +26,11 @@ private:
     std::shared_ptr<sinks::console_sink> console_sink_;
    
     std::shared_ptr<sinks::file_sink> file_sink_;
-     
+    
     bool enable_;
     bool console_enable_;
     bool file_enable_;
+    bool is_debug_tracking_;
     
     static std::string get_diskcache_path_(const char* ns,const char* directory);
     
@@ -86,6 +87,7 @@ public:
     
     const char* diskcache_path() const;
     
+    const bool is_debug_tracking();
    
     /// 记录日志
     /// @param type 1 输出到控制台 2 写入文件 0 先输出到控制台再写入文件

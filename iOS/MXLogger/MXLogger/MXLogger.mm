@@ -18,11 +18,22 @@ static NSString * _defaultDiskCacheDirectory;
     
 }
 @property (nonatomic, copy, nonnull, readwrite) NSString *diskCachePath;
-
+@property(nonatomic,assign,readwrite)BOOL isDebugTracking;
+@property (nonatomic, strong, nullable) dispatch_queue_t ioQueue;
 
 @end
 
 @implementation MXLogger
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace{
+  
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:NULL];
+}
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory{
+    MXLogger * mxLogger =  [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory];
+    return mxLogger;
+}
+
+
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace{
     return [self initWithNamespace:nameSpace diskCacheDirectory:nil];
 }
@@ -34,14 +45,67 @@ static NSString * _defaultDiskCacheDirectory;
         _nameSpace = nameSpace;
         _directory = directory;
         _logger =  mx_logger::initialize_namespace(nameSpace.UTF8String, directory.UTF8String);
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(applicationWillTerminate:)
+                                                     name:UIApplicationWillTerminateNotification
+                                                   object:nil];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(applicationDidEnterBackground:)
+                                                     name:UIApplicationDidEnterBackgroundNotification
+                                                   object:nil];
+        _shouldRemoveExpiredDataWhenTerminate = YES;
+        _shouldRemoveExpiredDataWhenEnterBackground = YES;
+        NSString * queueName = [NSString stringWithFormat:@"com.mxlog.LoggerCache.%@",nameSpace];
+        
+        _ioQueue = dispatch_queue_create(queueName.UTF8String, DISPATCH_QUEUE_SERIAL);
+        
     }
     return self;
 }
+
 
 - (void)dealloc
 {
     mx_logger::delete_namespace(_nameSpace.UTF8String, _directory.UTF8String);
     
+}
+/// 程序终止
+- (void)applicationWillTerminate:(NSNotification *)notification {
+   
+    if (!self.shouldRemoveExpiredDataWhenTerminate) {
+        return;
+    }
+    dispatch_sync(self.ioQueue, ^{
+        [self removeExpireData];
+    });
+}
+/// 进入后台
+- (void)applicationDidEnterBackground:(NSNotification *)notification {
+    if (!self.shouldRemoveExpiredDataWhenEnterBackground) {
+        return;
+    }
+    Class UIApplicationClass = NSClassFromString(@"UIApplication");
+    if(!UIApplicationClass || ![UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
+        return;
+    }
+    UIApplication *application = [UIApplication performSelector:@selector(sharedApplication)];
+    __block UIBackgroundTaskIdentifier bgTask = [application beginBackgroundTaskWithExpirationHandler:^{
+       
+        [application endBackgroundTask:bgTask];
+        bgTask = UIBackgroundTaskInvalid;
+    }];
+    dispatch_async(self.ioQueue, ^{
+        [self removeExpireData];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [application endBackgroundTask:bgTask];
+            bgTask = UIBackgroundTaskInvalid;
+        });
+    });
+}
+- (BOOL)isDebugTracking{
+    return _logger -> is_debug_tracking();
 }
 - (void)setStoragePolicy:(NSString *)storagePolicy{
     _storagePolicy = storagePolicy;

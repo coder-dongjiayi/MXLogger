@@ -13,6 +13,10 @@
 #include <mutex>
 #include <unordered_map>
 #include "mxlogger_helper.hpp"
+#ifdef  __APPLE__
+#include <sys/sysctl.h>
+#endif
+#include <unistd.h>
 namespace mxlogger{
 
 std::unordered_map<string, mxlogger *> *global_instanceDic_ =  new unordered_map<string, mxlogger *>;
@@ -67,6 +71,51 @@ static policy::storage_policy policy_(const char* storage_policy){
     return policy::storage_policy::yyyy_MM_dd;
 }
 
+static bool is_debuging_() {
+#ifdef __ANDROID__
+    
+    return true;
+//    const char* filename = "/proc/self/status";
+//    int fd = open(filename, O_RDONLY);
+//    if(fd < 0)
+//    {
+//        return false;
+//    }
+//
+//    char buffer[1000];
+//    int bytesRead = read(fd, buffer, sizeof(buffer) - 1);
+//    close(fd);
+//    if(bytesRead <= 0)
+//    {
+//        return false;
+//    }
+//
+//    buffer[bytesRead] = 0;
+//    const char tracerPidText[] = "TracerPid:";
+//    const char* tracerPointer = strstr(buffer, tracerPidText);
+//    if(tracerPointer == NULL)
+//    {
+//        return false;
+//    }
+//
+//    tracerPointer += sizeof(tracerPidText);
+//    return atoi(tracerPointer) > 0;
+#elif __APPLE__
+    struct kinfo_proc procInfo;
+    size_t structSize = sizeof(procInfo);
+    int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
+    
+    if(sysctl(mib, sizeof(mib)/sizeof(*mib), &procInfo, &structSize, NULL, 0) != 0)
+    {
+        strerror(errno);
+        return false;
+    }
+    
+    return (procInfo.kp_proc.p_flag & P_TRACED) != 0;
+
+#endif
+    return false;
+}
 std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     if (directory == nullptr) {
         return std::string{nullptr};
@@ -130,9 +179,6 @@ void mxlogger::destroy(){
 
 mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path){
     
-    enable_ = true;
-    console_enable_ = true;
-    file_enable_ = true;
     
     console_sink_ = std::make_shared<sinks::console_sink>(stdout);
     console_sink_ -> set_pattern("[%d][%p]%m");
@@ -147,6 +193,13 @@ mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path)
     file_sink_ -> set_pattern("[%d][%t][%p]%m");
     
     file_sink_ -> set_level(level::level_enum::info);
+    
+    is_debug_tracking_ = is_debuging_();
+    
+    enable_ = true;
+    console_enable_ = is_debug_tracking_;
+    file_enable_ = true;
+    
 }
 
 mxlogger::~mxlogger(){
@@ -157,7 +210,9 @@ mxlogger::~mxlogger(){
 const char* mxlogger::diskcache_path() const{
     return diskcache_path_.c_str();
 }
-
+const bool mxlogger::is_debug_tracking(){
+    return is_debug_tracking_;
+}
 void mxlogger::set_enable(bool enable){
     
     enable_ = enable;
@@ -237,12 +292,12 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
     
     string _name = name == nullptr ? string{"mxlogger"} : name;
     
-    string _tag = tag == nullptr ? string{} : tag;
+    string _tag = tag == nullptr ? string{} : string{tag};
     
     string _msg = msg == nullptr ? string{"nullptr"} : msg;
     
     details::log_msg log_msg(lvl,_name,_tag,_msg,is_main_thread);
-
+ 
  
    if (console_enable_ == true) {
         console_sink_->log(log_msg);
