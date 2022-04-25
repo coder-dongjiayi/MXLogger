@@ -10,6 +10,7 @@
 @implementation FlutterMxloggerPlugin
 
 
+
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
  
   FlutterMethodChannel* channel = [FlutterMethodChannel

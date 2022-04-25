@@ -26,8 +26,29 @@ class _MyAppState extends State<MyApp> {
 
   void init() async{
 
+    logger =  await MXLogger.initialize(nameSpace: "flutter_mxlogger",enable: true);
+   
+    String  isDebug =  logger.isDebugTraceing() == true ? "正在调试" : "非调试状态";
+    logger.info(isDebug,name: "mxlogger",tag: "isDebug");
+    
+    String? diskCachePath = logger.getdDiskcachePath();
+    if(diskCachePath == null){
+      logger.error("diskCachePath 异常");
+    }else{
+      logger.info(diskCachePath,name: "mxlogger",tag: "path");
+    }
 
-    logger =  await MXLogger.initialize(nameSpace: "flutter",enable: true);
+    logger.setMaxdiskSize(1024*1024*10);
+    logger.setMaxdiskAge(60*60*24*7);
+
+  /// 以下都是默认设置
+    logger.setStoragePolicy("yyy_MM_dd");
+    logger.setFileName("mxlog");
+    logger.shouldRemoveExpiredDataWhenEnterBackground(true);
+    logger.setConsoleLevel(0);
+    logger.setFileLevel(1);
+    logger.setConsolePattern("[%d][%p]%m");
+    logger.setFilePattern("[%d][%t][%p]%m");
   }
 
 

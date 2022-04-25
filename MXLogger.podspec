@@ -26,6 +26,7 @@ Pod::Spec.new do |s|
    s.libraries    = "z", "c++"
    
   s.pod_target_xcconfig = {
+     'VALID_ARCHS' => 'x86_64 armv7 arm64',
     "CLANG_CXX_LANGUAGE_STANDARD" => "gnu++17",
     "CLANG_CXX_LIBRARY" => "libc++",
     "CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF" => "NO",
