@@ -1,14 +1,23 @@
 #import "FlutterMxloggerPlugin.h"
 
-#include "mxlogger_manager.hpp"
+
 
 @implementation FlutterMxloggerPlugin
+
+static NSString * _nameSpace;
+
+static NSString * _directory;
+
+
+
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
+ 
   FlutterMethodChannel* channel = [FlutterMethodChannel
       methodChannelWithName:@"flutter_mxlogger"
             binaryMessenger:[registrar messenger]];
   FlutterMxloggerPlugin* instance = [[FlutterMxloggerPlugin alloc] init];
   [registrar addMethodCallDelegate:instance channel:channel];
+  
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -25,13 +34,20 @@
       }else{
           directory = arguments[@"directory"];
       }
-     NSString * diskCachePath  = [[directory stringByAppendingPathComponent:nameSpace] stringByAppendingString:@"/"];
-      mx_logger::instance().set_file_dir([diskCachePath UTF8String]);
+
+      _directory = directory;
+      _nameSpace = nameSpace;
+      
+      [MXLogger initializeWithNamespace:nameSpace diskCacheDirectory:directory];
+
       result(@YES);
       
   } else {
     result(FlutterMethodNotImplemented);
   }
+}
++(MXLogger*)logger{
+    return [MXLogger initializeWithNamespace:_nameSpace diskCacheDirectory:_directory];;
 }
 
 @end

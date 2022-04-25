@@ -1,6 +1,6 @@
 #import "AppDelegate.h"
 #import "GeneratedPluginRegistrant.h"
-#import <MXLogger/MXLogger.h>
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application

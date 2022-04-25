@@ -27,6 +27,7 @@ class MXLoggerObserver with WidgetsBindingObserver{
 
 class MXLogger{
 
+  static Pointer<Void> _handle = nullptr;
 
   static const MethodChannel _channel = MethodChannel('flutter_mxlogger');
   
@@ -42,7 +43,7 @@ class MXLogger{
     return   _enable == true;
   }
 
-  static Future<void> initialize({bool enable = false, String? nameSpace,  String? directory}) async{
+  static Future<void> initialize({bool enable = false, required String nameSpace,  String? directory}) async{
 
     _enable =  enable;
 
@@ -52,7 +53,7 @@ class MXLogger{
 
    WidgetsBinding.instance!.addObserver(_observer);
 
-   await _channel.invokeMethod("initialize",{"nameSpace":nameSpace ?? "mxlog","directory":directory});
+   await _channel.invokeMethod("initialize",{"nameSpace":nameSpace,"directory":directory});
 
   }
 
