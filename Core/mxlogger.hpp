@@ -44,6 +44,9 @@ public:
     /// 释放 logger
     static void delete_namespace(const char* ns,const char* directory);
     
+    static std::string md5(const char* ns,const char* directory);
+    
+    /// 释放全部的logger
     static void destroy();
     
     std::string map_key;

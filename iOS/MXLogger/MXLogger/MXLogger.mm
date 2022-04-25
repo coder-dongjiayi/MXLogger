@@ -7,7 +7,7 @@
 
 #import "MXLogger.h"
 #include <MXLoggerCore/mxlogger.hpp>
-
+static NSMutableDictionary<NSString*,MXLogger *> *global_instanceDic = nil;
 static NSString * _defaultDiskCacheDirectory;
 
 @interface MXLogger()
@@ -29,8 +29,42 @@ static NSString * _defaultDiskCacheDirectory;
     return [self initializeWithNamespace:nameSpace diskCacheDirectory:NULL];
 }
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory{
-    MXLogger * mxLogger =  [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory];
-    return mxLogger;
+ 
+    if (global_instanceDic == nil) {
+        global_instanceDic = [NSMutableDictionary dictionary];
+    }
+  
+    NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
+    if ([global_instanceDic objectForKey:key] == nil) {
+        MXLogger * logger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory];
+        [global_instanceDic setObject:logger forKey:key];
+        return logger;
+    }
+    MXLogger * logger = [global_instanceDic objectForKey:key];
+    return logger;
+    
+}
++(void)destroyWithNamespace:(nonnull NSString*)nameSpace{
+    [self destroyWithNamespace:nameSpace diskCacheDirectory:NULL];
+}
++(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory{
+    NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
+    if ([global_instanceDic objectForKey:key]) {
+        MXLogger * logger =  [global_instanceDic objectForKey:key];
+        logger = nil;
+        [global_instanceDic removeObjectForKey:key];
+    }
+}
+
++(NSString*)mapKey:(NSString*)nameSpace diskCacheDirectory:(NSString*)directory{
+    
+    if (!directory) {
+        directory = [MXLogger defaultDiskCacheDirectory];
+    }
+    std::string mapKey =  mx_logger::md5(nameSpace.UTF8String, directory.UTF8String);
+    
+    NSString * key =  [NSString stringWithUTF8String:mapKey.data()];
+    return key;
 }
 
 
@@ -60,6 +94,7 @@ static NSString * _defaultDiskCacheDirectory;
         NSString * queueName = [NSString stringWithFormat:@"com.mxlog.LoggerCache.%@",nameSpace];
         
         _ioQueue = dispatch_queue_create(queueName.UTF8String, DISPATCH_QUEUE_SERIAL);
+       
         
     }
     return self;
@@ -68,6 +103,7 @@ static NSString * _defaultDiskCacheDirectory;
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     mx_logger::delete_namespace(_nameSpace.UTF8String, _directory.UTF8String);
     
 }

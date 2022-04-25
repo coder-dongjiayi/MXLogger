@@ -18,31 +18,35 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    _logger =   [[MXLogger alloc] initWithNamespace:@"mxLogger" diskCacheDirectory:NULL];
+    {
+        MXLogger* logger =   [MXLogger initializeWithNamespace:@"default"];
+        
+        
+    }
     
-    NSString * isDebug = _logger.isDebugTracking == YES ? @"正在调试" : @"非调试状态";
-        _logger.fileHeader =  [NSString stringWithFormat:@"版本号:1.0.0 平台:iOS isDebug:%@",isDebug];
-    
-    [_logger info:@"mxlogger" msg:[NSString stringWithFormat:@"%@",isDebug] tag:@"isDebug"];
-    [_logger info:@"mxlogger" msg:_logger.diskCachePath tag:@"日志目录"];
-    
-    //    /**下面这些设置都是默认设置 不写也行 **/
-    
-    _logger.maxDiskAge = 60 * 60 * 24 * 7; // 一个星期
-    _logger.maxDiskSize = 1024 * 1024 * 10; // 10M
-
-    _logger.storagePolicy = @"yyyy_MM_dd";
-    _logger.fileName = @"mxlog";
-    
-    _logger.shouldRemoveExpiredDataWhenEnterBackground = YES;
-
-    _logger.shouldRemoveExpiredDataWhenTerminate = YES;
-
-    _logger.consoleLevel = 0;
-    _logger.fileLevel = 1;
-    
-    _logger.consolePattern = @"[%d][%p]%m";
-    _logger.filePattern = @"[%d][%t][%p]%m";
+//    NSString * isDebug = _logger.isDebugTracking == YES ? @"正在调试" : @"非调试状态";
+//        _logger.fileHeader =  [NSString stringWithFormat:@"版本号:1.0.0 平台:iOS isDebug:%@",isDebug];
+//
+//    [_logger info:@"mxlogger" msg:[NSString stringWithFormat:@"%@",isDebug] tag:@"isDebug"];
+//    [_logger info:@"mxlogger" msg:_logger.diskCachePath tag:@"日志目录"];
+//
+//    //    /**下面这些设置都是默认设置 不写也行 **/
+//
+//    _logger.maxDiskAge = 60 * 60 * 24 * 7; // 一个星期
+//    _logger.maxDiskSize = 1024 * 1024 * 10; // 10M
+//
+//    _logger.storagePolicy = @"yyyy_MM_dd";
+//    _logger.fileName = @"mxlog";
+//
+//    _logger.shouldRemoveExpiredDataWhenEnterBackground = YES;
+//
+//    _logger.shouldRemoveExpiredDataWhenTerminate = YES;
+//
+//    _logger.consoleLevel = 0;
+//    _logger.fileLevel = 1;
+//
+//    _logger.consolePattern = @"[%d][%p]%m";
+//    _logger.filePattern = @"[%d][%t][%p]%m";
 
 
 }

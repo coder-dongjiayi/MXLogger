@@ -1,13 +1,13 @@
 #import "FlutterMxloggerPlugin.h"
 
 
-
+@interface FlutterMxloggerPlugin()
+{
+   
+    
+}
+@end
 @implementation FlutterMxloggerPlugin
-
-static NSString * _nameSpace;
-
-static NSString * _directory;
-
 
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
@@ -35,19 +35,13 @@ static NSString * _directory;
           directory = arguments[@"directory"];
       }
 
-      _directory = directory;
-      _nameSpace = nameSpace;
-      
-      [MXLogger initializeWithNamespace:nameSpace diskCacheDirectory:directory];
 
-      result(@YES);
+      result(@{@"nameSpace":nameSpace,@"directory":directory});
       
   } else {
     result(FlutterMethodNotImplemented);
   }
 }
-+(MXLogger*)logger{
-    return [MXLogger initializeWithNamespace:_nameSpace diskCacheDirectory:_directory];;
-}
+
 
 @end

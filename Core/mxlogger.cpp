@@ -35,6 +35,7 @@ struct console_mutex{
 
 using mutex_t = typename mutex::console_mutex;
 
+
 static level::level_enum level_(int lvl){
   
     switch (lvl) {
@@ -116,6 +117,17 @@ static bool is_debuging_() {
 #endif
     return false;
 }
+
+
+ std::string mxlogger::md5(const char* ns,const char* directory){
+     
+     std::string diskcache_path = get_diskcache_path_(ns,directory);
+     std::string map_key =  mxlogger_helper::mx_md5(diskcache_path);
+
+     return map_key;
+}
+
+
 std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     if (directory == nullptr) {
         return std::string{nullptr};
@@ -203,7 +215,7 @@ mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path)
 }
 
 mxlogger::~mxlogger(){
-    printf("mxlogger 释放");
+    printf("mxlogger 释放\n");
     
 }
 

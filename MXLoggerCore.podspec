@@ -21,6 +21,7 @@ Pod::Spec.new do |s|
    
 
   s.libraries    = "z", "c++"
+  s.framework    = "CoreFoundation","UIKit"
 
   s.pod_target_xcconfig = {
     "CLANG_CXX_LANGUAGE_STANDARD" => "gnu++17",

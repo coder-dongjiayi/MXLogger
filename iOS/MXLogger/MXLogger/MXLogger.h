@@ -14,11 +14,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MXLogger : NSObject
 
-/// 便捷初始化
+
+/// 创建对象爱
+/// @param nameSpace ns  要调用  destroyWithNamespace 进行释放
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace;
 
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
 
+
+/// 释放对象的方法
+/// @param nameSpace ns
++(void)destroyWithNamespace:(nonnull NSString*)nameSpace;
++(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
 
 
 /// 初始化MXLogger

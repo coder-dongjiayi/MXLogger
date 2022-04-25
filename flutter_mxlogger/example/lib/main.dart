@@ -5,7 +5,7 @@ import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  await MXLogger.initialize(nameSpace: "flutter",enable: true);
+
   runApp(const MyApp());
 }
 
@@ -17,12 +17,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
+ late MXLogger logger;
   @override
   void initState() {
     super.initState();
+  init();
+  }
+
+  void init() async{
 
 
+    logger =  await MXLogger.initialize(nameSpace: "flutter",enable: true);
   }
 
 
@@ -38,26 +43,26 @@ class _MyAppState extends State<MyApp> {
             children: [
 
               ElevatedButton(onPressed: (){
-                MXLogger.debug("这是debug数据");
+                logger.debug("这是debug数据");
 
               }, child: Text("debug")),
               ElevatedButton(onPressed: (){
-                MXLogger.info("这是info数据");
+                logger.info("这是info数据",name: "flutter",tag: "tag");
 
               }, child: Text("info")),
               ElevatedButton(onPressed: (){
-                MXLogger.warn("这是warn数据");
+                logger.warn("这是warn数据");
 
               }, child: Text("warn")),
               ElevatedButton(onPressed: (){
-                MXLogger.error("这是erro数据");
+                logger.error("这是erro数据");
 
               }, child: Text("error")),
               ElevatedButton(onPressed: () async{
-               String? zipPath = await MXLogger.compressLogFile();
-               if(zipPath != null){
-                 print("zipPath:${zipPath}");
-               }
+               // String? zipPath = await MXLogger.compressLogFile();
+               // if(zipPath != null){
+               //   print("zipPath:${zipPath}");
+               // }
 
               }, child: Text("压缩文件夹"))
             ],

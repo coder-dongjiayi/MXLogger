@@ -7,17 +7,24 @@
 //
 
 #include <MXLogger/MXLogger.h>
-#include <MXLoggerCore/mxlogger.hpp>
+
 #define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #define MXLOGGERR_FUNC(func) flutter_mxlogger_ ## func
 
 
+
+MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* directory){
+    MXLogger * logger = nil;
+
+    logger =  [[MXLogger alloc] initWithNamespace:[NSString stringWithUTF8String:ns] diskCacheDirectory:[NSString stringWithUTF8String:directory]];
+    return (int64_t)logger;
+}
+
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_level)(const void *handle, int lvl){
-    MXLogger *logger = (__bridge MXLogger *) handle;
-    logger.fileLevel = lvl;
+ 
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_level)(const void *handle,int lvl){
-    mx_logger::initialize_namespace("", "");
+ 
   
 }
 
