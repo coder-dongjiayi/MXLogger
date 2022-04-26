@@ -80,12 +80,12 @@ class _MyAppState extends State<MyApp> {
 
               }, child: Text("error")),
               ElevatedButton(onPressed: () async{
-               // String? zipPath = await MXLogger.compressLogFile();
-               // if(zipPath != null){
-               //   print("zipPath:${zipPath}");
-               // }
 
-              }, child: Text("压缩文件夹"))
+                for(int i= 0;i < 100000;i++){
+                  logger.info("这是第${i}条数据",tag: "tag");
+                }
+
+              }, child: Text("10万条数据"))
             ],
           )
         ),
