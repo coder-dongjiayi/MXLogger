@@ -7,13 +7,12 @@
 #include <cstdint>
 #include "mxlogger.hpp"
 
-static JavaVM *g_currentJVM = nullptr;
 static jclass g_cls = nullptr;
 
 static int registerNativeMethods(JNIEnv *env, jclass cls);
 
 extern "C" JNIEXPORT JNICALL jint  JNI_OnLoad(JavaVM *vm, void *reserved) {
-   g_currentJVM = vm;
+
     JNIEnv *env;
     if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return -1;
@@ -79,6 +78,11 @@ namespace mxlogger{
         std::string directoryStr =jstring2string(env,directory);
         mx_logger *logger =    mx_logger ::initialize_namespace(nsStr.data(),directoryStr.data());
         return jlong (logger);
+    }
+    MXLOGGER_JNI void native_destroy(JNIEnv *env, jobject obj,jstring ns,jstring directory){
+        std::string nsStr =jstring2string(env,ns);
+        std::string directoryStr =jstring2string(env,directory);
+        mx_logger::delete_namespace(nsStr.data(),directoryStr.data());
     }
 
     MXLOGGER_JNI void native_log(JNIEnv *env, jobject obj,jlong handle,jint type,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
@@ -168,6 +172,7 @@ namespace mxlogger{
 static JNINativeMethod g_methods[] = {
         {"version", "()Ljava/lang/String;", (void *) mxlogger::version},
         {"jniInitialize","(Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::jniInitialize},
+        {"native_destroy","(Ljava/lang/String;Ljava/lang/String;)V",(void *)mxlogger::native_destroy},
         {"native_log","(JILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
         {"native_storagePolicy","(JLjava/lang/String;)V",(void *)mxlogger::native_storagePolicy},
         {"native_consolePattern","(JLjava/lang/String;)V",(void *)mxlogger::native_consolePattern},

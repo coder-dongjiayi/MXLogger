@@ -45,6 +45,25 @@ public class MXLogger implements LifecycleEventObserver {
         throw new IllegalStateException("MXLogger创建失败 [" + nameSpace + "]");
     }
 
+    /**
+     * 释放native层内存
+     * */
+    public  static  void destroy(Context context,@NonNull String nameSpace){
+       destroy(context,nameSpace,null);
+
+    }
+
+    public  static void destroy(Context context,@NonNull String nameSpace, @Nullable String directory){
+
+
+        if (directory == null){
+            directory = defaultDiskCacheDirectory(context);
+        }
+        native_destroy(nameSpace,directory);
+
+    }
+
+
     public   void debug(@Nullable String msg){
        debug(null,msg);
     }
@@ -144,6 +163,7 @@ public class MXLogger implements LifecycleEventObserver {
 
     private static native String version();
    private  static  native  long jniInitialize(String nameSpace,String directory);
+    private  static  native  void native_destroy(String nameSpace,String directory);
 
    private  static  native  void native_log(long handle,int logType,String name,int level,String msg,String tag,boolean mainThread);
 
