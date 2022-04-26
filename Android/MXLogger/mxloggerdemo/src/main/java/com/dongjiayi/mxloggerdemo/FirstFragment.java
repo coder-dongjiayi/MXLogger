@@ -16,12 +16,14 @@ public class FirstFragment extends Fragment {
 
     private FragmentFirstBinding binding;
 
+    private  MXLogger logger;
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
 
+        logger =   MXLogger.initWithNamespace(this.getContext(),"javamxlogger");
         binding = FragmentFirstBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
@@ -33,8 +35,11 @@ public class FirstFragment extends Fragment {
         binding.buttonFirst.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MXLogger.debug("这是MXLogger的debug信息");
-
+                logger.debug("tag","这是一条debug信息");
+                logger.info("tag","这是一条info信息");
+                logger.warn("tag","这是一条warn信息");
+                logger.error("tag","这是一条error信息");
+                logger.fatal("tag","这是一条fatal信息");
             }
         });
     }

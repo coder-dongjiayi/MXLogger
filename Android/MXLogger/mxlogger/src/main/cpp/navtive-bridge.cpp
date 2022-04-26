@@ -37,13 +37,13 @@ extern "C" JNIEXPORT JNICALL jint  JNI_OnLoad(JavaVM *vm, void *reserved) {
 
         return -4;
     }
+
     return JNI_VERSION_1_6;
 }
 
 #define MXLOGGER_JNI static
 namespace mxlogger{
-    MXLOGGER_JNI  inline log_type _logType(jint logtype);
-    MXLOGGER_JNI inline  level::level_enum _level(jint type);
+
 
     static jstring string2jstring(JNIEnv *env, const std::string &str) {
         return env->NewStringUTF(str.c_str());
@@ -60,184 +60,136 @@ namespace mxlogger{
         return "";
     }
 
+
     MXLOGGER_JNI jstring version(JNIEnv *env, jclass type){
-        std::string v = "0.0.1";
+        std::string v = "0.1.1";
         return string2jstring(env,v);
     }
-    MXLOGGER_JNI void native_storagePolicy(JNIEnv *env, jobject obj,jstring policy){
+    MXLOGGER_JNI void native_storagePolicy(JNIEnv *env, jobject obj,jlong handle,jstring policy){
         if (policy == nullptr) return;
-        policy::storage_policy  storage_policy = policy::storage_policy::yyyy_MM_dd;
-
-        const char * policy_str = jstring2string(env,policy).c_str();
-
-        if (strcmp("yyyy_MM",policy_str) == 0){
-            storage_policy = policy::storage_policy::yyyy_MM;
-        }else if(strcmp("yyyy_MM_dd",policy_str)  == 0){
-            storage_policy = policy::storage_policy::yyyy_MM_dd;
-        }else if (strcmp("yyyy_ww",policy_str) == 0){
-            storage_policy = policy::storage_policy::yyyy_ww;
-        }else if (strcmp("yyyy_MM_dd_HH",policy_str) == 0){
-            storage_policy =  policy::storage_policy::yyyy_MM_dd_HH;
-        }
-        mx_logger ::instance().set_file_policy(storage_policy);
+        std::string policyStr =jstring2string(env,policy);
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_file_policy(policyStr.data());
     }
 
-    MXLOGGER_JNI void jniInitialize(JNIEnv *env, jobject obj,jstring diskCachePath){
-        if (diskCachePath == nullptr) return;
+    MXLOGGER_JNI jlong jniInitialize(JNIEnv *env, jobject obj,jstring ns,jstring directory){
+        if (ns == nullptr || directory == nullptr) return 0;
 
-        std::string disk_cache_path =jstring2string(env,diskCachePath);
-
-        mx_logger &logger = mx_logger ::instance();
-        logger.set_file_dir(disk_cache_path);
+        std::string nsStr =jstring2string(env,ns);
+        std::string directoryStr =jstring2string(env,directory);
+        mx_logger *logger =    mx_logger ::initialize_namespace(nsStr.data(),directoryStr.data());
+        return jlong (logger);
     }
 
-    MXLOGGER_JNI void native_log(JNIEnv *env, jobject obj,jint type,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
+    MXLOGGER_JNI void native_log(JNIEnv *env, jobject obj,jlong handle,jint type,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
 
         const char  * log_msg = msg == NULL ? nullptr :jstring2string(env,msg).c_str();
 
         const char  * log_tag = tag == NULL ? nullptr : jstring2string(env,tag).c_str();
 
         const char  * log_name = name == NULL ? nullptr : jstring2string(env,name).c_str();
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> log(type,level,log_name,log_msg,log_tag,mainThread);
 
-        mx_logger::instance().log(_logType(type),_level(level),log_name,log_msg,log_tag,(bool)mainThread);
     }
 
-    MXLOGGER_JNI void native_async_file_log(JNIEnv *env, jobject obj,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
-
-        const char  * log_msg = msg == NULL ? nullptr :jstring2string(env,msg).c_str();
-
-        const char  * log_tag = tag == NULL ? nullptr : jstring2string(env,tag).c_str();
-
-        const char  * log_name = name == NULL ? nullptr : jstring2string(env,name).c_str();
 
 
-        mx_logger::instance().log_async_file(_level(level),log_name,log_msg,log_tag,(bool )mainThread);
-    }
-
-    MXLOGGER_JNI void native_sync_file_log(JNIEnv *env, jobject obj,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
-
-        const char  * log_msg = msg == NULL ? nullptr :jstring2string(env,msg).c_str();
-
-        const char  * log_tag = tag == NULL ? nullptr : jstring2string(env,tag).c_str();
-
-        const char  * log_name = name == NULL ? nullptr : jstring2string(env,name).c_str();
-
-
-        mx_logger::instance().log_sync_file(_level(level),log_name,log_msg,log_tag,(bool )mainThread);
-    }
-
-    MXLOGGER_JNI inline log_type _logType(jint type){
-        switch (type) {
-            case 0:
-                return log_type::all;
-            case 1:
-                return log_type::console;
-            case 2:
-                return log_type::file;
-            default:
-                return log_type::all;
-        }
-    }
-    MXLOGGER_JNI inline  level::level_enum _level(jint type){
-        switch (type) {
-            case 0:
-                return level::level_enum::debug;
-            case 1:
-                return level::level_enum::info;
-            case 2:
-                return level::level_enum::warn;
-            case 3:
-                return level::level_enum::error;
-            case 4:
-                return level::level_enum::fatal;
-            default:
-                return level::level_enum::debug;
-        }
-    }
-    MXLOGGER_JNI void native_consolePattern(JNIEnv *env, jobject obj,jstring pattern){
+    MXLOGGER_JNI void native_consolePattern(JNIEnv *env, jobject obj,jlong handle,jstring pattern){
         if (pattern == nullptr) return;
         std::string  console = jstring2string(env,pattern);
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger ->set_console_pattern(console.data());
 
-        mx_logger ::instance().set_console_pattern(console);
     }
-    MXLOGGER_JNI void native_filePattern(JNIEnv *env, jobject obj,jstring pattern){
+    MXLOGGER_JNI void native_filePattern(JNIEnv *env, jobject obj,jlong handle,jstring pattern){
         if (pattern == nullptr) return;
         std::string  file = jstring2string(env,pattern);
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_file_pattern(file.data());
+    }
+    MXLOGGER_JNI void native_consoleEnable(JNIEnv *env, jobject obj,jlong handle,jboolean enable){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_console_enable(enable);
+    }
+    MXLOGGER_JNI void native_fileEnable(JNIEnv *env, jobject obj,jlong handle,jboolean enable){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_file_enable(enable);
+    }
 
-        mx_logger ::instance().set_file_pattern(file);
+    MXLOGGER_JNI void native_consoleLevel(JNIEnv *env, jobject obj,jlong handle,jint level){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_console_level(level);
     }
-    MXLOGGER_JNI void native_consoleEnable(JNIEnv *env, jobject obj,jboolean enable){
-        mx_logger ::instance().set_console_enable((bool )enable);
+    MXLOGGER_JNI void native_fileLevel(JNIEnv *env, jobject obj,jlong handle,jint level){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_file_level(level);
     }
-    MXLOGGER_JNI void native_fileEnable(JNIEnv *env, jobject obj,jboolean enable){
-        mx_logger ::instance().set_file_enable((bool )enable);
-    }
-
-    MXLOGGER_JNI void native_consoleLevel(JNIEnv *env, jobject obj,jint level){
-        mx_logger::instance().set_console_level(_level(level));
-    }
-    MXLOGGER_JNI void native_fileLevel(JNIEnv *env, jobject obj,jint level){
-      mx_logger ::instance().set_file_level(_level(level));
-    }
-    MXLOGGER_JNI void native_fileHeader(JNIEnv *env, jobject obj,jstring file_header){
+    MXLOGGER_JNI void native_fileHeader(JNIEnv *env, jobject obj,jlong handle,jstring file_header){
         std::string file_header_str = jstring2string(env,file_header);
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_file_header(file_header_str.data());
 
-        mx_logger::instance().set_file_header(file_header_str.c_str());
     }
-    MXLOGGER_JNI void native_fileName(JNIEnv *env, jobject obj,jstring file_name){
+    MXLOGGER_JNI void native_fileName(JNIEnv *env, jobject obj,jlong handle,jstring file_name){
         std::string file_name_str = jstring2string(env,file_name);
-        mx_logger::instance().set_file_name(file_name_str.c_str());
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_file_name(file_name_str.data());
     }
-    MXLOGGER_JNI void native_maxDiskAge(JNIEnv *env, jobject obj,jlong maxAge){
-        mx_logger::instance().set_file_max_age((long )maxAge);
+    MXLOGGER_JNI void native_maxDiskAge(JNIEnv *env, jobject obj,jlong handle,jlong maxAge){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_file_max_age(maxAge);
     }
-    MXLOGGER_JNI void native_maxDiskSize(JNIEnv *env, jobject obj,jlong maxSize){
-        mx_logger::instance().set_file_max_size((long )maxSize);
+    MXLOGGER_JNI void native_maxDiskSize(JNIEnv *env, jobject obj,jlong handle,jlong maxSize){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_file_max_size(maxSize);
     }
-    MXLOGGER_JNI jlong native_logSize(){
-        return  (long )mx_logger::instance().file_size();
+    MXLOGGER_JNI jlong native_logSize(JNIEnv *env, jobject obj,jlong handle){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        return  (long )logger->file_size();
     }
-    MXLOGGER_JNI jboolean native_isDebugTracking(){
-        return (bool )mx_logger::instance().is_debuging();
-    }
-    MXLOGGER_JNI void native_isAsync(JNIEnv *env, jobject obj,jboolean isAsync){
-        mx_logger::instance().set_file_async(isAsync);
-    }
-    MXLOGGER_JNI void native_removeExpireData(){
-        mx_logger::instance().remove_expire_data();
+    MXLOGGER_JNI jboolean native_isDebugTracking(JNIEnv *env, jobject obj,jlong handle){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        return (bool )logger->is_debug_tracking();
     }
 
-    MXLOGGER_JNI void native_removeAll(){
-        mx_logger::instance().remove_all();
+
+    MXLOGGER_JNI void native_removeExpireData(JNIEnv *env, jobject obj,jlong handle){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> remove_expire_data();
+    }
+
+    MXLOGGER_JNI void native_removeAll(JNIEnv *env, jobject obj,jlong handle){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> remove_all();
     }
 
 }
 static JNINativeMethod g_methods[] = {
         {"version", "()Ljava/lang/String;", (void *) mxlogger::version},
-        {"jniInitialize","(Ljava/lang/String;)V",(void *)mxlogger::jniInitialize},
-        {"native_log","(ILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
-        {"native_async_file_log","(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_async_file_log},
-        {"native_sync_file_log","(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_sync_file_log},
+        {"jniInitialize","(Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::jniInitialize},
+        {"native_log","(JILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
+        {"native_storagePolicy","(JLjava/lang/String;)V",(void *)mxlogger::native_storagePolicy},
+        {"native_consolePattern","(JLjava/lang/String;)V",(void *)mxlogger::native_consolePattern},
+        {"native_filePattern","(JLjava/lang/String;)V",(void *)mxlogger::native_filePattern},
+        {"native_consoleLevel","(JI)V",(void *)mxlogger::native_consoleLevel},
+        {"native_fileLevel","(JI)V",(void *)mxlogger::native_fileLevel},
 
-        {"native_storagePolicy","(Ljava/lang/String;)V",(void *)mxlogger::native_storagePolicy},
-        {"native_consolePattern","(Ljava/lang/String;)V",(void *)mxlogger::native_consolePattern},
-        {"native_filePattern","(Ljava/lang/String;)V",(void *)mxlogger::native_filePattern},
-        {"native_consoleLevel","(I)V",(void *)mxlogger::native_consoleLevel},
-        {"native_fileLevel","(I)V",(void *)mxlogger::native_fileLevel},
-        {"native_consoleEnable","(Z)V",(void *)mxlogger::native_consoleEnable},
-        {"native_fileEnable","(Z)V",(void *)mxlogger::native_fileEnable},
-        {"native_fileHeader","(Ljava/lang/String;)V",(void *)mxlogger::native_fileHeader},
-        {"native_fileName","(Ljava/lang/String;)V",(void *)mxlogger::native_fileName},
-        {"native_maxDiskAge","(J)V",(void *)mxlogger::native_maxDiskAge},
-        {"native_maxDiskSize","(J)V",(void *)mxlogger::native_maxDiskSize},
-        {"native_logSize","()J",(void *)mxlogger::native_logSize},
-        {"native_isDebugTracking","()Z",(void *)mxlogger::native_isDebugTracking},
-        {"native_isAsync","(Z)V",(void *)mxlogger::native_isAsync},
-        {"native_removeExpireData","()V",(void *)mxlogger::native_removeExpireData},
-        {"native_removeAll","()V",(void *)mxlogger::native_removeAll}
+        {"native_consoleEnable","(JZ)V",(void *)mxlogger::native_consoleEnable},
+        {"native_fileEnable","(JZ)V",(void *)mxlogger::native_fileEnable},
+        {"native_fileHeader","(JLjava/lang/String;)V",(void *)mxlogger::native_fileHeader},
+        {"native_fileName","(JLjava/lang/String;)V",(void *)mxlogger::native_fileName},
+        {"native_maxDiskAge","(JJ)V",(void *)mxlogger::native_maxDiskAge},
+        {"native_maxDiskSize","(JJ)V",(void *)mxlogger::native_maxDiskSize},
+        {"native_logSize","(J)J",(void *)mxlogger::native_logSize},
+        {"native_isDebugTracking","(J)Z",(void *)mxlogger::native_isDebugTracking},
+        {"native_removeExpireData","(J)V",(void *)mxlogger::native_removeExpireData},
+        {"native_removeAll","(J)V",(void *)mxlogger::native_removeAll}
 
 
 };
 static int registerNativeMethods(JNIEnv *env, jclass cls) {
-    return env->RegisterNatives(cls, g_methods, sizeof(g_methods) / sizeof(g_methods[0]));
+    jint n =  sizeof(g_methods) / sizeof(g_methods[0]);
+    jint  r = env->RegisterNatives(cls, g_methods, n);
+    return r;
 }

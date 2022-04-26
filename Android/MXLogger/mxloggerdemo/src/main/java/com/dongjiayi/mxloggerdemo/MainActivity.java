@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-            MXLogger.initialize(MainActivity.this);
+ 
 
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
