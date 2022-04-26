@@ -116,6 +116,11 @@ namespace mxlogger{
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger -> set_console_enable(enable);
     }
+
+    MXLOGGER_JNI void native_enable(JNIEnv *env, jobject obj,jlong handle,jboolean enable){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> set_enable(enable);
+    }
     MXLOGGER_JNI void native_fileEnable(JNIEnv *env, jobject obj,jlong handle,jboolean enable){
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger -> set_file_enable(enable);
@@ -182,6 +187,7 @@ static JNINativeMethod g_methods[] = {
 
         {"native_consoleEnable","(JZ)V",(void *)mxlogger::native_consoleEnable},
         {"native_fileEnable","(JZ)V",(void *)mxlogger::native_fileEnable},
+        {"native_enable","(JZ)V",(void *)mxlogger::native_fileEnable},
         {"native_fileHeader","(JLjava/lang/String;)V",(void *)mxlogger::native_fileHeader},
         {"native_fileName","(JLjava/lang/String;)V",(void *)mxlogger::native_fileName},
         {"native_maxDiskAge","(JJ)V",(void *)mxlogger::native_maxDiskAge},

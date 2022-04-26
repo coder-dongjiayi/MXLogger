@@ -173,6 +173,7 @@ public class MXLogger implements LifecycleEventObserver {
    private  static  native void native_consoleLevel(long handle,int level);
    private  static  native void native_fileLevel(long handle,int level);
    private  static  native void native_fileEnable(long handle,boolean enable);
+   private static native  void native_enable(long handle,boolean enable);
    private  static  native void native_consoleEnable(long handle,boolean enable);
    private  static  native void native_fileName(long handle,String fileName);
    private  static  native void native_fileHeader(long handle,String fileHeader);
