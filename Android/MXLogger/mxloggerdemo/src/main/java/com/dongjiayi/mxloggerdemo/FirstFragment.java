@@ -24,6 +24,7 @@ public class FirstFragment extends Fragment {
     ) {
 
         logger =   MXLogger.initWithNamespace(this.getContext(),"javamxlogger");
+
         binding = FragmentFirstBinding.inflate(inflater, container, false);
         return binding.getRoot();
 

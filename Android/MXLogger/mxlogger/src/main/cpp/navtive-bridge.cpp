@@ -60,10 +60,13 @@ namespace mxlogger{
     }
 
 
-    MXLOGGER_JNI jstring version(JNIEnv *env, jclass type){
-        std::string v = "0.1.1";
-        return string2jstring(env,v);
+
+    MXLOGGER_JNI jstring native_diskcache_path(JNIEnv *env, jobject obj,jlong handle){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        const char * path = logger -> diskcache_path();
+       return string2jstring(env,path);
     }
+
     MXLOGGER_JNI void native_storagePolicy(JNIEnv *env, jobject obj,jlong handle,jstring policy){
         if (policy == nullptr) return;
         std::string policyStr =jstring2string(env,policy);
@@ -175,7 +178,7 @@ namespace mxlogger{
 
 }
 static JNINativeMethod g_methods[] = {
-        {"version", "()Ljava/lang/String;", (void *) mxlogger::version},
+
         {"jniInitialize","(Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::jniInitialize},
         {"native_destroy","(Ljava/lang/String;Ljava/lang/String;)V",(void *)mxlogger::native_destroy},
         {"native_log","(JILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
@@ -184,7 +187,7 @@ static JNINativeMethod g_methods[] = {
         {"native_filePattern","(JLjava/lang/String;)V",(void *)mxlogger::native_filePattern},
         {"native_consoleLevel","(JI)V",(void *)mxlogger::native_consoleLevel},
         {"native_fileLevel","(JI)V",(void *)mxlogger::native_fileLevel},
-
+        {"native_diskcache_path","(J)Ljava/lang/String;",(void *)mxlogger::native_diskcache_path},
         {"native_consoleEnable","(JZ)V",(void *)mxlogger::native_consoleEnable},
         {"native_fileEnable","(JZ)V",(void *)mxlogger::native_fileEnable},
         {"native_enable","(JZ)V",(void *)mxlogger::native_fileEnable},
