@@ -53,7 +53,7 @@ void console_sink::log(const details::log_msg &msg)
 
     const char *msg_output = formatted.data();
 
-    __android_log_write(priority, msg.tag.data(), msg_output);
+    __android_log_write(priority,  msg.tag.data(), msg_output);
 
 #elif __APPLE__
     size_t msg_size = formatted.size();

@@ -12,33 +12,13 @@ import androidx.lifecycle.LifecycleOwner;
 import java.security.Principal;
 
 
-public class MXLogger implements LifecycleEventObserver {
+public class MXLogger  {
 
-    @Override
-    public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
 
-        if (event == Lifecycle.Event.ON_STOP){
-        if (shouldRemoveExpiredDataWhenEnterBackground == true){
-            removeExpireData();
-        }
-
-        }
-        if (event == Lifecycle.Event.ON_DESTROY){
-
-        }
-    }
 
     private static  String defaultDiskCacheDirectory;
 
-    public boolean isShouldRemoveExpiredDataWhenEnterBackground() {
-        return shouldRemoveExpiredDataWhenEnterBackground;
-    }
 
-    public void setShouldRemoveExpiredDataWhenEnterBackground(boolean shouldRemoveExpiredDataWhenEnterBackground) {
-        this.shouldRemoveExpiredDataWhenEnterBackground = shouldRemoveExpiredDataWhenEnterBackground;
-    }
-    /// 程序进入后台的时候是否清理过期文件 默认YES
-    private boolean shouldRemoveExpiredDataWhenEnterBackground;
     ///  文件存储策略
 ///  yyyy_MM                    按月存储
 ///  yyyy_MM_dd              按天存储
@@ -83,7 +63,6 @@ public class MXLogger implements LifecycleEventObserver {
     public long getLogSize() {
         return native_logSize(nativeHandle);
     }
-
 
 
     public String getDiskCachePath() {
@@ -244,24 +223,8 @@ public class MXLogger implements LifecycleEventObserver {
     }
 
 
-    public   void debug(@Nullable String msg){
-       debug(null,msg);
-    }
 
-    public   void info(@Nullable String msg){
-        info(null,msg);
-    }
 
-    public   void warn(@Nullable String msg){
-        warn(null,msg);
-    }
-    public   void error(@Nullable String msg){
-        error(null,msg);
-    }
-
-    public   void fatal(@Nullable String msg){
-      fatal(null,msg);
-    }
 
 
     public   void debug(@Nullable String tag,@Nullable String msg){
