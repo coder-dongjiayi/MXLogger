@@ -3,6 +3,8 @@ import 'package:flutter_mxlogger/src/widget/log_listview.dart';
 import 'package:flutter_mxlogger/src/widget/search_bar.dart';
 import 'package:flutter_mxlogger/src/theme/mx_theme.dart';
 
+import 'mxlogger_detail_page.dart';
+
 void show(BuildContext context) {
   showModalBottomSheet(
       context: context,
@@ -85,6 +87,11 @@ class _MXLoggerAnalyzerState extends State<MXLoggerAnalyzer> {
       ),
       body: LogListView(
         dataSource: dataSource,
+        callback: (index){
+          Navigator.of(context).push(MaterialPageRoute(builder: (context){
+            return MXLoggerDetailPage();
+          }));
+        },
       ),
 
     );

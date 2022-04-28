@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mxlogger/src/theme/mx_theme.dart';
-
+typedef LogItemTapCallback = void Function(int index);
 class LogListView extends StatefulWidget {
-   LogListView({Key? key,this.dataSource}) : super(key: key);
+   LogListView({Key? key,this.dataSource,this.callback}) : super(key: key);
    List<Map<String,dynamic>>? dataSource;
+   LogItemTapCallback? callback;
   @override
   _LogListViewState createState() => _LogListViewState();
 }
@@ -16,13 +17,17 @@ class _LogListViewState extends State<LogListView> {
         itemCount: widget.dataSource!.length,
         itemBuilder: (context, index) {
           Map<String,dynamic> map =  widget.dataSource![index];
-          return Container(
+          return GestureDetector(
+            onTap: (){
+              widget.callback?.call(index);
+            },
+              child: Container(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
             color:
-                index % 2 == 0 ? MXTheme.themeColor : MXTheme.itemBackground,
-            
+            index % 2 == 0 ? MXTheme.themeColor : MXTheme.itemBackground,
+
             child: _item(msg: map["msg"],level: map["level"]),
-          );
+          ));
         });
   }
 
