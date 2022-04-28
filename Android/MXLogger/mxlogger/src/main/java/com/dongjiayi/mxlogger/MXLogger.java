@@ -1,15 +1,11 @@
 package com.dongjiayi.mxlogger;
 
 import android.content.Context;
+
 import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleEventObserver;
 
-import androidx.lifecycle.LifecycleOwner;
-
-import java.security.Principal;
 
 
 public class MXLogger  {
@@ -199,10 +195,13 @@ public class MXLogger  {
 
         long handle =   jniInitialize(nameSpace,directory);
         if (handle != 0) {
-            return new MXLogger(handle);
+
+            return new  MXLogger(handle);
         }
         throw new IllegalStateException("MXLogger创建失败 [" + nameSpace + "]");
     }
+
+
 
     /**
      * 释放native层内存

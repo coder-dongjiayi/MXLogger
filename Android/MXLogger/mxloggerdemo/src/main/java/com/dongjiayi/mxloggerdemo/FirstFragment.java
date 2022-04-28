@@ -27,8 +27,6 @@ public class FirstFragment extends Fragment {
         /// android端需要自己进行监听程序进入后台和杀死的 从而调用 removeExpireData() 方法清理日志数据
         logger =   MXLogger.initWithNamespace(this.getContext(),"javamxlogger");
 
-        String isDebug = logger.isDebugTracking() == true ? "正在调试" : "非调试状态";
-        logger.info("debug",isDebug);
         logger.info("path",logger.getDiskCachePath());
 
         logger.setMaxDiskSize(1024*1024*10);

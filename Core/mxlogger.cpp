@@ -17,6 +17,8 @@
 #include <sys/sysctl.h>
 #endif
 #include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
 namespace mxlogger{
 
 std::unordered_map<string, mxlogger *> *global_instanceDic_ =  new unordered_map<string, mxlogger *>;
@@ -75,32 +77,8 @@ static policy::storage_policy policy_(const char* storage_policy){
 static bool is_debuging_() {
 #ifdef __ANDROID__
     
-    return true;
-//    const char* filename = "/proc/self/status";
-//    int fd = open(filename, O_RDONLY);
-//    if(fd < 0)
-//    {
-//        return false;
-//    }
-//
-//    char buffer[1000];
-//    int bytesRead = read(fd, buffer, sizeof(buffer) - 1);
-//    close(fd);
-//    if(bytesRead <= 0)
-//    {
-//        return false;
-//    }
-//
-//    buffer[bytesRead] = 0;
-//    const char tracerPidText[] = "TracerPid:";
-//    const char* tracerPointer = strstr(buffer, tracerPidText);
-//    if(tracerPointer == NULL)
-//    {
-//        return false;
-//    }
-//
-//    tracerPointer += sizeof(tracerPidText);
-//    return atoi(tracerPointer) > 0;
+   return true;
+
 #elif __APPLE__
     struct kinfo_proc procInfo;
     size_t structSize = sizeof(procInfo);
@@ -215,7 +193,6 @@ mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path)
 }
 
 mxlogger::~mxlogger(){
-    printf("mxlogger 释放\n");
     
 }
 

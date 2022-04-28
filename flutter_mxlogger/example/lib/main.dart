@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
-
+import 'package:flutter_mxlogger/src/mxlogger_analyzer.dart' as Analyzer;
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -79,13 +79,12 @@ class _MyAppState extends State<MyApp> {
                 logger.error("这是erro数据");
 
               }, child: Text("error")),
-              ElevatedButton(onPressed: () async{
+              Builder(builder: (context){
+                return ElevatedButton(onPressed: (){
+                  Analyzer.show(context);
 
-                for(int i= 0;i < 100000;i++){
-                  logger.info("这是第${i}条数据",tag: "tag");
-                }
-
-              }, child: Text("10万条数据"))
+                }, child: Text("分析器"));
+              })
             ],
           )
         ),

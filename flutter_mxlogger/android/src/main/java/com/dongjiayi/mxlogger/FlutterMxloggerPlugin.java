@@ -4,12 +4,15 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import com.dongjiayi.mxlogger.MXLogger;
+
 
 /** FlutterMxloggerPlugin */
 public class FlutterMxloggerPlugin implements FlutterPlugin, MethodCallHandler {
@@ -33,10 +36,15 @@ public class FlutterMxloggerPlugin implements FlutterPlugin, MethodCallHandler {
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
     if (call.method.equals("initialize")) {
       final String nameSpace = call.argument("nameSpace");
-       String directory = call.argument("directory");
+      String directory = "";
+       if (call.argument("directory") == null){
+         directory = _context.getFilesDir().getAbsolutePath() + "/com.mxlog.LoggerCache";
+       }
+      HashMap<String,String> map = new HashMap<>();
+       map.put("nameSpace",nameSpace);
+      map.put("directory",directory);
 
-      MXLogger.initWithNamespace(_context,nameSpace,directory);
-      result.success(true);
+      result.success(map);
     } else {
       result.notImplemented();
     }
