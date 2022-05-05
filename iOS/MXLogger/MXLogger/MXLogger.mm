@@ -203,7 +203,7 @@ static NSString * _defaultDiskCacheDirectory;
 }
 
 - (NSUInteger)logSize{
-   long size =  _logger -> file_size();
+   long size =  _logger -> dir_size();
     return [[NSNumber numberWithLong:size] unsignedIntegerValue];
 }
 - (void)setFileLevel:(NSInteger)fileLevel{

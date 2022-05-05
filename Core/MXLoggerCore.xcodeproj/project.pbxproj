@@ -63,6 +63,7 @@
 		BDA28453280D778E00C833A3 /* md5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = md5.c; sourceTree = "<group>"; };
 		BDD1CA8128236876009B94D7 /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
 		BDD1CA8228236876009B94D7 /* cJSON.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON.c; sourceTree = "<group>"; };
+		BDD1CA872823A53F009B94D7 /* mxlogger_file_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_file_util.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +80,7 @@
 		BD406D8E27F19C76002C76D5 = {
 			isa = PBXGroup;
 			children = (
+				BDD1CA872823A53F009B94D7 /* mxlogger_file_util.hpp */,
 				BDD1CA8028236876009B94D7 /* cJson */,
 				BDA28450280D778E00C833A3 /* md5 */,
 				BD7BA72228082EA600EDA6AC /* console_sink.cpp */,

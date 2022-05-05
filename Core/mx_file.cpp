@@ -16,6 +16,7 @@
 #ifdef  __ANDROID__
 #include <android/log.h>
 #endif
+#include "mxlogger_file_util.hpp"
 
 namespace mxlogger{
 namespace details{
@@ -82,7 +83,7 @@ void mx_file::close(){
         fd_ = nullptr;
     }
 }
-long  mx_file::file_size() const{
+long  mx_file::dir_size() const{
     DIR *dir;
     struct dirent *entry;
     struct stat statbuf;
@@ -221,7 +222,7 @@ void mx_file::remove_expire_data(){
 
 void mx_file::write(const std::string &buf,const std::string &fname){
     
-    if (fd_ == nullptr || filename_.compare(fname) != 0 || path_exists(dir_ + filename_) == false) {
+    if (fd_ == nullptr || filename_.compare(fname) != 0 || path_exists((dir_ + filename_).data()) == false) {
         filename_ = fname;
         open();
     }
@@ -251,9 +252,9 @@ bool mx_file::create_dir_(const std::string &path){
     auto pos = path.find_last_of("/");
 
     std::string dir_name = pos != std::string::npos ? path.substr(0,pos) : std::string{};
+  
     
-    
-    if (path_exists(dir_name))  return  true;
+    if (path_exists(dir_name.data()))  return  true;
     
     if (dir_name.empty())  return  false;
     
@@ -264,7 +265,7 @@ bool mx_file::create_dir_(const std::string &path){
             token_pos = dir_name.size();
         }
         auto subdir = dir_name.substr(0,token_pos);
-        if (!subdir.empty() && !path_exists(subdir) && makedir_(subdir)!= 0) {
+        if (!subdir.empty() && !path_exists(subdir.data()) && makedir(subdir.data())!= 0) {
             
             return  false;
             
@@ -275,15 +276,6 @@ bool mx_file::create_dir_(const std::string &path){
     
     
     return true;
-}
-
-bool mx_file::path_exists(const std::string &path){
-    struct stat buffer;
-    return (::stat(path.c_str(), &buffer) == 0);
-}
-bool mx_file::makedir_(const std::string &path){
-    
-    return ::mkdir(path.c_str(),mode_t(0755)) == 0;
 }
 
 

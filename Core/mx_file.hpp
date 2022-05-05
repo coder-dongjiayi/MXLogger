@@ -47,8 +47,8 @@ public:
     // 删除所有日志文件
     void remove_all();
     
-    //当前日志文件大小
-    long  file_size() const;
+    //当前目录下的文件大小
+    long  dir_size() const;
     
     std::string &filename() ;
     
@@ -56,9 +56,6 @@ private:
     
     bool create_dir_(const std::string &path);
     
-    bool path_exists(const std::string &filename);
-    
-    bool makedir_(const std::string &path);
     
     const int open_tries_ = 5;
     

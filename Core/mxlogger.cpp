@@ -256,9 +256,9 @@ void mxlogger::remove_all(){
 }
 
 // 缓存日志文件大小(byte)
-long  mxlogger::file_size(){
+long  mxlogger::dir_size(){
     std::lock_guard<std::mutex> lock(mutex_t);
-    return file_sink_->mxfile->file_size();
+    return file_sink_->mxfile->dir_size();
 }
 void mxlogger::set_console_level(int level){
     console_sink_ -> set_level(level_(level));

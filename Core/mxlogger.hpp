@@ -78,7 +78,7 @@ public:
     void remove_all();
     
     // 缓存日志文件大小(byte)
-    long  file_size();
+    long  dir_size();
     
     void set_console_level(int level);
     
