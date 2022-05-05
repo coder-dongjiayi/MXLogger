@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mxlogger/src/widget/log_listview.dart';
 import 'package:flutter_mxlogger/src/widget/search_bar.dart';
@@ -5,7 +7,7 @@ import 'package:flutter_mxlogger/src/theme/mx_theme.dart';
 
 import 'mxlogger_detail_page.dart';
 
-void show(BuildContext context) {
+void show(BuildContext context,String dir) {
   showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -14,14 +16,14 @@ void show(BuildContext context) {
         return SizedBox(
           height: MediaQuery.of(context).size.height * 0.8,
           width: MediaQuery.of(context).size.width,
-          child: const MXLoggerAnalyzer(),
+          child:  MXLoggerAnalyzer(logDir: dir),
         );
       });
 }
 
 class MXLoggerAnalyzer extends StatefulWidget {
-  const MXLoggerAnalyzer({Key? key}) : super(key: key);
-
+   MXLoggerAnalyzer({Key? key,required this.logDir}) : super(key: key);
+  String logDir;
   @override
   _MXLoggerAnalyzerState createState() => _MXLoggerAnalyzerState();
 }
@@ -33,6 +35,7 @@ class _MXLoggerAnalyzerState extends State<MXLoggerAnalyzer> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    initFileData();
     dataSource = [
       {
         "level":0,
@@ -72,6 +75,10 @@ class _MXLoggerAnalyzerState extends State<MXLoggerAnalyzer> {
         "msg":"这是一条fatal信息，请前往AppStore查看对账单"
       }
     ];
+  }
+
+  Future<void> initFileData() async {
+
   }
   @override
   Widget build(BuildContext context) {

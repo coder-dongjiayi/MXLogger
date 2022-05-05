@@ -34,6 +34,7 @@ struct log_msg{
     chrono::system_clock::time_point time;
     
     level::level_enum level{level::debug};
+
 };
 
 }

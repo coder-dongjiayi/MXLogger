@@ -25,7 +25,7 @@ mx_file::mx_file() : max_disk_size_(0),max_disk_age_(0){
 }
 
 mx_file::~mx_file(){
-    printf("mx_file 释放\n");
+  
     close();
 }
 

@@ -93,6 +93,8 @@ add_library(MXLoggerCore
         sink.hpp
         md5/md5.h
         md5/md5.c
+        cJson/cJSON.h
+        cJson/cJSON.c
         )
 
 target_include_directories(MXLoggerCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

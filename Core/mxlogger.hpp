@@ -84,9 +84,9 @@ public:
     
     void set_file_level(int level);
     
-    void set_console_pattern(const char * pattern);
+    // 控制台输出格式
+    void set_pattern(const char * pattern);
     
-    void set_file_pattern(const char * pattern);
     
     const char* diskcache_path() const;
     

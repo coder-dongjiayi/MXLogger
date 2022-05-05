@@ -64,7 +64,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,copy)NSString * storagePolicy;
 
 /// 每次创建一个新的日志文件 写入文件头的信息
-@property (nonatomic,copy)NSString * fileHeader;
+@property (nonatomic,copy)NSDictionary * fileHeader;
 
 /// 自定义日志文件名 默认值:mxlog
 @property (nonatomic,copy)NSString *fileName;
@@ -89,10 +89,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,assign)NSInteger fileLevel;
 
 /// 控制台输出样式
-@property (nonatomic,copy)NSString * consolePattern;
+@property (nonatomic,copy)NSString * pattern;
 
-/// 写入文件输出样式
-@property (nonatomic,copy)NSString * filePattern;
 
 /// 清理过期文件
 -(void)removeExpireData;

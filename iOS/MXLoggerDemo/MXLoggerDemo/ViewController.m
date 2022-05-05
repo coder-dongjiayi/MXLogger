@@ -19,9 +19,9 @@
     [super viewDidLoad];
     
     _logger =   [MXLogger initializeWithNamespace:@"default"];
-    
+
     NSString * isDebug = _logger.isDebugTracking == YES ? @"正在调试" : @"非调试状态";
-        _logger.fileHeader =  [NSString stringWithFormat:@"版本号:1.0.0 平台:iOS isDebug:%@",isDebug];
+    _logger.fileHeader = @{@"平台":@"ios",@"版本":@"1.0.1"};
 
     [_logger info:@"mxlogger" msg:[NSString stringWithFormat:@"%@",isDebug] tag:@"isDebug"];
     [_logger info:@"mxlogger" msg:_logger.diskCachePath tag:@"日志目录"];
@@ -42,8 +42,7 @@
     _logger.consoleLevel = 0;
     _logger.fileLevel = 1;
 
-    _logger.consolePattern = @"[%d][%p]%m";
-    _logger.filePattern = @"[%d][%t][%p]%m";
+    _logger.pattern = @"[%d][%p]%m";
 
 
 }

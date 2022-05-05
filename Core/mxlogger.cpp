@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include "cJson/cJSON.h"
 namespace mxlogger{
 
 std::unordered_map<string, mxlogger *> *global_instanceDic_ =  new unordered_map<string, mxlogger *>;
@@ -225,7 +226,11 @@ void mxlogger::set_file_name(const char* filename){
 
 void mxlogger::set_file_header(const char* header){
     
-    file_sink_->mxfile->set_header(header);
+    cJSON * json = cJSON_CreateObject();
+    cJSON_AddStringToObject(json, "header", header);
+    char * json_chars =  cJSON_PrintUnformatted(json);
+    
+    file_sink_->mxfile->set_header(json_chars);
 }
 
 // 设置日志文件最大字节数(byte)
@@ -263,13 +268,11 @@ void mxlogger::set_file_level(int level){
     file_sink_ -> set_level(level_(level));
 }
 
-void mxlogger::set_console_pattern(const char * pattern){
+void mxlogger::set_pattern(const char * pattern){
     console_sink_ -> set_pattern(pattern);
 }
 
-void mxlogger::set_file_pattern(const char * pattern){
-    file_sink_ -> set_pattern(pattern);
-}
+
 
 void mxlogger::log(int type, int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
     if (enable_ == false) {

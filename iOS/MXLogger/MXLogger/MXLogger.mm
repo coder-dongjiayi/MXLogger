@@ -147,11 +147,24 @@ static NSString * _defaultDiskCacheDirectory;
     _storagePolicy = storagePolicy;
     _logger -> set_file_policy(storagePolicy.UTF8String);
 }
-- (void)setFileHeader:(NSString *)fileHeader{
+
+
+- (void)setFileHeader:(NSDictionary *)fileHeader{
     _fileHeader = fileHeader;
- 
-    _logger -> set_file_header(fileHeader.UTF8String);
+    NSError * error;
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:fileHeader options:NSJSONWritingPrettyPrinted error:&error];
+    if (error != NULL || jsonData == NULL) {
+        NSLog(@"header 资源转化失败");
+        return;
+    }
+    
+    NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    _logger -> set_file_header(jsonString.UTF8String);
 }
+
+
+
 
 - (void)setFileName:(NSString *)fileName{
     _fileName = fileName;
@@ -203,21 +216,16 @@ static NSString * _defaultDiskCacheDirectory;
     _logger -> set_console_level([NSNumber numberWithInteger:consoleLevel].intValue);
 }
 
-- (void)setConsolePattern:(NSString *)consolePattern{
-    _consolePattern = consolePattern;
-    if ([consolePattern isKindOfClass:[NSNull class]]) {
+- (void)setPattern:(NSString *)pattern{
+    _pattern = pattern;
+    if ([pattern isKindOfClass:[NSNull class]]) {
         return;
     }
-    _logger -> set_console_pattern(consolePattern.UTF8String);
+    _logger -> set_pattern(pattern.UTF8String);
 }
+    
 
-- (void)setFilePattern:(NSString *)filePattern{
-    _filePattern = filePattern;
-    if ([filePattern isKindOfClass:[NSNull class]]) {
-        return;
-    }
-    _logger -> set_file_pattern(filePattern.UTF8String);
-}
+
 -(void)debug:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
     [self log:0 name:name msg:msg tag:tag];
 }

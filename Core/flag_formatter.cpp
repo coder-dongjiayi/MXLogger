@@ -15,13 +15,8 @@ namespace details{
 // [2022-03-02-16:49:57.912]
 void time_formatter::format(const details::log_msg &log_msg, string &dest){
 
-    std::tm tm_time = mxlogger_helper::localtime(std::chrono::system_clock::to_time_t(log_msg.time));
 
-    auto micro = mxlogger_helper::time_fraction<std::chrono::microseconds>(log_msg.time);
-
-    using std::chrono:: milliseconds;
-    std::string time_str =  mxlogger_helper::string_format("%04d-%02d-%02d %02d:%02d:%02d.%06d", tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday, tm_time.tm_hour,tm_time.tm_min,tm_time.tm_sec,micro);
-
+    std::string time_str =  mxlogger_helper::micros_datetime(log_msg.time);
 
     dest.append(time_str);
 }

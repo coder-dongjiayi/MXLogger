@@ -18,6 +18,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
  late MXLogger logger;
+ late String _diskCachePath;
   @override
   void initState() {
     super.initState();
@@ -35,6 +36,7 @@ class _MyAppState extends State<MyApp> {
     if(diskCachePath == null){
       logger.error("diskCachePath 异常");
     }else{
+      _diskCachePath =  diskCachePath;
       logger.info(diskCachePath,name: "mxlogger",tag: "path");
     }
 
@@ -81,7 +83,7 @@ class _MyAppState extends State<MyApp> {
               }, child: Text("error")),
               Builder(builder: (context){
                 return ElevatedButton(onPressed: (){
-                  Analyzer.show(context);
+                  Analyzer.show(context,_diskCachePath);
 
                 }, child: Text("分析器"));
               })
