@@ -25,7 +25,9 @@
 
     [_logger info:@"mxlogger" msg:[NSString stringWithFormat:@"%@",isDebug] tag:@"isDebug"];
     [_logger info:@"mxlogger" msg:_logger.diskCachePath tag:@"日志目录"];
-
+    
+    [_logger debug:@"mxlogger" msg:[NSString stringWithFormat:@"日志文件大小:%ld",_logger.logSize] tag:@"size"];
+    
     _logger.maxDiskAge = 60 * 60 * 24 * 7; // 一个星期
     _logger.maxDiskSize = 1024 * 1024 * 10; // 10M
     
@@ -46,6 +48,23 @@
 
 
 }
+- (IBAction)removeAllButtonAction:(id)sender {
+    [_logger removeAllData];
+}
+
+
+
+- (IBAction)readLogButtonAction:(id)sender {
+
+    NSString * path = [NSString stringWithFormat:@"%@/%@",_logger.diskCachePath,@"mxlog_2022-05-06.log"];
+    
+    [MXLogger selectWithDiskCachePath:path offsetSize:0 limit:10 completion:^(NSArray<NSString *> * _Nonnull result, NSUInteger currentOffset) {
+        
+        
+    }];
+  
+}
+
 - (IBAction)defaultButttonAction:(id)sender {
     [_logger debug:@"mxlogger" msg:@"这是info信息" tag:NULL];
     [_logger info:@"mxlogger" msg:@"这是info信息" tag:NULL];

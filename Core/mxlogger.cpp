@@ -111,12 +111,20 @@ long mxlogger::select_log_form_path(const char* path,char* result[],long begin,i
     
    long size =  select_form_path(path, &destination, begin, limit);
     
-    std::vector<char*> cstrings;
-    cstrings.reserve(destination.size());
-    for(auto& s: destination){
-            cstrings.push_back(&s.front());
+    for (int i = 0; i<destination.size(); i++) {
+        std::string s = destination[i];
+       
+        
+       const char * data = s.data();
+        
+        long length = strlen(data);
+
+        result[i]=(char *)malloc(sizeof(char) * length);
+        
+        sprintf(result[i], "%s",data);
+
     }
-    result =  cstrings.data();
+  
     return size;
 }
 

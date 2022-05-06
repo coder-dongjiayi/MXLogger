@@ -66,6 +66,27 @@ static NSString * _defaultDiskCacheDirectory;
     NSString * key =  [NSString stringWithUTF8String:mapKey.data()];
     return key;
 }
++(void)selectWithDiskCachePath:(nonnull NSString*)diskCachePath offsetSize:(NSUInteger) offsetSize limit:(NSInteger) limit completion:(void(^)(NSArray<NSString*>* result,NSUInteger currentOffset)) completion{
+
+    NSMutableArray<NSString*> *messageList = [NSMutableArray arrayWithCapacity:limit];
+    
+  
+    int l = [NSNumber numberWithInteger:limit].intValue;
+    char* array[l];
+
+   long size =  mx_logger::select_log_form_path(diskCachePath.UTF8String, array, [NSNumber numberWithUnsignedInteger:offsetSize].longValue, l);
+
+    for (int i=0; i<l; i++) {
+        char * log_msg = array[i];
+        NSString * log = [NSString stringWithUTF8String:log_msg];
+        [messageList addObject:log];
+        free(array[i]);
+    }
+
+    completion([messageList copy],[NSNumber numberWithLong:size].unsignedIntegerValue);
+   
+}
+
 
 
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace{

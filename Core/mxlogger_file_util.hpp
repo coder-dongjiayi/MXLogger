@@ -11,9 +11,10 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <map>
 #include <sys/stat.h>
 #include <fstream>
-
+#include <dirent.h>
 namespace mxlogger{
 inline size_t file_size(const char* path){
     struct stat statbuf;
@@ -67,6 +68,58 @@ inline size_t  select_form_path(const char* path,std::vector<std::string> *vecto
 }
 
 
+
+inline int get_files(std::vector<std::map<std::string, std::string>> *destination,const char * dir_){
+    int result = 0;
+    DIR *dir;
+    struct stat statbuf;
+    
+    struct dirent *entry;
+   
+    if ((dir = opendir(dir_)) == nullptr){
+        
+        fprintf(stderr, "Cannot open dir: %s\n", dir_);
+        return -1;
+    }
+    
+    while ((entry = readdir(dir)) != nullptr) {
+    
+        if (strcmp(".DS_Store", entry->d_name) == 0 || strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0) {
+            continue;
+        }
+        char subdir[256];
+        sprintf(subdir, "%s%s", dir_, entry->d_name);
+       
+        lstat(subdir, &statbuf);
+        
+        long last_time = (long)statbuf.st_ctime;
+        long st_size =  (long)statbuf.st_size;
+        
+        std::map<std::string, std::string> map;
+        
+        std::string name = entry->d_name;
+        std::string time =  std::to_string(last_time);
+        std::string size =  std::to_string(st_size);
+        
+        map["name"] = name;
+        map["timestamp"] = time;
+        map["size"] = size;
+        
+        destination->push_back(map);
+      
+    }
+    std::sort(destination->begin(), destination->end(), [](std::map<std::string, std::string> &a,std::map<std::string, std::string> &b){
+        std::string a_time = a["timestamp"];
+        long a_t = std::stol(a_time);
+        
+        std::string b_time = b["timestamp"];
+        long b_t = std::stol(b_time);
+        return a_t > b_t;
+    });
+    closedir(dir);
+
+    return result;
+}
 
 
 

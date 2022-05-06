@@ -21,11 +21,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
 
-
 /// 释放对象的方法
 /// @param nameSpace ns
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace;
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
+
+
+
+/// 查询单个日志文件 这是个同步方法
+/// @param diskCachePath 日志路径 /xxx/xxx/mxlog_2022-05-06.log
+/// @param offsetSize 文件偏移
+/// @param limit 查询行数
+/// @param completion 回调
++(void)selectWithDiskCachePath:(nonnull NSString*)diskCachePath offsetSize:(NSUInteger) offsetSize limit:(NSInteger) limit completion:(void(^)(NSArray<NSString*>* result,NSUInteger currentOffset)) completion;
 
 
 /// 初始化MXLogger

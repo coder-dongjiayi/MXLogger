@@ -84,124 +84,80 @@ void mx_file::close(){
     }
 }
 long  mx_file::dir_size() const{
-    DIR *dir;
-    struct dirent *entry;
-    struct stat statbuf;
+   
     long   current_cache_size=0;
-    if ((dir = opendir(dir_.c_str())) == nullptr){
-        
-        fprintf(stderr, "Cannot open dir: %s\n", dir_.c_str());
-        return 0;
-    }
     
-    while ((entry = readdir(dir)) != nullptr) {
+    std::vector<std::map<std::string, std::string>> destination;
     
-        if (strcmp(".DS_Store", entry->d_name) == 0 || strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0) {
-            continue;
-        }
-        char subdir[256];
-        sprintf(subdir, "%s%s", dir_.c_str(), entry->d_name);
+    mxlogger::get_files(&destination, dir_.c_str());
+    
+    for (int i = 0; i < destination.size(); i++) {
+        std::map<std::string, std::string> map = destination[i];
+        current_cache_size  = current_cache_size + std::stol(map["size"]);
         
-        lstat(subdir, &statbuf);
-        
-        current_cache_size = current_cache_size + statbuf.st_size;
     }
-    closedir(dir);
     
     return  current_cache_size;
     
   
 }
 void mx_file::remove_all(){
-    DIR *dir;
-    struct dirent *entry;
-    if ((dir = opendir(dir_.c_str())) == nullptr){
-        
-        fprintf(stderr, "Cannot open dir: %s\n", dir_.c_str());
-        return;
-    }
+    std::vector<std::map<std::string, std::string>> destination;
     
-    while ((entry = readdir(dir)) != nullptr) {
+    mxlogger::get_files(&destination, dir_.c_str());
     
-        if (strcmp(".DS_Store", entry->d_name) == 0 || strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0) {
-            continue;
-        }
-        
+    
+    for (int i = 0; i < destination.size(); i++) {
+        std::map<std::string, std::string> map = destination[i];
+        std::string file_name  = map["name"];
         char subdir[256];
-        sprintf(subdir, "%s%s", dir_.c_str(), entry->d_name);
+        sprintf(subdir, "%s%s", dir_.c_str(), file_name.c_str());
         remove(subdir);
     }
     
-    closedir(dir);
 }
 
 void mx_file::remove_expire_data(){
    
 
-    DIR *dir;
-    struct dirent *entry;
-    struct stat statbuf;
-    long long  current_cache_size=0;
+   
+    long   current_cache_size=0;
   
     std::vector<char*> urls_delete;
-  
-
-    std::map<long long ,long long ,std::less<long long >>  cache_size_files_;
-    
-    std::map<long long ,char*,std::less<long long >>  cache_name_files_;
     
     std::tm tm_time = mxlogger_helper::now();
     
     long long int timestamp =  mktime(&tm_time);
     long long int expiration_tp = timestamp - max_disk_age_;
     
+    std::vector<std::map<std::string, std::string>> destination;
     
-    if ((dir = opendir(dir_.c_str())) == nullptr){
-        
-        fprintf(stderr, "Cannot open dir: %s\n", dir_.c_str());
-        return;
-    }
- 
-  
-    while ((entry = readdir(dir)) != nullptr && max_disk_age_ > 0) {
+    mxlogger::get_files(&destination, dir_.c_str());
+
+    for (int i = 0; i < destination.size(); i++) {
+        std::map<std::string, std::string> map = destination[i];
+        std::string file_name  = map["name"];
+        long size = std::stol(map["size"]);
+        time_t last_time = (time_t)std::stol(map["timestamp"]);
         char subdir[256];
-       
-        sprintf(subdir, "%s%s", dir_.c_str(), entry->d_name);
+        sprintf(subdir, "%s%s", dir_.c_str(), file_name.c_str());
         
-        lstat(subdir, &statbuf);
-       
-        if (strcmp(".DS_Store", entry->d_name) == 0 || strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0) {
+        if (last_time < expiration_tp) {
+            /// 过期文件
+            urls_delete.push_back(subdir);
             continue;
-        }else{
-         
-            time_t last_time = statbuf.st_ctime;
-            if (last_time < expiration_tp) {
-                /// 过期文件
-                urls_delete.push_back(subdir);
-                continue;
-            }
-        
-            current_cache_size = current_cache_size + statbuf.st_size;
-            
-            cache_size_files_[last_time] = statbuf.st_size;
-            cache_name_files_[last_time] = entry->d_name;
-           
         }
-    }
-    
-    
-    if (max_disk_size_ > 0 && current_cache_size > max_disk_size_) {
-        
-        for (auto &key : cache_size_files_) {
-            
-            char * file_name = cache_name_files_[key.first];
-            
-            long long  file_size = key.second;
-            
-            char delete_path[256];
-           
-            sprintf(delete_path, "%s%s", dir_.c_str(), file_name);
+        current_cache_size = current_cache_size + size;
        
+    }
+    if (max_disk_size_ > 0 && current_cache_size > max_disk_size_) {
+        for (int i = 0; i < destination.size(); i++) {
+            std::map<std::string, std::string> map = destination[i];
+            std::string file_name  = map["name"];
+            long file_size = std::stol(map["size"]);
+            char delete_path[256];
+            
+            sprintf(delete_path, "%s%s", dir_.c_str(), file_name.c_str());
             if (remove(delete_path) == 0) {
                 current_cache_size = current_cache_size - file_size;
            
@@ -209,13 +165,8 @@ void mx_file::remove_expire_data(){
                     break;
                 }
             }
-            
         }
-        
     }
-    
-    closedir(dir);
-    
     
 }
 
