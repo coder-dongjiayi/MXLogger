@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include "cJson/cJSON.h"
+#include "mxlogger_file_util.hpp"
 namespace mxlogger{
 
 std::unordered_map<string, mxlogger *> *global_instanceDic_ =  new unordered_map<string, mxlogger *>;
@@ -105,7 +106,19 @@ static bool is_debuging_() {
 
      return map_key;
 }
-
+long mxlogger::select_log_form_path(const char* path,char* result[],long begin,int limit){
+    std::vector<std::string> destination;
+    
+   long size =  select_form_path(path, &destination, begin, limit);
+    
+    std::vector<char*> cstrings;
+    cstrings.reserve(destination.size());
+    for(auto& s: destination){
+            cstrings.push_back(&s.front());
+    }
+    result =  cstrings.data();
+    return size;
+}
 
 std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     if (directory == nullptr) {

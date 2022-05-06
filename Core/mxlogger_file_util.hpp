@@ -31,7 +31,7 @@ inline bool makedir(const char* path){
     return ::mkdir(path,mode_t(0755)) == 0;
 }
 
-inline size_t  select_form(std::vector<std::string> *vector,const char* path,size_t begin, int limit){
+inline size_t  select_form_path(const char* path,std::vector<std::string> *vector,size_t begin, int limit){
     
    
     if (path_exists(path) == false) {
