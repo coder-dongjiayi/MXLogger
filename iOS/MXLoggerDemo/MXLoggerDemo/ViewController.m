@@ -28,7 +28,7 @@
     
     [_logger debug:@"mxlogger" msg:[NSString stringWithFormat:@"日志文件大小:%ld",_logger.logSize] tag:@"size"];
     
-    _logger.maxDiskAge = 60 * 60 * 24 * 7; // 一个星期
+    _logger.maxDiskAge = 60; // 一个星期
     _logger.maxDiskSize = 1024 * 1024 * 10; // 10M
     
     //    /**下面这些设置都是默认设置 不写也行 **/
@@ -48,11 +48,24 @@
 
 
 }
+
+- (IBAction)cacheDirButtonAction:(id)sender {
+  NSArray * array =   [MXLogger selectLogfilesWithDirectory:_logger.diskCachePath];
+    [array enumerateObjectsUsingBlock:^(NSDictionary*  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSLog(@"文件名:%@,文件大小:%@,文件最后更新时间:%@",obj[@"name"],obj[@"size"],obj[@"timestamp"]);
+    }];
+}
+
 - (IBAction)removeAllButtonAction:(id)sender {
+   
+    
     [_logger removeAllData];
 }
 
 
+- (IBAction)removeExpireDataButtonAction:(id)sender {
+    [_logger removeExpireData];
+}
 
 - (IBAction)readLogButtonAction:(id)sender {
 

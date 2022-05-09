@@ -54,6 +54,22 @@
                                     <action selector="removeAllButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gxD-Mx-wO6"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="D3u-dv-T7u">
+                                <rect key="frame" x="80.5" y="447" width="253" height="31"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="删除过期文件或超过目标大小的文件"/>
+                                <connections>
+                                    <action selector="removeExpireDataButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="nb0-3L-dN9"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ovf-aQ-Y0J">
+                                <rect key="frame" x="123.5" y="502" width="167" height="31"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="获取缓存目录日志文件"/>
+                                <connections>
+                                    <action selector="cacheDirButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="f5X-f4-cdt"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -63,7 +79,11 @@
                             <constraint firstItem="XEH-Y6-v3x" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="S7I-FC-Nlj"/>
                             <constraint firstItem="HQK-MC-3Mh" firstAttribute="top" secondItem="XEH-Y6-v3x" secondAttribute="bottom" constant="10" id="V7x-1v-bu3"/>
                             <constraint firstItem="HQK-MC-3Mh" firstAttribute="centerX" secondItem="XuW-Ki-bnb" secondAttribute="centerX" id="VED-FZ-Z8t"/>
+                            <constraint firstItem="ovf-aQ-Y0J" firstAttribute="top" secondItem="D3u-dv-T7u" secondAttribute="bottom" constant="24" id="d61-nw-SaZ"/>
+                            <constraint firstItem="ovf-aQ-Y0J" firstAttribute="centerX" secondItem="D3u-dv-T7u" secondAttribute="centerX" id="dIe-Uc-hQH"/>
                             <constraint firstItem="Ub4-oB-vIb" firstAttribute="centerX" secondItem="HQK-MC-3Mh" secondAttribute="centerX" id="eyS-hX-18c"/>
+                            <constraint firstItem="D3u-dv-T7u" firstAttribute="top" secondItem="Ub4-oB-vIb" secondAttribute="bottom" constant="62" id="f0e-5Y-ZUL"/>
+                            <constraint firstItem="D3u-dv-T7u" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="go7-Vj-XYj"/>
                             <constraint firstItem="XEH-Y6-v3x" firstAttribute="top" secondItem="XuW-Ki-bnb" secondAttribute="bottom" constant="43" id="moR-53-fu7"/>
                             <constraint firstItem="Ub4-oB-vIb" firstAttribute="top" secondItem="HQK-MC-3Mh" secondAttribute="bottom" constant="20" id="nuH-AA-6Uo"/>
                             <constraint firstItem="63a-Lo-GkM" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="100" id="w7H-n9-dZB"/>

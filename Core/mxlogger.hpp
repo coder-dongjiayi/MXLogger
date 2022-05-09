@@ -50,8 +50,6 @@ public:
     static void destroy();
     
     
-    static long select_log_form_path(const char* path,char* result[],long begin,int limit);
-    
     
     std::string map_key;
     

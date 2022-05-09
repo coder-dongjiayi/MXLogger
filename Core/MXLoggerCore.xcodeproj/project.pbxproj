@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BD12BD192826513A00BA6D5B /* mxlogger_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */; };
+		BD12BD1A2826544200BA6D5B /* mxlogger_util.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD12BD182826513A00BA6D5B /* mxlogger_util.hpp */; };
 		BD7BA73628082EA600EDA6AC /* console_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72228082EA600EDA6AC /* console_sink.cpp */; };
 		BD7BA73728082EA600EDA6AC /* logger_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72528082EA600EDA6AC /* logger_os.cpp */; };
 		BD7BA73828082EA600EDA6AC /* mxlogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72628082EA600EDA6AC /* mxlogger.cpp */; };
@@ -29,6 +31,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				BD12BD1A2826544200BA6D5B /* mxlogger_util.hpp in CopyFiles */,
 				BD7BA77528096BFD00EDA6AC /* mxlogger.hpp in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -36,6 +39,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mxlogger_util.cpp; sourceTree = "<group>"; };
+		BD12BD182826513A00BA6D5B /* mxlogger_util.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_util.hpp; sourceTree = "<group>"; };
 		BD406D9727F19C76002C76D5 /* libMXLoggerCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMXLoggerCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD7BA72028082EA600EDA6AC /* logger_os.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = logger_os.hpp; sourceTree = "<group>"; };
 		BD7BA72128082EA600EDA6AC /* sink.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sink.hpp; sourceTree = "<group>"; };
@@ -80,6 +85,8 @@
 		BD406D8E27F19C76002C76D5 = {
 			isa = PBXGroup;
 			children = (
+				BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */,
+				BD12BD182826513A00BA6D5B /* mxlogger_util.hpp */,
 				BDD1CA872823A53F009B94D7 /* mxlogger_file_util.hpp */,
 				BDD1CA8028236876009B94D7 /* cJson */,
 				BDA28450280D778E00C833A3 /* md5 */,
@@ -201,6 +208,7 @@
 				BD7BA73728082EA600EDA6AC /* logger_os.cpp in Sources */,
 				BD7BA73A28082EA600EDA6AC /* mx_file.cpp in Sources */,
 				BDD1CA8328236876009B94D7 /* cJSON.c in Sources */,
+				BD12BD192826513A00BA6D5B /* mxlogger_util.cpp in Sources */,
 				BD7BA73F28082EA600EDA6AC /* sink.cpp in Sources */,
 				BD7BA73C28082EA600EDA6AC /* flag_formatter.cpp in Sources */,
 			);

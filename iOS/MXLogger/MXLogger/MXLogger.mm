@@ -7,6 +7,7 @@
 
 #import "MXLogger.h"
 #include <MXLoggerCore/mxlogger.hpp>
+#include <MXLoggerCore/mxlogger_util.hpp>
 static NSMutableDictionary<NSString*,MXLogger *> *global_instanceDic = nil;
 static NSString * _defaultDiskCacheDirectory;
 
@@ -74,7 +75,8 @@ static NSString * _defaultDiskCacheDirectory;
     int l = [NSNumber numberWithInteger:limit].intValue;
     char* array[l];
 
-   long size =  mx_logger::select_log_form_path(diskCachePath.UTF8String, array, [NSNumber numberWithUnsignedInteger:offsetSize].longValue, l);
+    
+   long size =  mxlogger::util::mxlogger_util::select_log_form_path(diskCachePath.UTF8String, array, [NSNumber numberWithUnsignedInteger:offsetSize].longValue, l);
 
     for (int i=0; i<l; i++) {
         char * log_msg = array[i];
@@ -86,6 +88,32 @@ static NSString * _defaultDiskCacheDirectory;
     completion([messageList copy],[NSNumber numberWithLong:size].unsignedIntegerValue);
    
 }
++(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory{
+   
+    
+    int length;
+    char** array = (char **)malloc(sizeof(char**));
+    
+    mxlogger::util::mxlogger_util::select_logfiles_dir(directory.UTF8String, array,&length);
+    
+    NSMutableArray<NSDictionary<NSString*,NSString*>*>* files = [NSMutableArray arrayWithCapacity:length];
+    
+    for (int i=0; i<length; i++) {
+        char * file_info = array[i];
+        NSString * infoString = [NSString stringWithUTF8String:file_info];
+        NSArray * infoList = [infoString componentsSeparatedByString:@","];
+        NSDictionary * map = @{@"name":infoList[0],@"size":infoList[1],@"timestamp":infoList[2]};
+        
+        [files addObject:map];
+        free(array[i]);
+        
+    }
+    free(array);
+  
+    
+    return [files copy];
+}
+
 
 
 

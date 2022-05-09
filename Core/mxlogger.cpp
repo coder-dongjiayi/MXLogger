@@ -106,27 +106,8 @@ static bool is_debuging_() {
 
      return map_key;
 }
-long mxlogger::select_log_form_path(const char* path,char* result[],long begin,int limit){
-    std::vector<std::string> destination;
-    
-   long size =  select_form_path(path, &destination, begin, limit);
-    
-    for (int i = 0; i<destination.size(); i++) {
-        std::string s = destination[i];
-       
-        
-       const char * data = s.data();
-        
-        long length = strlen(data);
 
-        result[i]=(char *)malloc(sizeof(char) * length);
-        
-        sprintf(result[i], "%s",data);
 
-    }
-  
-    return size;
-}
 
 std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     if (directory == nullptr) {

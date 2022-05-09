@@ -36,6 +36,11 @@ NS_ASSUME_NONNULL_BEGIN
 +(void)selectWithDiskCachePath:(nonnull NSString*)diskCachePath offsetSize:(NSUInteger) offsetSize limit:(NSInteger) limit completion:(void(^)(NSArray<NSString*>* result,NSUInteger currentOffset)) completion;
 
 
+/// 查询目录下的日志文件
+/// @param directory 目录地址
++(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory;
+
+
 /// 初始化MXLogger
 /// @param nameSpace 命名空间
 /// @param directory 目录
