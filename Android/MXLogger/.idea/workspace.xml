@@ -14,13 +14,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger_file_util.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger_file_util.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger_util.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger_util.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger_util.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger_util.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.mm" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.mm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/ViewController.m" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/ViewController.m" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,8 +66,7 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="mxloggerdemo" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="publishing" type="c8890929:TasksNode$1" />
+                <item name="mxlogger" type="2d1252cf:ModuleNode" />
               </path>
             </expand>
             <select />
@@ -129,7 +128,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.MXLogger [publishReleasePublicationToMavencentralRepository]">
+  <component name="RunManager" selected="Gradle.MX [assemble]">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="mxloggerdemo.mxloggerdemo" />
       <option name="DEPLOY" value="true" />
@@ -274,8 +273,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.MXLogger [publishReleasePublicationToMavencentralRepository]" />
         <item itemvalue="Gradle.MX [assemble]" />
+        <item itemvalue="Gradle.MXLogger [publishReleasePublicationToMavencentralRepository]" />
         <item itemvalue="Gradle.MXLogger [assembleRelease]" />
         <item itemvalue="Gradle.MXLogger [publishReleasePublicationToMavenLocal]" />
       </list>

@@ -6,6 +6,7 @@
 #include <string>
 #include <cstdint>
 #include "mxlogger.hpp"
+#include "mxlogger_util.hpp"
 
 static jclass g_cls = nullptr;
 
@@ -61,6 +62,11 @@ namespace mxlogger{
 
 
 
+//    MXLOGGER_JNI jobjectArray native_select_logfiles(JNIEnv *env, jobject obj,jstring directory){
+//        std::vector<std::string> destination;
+//
+//    }
+
     MXLOGGER_JNI jstring native_diskcache_path(JNIEnv *env, jobject obj,jlong handle){
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         const char * path = logger -> diskcache_path();
@@ -106,15 +112,10 @@ namespace mxlogger{
         if (pattern == nullptr) return;
         std::string  console = jstring2string(env,pattern);
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
-        logger ->set_console_pattern(console.data());
+        logger ->set_pattern(console.data());
 
     }
-    MXLOGGER_JNI void native_filePattern(JNIEnv *env, jobject obj,jlong handle,jstring pattern){
-        if (pattern == nullptr) return;
-        std::string  file = jstring2string(env,pattern);
-        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
-        logger -> set_file_pattern(file.data());
-    }
+
     MXLOGGER_JNI void native_consoleEnable(JNIEnv *env, jobject obj,jlong handle,jboolean enable){
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger -> set_console_enable(enable);
@@ -158,7 +159,7 @@ namespace mxlogger{
     }
     MXLOGGER_JNI jlong native_logSize(JNIEnv *env, jobject obj,jlong handle){
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
-        return  (long )logger->file_size();
+        return  (long )logger->dir_size();
     }
     MXLOGGER_JNI jboolean native_isDebugTracking(JNIEnv *env, jobject obj,jlong handle){
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
@@ -184,13 +185,12 @@ static JNINativeMethod g_methods[] = {
         {"native_log","(JILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
         {"native_storagePolicy","(JLjava/lang/String;)V",(void *)mxlogger::native_storagePolicy},
         {"native_consolePattern","(JLjava/lang/String;)V",(void *)mxlogger::native_consolePattern},
-        {"native_filePattern","(JLjava/lang/String;)V",(void *)mxlogger::native_filePattern},
         {"native_consoleLevel","(JI)V",(void *)mxlogger::native_consoleLevel},
         {"native_fileLevel","(JI)V",(void *)mxlogger::native_fileLevel},
         {"native_diskcache_path","(J)Ljava/lang/String;",(void *)mxlogger::native_diskcache_path},
         {"native_consoleEnable","(JZ)V",(void *)mxlogger::native_consoleEnable},
         {"native_fileEnable","(JZ)V",(void *)mxlogger::native_fileEnable},
-        {"native_enable","(JZ)V",(void *)mxlogger::native_fileEnable},
+        {"native_enable","(JZ)V",(void *)mxlogger::native_enable},
         {"native_fileHeader","(JLjava/lang/String;)V",(void *)mxlogger::native_fileHeader},
         {"native_fileName","(JLjava/lang/String;)V",(void *)mxlogger::native_fileName},
         {"native_maxDiskAge","(JJ)V",(void *)mxlogger::native_maxDiskAge},

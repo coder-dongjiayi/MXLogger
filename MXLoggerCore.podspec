@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 # pod lib lint --allow-warnings --verbose --skip-import-validation
   s.name         = "MXLoggerCore"
-  s.version      = "0.1.1"
+  s.version      = "0.1.2"
   s.summary      = "MXLoggerCore 客户端夸平台日志收集"
 
   s.description  = <<-DESC
@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/coder-dongjiayi/MXLogger.git", :tag => "v#{s.version}" }
   s.source_files = "Core", "Core/*.{h,cpp,hpp,cc}", "Core/md5/*"
   
-  s.public_header_files = "Core/mxlogger.hpp"
+  s.public_header_files = "Core/mxlogger.hpp","Core/mxlogger_util.hpp"
    
 
   s.libraries    = "z", "c++"

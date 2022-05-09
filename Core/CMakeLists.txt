@@ -84,6 +84,9 @@ add_library(MXLoggerCore
         logger_os.hpp
         mx_file.cpp
         mx_file.hpp
+        mxlogger_util.hpp
+        mxlogger_util.cpp
+        mxlogger_file_util.hpp
         mxlogger_helper.hpp
         mxlogger.cpp
         mxlogger.hpp

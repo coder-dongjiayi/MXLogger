@@ -36,8 +36,8 @@ public class FirstFragment extends Fragment {
         logger.setFileName("mxlog");
         logger.setConsoleLevel(0);
         logger.setFileLevel(1);
-        logger.setConsolePattern("[%d][%p]%m");
-        logger.setFilePattern("[%d][%t][%p]%m");
+        logger.setPattern("[%d][%p]%m");
+
 
         binding = FragmentFirstBinding.inflate(inflater, container, false);
         return binding.getRoot();

@@ -22,9 +22,8 @@ public class MXLogger  {
 ///  yyyy_MM_dd_HH       按小时存储
     private String storagePolicy;
     /// 控制台输出样式
-    private String consolePattern;
-    /// 写入文件输出样式
-    private String filePattern;
+    private String pattern;
+
     /// 设置控制台日志输出等级
     private int consoleLevel;
     /// 设置写入文件日志等级
@@ -77,23 +76,16 @@ public class MXLogger  {
         native_storagePolicy(nativeHandle,storagePolicy);
     }
 
-    public String getConsolePattern() {
-        return consolePattern;
+    public String getPattern() {
+        return pattern;
     }
 
-    public void setConsolePattern(String consolePattern) {
-        this.consolePattern = consolePattern;
-        native_consolePattern(nativeHandle,consolePattern);
+    public void setPattern(String pattern) {
+        this.pattern = pattern;
+        native_consolePattern(nativeHandle,pattern);
     }
 
-    public String getFilePattern() {
-        return filePattern;
-    }
 
-    public void setFilePattern(String filePattern) {
-        this.filePattern = filePattern;
-        native_filePattern(nativeHandle,filePattern);
-    }
 
     public int getConsoleLevel() {
         return consoleLevel;
@@ -316,7 +308,6 @@ public class MXLogger  {
     private  static  native void native_storagePolicy(long handle,String policy);
 
    private  static  native void native_consolePattern(long handle,String pattern);
-   private  static  native void native_filePattern(long handle,String pattern);
    private  static  native void native_consoleLevel(long handle,int level);
    private  static  native void native_fileLevel(long handle,int level);
    private  static  native void native_fileEnable(long handle,boolean enable);
