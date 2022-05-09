@@ -38,6 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 查询目录下的日志文件
 /// @param directory 目录地址
+/// @return [{"name":"文件名","size":文件大小,"timestamp":"文件最后更新时间"}]
 +(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory;
 
 
