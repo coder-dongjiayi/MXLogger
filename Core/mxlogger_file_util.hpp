@@ -54,7 +54,7 @@ inline size_t  select_form_path(const char* path,std::vector<std::string> *vecto
     size_t bytes = 0;
     
     int number = 0;
-    printf("begin = %zu \n",begin);
+
     while (number < limit && std::getline(in_file, line)) {
         
         bytes = bytes + line.size() + 1;

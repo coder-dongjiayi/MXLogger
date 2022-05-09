@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param offsetSize 文件偏移
 /// @param limit 查询行数
 /// @param completion 回调
-+(void)selectWithDiskCachePath:(nonnull NSString*)diskCachePath offsetSize:(NSUInteger) offsetSize limit:(NSInteger) limit completion:(void(^)(NSArray<NSString*>* result,NSUInteger currentOffset)) completion;
++(void)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath offsetSize:(NSUInteger) offsetSize limit:(NSInteger) limit completion:(void(^)(NSArray<NSString*>* result,NSUInteger currentOffset)) completion;
 
 
 /// 查询目录下的日志文件

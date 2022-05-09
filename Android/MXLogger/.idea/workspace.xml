@@ -14,25 +14,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/android/.idea/jarRepositories.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/android/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/src/main/java/com/dongjiayi/mxlogger/FlutterMxloggerPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/android/src/main/java/com/dongjiayi/mxlogger/FlutterMxloggerPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/lib/flutter_mxlogger.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/lib/flutter_mxlogger.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger_file_util.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger_file_util.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger_util.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger_util.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger_util.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger_util.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.mm" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.mm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/ViewController.m" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/ViewController.m" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[c1ea9cf1]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[/Users/dongjiayi/.android/avd/Pixel_3a_API_30_x86.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />

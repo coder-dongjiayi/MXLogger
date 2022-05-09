@@ -67,48 +67,44 @@ static NSString * _defaultDiskCacheDirectory;
     NSString * key =  [NSString stringWithUTF8String:mapKey.data()];
     return key;
 }
-+(void)selectWithDiskCachePath:(nonnull NSString*)diskCachePath offsetSize:(NSUInteger) offsetSize limit:(NSInteger) limit completion:(void(^)(NSArray<NSString*>* result,NSUInteger currentOffset)) completion{
++(void)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath offsetSize:(NSUInteger) offsetSize limit:(NSInteger) limit completion:(void(^)(NSArray<NSString*>* result,NSUInteger currentOffset)) completion{
 
-    NSMutableArray<NSString*> *messageList = [NSMutableArray arrayWithCapacity:limit];
-    
   
-    int l = [NSNumber numberWithInteger:limit].intValue;
-    char* array[l];
-
+  
+    std::vector<std::string> destination;
     
-   long size =  mxlogger::util::mxlogger_util::select_log_form_path(diskCachePath.UTF8String, array, [NSNumber numberWithUnsignedInteger:offsetSize].longValue, l);
-
-    for (int i=0; i<l; i++) {
-        char * log_msg = array[i];
-        NSString * log = [NSString stringWithUTF8String:log_msg];
-        [messageList addObject:log];
-        free(array[i]);
+   long offSize =  mxlogger::util::mxlogger_util::select_log_form_path(diskCacheFilePath.UTF8String, &destination, [NSNumber numberWithUnsignedInteger:offsetSize].longValue, [NSNumber numberWithInteger:limit].intValue);
+    
+    
+    NSMutableArray<NSString*> *messageList = [NSMutableArray arrayWithCapacity:destination.size()];
+    
+    for (int i = 0; i<destination.size(); i++) {
+        std::string log_info = destination[i];
+        NSString * string = [NSString stringWithUTF8String:log_info.data()];
+        [messageList addObject:string];
     }
 
-    completion([messageList copy],[NSNumber numberWithLong:size].unsignedIntegerValue);
+    completion([messageList copy],[NSNumber numberWithLong:offSize].unsignedIntegerValue);
    
 }
 +(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory{
    
+    std::vector<std::map<std::string, std::string>> destination;
     
-    int length;
-    char** array = (char **)malloc(sizeof(char**));
+    mxlogger::util::mxlogger_util::select_logfiles_dir(directory.UTF8String, &destination);
     
-    mxlogger::util::mxlogger_util::select_logfiles_dir(directory.UTF8String, array,&length);
+    NSMutableArray<NSDictionary<NSString*,NSString*>*>* files = [NSMutableArray arrayWithCapacity:destination.size()];
     
-    NSMutableArray<NSDictionary<NSString*,NSString*>*>* files = [NSMutableArray arrayWithCapacity:length];
-    
-    for (int i=0; i<length; i++) {
-        char * file_info = array[i];
-        NSString * infoString = [NSString stringWithUTF8String:file_info];
-        NSArray * infoList = [infoString componentsSeparatedByString:@","];
-        NSDictionary * map = @{@"name":infoList[0],@"size":infoList[1],@"timestamp":infoList[2]};
+    for (int i = 0; i< destination.size(); i++) {
+        std::map<std::string, std::string> map = destination[i];
+        NSString * name = [NSString stringWithUTF8String:map["name"].data()];
+        NSString * size = [NSString stringWithUTF8String:map["size"].data()];
+        NSString * timestamp = [NSString stringWithUTF8String:map["timestamp"].data()];
         
-        [files addObject:map];
-        free(array[i]);
+        NSDictionary *dictionary = @{@"name":name,@"size":size,@"timestamp":timestamp};
         
+        [files addObject:dictionary];
     }
-    free(array);
   
     
     return [files copy];

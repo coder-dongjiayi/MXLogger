@@ -69,11 +69,15 @@
 
 - (IBAction)readLogButtonAction:(id)sender {
 
-    NSString * path = [NSString stringWithFormat:@"%@/%@",_logger.diskCachePath,@"mxlog_2022-05-06.log"];
+    NSArray * array =   [MXLogger selectLogfilesWithDirectory:_logger.diskCachePath];
     
-    [MXLogger selectWithDiskCachePath:path offsetSize:0 limit:10 completion:^(NSArray<NSString *> * _Nonnull result, NSUInteger currentOffset) {
+    NSString * path = [NSString stringWithFormat:@"%@%@",_logger.diskCachePath,array.firstObject[@"name"]];
+    
+    [MXLogger selectWithDiskCacheFilePath:path offsetSize:0 limit:10 completion:^(NSArray<NSString *> * _Nonnull result, NSUInteger currentOffset) {
         
-        
+        [result enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSLog(@"%@",obj);
+        }];
     }];
   
 }
