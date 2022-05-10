@@ -29,16 +29,7 @@ class _MyAppState extends State<MyApp> {
 
     logger =  await MXLogger.initialize(nameSpace: "flutter_mxlogger",enable: true);
    
-    String  isDebug =  logger.isDebugTraceing() == true ? "正在调试" : "非调试状态";
-    logger.info(isDebug,name: "mxlogger",tag: "isDebug");
 
-     String? diskCachePath = logger.getdDiskcachePath();
-    if(diskCachePath == null){
-      logger.error("diskCachePath 异常");
-    }else{
-      _diskCachePath =  diskCachePath;
-      logger.info(diskCachePath,name: "mxlogger",tag: "path");
-    }
 
     Map<String,dynamic> header = {"version":"1.0.1","platform":"ios"};
     logger.setFileHeader(header);
@@ -53,6 +44,17 @@ class _MyAppState extends State<MyApp> {
     logger.setFileLevel(1);
     logger.setPattern("[%d][%p]%m");
 
+
+    String  isDebug =  logger.isDebugTraceing() == true ? "正在调试" : "非调试状态";
+    logger.info(isDebug,name: "mxlogger",tag: "isDebug");
+
+    String? diskCachePath = logger.getdDiskcachePath();
+    if(diskCachePath == null){
+      logger.error("diskCachePath 异常");
+    }else{
+      _diskCachePath =  diskCachePath;
+      logger.info(diskCachePath,name: "mxlogger",tag: "path");
+    }
   }
 
 

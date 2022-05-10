@@ -27,6 +27,7 @@ class _FileListViewState extends State<FileListView> {
       String name = map["name"];
       int timeStemp = map["timestemp"];
       int size = map["size"];
+       DateTime  dateTime =  DateTime.fromMillisecondsSinceEpoch(timeStemp * 1000);
 
       return   GestureDetector(
           onTap: (){
@@ -37,9 +38,21 @@ class _FileListViewState extends State<FileListView> {
             color:
             index % 2 == 0 ? MXTheme.themeColor : MXTheme.itemBackground,
 
-            child: _itemBuiler(name,"$timeStemp","$size"),
+            child: _itemBuiler(name,"${dateTime.toString()}","$size"),
           ));
     });
+  }
+
+  String _kbString(int size){
+
+    if(size < 1024){
+      return "$size byte";
+    }
+    if(size > 1024 && size < 1024*1024){
+     double r =  size/1024.0;
+      return ""
+    }
+    return  "$size byte";
   }
 
   Widget _itemBuiler(String name,String time,String kb){
@@ -50,7 +63,7 @@ class _FileListViewState extends State<FileListView> {
         Expanded(child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Text("$name",style: TextStyle(color: MXTheme.white,fontSize: 16)),
+          Text("$name",style: TextStyle(color: MXTheme.white,fontSize: 17)),
           const SizedBox(height: 10),
           Text("last time:$time",style: TextStyle(color: MXTheme.text,fontSize: 12),)
         ],)),

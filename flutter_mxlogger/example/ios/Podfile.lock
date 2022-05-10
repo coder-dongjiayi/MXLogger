@@ -2,10 +2,10 @@ PODS:
   - Flutter (1.0.0)
   - flutter_mxlogger (0.0.1):
     - Flutter
-    - MXLogger (~> 0.1.2)
-  - MXLogger (0.1.2):
-    - MXLoggerCore (~> 0.1.2)
-  - MXLoggerCore (0.1.2)
+    - MXLogger (~> 0.1.3)
+  - MXLogger (0.1.3):
+    - MXLoggerCore (~> 0.1.3)
+  - MXLoggerCore (0.1.3)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -24,9 +24,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
-  flutter_mxlogger: 0c02fe3d0e7a3befbeb582cf924114ae7239c3b9
-  MXLogger: ecc1dcba46bb7bf9996ef09f2aa5c88b7c4b1e03
-  MXLoggerCore: ab75504cef14e800110277ae4eda3eea8dbdac80
+  flutter_mxlogger: 00534ff0122f752c47643eba32caa97bebbee6a3
+  MXLogger: bd3ace54aec66052fa0d40034dc764f24279b1f8
+  MXLoggerCore: e2a406903f611481d4c98b148f8643560bac3df7
 
 PODFILE CHECKSUM: 688dacb4298e165e34d363b49247a0ac46eea3b9
 
