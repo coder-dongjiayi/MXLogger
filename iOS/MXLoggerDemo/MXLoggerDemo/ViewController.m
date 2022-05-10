@@ -20,21 +20,13 @@
     
     _logger =   [MXLogger initializeWithNamespace:@"default"];
 
-    NSString * isDebug = _logger.isDebugTracking == YES ? @"正在调试" : @"非调试状态";
-    _logger.fileHeader = @{@"平台":@"ios",@"版本":@"1.0.1"};
-
-    [_logger info:@"mxlogger" msg:[NSString stringWithFormat:@"%@",isDebug] tag:@"isDebug"];
-    [_logger info:@"mxlogger" msg:_logger.diskCachePath tag:@"日志目录"];
-    
-    [_logger debug:@"mxlogger" msg:[NSString stringWithFormat:@"日志文件大小:%ld",_logger.logSize] tag:@"size"];
-    
+   
     _logger.maxDiskAge = 60; // 一个星期
     _logger.maxDiskSize = 1024 * 1024 * 10; // 10M
     
-    //    /**下面这些设置都是默认设置 不写也行 **/
    
 
-    _logger.storagePolicy = @"yyyy_MM_dd";
+    _logger.storagePolicy = @"yyyy_MM_dd_HH";
     _logger.fileName = @"mxlog";
 
     _logger.shouldRemoveExpiredDataWhenEnterBackground = YES;
@@ -47,6 +39,14 @@
     _logger.pattern = @"[%d][%p]%m";
 
 
+    NSString * isDebug = _logger.isDebugTracking == YES ? @"正在调试" : @"非调试状态";
+    _logger.fileHeader = @{@"平台":@"ios",@"版本":@"1.0.1"};
+
+    [_logger info:@"mxlogger" msg:[NSString stringWithFormat:@"%@",isDebug] tag:@"isDebug"];
+    [_logger info:@"mxlogger" msg:_logger.diskCachePath tag:@"日志目录"];
+    
+    [_logger debug:@"mxlogger" msg:[NSString stringWithFormat:@"日志文件大小:%ld",_logger.logSize] tag:@"size"];
+    
 }
 
 - (IBAction)cacheDirButtonAction:(id)sender {

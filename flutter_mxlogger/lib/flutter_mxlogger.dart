@@ -1,5 +1,6 @@
 library flutter_mxlogger;
 
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:archive/archive_io.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart';
 export 'flutter_mxlogger.dart';
 import 'package:archive/archive.dart';
 
+typedef SelectFunction = void  Function(int offsetSize,List<String> messageList);
 typedef LoggerFunction = Void Function(
     Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
 
@@ -36,10 +38,11 @@ class MXLogger with WidgetsBindingObserver {
       removeExpireData();
     }
   }
-  MXLogger({bool enable = false,
-    required String nameSpace,
-    required String directory}){
 
+  MXLogger(
+      {bool enable = false,
+      required String nameSpace,
+      required String directory}) {
     WidgetsBinding.instance!.addObserver(this);
 
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
@@ -54,7 +57,6 @@ class MXLogger with WidgetsBindingObserver {
       {bool enable = false,
       required String nameSpace,
       String? directory}) async {
-
     String ns = nameSpace;
     String dr = directory ?? "";
     if (directory == null) {
@@ -70,7 +72,89 @@ class MXLogger with WidgetsBindingObserver {
     return mxLogger;
   }
 
+  static String? _buffer2String(Pointer<Uint8>? ptr, int length) {
+    if (ptr != null && ptr != nullptr) {
+      var listView = ptr.asTypedList(length);
+      return const Utf8Decoder().convert(listView);
+    }
+    return null;
+  }
 
+  static void selectLogMsg(
+      {required String diskcacheFilePath, int limit = 10,SelectFunction? completion}) {
+    List<String> msgList = [];
+
+    Pointer<Utf8> dirPathPtr = diskcacheFilePath.toNativeUtf8();
+
+    final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
+    final sizeArrayPtr = calloc<Pointer<Uint32>>();
+
+    Pointer<Int32> numberPtr = calloc<Int32>();
+
+    int offSize = _select_logmsg(dirPathPtr, 0, limit, numberPtr, arrayPtr, sizeArrayPtr);
+    final array_ptr = arrayPtr[0];
+    final sizeArray_ptr = sizeArrayPtr[0];
+
+    final number = numberPtr.value;
+
+    calloc.free(numberPtr);
+    for (int i = 0; i < number; i++) {
+      final logArray = array_ptr[i];
+      final size = sizeArray_ptr[i];
+      String? logMsg = _buffer2String(logArray.cast(), size);
+      if(logMsg != null){
+        msgList.add(logMsg);
+      }
+    }
+
+    calloc.free(array_ptr);
+    calloc.free(sizeArray_ptr);
+
+    calloc.free(dirPathPtr);
+    calloc.free(arrayPtr);
+    calloc.free(sizeArrayPtr);
+
+    completion?.call(offSize,msgList);
+
+  }
+
+  static List<Map<String, dynamic>> selectLogfiles(
+      {required String directory}) {
+    List<Map<String, dynamic>> logFiles = [];
+
+    Pointer<Utf8> dirPtr = directory.toNativeUtf8();
+    final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
+    final sizeArrayPtr = calloc<Pointer<Uint32>>();
+    final count = _select_logfiles(dirPtr, arrayPtr, sizeArrayPtr);
+    if (count > 0) {
+      final array = arrayPtr[0];
+      final sizeArray = sizeArrayPtr[0];
+
+      for (int i = 0; i < count; i++) {
+        final keyPtr = array[i];
+        final size = sizeArray[i];
+        String? log_info = _buffer2String(keyPtr.cast(), size);
+        if (log_info != null) {
+          List<String> _list = log_info.split(",");
+          Map<String, dynamic> _map = {
+            "name": _list[0],
+            "size": int.parse(_list[1]),
+            "timestemp": int.parse(_list[2])
+          };
+          logFiles.add(_map);
+        }
+      }
+
+      calloc.free(array);
+      calloc.free(sizeArray);
+    }
+
+    calloc.free(dirPtr);
+    calloc.free(arrayPtr);
+    calloc.free(sizeArrayPtr);
+
+    return logFiles;
+  }
 
   /// 释放log
   void destroy({required String nameSpace, String? directory}) {
@@ -149,9 +233,11 @@ class MXLogger with WidgetsBindingObserver {
   }
 
   /// 设置文件头
-  void setFileHeader(String header) {
+  void setFileHeader(Map<String, dynamic> header) {
     if (_isEnable() == false) return;
-    Pointer<Utf8> headerPtr = header.toNativeUtf8();
+    String jsonHeader = jsonEncode(header);
+
+    Pointer<Utf8> headerPtr = jsonHeader.toNativeUtf8();
     _setFileHeader(_handle, headerPtr);
     calloc.free(headerPtr);
   }
@@ -206,26 +292,14 @@ class MXLogger with WidgetsBindingObserver {
     return _getLogSize(_handle);
   }
 
-  /// 写入文件格式化  默认 [%d][%t][%p]%m
-  void setFilePattern(String pattern) {
+  void setPattern(String pattern) {
     if (_isEnable() == false) return;
     Pointer<Utf8> patternPtr = pattern.toNativeUtf8();
-    _setFilePattern(_handle, patternPtr);
+    _setPattern(_handle, patternPtr);
     calloc.free(patternPtr);
   }
 
-  void setConsolePattern(String pattern) {
-    if (_isEnable() == false) return;
-    Pointer<Utf8> patternPtr = pattern.toNativeUtf8();
-    _setConsolePattern(_handle, patternPtr);
-    calloc.free(patternPtr);
-  }
 
-  /// 设置写入日志文件同步还是异步
-  void setAsync(bool isAsync) {
-    if (_isEnable() == false) return;
-    _setAsync(_handle, isAsync == true ? 1 : 0);
-  }
 
   /// 是否正在debuging
   bool isDebugTraceing() {
@@ -266,7 +340,6 @@ class MXLogger with WidgetsBindingObserver {
   void fatal(String msg, {String? name, String? tag}) {
     log(4, msg, name: name, tag: tag);
   }
-
 
   void log(int lvl, String msg, {String? name, String? tag}) {
     if (_isEnable() == false) return;
@@ -315,10 +388,7 @@ final void Function(
                     Pointer<Utf8>, Pointer<Utf8>)>>(_mxlogger_function("log"))
         .asFunction();
 
-final void Function(Pointer<Void>, int) _setAsync = _nativeLib
-    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-        _mxlogger_function("set_is_async"))
-    .asFunction();
+
 
 final void Function(Pointer<Void>, int) _setFileLevel = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
@@ -370,21 +440,42 @@ final void Function(Pointer<Void>, Pointer<Utf8>) _setStoragePolicy = _nativeLib
         _mxlogger_function("set_storage_policy"))
     .asFunction();
 
-final void Function(Pointer<Void>, Pointer<Utf8>) _setFilePattern = _nativeLib
+final void Function(Pointer<Void>, Pointer<Utf8>) _setPattern = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Pointer<Utf8>)>>(
-        _mxlogger_function("set_file_pattern"))
+        _mxlogger_function("set_pattern"))
     .asFunction();
-
-final void Function(Pointer<Void>, Pointer<Utf8>) _setConsolePattern =
-    _nativeLib
-        .lookup<NativeFunction<Void Function(Pointer<Void>, Pointer<Utf8>)>>(
-            _mxlogger_function("set_console_pattern"))
-        .asFunction();
 
 final void Function(Pointer<Void>) _removeExpireData = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
         _mxlogger_function("remove_expire_data"))
     .asFunction();
+
+final int Function(Pointer<Utf8>, Pointer<Pointer<Pointer<Utf8>>>,
+        Pointer<Pointer<Uint32>>) _select_logfiles =
+    _nativeLib
+        .lookup<
+                NativeFunction<
+                    Uint64 Function(
+                        Pointer<Utf8>,
+                        Pointer<Pointer<Pointer<Utf8>>>,
+                        Pointer<Pointer<Uint32>>)>>(
+            _mxlogger_function("select_logfiles"))
+        .asFunction();
+
+final int Function(Pointer<Utf8>, int, int,Pointer<Int32>, Pointer<Pointer<Pointer<Utf8>>>,
+        Pointer<Pointer<Uint32>>) _select_logmsg =
+    _nativeLib
+        .lookup<
+                NativeFunction<
+                    Uint64 Function(
+                        Pointer<Utf8>,
+                        Uint32,
+                        Int32,
+Pointer<Int32>,
+                        Pointer<Pointer<Pointer<Utf8>>>,
+                        Pointer<Pointer<Uint32>>)>>(
+            _mxlogger_function("select_logmsg"))
+        .asFunction();
 
 final void Function(Pointer<Void>) _removeAll = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(

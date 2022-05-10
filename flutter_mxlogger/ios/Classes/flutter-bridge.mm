@@ -46,9 +46,86 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_enable)(const void *handle,int e
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_header)(const void *handle,const char* header){
     if(header == nullptr) return;
     MXLogger *logger = (__bridge MXLogger *) handle;
-    logger.fileHeader = [NSString stringWithUTF8String:header];
+    NSString * jsonString = [NSString stringWithUTF8String:header];
+    NSData * jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSDictionary * dictionary = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONWritingPrettyPrinted error:NULL];
+    
+    logger.fileHeader = dictionary;
+    
 }
 
+
+MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_path,uint32_t offset_size,int limit, int* number, char ***array_ptr,uint32_t **size_array_ptr){
+    if(diskcache_file_path == nullptr){
+        return 0;
+    }
+    
+   __block uint32_t result_size = 0;
+    
+    __block NSArray<NSString*> * resultArray;
+    
+    [MXLogger selectWithDiskCacheFilePath:[NSString stringWithUTF8String:diskcache_file_path] offsetSize:offset_size limit:limit completion:^(NSArray<NSString *> * _Nonnull result, NSUInteger currentOffset) {
+        result_size = static_cast<uint32_t>(currentOffset);
+        resultArray = result;
+    }];
+    
+    int count = (int)resultArray.count;
+    
+    *number = count;
+    
+    if(count > 0){
+        auto array = (char**)malloc(count * sizeof(void *));
+        auto size_array = (uint32_t *) malloc(count * sizeof(uint32_t *));
+        if(!array){
+            free(array);
+            free(size_array);
+            return -1;
+        }
+        *array_ptr = array;
+        *size_array_ptr = size_array;
+        for(int i = 0;i<count;i++){
+            NSString * logMsg = resultArray[i];
+            auto logData = [logMsg dataUsingEncoding:NSUTF8StringEncoding];
+            NSUInteger length = logData.length;
+            size_array[i] = static_cast<uint32_t>(length);
+    
+            array[i] = (char*)logData.bytes;
+        }
+    }
+    
+    return result_size;
+    
+}
+MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logfiles)(const char * directory, char ***array_ptr,uint32_t **size_array_ptr){
+    if(directory == nullptr) return 0;
+    
+    
+    NSArray<NSDictionary<NSString*,NSString*>*>* list =  [MXLogger selectLogfilesWithDirectory:[NSString stringWithUTF8String:directory]];
+    if(list.count > 0){
+        auto array = (char**)malloc(list.count * sizeof(void *));
+        auto size_array = (uint32_t *) malloc(list.count * sizeof(uint32_t *));
+        if(!array){
+            free(array);
+            free(size_array);
+            return 0;
+        }
+        *array_ptr = array;
+        *size_array_ptr = size_array;
+        
+        for(int i =0;i < list.count;i++){
+            NSDictionary<NSString*,NSString*>* map = list[i];
+            NSString * info = [NSString  stringWithFormat:@"%@,%@,%@",map[@"name"],map[@"size"],map[@"timestamp"]];
+            auto infoData = [info dataUsingEncoding:NSUTF8StringEncoding];
+            size_array[i] = static_cast<uint32_t>(infoData.length);
+            array[i] = (char*)infoData.bytes;
+        }
+        return static_cast<uint32_t>(list.count);
+    }
+    
+    return 0;
+    
+}
 
 
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_age)(const void *handle,int max_age){
@@ -90,16 +167,11 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_storage_policy)(const void *handle,const
     MXLogger *logger = (__bridge MXLogger *) handle;
     logger.storagePolicy = [NSString stringWithUTF8String:policy];
 }
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_pattern)(const void *handle,const char*pattern){
-    if(pattern == nullptr) return;
-    MXLogger *logger = (__bridge MXLogger *) handle;
-    logger.filePattern = [NSString stringWithUTF8String:pattern];
 
-}
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_pattern)(const void *handle,const char*pattern){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_pattern)(const void *handle,const char*pattern){
     if(pattern == nullptr) return;
     MXLogger *logger = (__bridge MXLogger *) handle;
-    logger.consolePattern = [NSString stringWithUTF8String:pattern];
+    logger.pattern = [NSString stringWithUTF8String:pattern];
 
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(log)(const void *handle,const char* name, int lvl,const char* msg,const char* tag){

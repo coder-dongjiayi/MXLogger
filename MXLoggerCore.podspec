@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = "9.0"
 
   s.source       = { :git => "https://github.com/coder-dongjiayi/MXLogger.git", :tag => "v#{s.version}" }
-  s.source_files = "Core", "Core/*.{h,cpp,hpp,cc}", "Core/md5/*"
+  s.source_files = "Core", "Core/*.{h,cpp,hpp,cc}", "Core/md5/*","Core/cJson/*"
   
   s.public_header_files = "Core/mxlogger.hpp","Core/mxlogger_util.hpp"
    

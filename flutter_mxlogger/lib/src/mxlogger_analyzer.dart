@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_mxlogger/flutter_mxlogger.dart';
+import 'package:flutter_mxlogger/src/widget/file_listview.dart';
 import 'package:flutter_mxlogger/src/widget/log_listview.dart';
 import 'package:flutter_mxlogger/src/widget/search_bar.dart';
 import 'package:flutter_mxlogger/src/theme/mx_theme.dart';
@@ -78,7 +80,7 @@ class _MXLoggerAnalyzerState extends State<MXLoggerAnalyzer> {
   }
 
   Future<void> initFileData() async {
-
+    MXLogger.selectLogfiles(directory: widget.logDir);
   }
   @override
   Widget build(BuildContext context) {
@@ -92,14 +94,17 @@ class _MXLoggerAnalyzerState extends State<MXLoggerAnalyzer> {
         leading: const SizedBox(),
         title: const SearchBar(),
       ),
-      body: LogListView(
-        dataSource: dataSource,
-        callback: (index){
-          Navigator.of(context).push(MaterialPageRoute(builder: (context){
-            return MXLoggerDetailPage();
-          }));
-        },
+      body: FileListView(
+       dirPath: widget.logDir,
       ),
+      // body: LogListView(
+      //   dataSource: dataSource,
+      //   callback: (index){
+      //     Navigator.of(context).push(MaterialPageRoute(builder: (context){
+      //       return MXLoggerDetailPage();
+      //     }));
+      //   },
+      // ),
 
     );
   }

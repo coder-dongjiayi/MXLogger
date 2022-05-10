@@ -12,7 +12,6 @@
 		BD7BA73628082EA600EDA6AC /* console_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72228082EA600EDA6AC /* console_sink.cpp */; };
 		BD7BA73728082EA600EDA6AC /* logger_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72528082EA600EDA6AC /* logger_os.cpp */; };
 		BD7BA73828082EA600EDA6AC /* mxlogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72628082EA600EDA6AC /* mxlogger.cpp */; };
-		BD7BA73928082EA600EDA6AC /* file_appender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72C28082EA600EDA6AC /* file_appender.cpp */; };
 		BD7BA73A28082EA600EDA6AC /* mx_file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72D28082EA600EDA6AC /* mx_file.cpp */; };
 		BD7BA73B28082EA600EDA6AC /* log_msg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72E28082EA600EDA6AC /* log_msg.cpp */; };
 		BD7BA73C28082EA600EDA6AC /* flag_formatter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA73028082EA600EDA6AC /* flag_formatter.cpp */; };
@@ -50,11 +49,9 @@
 		BD7BA72528082EA600EDA6AC /* logger_os.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger_os.cpp; sourceTree = "<group>"; };
 		BD7BA72628082EA600EDA6AC /* mxlogger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mxlogger.cpp; sourceTree = "<group>"; };
 		BD7BA72728082EA600EDA6AC /* mxlogger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mxlogger.hpp; sourceTree = "<group>"; };
-		BD7BA72828082EA600EDA6AC /* file_appender.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = file_appender.hpp; sourceTree = "<group>"; };
 		BD7BA72928082EA600EDA6AC /* file_sink.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = file_sink.hpp; sourceTree = "<group>"; };
 		BD7BA72A28082EA600EDA6AC /* mx_file.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mx_file.hpp; sourceTree = "<group>"; };
 		BD7BA72B28082EA600EDA6AC /* mxlogger_helper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_helper.hpp; sourceTree = "<group>"; };
-		BD7BA72C28082EA600EDA6AC /* file_appender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file_appender.cpp; sourceTree = "<group>"; };
 		BD7BA72D28082EA600EDA6AC /* mx_file.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mx_file.cpp; sourceTree = "<group>"; };
 		BD7BA72E28082EA600EDA6AC /* log_msg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log_msg.cpp; sourceTree = "<group>"; };
 		BD7BA72F28082EA600EDA6AC /* flag_formatter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = flag_formatter.hpp; sourceTree = "<group>"; };
@@ -92,8 +89,6 @@
 				BDA28450280D778E00C833A3 /* md5 */,
 				BD7BA72228082EA600EDA6AC /* console_sink.cpp */,
 				BD7BA73428082EA600EDA6AC /* console_sink.hpp */,
-				BD7BA72C28082EA600EDA6AC /* file_appender.cpp */,
-				BD7BA72828082EA600EDA6AC /* file_appender.hpp */,
 				BD7BA73128082EA600EDA6AC /* file_sink.cpp */,
 				BD7BA72928082EA600EDA6AC /* file_sink.hpp */,
 				BD7BA73028082EA600EDA6AC /* flag_formatter.cpp */,
@@ -198,7 +193,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BD7BA73928082EA600EDA6AC /* file_appender.cpp in Sources */,
 				BD7BA73628082EA600EDA6AC /* console_sink.cpp in Sources */,
 				BD7BA73E28082EA600EDA6AC /* pattern_formatter.cpp in Sources */,
 				BD7BA73D28082EA600EDA6AC /* file_sink.cpp in Sources */,

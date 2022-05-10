@@ -11,17 +11,18 @@
 #include <stdio.h>
 #include "sink.hpp"
 #include "mx_file.hpp"
-#include "file_appender.hpp"
+
 namespace mxlogger{
 namespace sinks {
 
 class file_sink : public sink{
 public:
-    file_sink(std::shared_ptr<details::mx_file> file): mxfile(file) {};
-    
-    ~file_sink(){
-        printf("file_sink 释放\n");
+    file_sink(std::shared_ptr<details::mx_file> file): mxfile(file) {
+        filename_ = "mxlog";
+        handle_date_(policy::storage_policy::yyyy_MM_dd);
     };
+    
+    ~file_sink(){};
     
     void log(const details::log_msg &msg) override;
     
@@ -35,8 +36,11 @@ public:
     std::shared_ptr<details::mx_file> mxfile;
     
 private:
-    
-    details::file_appender file_appender_;
+    void handle_date_(policy::storage_policy policy);
+    std::string calculator_filename_;
+ 
+    std::string filename_;
+
 };
 
 };

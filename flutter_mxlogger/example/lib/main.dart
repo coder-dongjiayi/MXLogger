@@ -31,8 +31,8 @@ class _MyAppState extends State<MyApp> {
    
     String  isDebug =  logger.isDebugTraceing() == true ? "正在调试" : "非调试状态";
     logger.info(isDebug,name: "mxlogger",tag: "isDebug");
-    
-    String? diskCachePath = logger.getdDiskcachePath();
+
+     String? diskCachePath = logger.getdDiskcachePath();
     if(diskCachePath == null){
       logger.error("diskCachePath 异常");
     }else{
@@ -40,17 +40,19 @@ class _MyAppState extends State<MyApp> {
       logger.info(diskCachePath,name: "mxlogger",tag: "path");
     }
 
+    Map<String,dynamic> header = {"version":"1.0.1","platform":"ios"};
+    logger.setFileHeader(header);
+
     logger.setMaxdiskSize(1024*1024*10);
     logger.setMaxdiskAge(60*60*24*7);
 
-  /// 以下都是默认设置
-    logger.setStoragePolicy("yyy_MM_dd");
+    logger.setStoragePolicy("yyyy_MM_dd_HH");
     logger.setFileName("mxlog");
     logger.shouldRemoveExpiredDataWhenEnterBackground(true);
     logger.setConsoleLevel(0);
     logger.setFileLevel(1);
-    logger.setConsolePattern("[%d][%p]%m");
-    logger.setFilePattern("[%d][%t][%p]%m");
+    logger.setPattern("[%d][%p]%m");
+
   }
 
 
@@ -81,6 +83,28 @@ class _MyAppState extends State<MyApp> {
                 logger.error("这是erro数据");
 
               }, child: Text("error")),
+              ElevatedButton(onPressed: (){
+              List<Map<String, dynamic>> _list =  MXLogger.selectLogfiles(directory: _diskCachePath);
+              _list.forEach((element) {
+                print(element.toString());
+              });
+
+              }, child: Text("获取目录下的日志文件")),
+
+              ElevatedButton(onPressed: (){
+                List<Map<String, dynamic>> _list =  MXLogger.selectLogfiles(directory: _diskCachePath);
+                String fileName = _list.first["name"];
+
+                MXLogger.selectLogMsg(diskcacheFilePath: _diskCachePath + fileName,completion: (int size,List<String> messageList){
+                  print("size = $size");
+                  messageList.forEach((element) {
+                    print(element);
+
+                  });
+
+                });
+
+              }, child: Text("查询日志信息")),
               Builder(builder: (context){
                 return ElevatedButton(onPressed: (){
                   Analyzer.show(context,_diskCachePath);

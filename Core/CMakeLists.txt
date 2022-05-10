@@ -71,8 +71,6 @@ add_library(MXLoggerCore
         # Provides a relative path to your source file(s).
         console_sink.cpp
         console_sink.hpp
-        file_appender.cpp
-        file_appender.hpp
         file_sink.cpp
         file_sink.hpp
         flag_formatter.cpp
