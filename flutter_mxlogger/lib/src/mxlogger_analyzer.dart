@@ -8,6 +8,7 @@ import 'package:flutter_mxlogger/src/widget/search_bar.dart';
 import 'package:flutter_mxlogger/src/theme/mx_theme.dart';
 
 import 'mxlogger_detail_page.dart';
+import 'mxlogger_log_page.dart';
 
 void show(BuildContext context,String dir) {
   showModalBottomSheet(
@@ -32,53 +33,13 @@ class MXLoggerAnalyzer extends StatefulWidget {
 
 class _MXLoggerAnalyzerState extends State<MXLoggerAnalyzer> {
 
- late List<Map<String,dynamic>> dataSource;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     initFileData();
-    dataSource = [
-      {
-        "level":0,
-        "msg":"这是一条debug信息，请前往AppStore查看对账单"
-      },
-      {
-        "level":1,
-        "msg":"这是一条info信息，请前往AppStore查看对账单"
-      },
-      {
-        "level":1,
-        "msg":"这是一条info信息，请前往AppStore查看对账单"
-      },
-      {
-        "level":1,
-        "msg":"这是一条info信息，请前往AppStore查看对账单"
-      },
-      {
-        "level":1,
-        "msg":"这是一条info信息，请前往AppStore查看对账单"
-      },
-      {
-        "level":1,
-        "msg":"这是一条info信息，请前往AppStore查看对账单"
-      },
-
-      {
-        "level":2,
-        "msg":"这是一条warn信息，请前往AppStore查看对账单"
-      },
-      {
-        "level":3,
-        "msg":"这是一条error信息，请前往AppStore查看对账单"
-      },
-      {
-        "level":4,
-        "msg":"这是一条fatal信息，请前往AppStore查看对账单"
-      }
-    ];
   }
-
   Future<void> initFileData() async {
     MXLogger.selectLogfiles(directory: widget.logDir);
   }
@@ -86,25 +47,21 @@ class _MXLoggerAnalyzerState extends State<MXLoggerAnalyzer> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MXTheme.themeColor,
-      appBar: AppBar(
-        leadingWidth: 0,
-        toolbarHeight: 90,
-        backgroundColor: MXTheme.itemBackground,
-        elevation: 0,
-        leading: const SizedBox(),
-        title: const SearchBar(),
-      ),
+
       body: FileListView(
        dirPath: widget.logDir,
+        callback: (String fileName,int size){
+         String path = widget.logDir + fileName;
+
+          Navigator.push(context, MaterialPageRoute(builder: (context){
+            return MXLoggerLogPage(
+              logPath: path,
+              fileSize: size,
+            );
+          }));
+        },
       ),
-      // body: LogListView(
-      //   dataSource: dataSource,
-      //   callback: (index){
-      //     Navigator.of(context).push(MaterialPageRoute(builder: (context){
-      //       return MXLoggerDetailPage();
-      //     }));
-      //   },
-      // ),
+
 
     );
   }

@@ -41,20 +41,19 @@ class _MyAppState extends State<MyApp> {
     logger.setFileName("mxlog");
     logger.shouldRemoveExpiredDataWhenEnterBackground(true);
     logger.setConsoleLevel(0);
-    logger.setFileLevel(1);
+    logger.setFileLevel(0);
     logger.setPattern("[%d][%p]%m");
 
-
-    String  isDebug =  logger.isDebugTraceing() == true ? "正在调试" : "非调试状态";
-    logger.info(isDebug,name: "mxlogger",tag: "isDebug");
-
-    String? diskCachePath = logger.getdDiskcachePath();
-    if(diskCachePath == null){
-      logger.error("diskCachePath 异常");
-    }else{
-      _diskCachePath =  diskCachePath;
-      logger.info(diskCachePath,name: "mxlogger",tag: "path");
-    }
+    // String  isDebug =  logger.isDebugTraceing() == true ? "正在调试" : "非调试状态";
+    // logger.info(isDebug,name: "mxlogger",tag: "isDebug");
+    //
+    // String? diskCachePath = logger.getdDiskcachePath();
+    // if(diskCachePath == null){
+    //   logger.error("diskCachePath 异常");
+    // }else{
+    //   _diskCachePath =  diskCachePath;
+    //   logger.info(diskCachePath,name: "mxlogger",tag: "path");
+    // }
   }
 
 
@@ -70,7 +69,7 @@ class _MyAppState extends State<MyApp> {
             children: [
 
               ElevatedButton(onPressed: (){
-                logger.debug("这是debug数据");
+                logger.debug("这是debug数据这是debug数据这是debug数据这是debug数据这是debug数据这是debug数据这是debug数据这是debug数据这是debug数据这是debug数据");
 
               }, child: Text("debug")),
               ElevatedButton(onPressed: (){
@@ -94,22 +93,22 @@ class _MyAppState extends State<MyApp> {
               }, child: Text("获取目录下的日志文件")),
 
               ElevatedButton(onPressed: (){
-                List<Map<String, dynamic>> _list =  MXLogger.selectLogfiles(directory: _diskCachePath);
-                String fileName = _list.first["name"];
-
-                MXLogger.selectLogMsg(diskcacheFilePath: _diskCachePath + fileName,completion: (int size,List<String> messageList){
-                  print("size = $size");
-                  messageList.forEach((element) {
-                    print(element);
-
-                  });
-
-                });
+                // List<Map<String, dynamic>> _list =  MXLogger.selectLogfiles(directory: _diskCachePath);
+                // String fileName = _list.first["name"];
+                //
+                // MXLogger.selectLogMsg(diskcacheFilePath: _diskCachePath + fileName,completion: (int size,List<String> messageList){
+                //   print("size = $size");
+                //   messageList.forEach((element) {
+                //     print(element);
+                //
+                //   });
+                //
+                // });
 
               }, child: Text("查询日志信息")),
               Builder(builder: (context){
                 return ElevatedButton(onPressed: (){
-                  Analyzer.show(context,_diskCachePath);
+                  Analyzer.show(context,logger.getdDiskcachePath() ?? "");
 
                 }, child: Text("分析器"));
               })

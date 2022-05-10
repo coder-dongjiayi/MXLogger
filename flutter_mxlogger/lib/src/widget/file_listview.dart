@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 import 'package:flutter_mxlogger/src/theme/mx_theme.dart';
+
+typedef FileItemTapCallback = void Function(String fileName,int size);
+
 class FileListView extends StatefulWidget {
-   const FileListView({Key? key,required this.dirPath}) : super(key: key);
+   const FileListView({Key? key,required this.dirPath,this.callback}) : super(key: key);
 
   final  String dirPath;
+  final FileItemTapCallback? callback;
   @override
   _FileListViewState createState() => _FileListViewState();
 }
@@ -31,28 +35,39 @@ class _FileListViewState extends State<FileListView> {
 
       return   GestureDetector(
           onTap: (){
-
+            widget.callback?.call(name,size);
           },
           child: Container(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
             color:
             index % 2 == 0 ? MXTheme.themeColor : MXTheme.itemBackground,
 
-            child: _itemBuiler(name,"${dateTime.toString()}","$size"),
+            child: _itemBuiler(name,dateTime.toString(),_kbString(size)),
           ));
     });
   }
 
   String _kbString(int size){
-
     if(size < 1024){
-      return "$size byte";
+      return "$size B";
     }
-    if(size > 1024 && size < 1024*1024){
-     double r =  size/1024.0;
-      return ""
+    double M = 1024.0*1024;
+
+    if(size > 1024 && size< M){
+      double sizeK = size/1024.0;
+      return sizeK.toStringAsFixed(2) + "K";
     }
-    return  "$size byte";
+
+    double G = M * 1024.0;
+    if(size > M && size < G){
+      double sizeM =  size/M;
+      return sizeM.toStringAsFixed(2) + "M";
+    }
+    if(size > G){
+      double sizeG = size / G;
+      return sizeG.toStringAsFixed(2) + "G";
+    }
+    return "$size Byte";
   }
 
   Widget _itemBuiler(String name,String time,String kb){

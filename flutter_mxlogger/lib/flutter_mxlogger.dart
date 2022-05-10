@@ -81,7 +81,7 @@ class MXLogger with WidgetsBindingObserver {
   }
 
   static void selectLogMsg(
-      {required String diskcacheFilePath, int limit = 10,SelectFunction? completion}) {
+      {required String diskcacheFilePath,required int offSize , int limit = 10,SelectFunction? completion}) {
     List<String> msgList = [];
 
     Pointer<Utf8> dirPathPtr = diskcacheFilePath.toNativeUtf8();
@@ -91,7 +91,7 @@ class MXLogger with WidgetsBindingObserver {
 
     Pointer<Int32> numberPtr = calloc<Int32>();
 
-    int offSize = _select_logmsg(dirPathPtr, 0, limit, numberPtr, arrayPtr, sizeArrayPtr);
+    int resultSize = _select_logmsg(dirPathPtr, offSize, limit, numberPtr, arrayPtr, sizeArrayPtr);
     final array_ptr = arrayPtr[0];
     final sizeArray_ptr = sizeArrayPtr[0];
 
@@ -114,7 +114,7 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(arrayPtr);
     calloc.free(sizeArrayPtr);
 
-    completion?.call(offSize,msgList);
+    completion?.call(resultSize,msgList);
 
   }
 
