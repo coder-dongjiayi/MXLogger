@@ -11,10 +11,10 @@ namespace mxlogger{
 namespace util{
 
 
- long mxlogger_util::select_log_form_path(const char* path,std::vector<std::string> *destination,long begin,int limit){
+ long mxlogger_util::select_log_form_path(const char* path,std::vector<std::string> *destination){
     
      
-    long size =  select_form_path2(path, destination, begin, limit);
+    long size =  select_form_path(path, destination);
      
 
    

@@ -32,50 +32,50 @@ inline bool makedir(const char* path){
     return ::mkdir(path,mode_t(0755)) == 0;
 }
 
-inline size_t  select_form_path2(const char* path,std::vector<std::string> *vector,size_t begin, int limit){
-    if (path_exists(path) == false) {
-        printf("文件路径不存在\n");
-        return  -1;
-    }
+//inline size_t  select_form_path2(const char* path,std::vector<std::string> *vector,size_t begin, int limit){
+//    if (path_exists(path) == false) {
+//        printf("文件路径不存在\n");
+//        return  -1;
+//    }
+//
+//    std::ifstream in_file(path,std::ios::in | std::ios::binary);
+//
+//    if (!in_file) {
+//        printf("文件打开失败\n");
+//        return -2;
+//    }
+//    std::vector<std::string> lines;
+//    std::string line;
+//    std::streampos size = in_file.tellg();
+//    char x;
+//    for (int i = 1; i <= size; i++) {
+//        in_file.seekg(-i, std::ios::end);
+//        in_file.get(x);
+//        if (x == 0) {continue;}
+//
+//        if (x == '\n') {
+//            std::string templine = line;
+//        if (templine.size() > 0) {
+//
+//            lines.push_back(templine);
+//
+//        }
+//            line = "";
+//        }else {
+//            line = x + line;
+//
+//        }
+//        x = 0;
+//        if (line.size() > 0) {
+//                    lines.push_back(line);
+//            }
+//    }
+//    in_file.close();
+//    return 0;
+//}
+inline int  select_form_path(const char* path,std::vector<std::string> *vector){
     
-    std::ifstream in_file(path,std::ios::ate);
-   
-    if (!in_file) {
-        printf("文件打开失败\n");
-        return -2;
-    }
-    std::vector<std::string> lines;
-    std::string line;
-    std::streampos size = in_file.tellg();
-    char x;
-    for (int i = 1; i <= size; i++) {
-        in_file.seekg(-i, std::ios::end);
-        in_file.get(x);
-        if (x == 0) {continue;}
-        
-        if (x == '\n') {
-            std::string templine = line;
-        if (templine.size() > 0) {
-                           
-            lines.push_back(templine);
-                
-        }
-            line = "";
-        }else {
-            line = x + line;
-            
-        }
-        x = 0;
-        if (line.size() > 0) {
-                    lines.push_back(line);
-            }
-    }
-    in_file.close();
-    return 0;
-}
-inline size_t  select_form_path(const char* path,std::vector<std::string> *vector,size_t begin, int limit){
-    
-    //https://blog.csdn.net/zhanghaishan/article/details/119381568
+
    
     if (path_exists(path) == false) {
         printf("文件路径不存在\n");
@@ -88,25 +88,22 @@ inline size_t  select_form_path(const char* path,std::vector<std::string> *vecto
         printf("文件打开失败\n");
         return -2;
     }
-  
-    in_file.seekg(begin);
+
     
     std::string line;
     
     size_t bytes = 0;
     
-    int number = 0;
 
-    while (number < limit && std::getline(in_file, line)) {
+    while (std::getline(in_file, line)) {
         
         bytes = bytes + line.size() + 1;
         vector ->push_back(line.data());
-        number ++ ;
     }
   
+    in_file.close();
     
-    
-    return bytes;
+    return 0;
 }
 
 

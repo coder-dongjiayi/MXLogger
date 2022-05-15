@@ -28,12 +28,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 
-/// 查询单个日志文件 这是个同步方法
+
 /// @param diskCacheFilePath 日志路径 /xxx/xxx/mxlog_2022-05-06.log
-/// @param offsetSize 文件偏移
-/// @param limit 查询行数
-/// @param completion 回调
-+(void)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath offsetSize:(NSUInteger) offsetSize limit:(NSInteger) limit completion:(void(^)(NSArray<NSString*>* result,NSUInteger currentOffset)) completion;
++(NSArray<NSString*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath;
 
 
 /// 查询目录下的日志文件

@@ -67,24 +67,24 @@ static NSString * _defaultDiskCacheDirectory;
     NSString * key =  [NSString stringWithUTF8String:mapKey.data()];
     return key;
 }
-+(void)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath offsetSize:(NSUInteger) offsetSize limit:(NSInteger) limit completion:(void(^)(NSArray<NSString*>* result,NSUInteger currentOffset)) completion{
++(NSArray<NSString*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath{
 
   
   
     std::vector<std::string> destination;
     
-   long offSize =  mxlogger::util::mxlogger_util::select_log_form_path(diskCacheFilePath.UTF8String, &destination, [NSNumber numberWithUnsignedInteger:offsetSize].longValue, [NSNumber numberWithInteger:limit].intValue);
+    mxlogger::util::mxlogger_util::select_log_form_path(diskCacheFilePath.UTF8String, &destination);
     
     
     NSMutableArray<NSString*> *messageList = [NSMutableArray arrayWithCapacity:destination.size()];
     
-    for (int i = 0; i<destination.size(); i++) {
+    for (int i = (int)destination.size(); i>=0; i--) {
         std::string log_info = destination[i];
         NSString * string = [NSString stringWithUTF8String:log_info.data()];
         [messageList addObject:string];
     }
 
-    completion([messageList copy],[NSNumber numberWithLong:offSize].unsignedIntegerValue);
+    return [messageList copy];
    
 }
 +(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory{

@@ -73,13 +73,11 @@
     
     NSString * path = [NSString stringWithFormat:@"%@%@",_logger.diskCachePath,array.firstObject[@"name"]];
     
-    [MXLogger selectWithDiskCacheFilePath:path offsetSize:0 limit:10 completion:^(NSArray<NSString *> * _Nonnull result, NSUInteger currentOffset) {
-        
-        [result enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSLog(@"%@",obj);
-        }];
-    }];
+   NSArray * result =  [MXLogger selectWithDiskCacheFilePath:path];
   
+    [result enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSLog(@"%@",obj);
+    }];
 }
 
 - (IBAction)defaultButttonAction:(id)sender {
