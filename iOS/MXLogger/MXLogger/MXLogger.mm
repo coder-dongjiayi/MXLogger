@@ -75,10 +75,11 @@ static NSString * _defaultDiskCacheDirectory;
     
     mxlogger::util::mxlogger_util::select_log_form_path(diskCacheFilePath.UTF8String, &destination);
     
+    if(destination.size() == 0) return @[];
     
     NSMutableArray<NSString*> *messageList = [NSMutableArray arrayWithCapacity:destination.size()];
     
-    for (int i = (int)destination.size(); i>=0; i--) {
+    for (int i = (int)(destination.size() - 1); i>=0; i--) {
         std::string log_info = destination[i];
         NSString * string = [NSString stringWithUTF8String:log_info.data()];
         [messageList addObject:string];
