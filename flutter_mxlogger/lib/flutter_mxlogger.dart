@@ -8,9 +8,9 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 export 'flutter_mxlogger.dart';
-import 'package:archive/archive.dart';
 
-typedef SelectFunction = void  Function(int offsetSize,List<String> messageList);
+
+
 typedef LoggerFunction = Void Function(
     Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
 
@@ -80,8 +80,8 @@ class MXLogger with WidgetsBindingObserver {
     return null;
   }
 
-  static void selectLogMsg(
-      {required String diskcacheFilePath,required int offSize , int limit = 10,SelectFunction? completion}) {
+  static List<String>  selectLogMsg(
+      {required String diskcacheFilePath}) {
     List<String> msgList = [];
 
     Pointer<Utf8> dirPathPtr = diskcacheFilePath.toNativeUtf8();
@@ -91,7 +91,7 @@ class MXLogger with WidgetsBindingObserver {
 
     Pointer<Int32> numberPtr = calloc<Int32>();
 
-    int resultSize = _select_logmsg(dirPathPtr, offSize, limit, numberPtr, arrayPtr, sizeArrayPtr);
+    _select_logmsg(dirPathPtr, numberPtr, arrayPtr, sizeArrayPtr);
     final array_ptr = arrayPtr[0];
     final sizeArray_ptr = sizeArrayPtr[0];
 
@@ -114,7 +114,7 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(arrayPtr);
     calloc.free(sizeArrayPtr);
 
-    completion?.call(resultSize,msgList);
+    return msgList;
 
   }
 
@@ -462,15 +462,14 @@ final int Function(Pointer<Utf8>, Pointer<Pointer<Pointer<Utf8>>>,
             _mxlogger_function("select_logfiles"))
         .asFunction();
 
-final int Function(Pointer<Utf8>, int, int,Pointer<Int32>, Pointer<Pointer<Pointer<Utf8>>>,
+final int Function(Pointer<Utf8>,Pointer<Int32>, Pointer<Pointer<Pointer<Utf8>>>,
         Pointer<Pointer<Uint32>>) _select_logmsg =
     _nativeLib
         .lookup<
                 NativeFunction<
                     Uint64 Function(
                         Pointer<Utf8>,
-                        Uint32,
-                        Int32,
+
 Pointer<Int32>,
                         Pointer<Pointer<Pointer<Utf8>>>,
                         Pointer<Pointer<Uint32>>)>>(

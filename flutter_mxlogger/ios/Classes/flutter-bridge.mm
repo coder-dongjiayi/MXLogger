@@ -56,19 +56,13 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_header)(const void *handle,const ch
 }
 
 
-MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_path,uint32_t offset_size,int limit, int* number, char ***array_ptr,uint32_t **size_array_ptr){
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_path,int* number, char ***array_ptr,uint32_t **size_array_ptr){
     if(diskcache_file_path == nullptr){
-        return 0;
+        return -1;
     }
     
-   __block uint32_t result_size = 0;
     
-    __block NSArray<NSString*> * resultArray;
-    
-    [MXLogger selectWithDiskCacheFilePath:[NSString stringWithUTF8String:diskcache_file_path] offsetSize:offset_size limit:limit completion:^(NSArray<NSString *> * _Nonnull result, NSUInteger currentOffset) {
-        result_size = static_cast<uint32_t>(currentOffset);
-        resultArray = result;
-    }];
+    NSArray<NSString*> * resultArray =   [MXLogger selectWithDiskCacheFilePath:[NSString stringWithUTF8String:diskcache_file_path]];
     
     int count = (int)resultArray.count;
     
@@ -94,7 +88,7 @@ MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_fi
         }
     }
     
-    return result_size;
+    return 0;
     
 }
 MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logfiles)(const char * directory, char ***array_ptr,uint32_t **size_array_ptr){

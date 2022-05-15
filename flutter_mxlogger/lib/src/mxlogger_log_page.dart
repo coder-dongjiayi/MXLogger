@@ -16,7 +16,7 @@ class MXLoggerLogPage extends StatefulWidget {
 
 class _MXLoggerLogPageState extends State<MXLoggerLogPage> {
   List<Map<String, dynamic>> dataSource = [];
-  int offSize = 0;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -25,28 +25,18 @@ class _MXLoggerLogPageState extends State<MXLoggerLogPage> {
   }
 
   void loadMoreData(){
-    if(offSize>= widget.fileSize) return;
-    MXLogger.selectLogMsg(
-        diskcacheFilePath: widget.logPath,
-        offSize: offSize,
-        limit: 10,
-        completion: (int size, List<String> messages) {
-    
-          List<Map<String, dynamic>> _list = [];
-          for (var element in messages) {
-            Map<String,dynamic> map = jsonDecode(element);
-            if(map["header"] == null){
-              _list.add(map);
-            }
-          }
 
-         if(offSize == 0){
-           dataSource = _list;
-         }else{
-           dataSource.addAll(_list);
-         }
-          offSize = size + offSize;
-        });
+    List<String> msgList =   MXLogger.selectLogMsg(
+        diskcacheFilePath: widget.logPath);
+
+    List<Map<String, dynamic>> _list = [];
+    for (var element in msgList) {
+      Map<String,dynamic> map = jsonDecode(element);
+      if(map["header"] == null){
+        _list.add(map);
+      }
+    }
+    dataSource = _list;
     setState(() {
 
     });
@@ -66,7 +56,7 @@ class _MXLoggerLogPageState extends State<MXLoggerLogPage> {
       body: LogListView(
         dataSource: dataSource,
         loadMoreBack: (){
-          loadMoreData();
+
         },
       ),
     );
