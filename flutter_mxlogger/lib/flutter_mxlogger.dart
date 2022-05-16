@@ -173,7 +173,7 @@ class MXLogger with WidgetsBindingObserver {
 
   Future<String?> compressLogFile() async {
     if (_isEnable() == false) return null;
-    String? diskPath = getdDiskcachePath();
+    String? diskPath = getDiskcachePath();
     if (diskPath == null) return null;
     Directory directory = Directory(diskPath);
 
@@ -188,7 +188,7 @@ class MXLogger with WidgetsBindingObserver {
 
   Future<bool> removeZip(String zipPath) async {
     if (_isEnable() == false) return false;
-    String? diskPath = getdDiskcachePath();
+    String? diskPath = getDiskcachePath();
     if (diskPath == null) return false;
 
     Directory directory = Directory(zipPath);
