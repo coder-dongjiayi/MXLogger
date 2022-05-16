@@ -39,9 +39,10 @@ class _LogListViewState extends State<LogListView> {
     return ListView.builder(
         controller: _scrollController,
         itemCount: _dataSource!.length,
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           Map<String, dynamic> map = _dataSource![index];
+          String time = map["time"];
           return GestureDetector(
               onTap: () {
                 widget.callback?.call(index);
@@ -51,22 +52,28 @@ class _LogListViewState extends State<LogListView> {
                 color: index % 2 == 0
                     ? MXTheme.themeColor
                     : MXTheme.itemBackground,
-                child: _item(name: map["name"], msg: map["msg"], level: map["level"]),
+                child: _item(name: map["name"], msg: map["msg"], level: map["level"],time: time),
               ));
         });
   }
 
-  Widget _item({required String name,required String msg, required int level}) {
+  Widget _item({required String name,required String msg, required int level,required String time}) {
     return Stack(
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 15),
-          child: Text(
-            msg,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: MXTheme.text),
-          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+              Text(
+                msg,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: MXTheme.text),
+              ),
+            ],
+          )
         ),
         Positioned(
             left: 0,

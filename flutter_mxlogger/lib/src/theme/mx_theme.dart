@@ -6,6 +6,7 @@ class MXTheme{
   static Color themeColor = const Color.fromRGBO(14, 34, 49, 1);
   static Color itemBackground = const Color.fromRGBO(34, 57, 75, 0.3);
   static Color text = const Color.fromRGBO(255, 255, 255, 0.5);
+  static Color subText = const Color.fromRGBO(76, 94, 109, 1.0);
   static Color debug = const Color.fromRGBO(81, 143, 127, 1);
   static Color info = const Color.fromRGBO(113, 179, 196, 1);
   static Color warn = const Color.fromRGBO(233, 204, 123, 1);

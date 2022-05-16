@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
 
    s.framework    = "CoreFoundation"
 
-   s.dependency 'MXLoggerCore', '0.1.0'
+   s.dependency 'MXLoggerCore', '~>0.1.0'
    s.libraries    = "z", "c++"
    
   s.pod_target_xcconfig = {
