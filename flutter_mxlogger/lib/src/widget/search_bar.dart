@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_mxlogger/src/theme/mx_theme.dart';
+import 'package:flutter_mxlogger/src/level/mx_level.dart';
+
 class SearchBar extends StatefulWidget {
   const SearchBar({Key? key}) : super(key: key);
 
@@ -9,32 +11,7 @@ class SearchBar extends StatefulWidget {
 }
 
 class _SearchBarState extends State<SearchBar> {
-  final List<Map<String,dynamic>> _levels = [
-    {
-      "level":"ALL",
-      "color":MXTheme.white
-    },
-    {
-      "level":"DEBUG",
-      "color":MXTheme.debug,
-    },
-    {
-      "level":"INFO",
-      "color":MXTheme.info,
-    },
-    {
-      "level":"WAENING",
-      "color":MXTheme.warn,
-    },
-    {
-      "level":"ERROR",
-      "color":MXTheme.error,
-    },
-    {
-      "level":"FATAL",
-      "color":MXTheme.fatal,
-    }
-  ];
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -52,7 +29,7 @@ class _SearchBarState extends State<SearchBar> {
       height: 35,
       child: ListView(
         scrollDirection:Axis.horizontal,
-        children: _levels.map((e){
+        children: MXLevels.map((e){
           return _button(e["level"],e["color"]);
         }).toList(),
       ),

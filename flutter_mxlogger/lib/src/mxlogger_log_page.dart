@@ -6,6 +6,8 @@ import 'package:flutter_mxlogger/src/theme/mx_theme.dart';
 import 'package:flutter_mxlogger/src/widget/log_listview.dart';
 import 'package:flutter_mxlogger/src/widget/search_bar.dart';
 
+import 'mxlogger_detail_page.dart';
+
 class MXLoggerLogPage extends StatefulWidget {
   const MXLoggerLogPage({Key? key, required this.logPath, required this.fileSize}) : super(key: key);
   final String logPath;
@@ -55,9 +57,12 @@ class _MXLoggerLogPageState extends State<MXLoggerLogPage> {
       ),
       body: LogListView(
         dataSource: dataSource,
-        loadMoreBack: (){
-
+        callback: (int index){
+         Navigator.of(context).push(MaterialPageRoute(builder: (context){
+           return  MXLoggerDetailPage(source: dataSource[index]);
+         }));
         },
+
       ),
     );
   }

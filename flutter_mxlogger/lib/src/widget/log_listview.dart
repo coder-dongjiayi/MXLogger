@@ -36,58 +36,80 @@ class _LogListViewState extends State<LogListView> {
   Widget build(BuildContext context) {
     if (widget.dataSource == null) return const SizedBox();
 
-    return ListView.builder(
-        controller: _scrollController,
-        itemCount: _dataSource!.length,
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemBuilder: (context, index) {
-          Map<String, dynamic> map = _dataSource![index];
-          String time = map["time"];
-          return GestureDetector(
-              onTap: () {
-                widget.callback?.call(index);
-              },
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                color: index % 2 == 0
-                    ? MXTheme.themeColor
-                    : MXTheme.itemBackground,
-                child: _item(name: map["name"], msg: map["msg"], level: map["level"],time: time),
-              ));
-        });
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      child: ListView.builder(
+          controller: _scrollController,
+          itemCount: _dataSource!.length,
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            Map<String, dynamic> map = _dataSource![index];
+            String time = map["time"];
+
+            return GestureDetector(
+                onTap: () {
+                  widget.callback?.call(index);
+                },
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+
+                  child: _item(
+                      name: map["name"],
+                      msg: map["msg"],
+                      level: map["level"],
+                      time: time),
+                ));
+          }),
+    );
   }
 
-  Widget _item({required String name,required String msg, required int level,required String time}) {
+  Widget _item(
+      {required String name,
+      required String msg,
+      required int level,
+      required String time}) {
     return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 15),
+        Container(
+          margin: EdgeInsets.only(left: 20),
+          padding: EdgeInsets.only(bottom: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
+              Text(time,style: TextStyle(color: MXTheme.subText,fontSize: 13)),
+              SizedBox(height: 5),
               Text(
                 msg,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: MXTheme.text),
+                style: TextStyle(color: MXTheme.text,fontSize: 16),
               ),
             ],
           )
         ),
         Positioned(
+          top: 0,
             left: 0,
-            top: 0,
+            child: Container(
+          width: 10,
+          height: 10,
+          margin: EdgeInsets.only(top: 3),
+          decoration: BoxDecoration(
+              color: MXTheme.colorLevel(level),
+              borderRadius: BorderRadius.all(Radius.circular(5))
+          ),
+        )),
+        Positioned(
+            left: 4,
+            top: 10+3,
             bottom: 0,
-            width: 5,
+            width: 2,
             child: Container(
               decoration: BoxDecoration(
-                  color: MXTheme.colorLevel(level),
+                  color: MXTheme.itemBackground,
                   borderRadius: const BorderRadius.all(Radius.circular(3))),
             ))
       ],
     );
   }
-
-
 }
