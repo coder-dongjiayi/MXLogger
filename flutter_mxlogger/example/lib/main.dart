@@ -108,7 +108,7 @@ class _MyAppState extends State<MyApp> {
               }, child: Text("查询日志信息")),
               Builder(builder: (context){
                 return ElevatedButton(onPressed: (){
-                  Analyzer.show(context,logger.getdDiskcachePath() ?? "");
+                  Analyzer.show(context,logger.getDiskcachePath() ?? "");
 
                 }, child: Text("分析器"));
               })

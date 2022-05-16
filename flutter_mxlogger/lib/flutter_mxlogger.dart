@@ -311,7 +311,7 @@ class MXLogger with WidgetsBindingObserver {
     return isTracking;
   }
 
-  String? getdDiskcachePath() {
+  String? getDiskcachePath() {
     if (_isEnable() == false) return null;
     Pointer<Int8> result = _getdDiskcachePath(_handle);
     if (result == nullptr) {
