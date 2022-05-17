@@ -12,7 +12,7 @@ class MXTheme{
   static Color warn = const Color.fromRGBO(233, 204, 123, 1);
   static Color error = const Color.fromRGBO(197, 73, 88, 1);
   static Color fatal = const Color.fromRGBO(226, 7, 35, 1);
-
+  static Color tag = const Color(0xB37357FF);
   static Color colorLevel(int level){
     switch(level){
       case 0:
