@@ -6,13 +6,10 @@ PODS:
   - MXLogger (0.1.0):
     - MXLoggerCore (~> 0.1.0)
   - MXLoggerCore (0.1.0)
-  - path_provider_ios (0.0.1):
-    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_mxlogger (from `.symlinks/plugins/flutter_mxlogger/ios`)
-  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -24,15 +21,12 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_mxlogger:
     :path: ".symlinks/plugins/flutter_mxlogger/ios"
-  path_provider_ios:
-    :path: ".symlinks/plugins/path_provider_ios/ios"
 
 SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   flutter_mxlogger: 908e1d18bfc3ab620d6c9a95198a8acfdce7be18
   MXLogger: a68c2bff537ba884b59e3c85203d08e0e8becc9c
   MXLoggerCore: 4fcf4dcc40ec36a8ad18a6ad0474f58ba9762310
-  path_provider_ios: 7d7ce634493af4477d156294792024ec3485acd5
 
 PODFILE CHECKSUM: 688dacb4298e165e34d363b49247a0ac46eea3b9
 

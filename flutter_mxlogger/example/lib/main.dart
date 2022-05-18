@@ -44,21 +44,12 @@ class _MyAppState extends State<MyApp> {
     logger.setFileLevel(0);
     logger.setPattern("[%d][%p]%m");
 
-    // String  isDebug =  logger.isDebugTraceing() == true ? "正在调试" : "非调试状态";
-    // logger.info(isDebug,name: "mxlogger",tag: "isDebug");
-    //
-    // String? diskCachePath = logger.getdDiskcachePath();
-    // if(diskCachePath == null){
-    //   logger.error("diskCachePath 异常");
-    // }else{
-    //   _diskCachePath =  diskCachePath;
-    //   logger.info(diskCachePath,name: "mxlogger",tag: "path");
-    // }
   }
 
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
