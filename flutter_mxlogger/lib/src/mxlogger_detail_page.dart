@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mxlogger/src/theme/mx_theme.dart';
 import 'package:flutter_mxlogger/src/level/mx_level.dart';
+import 'package:flutter_json_view/flutter_json_view.dart';
 class MXLoggerDetailPage extends StatefulWidget {
   const MXLoggerDetailPage({Key? key, required this.source}) : super(key: key);
   final Map<String,dynamic> source;
@@ -58,12 +61,23 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
     );
   }
   Widget message(String msg){
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-      color: MXTheme.itemBackground,
-      child: Text(msg,style: TextStyle(color: MXTheme.text,fontSize: 16)),
-    );
+    try{
+     Map<String,dynamic> map =  jsonDecode(msg);
+     return Container(
+       width: MediaQuery.of(context).size.width,
+       padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+       color: MXTheme.itemBackground,
+       child: JsonView.map(map)
+     );
+    }catch(error){
+      return Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+        color: MXTheme.itemBackground,
+        child: Text(msg,style: TextStyle(color: MXTheme.text,fontSize: 16)),
+      );
+    }
+
   }
 }
 
