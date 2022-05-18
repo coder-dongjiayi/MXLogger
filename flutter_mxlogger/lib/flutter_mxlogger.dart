@@ -3,7 +3,6 @@ library flutter_mxlogger;
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
-import 'package:archive/archive_io.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -139,7 +138,7 @@ class MXLogger with WidgetsBindingObserver {
           Map<String, dynamic> _map = {
             "name": _list[0],
             "size": int.parse(_list[1]),
-            "timestemp": int.parse(_list[2])
+            "timestamp": int.parse(_list[2])
           };
           logFiles.add(_map);
         }
@@ -171,20 +170,20 @@ class MXLogger with WidgetsBindingObserver {
     _shouldRemoveExpiredDataWhenEnterBackground = should;
   }
 
-  Future<String?> compressLogFile() async {
-    if (_isEnable() == false) return null;
-    String? diskPath = getDiskcachePath();
-    if (diskPath == null) return null;
-    Directory directory = Directory(diskPath);
-
-    ZipFileEncoder encoder = ZipFileEncoder();
-    List<String> directorList = directory.path.split("/");
-    directorList.removeAt(directorList.length - 1);
-    String zipPath = directorList.join("/");
-    encoder.zipDirectory(directory, filename: zipPath + ".zip");
-
-    return encoder.zipPath;
-  }
+  // Future<String?> compressLogFile() async {
+  //   if (_isEnable() == false) return null;
+  //   String? diskPath = getDiskcachePath();
+  //   if (diskPath == null) return null;
+  //   Directory directory = Directory(diskPath);
+  //
+  //   ZipFileEncoder encoder = ZipFileEncoder();
+  //   List<String> directorList = directory.path.split("/");
+  //   directorList.removeAt(directorList.length - 1);
+  //   String zipPath = directorList.join("/");
+  //   encoder.zipDirectory(directory, filename: zipPath + ".zip");
+  //
+  //   return encoder.zipPath;
+  // }
 
   Future<bool> removeZip(String zipPath) async {
     if (_isEnable() == false) return false;
