@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
-import 'package:flutter_mxlogger/src/mxlogger_analyzer.dart' as Analyzer;
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -108,7 +107,7 @@ class _MyAppState extends State<MyApp> {
               }, child: Text("查询日志信息")),
               Builder(builder: (context){
                 return ElevatedButton(onPressed: (){
-                  Analyzer.show(context,logger.getDiskcachePath() ?? "");
+
 
                 }, child: Text("分析器"));
               })
