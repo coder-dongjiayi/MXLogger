@@ -124,7 +124,7 @@ void mx_file::remove_expire_data(){
     long   current_cache_size=0;
   
     std::vector<std::string> delete_urls;
-    std::vector<int> delete_indexs;
+    std::vector<std::map<std::string, std::string>> final_dir;
     
     std::tm tm_time = mxlogger_helper::now();
     
@@ -133,47 +133,45 @@ void mx_file::remove_expire_data(){
     
     std::vector<std::map<std::string, std::string>> destination;
  
-    mxlogger::get_files(&destination, dir_.c_str());
-
-    // step1 遍历文件找出过期文件，统计文件size
-    for (int i = 0; i < destination.size(); i++) {
-        std::map<std::string, std::string> map = destination[i];
-        std::string file_name  = map["name"];
-        long size = std::stol(map["size"]);
-        time_t last_time = (time_t)std::stol(map["timestamp"]);
-        
-        if (last_time < expiration_tp) {
-            /// 过期文件
-            delete_urls.push_back(file_name);
-            delete_indexs.push_back(i);
-            continue;
+    if(max_disk_age_ > 0){
+        mxlogger::get_files(&destination, dir_.c_str());
+        // step1 遍历文件找出过期文件，统计文件size
+        for (int i = 0; i < destination.size(); i++) {
+            std::map<std::string, std::string> map = destination[i];
+            std::string file_name  = map["name"];
+            long size = std::stol(map["size"]);
+            time_t last_time = (time_t)std::stol(map["timestamp"]);
+            
+            if (last_time < expiration_tp) {
+                /// 过期文件
+                delete_urls.push_back(file_name);
+               
+                continue;
+            }else{
+                final_dir.push_back(map);
+            }
+            current_cache_size = current_cache_size + size;
+           
         }
-        current_cache_size = current_cache_size + size;
-       
-    }
-    //删除过期文件
-    for (int i = 0; i< delete_urls.size(); i++) {
-        char delete_path[256];
-        
-        std::string name = delete_urls[i];
-        
-        sprintf(delete_path, "%s%s", dir_.c_str(), name.c_str());
-        if (remove(delete_path) != 0) {
-            printf("删除文件失败");
+        //删除过期文件
+        for (int i = 0; i< delete_urls.size(); i++) {
+            char delete_path[256];
+            
+            std::string name = delete_urls[i];
+            
+            sprintf(delete_path, "%s%s", dir_.c_str(), name.c_str());
+            if (remove(delete_path) != 0) {
+                printf("删除文件失败");
+            }
+            
         }
-        
     }
-
-    for (int i = 0; i< delete_indexs.size(); i++) {
-        int index = delete_indexs[i];
-        auto it = destination.begin() + index;
-        destination.erase(it);
-    }
+   
    
   // step2 清理大于目标size的文件
     if (max_disk_size_ > 0 && current_cache_size > max_disk_size_) {
-        for (int i = 0; i < destination.size(); i++) {
-            std::map<std::string, std::string> map = destination[i];
+        for (int i = 0; i < final_dir.size(); i++) {
+            std::map<std::string, std::string> map = final_dir[i];
             std::string file_name  = map["name"];
             long file_size = std::stol(map["size"]);
             char delete_path[256];
