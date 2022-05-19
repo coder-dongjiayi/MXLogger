@@ -16,7 +16,7 @@ A new Flutter project.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'MXLogger', '~> 0.1.0'
+  s.dependency 'MXLogger', '~> 0.1.1'
   s.platform = :ios, '9.0'
 
   # Flutter.framework does not contain a i386 slice.
