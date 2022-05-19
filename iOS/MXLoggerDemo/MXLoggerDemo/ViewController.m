@@ -49,6 +49,8 @@
     
 }
 
+
+
 - (IBAction)cacheDirButtonAction:(id)sender {
   NSArray * array =   [MXLogger selectLogfilesWithDirectory:_logger.diskCachePath];
     [array enumerateObjectsUsingBlock:^(NSDictionary*  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -94,21 +96,29 @@
     NSTimeInterval start =[dateStart timeIntervalSince1970];
     NSInteger index = 0;
     NSLog(@"开始写入日志");
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+       
+           for (NSInteger i = 0; i < 100000; i++) {
+
+               NSString * string = [NSString stringWithFormat:@"第%ld条数据",(long)i];
+               [self->_logger info:@"name" msg:string tag:@"net"];
+            
+           }
+           NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
+           NSTimeInterval end =[dateEnd timeIntervalSince1970];
+        dispatch_async(dispatch_get_main_queue(), ^{
+          
+            [sender setTitle:[NSString stringWithFormat:@"写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
+            NSLog(@"index = %ld",index);
+            NSLog(@"时间:%f",end - start);
+        });
+    });
+
+
+    
+   
  
-    for (NSInteger i = 0; i < 100000; i++) {
 
-        NSString * string = [NSString stringWithFormat:@"第%ld条数据",(long)i];
-        [_logger info:@"name" msg:string tag:@"net"];
-     
-        
-    }
-
-    NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
-    NSTimeInterval end =[dateEnd timeIntervalSince1970];
-
-    [sender setTitle:[NSString stringWithFormat:@"写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
-    NSLog(@"index = %ld",index);
-    NSLog(@"时间:%f",end - start);
 }
 
 

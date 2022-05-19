@@ -25,20 +25,6 @@ namespace mxlogger{
 
 std::unordered_map<string, mxlogger *> *global_instanceDic_ =  new unordered_map<string, mxlogger *>;
 
-namespace mutex{
-
-struct console_mutex{
-    using mutex_t = std::mutex;
-    static mutex_t &mutex(){
-        static mutex_t s_mutex;
-        return s_mutex;
-    }
-};
-}
-
-
-using mutex_t = typename mutex::console_mutex;
-
 
 static level::level_enum level_(int lvl){
   
@@ -76,26 +62,30 @@ static policy::storage_policy policy_(const char* storage_policy){
     return policy::storage_policy::yyyy_MM_dd;
 }
 
+
+/// 暂时先返回true
 static bool is_debuging_() {
-#ifdef __ANDROID__
+    return true;
     
-   return true;
-
-#elif __APPLE__
-    struct kinfo_proc procInfo;
-    size_t structSize = sizeof(procInfo);
-    int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
-    
-    if(sysctl(mib, sizeof(mib)/sizeof(*mib), &procInfo, &structSize, NULL, 0) != 0)
-    {
-        strerror(errno);
-        return false;
-    }
-    
-    return (procInfo.kp_proc.p_flag & P_TRACED) != 0;
-
-#endif
-    return false;
+//#ifdef __ANDROID__
+//
+//   return true;
+//
+//#elif __APPLE__
+//    struct kinfo_proc procInfo;
+//    size_t structSize = sizeof(procInfo);
+//    int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
+//
+//    if(sysctl(mib, sizeof(mib)/sizeof(*mib), &procInfo, &structSize, NULL, 0) != 0)
+//    {
+//        strerror(errno);
+//        return false;
+//    }
+//
+//    return (procInfo.kp_proc.p_flag & P_TRACED) != 0;
+//
+//#endif
+//    return false;
 }
 
 
@@ -183,8 +173,6 @@ mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path)
     
     file_sink_ -> mxfile -> set_dir(diskcache_path);
     
-    file_sink_ -> set_pattern("[%d][%t][%p]%m");
-    
     file_sink_ -> set_level(level::level_enum::info);
     
     is_debug_tracking_ = is_debuging_();
@@ -228,6 +216,8 @@ void mxlogger::set_file_name(const char* filename){
 
 void mxlogger::set_file_header(const char* header){
     
+    std::lock_guard<std::mutex> lock(logger_mutex);
+    
     cJSON * json = cJSON_CreateObject();
     cJSON_AddStringToObject(json, "header", header);
     char * json_chars =  cJSON_PrintUnformatted(json);
@@ -247,19 +237,19 @@ void mxlogger::set_file_max_age(const  long max_age){
 
 // 清理过期文件
 void mxlogger::remove_expire_data(){
-    std::lock_guard<std::mutex> lock(mutex_t);
+    std::lock_guard<std::mutex> lock(logger_mutex);
     file_sink_->mxfile->remove_expire_data();
 }
 
 //删除所有日志文件
 void mxlogger::remove_all(){
-    std::lock_guard<std::mutex> lock(mutex_t);
+    std::lock_guard<std::mutex> lock(logger_mutex);
     file_sink_->mxfile->remove_all();
 }
 
 // 缓存日志文件大小(byte)
 long  mxlogger::dir_size(){
-    std::lock_guard<std::mutex> lock(mutex_t);
+    std::lock_guard<std::mutex> lock(logger_mutex);
     return file_sink_->mxfile->dir_size();
 }
 void mxlogger::set_console_level(int level){
@@ -275,12 +265,11 @@ void mxlogger::set_pattern(const char * pattern){
 }
 
 
-
 void mxlogger::log(int type, int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
     if (enable_ == false) {
         return;
     }
-    std::lock_guard<std::mutex> lock(mutex_t);
+    std::lock_guard<std::mutex> lock(logger_mutex);
     
     level::level_enum lvl = level_(level);
     

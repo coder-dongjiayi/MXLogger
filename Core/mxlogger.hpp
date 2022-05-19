@@ -9,7 +9,7 @@
 #define mxlog_hpp
 #include <string>
 #include <stdio.h>
-
+#include <mutex>
 namespace mxlogger{
 namespace sinks {
 class console_sink;
@@ -31,6 +31,8 @@ private:
     bool console_enable_;
     bool file_enable_;
     bool is_debug_tracking_;
+    
+    std::mutex logger_mutex;
     
     static std::string get_diskcache_path_(const char* ns,const char* directory);
     
