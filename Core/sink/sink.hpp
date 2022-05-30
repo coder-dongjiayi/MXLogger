@@ -27,7 +27,6 @@ public:
            
     virtual void log(const details::log_msg &msg) = 0;
     
-    virtual void set_pattern(const std::string &pattern) = 0;
     
     // 刷新
     virtual void flush() = 0;

@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include "cJson/cJSON.h"
+#include "mmap_sink.hpp"
 #include "mxlogger_file_util.hpp"
 namespace mxlogger{
 
@@ -175,6 +176,8 @@ mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path)
     
     file_sink_ -> set_level(level::level_enum::info);
     
+    mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,policy::storage_policy::yyyy_MM_dd);
+    
     is_debug_tracking_ = is_debuging_();
     
     enable_ = true;
@@ -287,7 +290,8 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
     }
 
     if (file_enable_ == true) {
-        file_sink_ -> log(log_msg);
+        mmap_sink_ -> log(log_msg);
+        //file_sink_ -> log(log_msg);
     }
    
 }

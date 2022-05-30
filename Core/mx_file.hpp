@@ -54,8 +54,6 @@ public:
     
 private:
     
-    bool create_dir_(const std::string &path);
-    
     
     const int open_tries_ = 5;
     

@@ -14,6 +14,7 @@ namespace mxlogger{
 namespace sinks {
 class console_sink;
 class file_sink;
+class mmap_sink;
 }
 
 
@@ -26,6 +27,8 @@ private:
     std::shared_ptr<sinks::console_sink> console_sink_;
    
     std::shared_ptr<sinks::file_sink> file_sink_;
+    
+    std::shared_ptr<sinks::mmap_sink> mmap_sink_;
     
     bool enable_;
     bool console_enable_;

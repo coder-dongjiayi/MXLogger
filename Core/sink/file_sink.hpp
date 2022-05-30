@@ -25,9 +25,7 @@ public:
     ~file_sink(){};
     
     void log(const details::log_msg &msg) override;
-    
-    void set_pattern(const std::string &pattern) final;
-    
+        
     void flush() override;
     
     void set_policy(policy::storage_policy policy);

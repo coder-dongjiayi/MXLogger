@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BD0DDFF628449DDF0090439D /* memory_mmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD0DDFF328449DDF0090439D /* memory_mmap.cpp */; };
+		BD0DDFF728449DDF0090439D /* mmap_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD0DDFF428449DDF0090439D /* mmap_sink.cpp */; };
 		BD12BD192826513A00BA6D5B /* mxlogger_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */; };
 		BD12BD1A2826544200BA6D5B /* mxlogger_util.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD12BD182826513A00BA6D5B /* mxlogger_util.hpp */; };
 		BD7BA73628082EA600EDA6AC /* console_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72228082EA600EDA6AC /* console_sink.cpp */; };
@@ -38,6 +40,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BD0DDFF228449DDF0090439D /* memory_mmap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = memory_mmap.hpp; sourceTree = "<group>"; };
+		BD0DDFF328449DDF0090439D /* memory_mmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = memory_mmap.cpp; sourceTree = "<group>"; };
+		BD0DDFF428449DDF0090439D /* mmap_sink.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mmap_sink.cpp; sourceTree = "<group>"; };
+		BD0DDFF528449DDF0090439D /* mmap_sink.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mmap_sink.hpp; sourceTree = "<group>"; };
 		BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mxlogger_util.cpp; sourceTree = "<group>"; };
 		BD12BD182826513A00BA6D5B /* mxlogger_util.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_util.hpp; sourceTree = "<group>"; };
 		BD406D9727F19C76002C76D5 /* libMXLoggerCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMXLoggerCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -79,18 +85,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BD0DDFF82844A0B30090439D /* sink */ = {
+			isa = PBXGroup;
+			children = (
+				BD7BA73328082EA600EDA6AC /* sink.cpp */,
+				BD7BA72128082EA600EDA6AC /* sink.hpp */,
+				BD0DDFF428449DDF0090439D /* mmap_sink.cpp */,
+				BD0DDFF528449DDF0090439D /* mmap_sink.hpp */,
+				BD7BA73128082EA600EDA6AC /* file_sink.cpp */,
+				BD7BA72928082EA600EDA6AC /* file_sink.hpp */,
+				BD7BA72228082EA600EDA6AC /* console_sink.cpp */,
+				BD7BA73428082EA600EDA6AC /* console_sink.hpp */,
+			);
+			path = sink;
+			sourceTree = "<group>";
+		};
 		BD406D8E27F19C76002C76D5 = {
 			isa = PBXGroup;
 			children = (
+				BD0DDFF82844A0B30090439D /* sink */,
+				BD0DDFF328449DDF0090439D /* memory_mmap.cpp */,
+				BD0DDFF228449DDF0090439D /* memory_mmap.hpp */,
 				BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */,
 				BD12BD182826513A00BA6D5B /* mxlogger_util.hpp */,
 				BDD1CA872823A53F009B94D7 /* mxlogger_file_util.hpp */,
 				BDD1CA8028236876009B94D7 /* cJson */,
 				BDA28450280D778E00C833A3 /* md5 */,
-				BD7BA72228082EA600EDA6AC /* console_sink.cpp */,
-				BD7BA73428082EA600EDA6AC /* console_sink.hpp */,
-				BD7BA73128082EA600EDA6AC /* file_sink.cpp */,
-				BD7BA72928082EA600EDA6AC /* file_sink.hpp */,
 				BD7BA73028082EA600EDA6AC /* flag_formatter.cpp */,
 				BD7BA72F28082EA600EDA6AC /* flag_formatter.hpp */,
 				BD7BA73528082EA600EDA6AC /* log_enum.h */,
@@ -105,8 +125,6 @@
 				BD7BA72728082EA600EDA6AC /* mxlogger.hpp */,
 				BD7BA73228082EA600EDA6AC /* pattern_formatter.cpp */,
 				BD7BA72428082EA600EDA6AC /* pattern_formatter.hpp */,
-				BD7BA73328082EA600EDA6AC /* sink.cpp */,
-				BD7BA72128082EA600EDA6AC /* sink.hpp */,
 				BD406D9827F19C76002C76D5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -198,11 +216,13 @@
 				BD7BA73D28082EA600EDA6AC /* file_sink.cpp in Sources */,
 				BD7BA73B28082EA600EDA6AC /* log_msg.cpp in Sources */,
 				BDA28454280D778E00C833A3 /* md5.c in Sources */,
+				BD0DDFF728449DDF0090439D /* mmap_sink.cpp in Sources */,
 				BD7BA73828082EA600EDA6AC /* mxlogger.cpp in Sources */,
 				BD7BA73728082EA600EDA6AC /* logger_os.cpp in Sources */,
 				BD7BA73A28082EA600EDA6AC /* mx_file.cpp in Sources */,
 				BDD1CA8328236876009B94D7 /* cJSON.c in Sources */,
 				BD12BD192826513A00BA6D5B /* mxlogger_util.cpp in Sources */,
+				BD0DDFF628449DDF0090439D /* memory_mmap.cpp in Sources */,
 				BD7BA73F28082EA600EDA6AC /* sink.cpp in Sources */,
 				BD7BA73C28082EA600EDA6AC /* flag_formatter.cpp in Sources */,
 			);

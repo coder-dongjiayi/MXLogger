@@ -73,6 +73,37 @@ inline bool makedir(const char* path){
 //    in_file.close();
 //    return 0;
 //}
+bool create_dir(const std::string &path){
+    
+    auto pos = path.find_last_of("/");
+
+    std::string dir_name = pos != std::string::npos ? path.substr(0,pos) : std::string{};
+  
+    
+    if (path_exists(dir_name.data()))  return  true;
+    
+    if (dir_name.empty())  return  false;
+    
+    size_t search_offset = 0;
+    do {
+       auto token_pos =  dir_name.find_first_of("/",search_offset);
+        if (token_pos == std::string::npos) {
+            token_pos = dir_name.size();
+        }
+        auto subdir = dir_name.substr(0,token_pos);
+        if (!subdir.empty() && !path_exists(subdir.data()) && !makedir(subdir.data())) {
+            
+            return  false;
+            
+        }
+        search_offset = token_pos + 1;
+        
+    } while (search_offset < dir_name.size());
+    
+    
+    return true;
+}
+
 inline int  select_form_path(const char* path,std::vector<std::string> *vector){
     
 

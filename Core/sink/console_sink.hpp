@@ -23,7 +23,7 @@ public:
     
     void log(const details::log_msg &msg) override;
     
-    void set_pattern(const std::string &pattern) final;
+    void set_pattern(const std::string &pattern);
     
     void flush() override;
 private:
