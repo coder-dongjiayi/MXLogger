@@ -291,7 +291,7 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
 
     if (file_enable_ == true) {
         mmap_sink_ -> log(log_msg);
-        //file_sink_ -> log(log_msg);
+       // file_sink_ -> log(log_msg);
     }
    
 }

@@ -6,7 +6,6 @@
 //
 
 #include "file_sink.hpp"
-
 #include "../cJson/cJSON.h"
 #include "mxlogger_helper.hpp"
 namespace mxlogger{

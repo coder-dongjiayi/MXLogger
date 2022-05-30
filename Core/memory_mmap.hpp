@@ -19,7 +19,7 @@ public:
     
    
 
-    bool start_mmap(size_t size);
+    bool mmap();
     
     bool write_data(const std::string &buf,const std::string &fname);
     
@@ -29,8 +29,13 @@ private:
     bool ope_file_();
     bool truncate_(size_t size);
     
+    std::string mmap_disk_path_;
+    
+    /// 文件目录
     std::string dir_path_;
     
+    
+    /// 文件名
     std::string  filename_;
     
     //一页内存大小
@@ -40,7 +45,7 @@ private:
 
     size_t position_;
     
-    char* mmap_ptr_;
+    char* mmap_ptr_ = nullptr;
     
 };
 
