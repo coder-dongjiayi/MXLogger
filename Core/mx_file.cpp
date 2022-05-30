@@ -235,7 +235,7 @@ bool mx_file::create_dir_(const std::string &path){
             token_pos = dir_name.size();
         }
         auto subdir = dir_name.substr(0,token_pos);
-        if (!subdir.empty() && !path_exists(subdir.data()) && makedir(subdir.data())!= 0) {
+        if (!subdir.empty() && !path_exists(subdir.data()) && !makedir(subdir.data())) {
             
             return  false;
             
