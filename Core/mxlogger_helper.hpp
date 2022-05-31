@@ -73,7 +73,7 @@ inline ToDuration time_fraction(std::chrono::system_clock::time_point tp)
 
 inline std::string micros_datetime(std::chrono::system_clock::time_point time){
     std::tm tm_time = mxlogger_helper::localtime(std::chrono::system_clock::to_time_t(time));
-
+        
     auto micro = mxlogger_helper::time_fraction<std::chrono::microseconds>(time);
 
     using std::chrono:: milliseconds;

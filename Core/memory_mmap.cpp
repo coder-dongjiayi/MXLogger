@@ -84,7 +84,7 @@ bool memory_mmap::mmap(){
         return  false;
     }
     mmap_ptr_ = (char*)result;
-    
+    position_ = strlen(mmap_ptr_);
     
     return  true;
 }
@@ -104,15 +104,18 @@ bool memory_mmap::write_data(const std::string &buf,const std::string &fname){
     char * data = (char*)buf.data();
       
     size_t length = buf.size();
-      
+    size_t total = position_ + length;
     
-    void* result =  memcpy(mmap_ptr_, data, length);
+    if (total > file_size_) {
+        truncate_(total * 1.5);
+    }
+    void* result =  memcpy(mmap_ptr_ + position_, data, length);
     
     if (result == nullptr) {
         printf("[mxlogger_error] write_data error:%s\n",strerror(errno));
         return  false;
     }
-    mmap_ptr_ = mmap_ptr_ + length;
+    position_ = position_ + length;
     
     
     return true;

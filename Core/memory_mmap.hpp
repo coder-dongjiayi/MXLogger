@@ -39,11 +39,11 @@ private:
     std::string  filename_;
     
     //一页内存大小
-    size_t page_size_;
+    size_t page_size_ = 0;
     // 文件大小
-    size_t file_size_;
+    size_t file_size_ = 0;
 
-    size_t position_;
+    size_t position_ = 0;
     
     char* mmap_ptr_ = nullptr;
     

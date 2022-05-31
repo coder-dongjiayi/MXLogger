@@ -33,6 +33,8 @@ struct log_msg{
     
     chrono::system_clock::time_point time;
     
+    std::string json_string;
+    
     level::level_enum level{level::debug};
 
 };
