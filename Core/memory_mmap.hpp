@@ -19,7 +19,12 @@ public:
     
    
 
+    bool sync();
+    
+    bool async();
+    
     bool mmap();
+    
     
     bool write_data(const std::string &buf,const std::string &fname);
     
@@ -28,6 +33,7 @@ private:
     
     bool ope_file_();
     bool truncate_(size_t size);
+    bool msync_(int flag);
     
     std::string mmap_disk_path_;
     

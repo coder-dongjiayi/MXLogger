@@ -19,7 +19,7 @@ class file_sink : public sink{
 public:
     file_sink(std::shared_ptr<details::mx_file> file): mxfile(file) {
         filename_ = "mxlog";
-        handle_date_(policy::storage_policy::yyyy_MM_dd);
+        handle_date(policy::storage_policy::yyyy_MM_dd);
     };
     
     ~file_sink(){};
@@ -34,10 +34,7 @@ public:
     std::shared_ptr<details::mx_file> mxfile;
     
 private:
-    void handle_date_(policy::storage_policy policy);
     std::string calculator_filename_;
- 
-    std::string filename_;
 
 };
 

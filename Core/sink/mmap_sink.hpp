@@ -28,10 +28,7 @@ private:
     std::atomic_int level_{level::debug};
     
     std::shared_ptr<memory_mmap> mmap_;
-    std::string filename_;
     
-   
-    void handle_date_(policy::storage_policy policy);
 };
 
 

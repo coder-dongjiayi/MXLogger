@@ -88,6 +88,23 @@ bool memory_mmap::mmap(){
     
     return  true;
 }
+bool memory_mmap::msync_(int flag){
+    if (msync(mmap_ptr_, file_size_, flag) != 0) {
+        printf("[mxlogger_error]msync_ error:%s\n",strerror(errno));
+        return false;
+    }
+    return true;
+   
+}
+
+bool memory_mmap::sync(){
+    
+    return msync_(MS_SYNC);
+}
+
+bool memory_mmap::async(){
+    return msync_(MS_ASYNC);
+}
 
 
 bool memory_mmap::write_data(const std::string &buf,const std::string &fname){
@@ -108,6 +125,7 @@ bool memory_mmap::write_data(const std::string &buf,const std::string &fname){
     
     if (total > file_size_) {
         truncate_(total * 1.5);
+        sync();
     }
     void* result =  memcpy(mmap_ptr_ + position_, data, length);
     
