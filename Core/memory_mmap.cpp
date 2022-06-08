@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include "mxlogger_file_util.hpp"
 
-static const size_t offset_actual = sizeof(uint32_t);
+static const size_t offset_length = sizeof(uint32_t);
 
 namespace mxlogger{
 
@@ -57,7 +57,7 @@ bool memory_mmap::ope_file_(){
 
 void memory_mmap::write_actual_size(size_t size){
     
-    memcpy(mmap_ptr_, &size, offset_actual);
+    memcpy(mmap_ptr_, &size, offset_length);
     
     actual_size_ = size;
 }
@@ -68,7 +68,7 @@ size_t memory_mmap::get_actual_size(){
     
     uint32_t actual_size;
     
-    memcpy(&actual_size, mmap_ptr_, offset_actual);
+    memcpy(&actual_size, mmap_ptr_, offset_length);
     
     return actual_size;
 }
@@ -127,14 +127,24 @@ bool memory_mmap::write_data(const void* buffer, size_t buffer_size, const std::
         actual_size_ = get_actual_size();
     }
     
-    size_t total = actual_size_ + buffer_size ;
+    ///1.、需要写入字节总大小 = 当前文件真实长度 + 需要写入buffer的长度 + offset_length
     
+    size_t total = actual_size_ + buffer_size + offset_length;
+    
+    /// 2、 如果写入长度大于文件长度 进行扩容
     if (total >= file_size_) {
         truncate_(total + 1);
     }
     
-    memcpy(mmap_ptr_  + offset_actual + actual_size_, buffer, buffer_size);
+    uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
     
+    ///3.、先写入buffer 长度
+    memcpy(write_ptr, &buffer_size, offset_length);
+    
+    ///4、 再写buffer数据
+    memcpy(write_ptr + offset_length, buffer, buffer_size);
+    
+    ///5、更新文件真实大小
     write_actual_size(total);
     
     return true;

@@ -259,13 +259,14 @@ void mxlogger::set_pattern(const char * pattern){
 
 
 void mxlogger::log(int type, int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
+    
+    std::lock_guard<std::mutex> lock(logger_mutex);
     if (enable_ == false) {
         return;
     }
-    std::lock_guard<std::mutex> lock(logger_mutex);
     
     flatbuffers::FlatBufferBuilder builder_;
-    auto root = Createlog_serializeDirect(builder_,name,tag,msg,level,is_main_thread,1654501033228);
+    auto root = Createlog_serializeDirect(builder_,name,tag,msg,level,is_main_thread,mxlogger_helper::time_stamp_milliseconds());
     
         builder_.Finish(root);
     

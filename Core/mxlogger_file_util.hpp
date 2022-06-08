@@ -13,8 +13,11 @@
 #include <vector>
 #include <map>
 #include <sys/stat.h>
-#include <fstream>
+
 #include <dirent.h>
+#include <sys/file.h>
+#include <unistd.h>
+#include "log_serialize.h"
 namespace mxlogger{
 inline size_t file_size(const char* path){
     struct stat statbuf;
@@ -32,47 +35,7 @@ inline bool makedir(const char* path){
     return ::mkdir(path,mode_t(0755)) == 0;
 }
 
-//inline size_t  select_form_path2(const char* path,std::vector<std::string> *vector,size_t begin, int limit){
-//    if (path_exists(path) == false) {
-//        printf("文件路径不存在\n");
-//        return  -1;
-//    }
-//
-//    std::ifstream in_file(path,std::ios::in | std::ios::binary);
-//
-//    if (!in_file) {
-//        printf("文件打开失败\n");
-//        return -2;
-//    }
-//    std::vector<std::string> lines;
-//    std::string line;
-//    std::streampos size = in_file.tellg();
-//    char x;
-//    for (int i = 1; i <= size; i++) {
-//        in_file.seekg(-i, std::ios::end);
-//        in_file.get(x);
-//        if (x == 0) {continue;}
-//
-//        if (x == '\n') {
-//            std::string templine = line;
-//        if (templine.size() > 0) {
-//
-//            lines.push_back(templine);
-//
-//        }
-//            line = "";
-//        }else {
-//            line = x + line;
-//
-//        }
-//        x = 0;
-//        if (line.size() > 0) {
-//                    lines.push_back(line);
-//            }
-//    }
-//    in_file.close();
-//    return 0;
-//}
+
 bool create_dir(const std::string &path){
     
     auto pos = path.find_last_of("/");
@@ -104,7 +67,7 @@ bool create_dir(const std::string &path){
     return true;
 }
 
-inline int  select_form_path(const char* path,std::vector<std::string> *vector){
+inline int  select_form_path(const char* path,std::vector<std::map<std::string, std::string>> *vector){
     
 
    
@@ -113,26 +76,43 @@ inline int  select_form_path(const char* path,std::vector<std::string> *vector){
         return  -1;
     }
     
-    std::ifstream in_file(path,std::ios::in | std::ios::binary);
-   
-    if (!in_file) {
-        printf("文件打开失败\n");
-        return -2;
-    }
-
+    int fd =  open(path, O_RDWR|O_CLOEXEC|O_CREAT,S_IRWXU);
     
-    std::string line;
+    uint32_t size;
+    read(fd, &size, sizeof(uint32_t));
     
-    size_t bytes = 0;
-    
-
-    while (std::getline(in_file, line)) {
+    size_t begin = sizeof(uint32_t);
+    while (begin <= size) {
         
-        bytes = bytes + line.size() + 1;
-        vector ->push_back(line.data());
+        uint32_t  item_size;
+        
+        read(fd, &item_size, sizeof(uint32_t));
+        
+        uint8_t * buffer = (uint8_t*)malloc(item_size);
+        
+        read(fd, buffer , item_size);
+        
+        auto logger =  Getlog_serialize(buffer);
+
+
+        std::map<std::string, std::string> map;
+        
+        map["msg"] = logger->msg()->str();
+        map["tag"] = logger->tag()->str();
+        map["name"] = logger->name()->str();
+        map["timestamp"] = std::to_string(logger->timestamp());
+        map["level"] = std::to_string(logger->level());
+        map["is_main_thread"] =std::to_string(logger->is_main_thread());
+        
+        vector->push_back(map);
+        
+        begin = begin + sizeof(uint32_t) + item_size;
+        
+        free(buffer);
+        
     }
-  
-    in_file.close();
+    
+    close(fd);
     
     return 0;
 }

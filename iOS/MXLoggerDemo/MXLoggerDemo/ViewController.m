@@ -49,10 +49,10 @@
 
 
 - (IBAction)cacheDirButtonAction:(id)sender {
-//  NSArray * array =   [MXLogger selectLogfilesWithDirectory:_logger.diskCachePath];
-//    [array enumerateObjectsUsingBlock:^(NSDictionary*  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//        NSLog(@"文件名:%@,文件大小:%@,文件最后更新时间:%@",obj[@"name"],obj[@"size"],obj[@"timestamp"]);
-//    }];
+  NSArray * array =   [MXLogger selectLogfilesWithDirectory:_logger.diskCachePath];
+    [array enumerateObjectsUsingBlock:^(NSDictionary*  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSLog(@"文件名:%@,文件大小:%@,文件最后更新时间:%@",obj[@"name"],obj[@"size"],obj[@"timestamp"]);
+    }];
 }
 
 - (IBAction)removeAllButtonAction:(id)sender {
@@ -68,15 +68,18 @@
 
 - (IBAction)readLogButtonAction:(id)sender {
 
-//    NSArray * array =   [MXLogger selectLogfilesWithDirectory:_logger.diskCachePath];
-//
-//    NSString * path = [NSString stringWithFormat:@"%@%@",_logger.diskCachePath,array.firstObject[@"name"]];
-//
-//   NSArray * result =  [MXLogger selectWithDiskCacheFilePath:path];
-//
-//    [result enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//        NSLog(@"%@",obj);
-//    }];
+    NSArray * array =   [MXLogger selectLogfilesWithDirectory:_logger.diskCachePath];
+
+    NSString * path = [NSString stringWithFormat:@"%@%@",_logger.diskCachePath,array.firstObject[@"name"]];
+
+   NSArray * result =  [MXLogger selectWithDiskCacheFilePath:path];
+
+    [result enumerateObjectsUsingBlock:^(NSDictionary*  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSString * msg = obj[@"msg"];
+        NSString * tm = obj[@"timestamp"];
+        
+        NSLog(@"%@,%@",tm,msg);
+    }];
 }
 
 - (IBAction)defaultButttonAction:(id)sender {
@@ -97,9 +100,9 @@
     NSLog(@"开始写入日志");
     for (NSInteger i = 0; i < 100000; i++) {
 
-//        NSString * string = [NSString stringWithFormat:@"第%ld条数据",(long)i];
+       NSString * message = [NSString stringWithFormat:@"第%ld条数据",(long)i];
 
-        [self->_logger info:@"name" msg:@"这是第一条数据" tag:@"net"];
+        [self->_logger info:@"name" msg:message tag:@"net"];
 
     }
     NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];

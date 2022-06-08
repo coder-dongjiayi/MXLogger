@@ -71,6 +71,16 @@ inline ToDuration time_fraction(std::chrono::system_clock::time_point tp)
     return duration_cast<ToDuration>(duration) - duration_cast<ToDuration>(secs);
 }
 
+
+inline int64_t time_stamp_milliseconds()
+{
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    auto tmp = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
+    return tmp.count();
+    
+   
+}
+
 inline std::string micros_datetime(std::chrono::system_clock::time_point time){
     std::tm tm_time = mxlogger_helper::localtime(std::chrono::system_clock::to_time_t(time));
         

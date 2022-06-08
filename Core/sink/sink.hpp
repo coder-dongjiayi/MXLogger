@@ -18,9 +18,6 @@ class sink{
 protected:
     std::atomic_int level_{level::debug};
     
-    std::string pattern_;
-    
-    
     void handle_date(policy::storage_policy policy);
     
     std::string filename_;
@@ -37,8 +34,7 @@ public:
     void set_level(level::level_enum log_level);
     
     // 判断是否应该打印日志
-     bool should_log(level::level_enum mesg_level);
-    
+    bool should_log(level::level_enum mesg_level);
     
     // 获取日志等级
     level::level_enum level() const;

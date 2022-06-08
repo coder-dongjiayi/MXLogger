@@ -97,6 +97,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,copy)NSString * pattern;
 
 
++(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath;
+
++(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory;
+
 /// 清理过期文件
 -(void)removeExpireData;
 

@@ -68,22 +68,41 @@ static NSString * _defaultDiskCacheDirectory;
     NSString * key =  [NSString stringWithUTF8String:mapKey.data()];
     return key;
 }
-+(NSArray<NSString*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath{
++(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath{
 
   
   
-    std::vector<std::string> destination;
+    std::vector<std::map<std::string, std::string>> destination;
     
     mxlogger::util::mxlogger_util::select_log_form_path(diskCacheFilePath.UTF8String, &destination);
     
     if(destination.size() == 0) return @[];
     
-    NSMutableArray<NSString*> *messageList = [NSMutableArray arrayWithCapacity:destination.size()];
+    NSMutableArray<NSDictionary*> *messageList = [NSMutableArray arrayWithCapacity:destination.size()];
     
     for (int i = (int)(destination.size() - 1); i>=0; i--) {
-        std::string log_info = destination[i];
-        NSString * string = [NSString stringWithUTF8String:log_info.data()];
-        [messageList addObject:string];
+        
+        std::map<std::string, std::string> log_map = destination[i];
+        
+        std::string msg = log_map["msg"];
+        std::string name = log_map["name"];
+        std::string tag = log_map["tag"];
+        std::string is_main_thread = log_map["is_main_thread"];
+        std::string timestamp = log_map["timestamp"];
+        std::string level = log_map["level"];
+        
+        
+        NSDictionary * dictionary = @{
+            @"msg":[NSString stringWithUTF8String:msg.data()],
+            @"name":[NSString stringWithUTF8String:name.data()],
+            @"tag":[NSString stringWithUTF8String:tag.data()],
+            @"is_main_thread":[NSString stringWithUTF8String:is_main_thread.data()],
+            @"timestamp":[NSString stringWithUTF8String:timestamp.data()],
+            @"level":[NSString stringWithUTF8String:level.data()]
+            
+        };
+        
+        [messageList addObject:dictionary];
     }
 
     return [messageList copy];

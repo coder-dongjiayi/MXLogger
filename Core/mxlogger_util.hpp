@@ -17,7 +17,7 @@ namespace util{
 class mxlogger_util{
     
 public:
-    static long select_log_form_path(const char* path,std::vector<std::string> *destination);
+    static void select_log_form_path(const char* path,std::vector<std::map<std::string, std::string>> *destination);
     
 
     static int select_logfiles_dir(const char* dir,std::vector<std::map<std::string, std::string>> *destination);
