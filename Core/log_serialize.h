@@ -116,7 +116,7 @@ inline flatbuffers::Offset<log_serialize> Createlog_serializeDirect(
   auto name__ = name ? _fbb.CreateString(name) : 0;
   auto tag__ = tag ? _fbb.CreateString(tag) : 0;
   auto msg__ = msg ? _fbb.CreateString(msg) : 0;
-  return mxlogger::Createlog_serialize(
+    return Createlog_serialize(
       _fbb,
       name__,
       tag__,
@@ -126,33 +126,33 @@ inline flatbuffers::Offset<log_serialize> Createlog_serializeDirect(
       timestamp);
 }
 
-inline const mxlogger::log_serialize *Getlog_serialize(const void *buf) {
-  return flatbuffers::GetRoot<mxlogger::log_serialize>(buf);
+inline const log_serialize *Getlog_serialize(const void *buf) {
+  return flatbuffers::GetRoot<log_serialize>(buf);
 }
 
-inline const mxlogger::log_serialize *GetSizePrefixedlog_serialize(const void *buf) {
-  return flatbuffers::GetSizePrefixedRoot<mxlogger::log_serialize>(buf);
+inline const log_serialize *GetSizePrefixedlog_serialize(const void *buf) {
+  return flatbuffers::GetSizePrefixedRoot<log_serialize>(buf);
 }
 
 inline bool Verifylog_serializeBuffer(
     flatbuffers::Verifier &verifier) {
-  return verifier.VerifyBuffer<mxlogger::log_serialize>(nullptr);
+  return verifier.VerifyBuffer<log_serialize>(nullptr);
 }
 
 inline bool VerifySizePrefixedlog_serializeBuffer(
     flatbuffers::Verifier &verifier) {
-  return verifier.VerifySizePrefixedBuffer<mxlogger::log_serialize>(nullptr);
+  return verifier.VerifySizePrefixedBuffer<log_serialize>(nullptr);
 }
 
 inline void Finishlog_serializeBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
-    flatbuffers::Offset<mxlogger::log_serialize> root) {
+    flatbuffers::Offset<log_serialize> root) {
   fbb.Finish(root);
 }
 
 inline void FinishSizePrefixedlog_serializeBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
-    flatbuffers::Offset<mxlogger::log_serialize> root) {
+    flatbuffers::Offset<log_serialize> root) {
   fbb.FinishSizePrefixed(root);
 }
 

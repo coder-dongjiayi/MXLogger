@@ -10,6 +10,9 @@
 #include <sys/file.h>
 #include <unistd.h>
 #include "mxlogger_file_util.hpp"
+
+static const size_t offset_actual = sizeof(uint32_t);
+
 namespace mxlogger{
 
 memory_mmap::memory_mmap(const std::string &dir_path,const std::string &fname):dir_path_(dir_path),page_size_(static_cast<size_t>(getpagesize())){
@@ -56,7 +59,7 @@ bool memory_mmap::ope_file_(){
 
 void memory_mmap::write_actual_size(size_t size){
     
-    memcpy(mmap_ptr_, &size, sizeof(uint32_t));
+    memcpy(mmap_ptr_, &size, offset_actual);
     
     actual_size_ = size;
 }
@@ -67,7 +70,7 @@ size_t memory_mmap::get_actual_size(){
     
     uint32_t actual_size;
     
-    memcpy(&actual_size, mmap_ptr_, sizeof(uint32_t));
+    memcpy(&actual_size, mmap_ptr_, offset_actual);
     
     return actual_size;
 }
@@ -77,7 +80,7 @@ bool memory_mmap::truncate_(size_t size){
     
     if (size <= 0 || size % page_size_ != 0 || size == file_size_) {
         size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
-//        printf("capacity_size:%ld\n",capacity_size);
+    
         if (ftruncate(fd_, static_cast<off_t>(capacity_size)) != 0) {
             printf("[mxlogger_error]truncate_ error:%s\n",strerror(errno));
         
@@ -133,7 +136,7 @@ bool memory_mmap::async(){
 }
 
 
-bool memory_mmap::write_data2(const void* buffer, size_t buffer_size, const std::string &fname){
+bool memory_mmap::write_data(const void* buffer, size_t buffer_size, const std::string &fname){
   
     mmap_disk_path_ = dir_path_ + fname;
     
@@ -143,17 +146,14 @@ bool memory_mmap::write_data2(const void* buffer, size_t buffer_size, const std:
  
     }
     
-      
-    
     size_t total = actual_size_ + buffer_size;
-    
     
     if (total >= file_size_) {
         truncate_(total);
         sync();
     }
     
-    void* result =  memcpy(mmap_ptr_  + sizeof(uint32_t) + actual_size_, buffer, buffer_size);
+    void* result =  memcpy(mmap_ptr_  + offset_actual + actual_size_, buffer, buffer_size);
     
     if (result == nullptr) {
         printf("[mxlogger_error] write_data error:%s\n",strerror(errno));
@@ -165,37 +165,7 @@ bool memory_mmap::write_data2(const void* buffer, size_t buffer_size, const std:
     return true;
 }
 
-bool memory_mmap::write_data(const std::string &buf,const std::string &fname){
-//
-//    mmap_disk_path_ = dir_path_ + fname;
-//
-//    if (fd_  < 0 || filename_.compare(fname) != 0 || path_exists((mmap_disk_path_).data()) == false) {
-//        filename_ = fname;
-//        if(ope_file_() == false) return false;
-//
-//    }
-//
-//
-//    char * data = (char*)buf.data();
-//
-//    size_t length = buf.size();
-//    size_t total = position_ + length;
-//
-//    if (total > file_size_) {
-//        truncate_(total * 1.5);
-//        sync();
-//    }
-//    void* result =  memcpy(mmap_ptr_ + position_, data, length);
-//
-//    if (result == nullptr) {
-//        printf("[mxlogger_error] write_data error:%s\n",strerror(errno));
-//        return  false;
-//    }
-//    position_ = position_ + length;
-    
-    
-    return true;
-}
+
 
 
 }

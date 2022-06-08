@@ -6,32 +6,32 @@
 //
 
 #include "file_sink.hpp"
-#include "../cJson/cJSON.h"
+
 #include "mxlogger_helper.hpp"
 namespace mxlogger{
 
 namespace sinks{
-void file_sink::log(const details::log_msg &msg){
-    if (should_log(msg.level) == false) return;
-    
-    std::string time_str =  mxlogger_helper::micros_datetime(msg.time);
-    cJSON * json = cJSON_CreateObject();
-
-    cJSON_AddStringToObject(json, "name", msg.name.data());
-    cJSON_AddStringToObject(json, "tag", msg.tag.data());
-    cJSON_AddStringToObject(json, "msg", msg.msg.data());
-    cJSON_AddBoolToObject(json, "is_main_thread", msg.is_main_thread);
-    cJSON_AddNumberToObject(json, "thread_id", msg.thread_id);
-    cJSON_AddNumberToObject(json,"level",msg.level);
-    cJSON_AddStringToObject(json, "time", time_str.data());
-
-    char * json_string = cJSON_PrintUnformatted(json);
-
-    strcat(json_string, "\n");
-
-    mxfile -> write(json_string, calculator_filename_);
-
-    mxfile-> flush();
+void file_sink::log(const void* buffer, size_t buffer_size, level::level_enum level){
+//    if (should_log(msg.level) == false) return;
+//
+//    std::string time_str =  mxlogger_helper::micros_datetime(msg.time);
+//    cJSON * json = cJSON_CreateObject();
+//
+//    cJSON_AddStringToObject(json, "name", msg.name.data());
+//    cJSON_AddStringToObject(json, "tag", msg.tag.data());
+//    cJSON_AddStringToObject(json, "msg", msg.msg.data());
+//    cJSON_AddBoolToObject(json, "is_main_thread", msg.is_main_thread);
+//    cJSON_AddNumberToObject(json, "thread_id", msg.thread_id);
+//    cJSON_AddNumberToObject(json,"level",msg.level);
+//    cJSON_AddStringToObject(json, "time", time_str.data());
+//
+//    char * json_string = cJSON_PrintUnformatted(json);
+//
+//    strcat(json_string, "\n");
+//
+//    mxfile -> write(json_string, calculator_filename_);
+//
+//    mxfile-> flush();
     
 }
 

@@ -12,8 +12,7 @@
 #include <mutex>
 namespace mxlogger{
 namespace sinks {
-class console_sink;
-class file_sink;
+
 class mmap_sink;
 }
 
@@ -24,9 +23,6 @@ private:
     mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name);
     ~mxlogger();
     
-    std::shared_ptr<sinks::console_sink> console_sink_;
-   
-    std::shared_ptr<sinks::file_sink> file_sink_;
     
     std::shared_ptr<sinks::mmap_sink> mmap_sink_;
     

@@ -9,8 +9,8 @@
 #define sink_hpp
 
 #include <stdio.h>
-#include "log_msg.hpp"
-#include "pattern_formatter.hpp"
+#include "log_enum.h"
+#include "log_serialize.h"
 namespace mxlogger{
 namespace sinks {
 
@@ -20,7 +20,6 @@ protected:
     
     std::string pattern_;
     
-    std::unique_ptr<pattern_formatter> formatter_;
     
     void handle_date(policy::storage_policy policy);
     
@@ -29,7 +28,7 @@ protected:
 public:
     virtual ~sink() = default;
            
-    virtual void log(const details::log_msg &msg) = 0;
+    virtual void log(const void* buffer, size_t buffer_size,  level::level_enum level) = 0;
     
     
     // 刷新

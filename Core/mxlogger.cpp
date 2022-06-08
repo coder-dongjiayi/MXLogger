@@ -6,9 +6,7 @@
 //
 
 #include "mxlogger.hpp"
-#include "log_msg.hpp"
-#include "console_sink.hpp"
-#include "file_sink.hpp"
+
 #include "mx_file.hpp"
 #include <mutex>
 #include <unordered_map>
@@ -19,13 +17,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include "cJson/cJSON.h"
 #include "mmap_sink.hpp"
 #include "mxlogger_file_util.hpp"
 
 namespace mxlogger{
 
-std::unordered_map<string, mxlogger *> *global_instanceDic_ =  new unordered_map<string, mxlogger *>;
+std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::unordered_map<std::string, mxlogger *>;
 
 
 static level::level_enum level_(int lvl){
@@ -111,9 +108,9 @@ std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     if (ns == nullptr) {
         ns = "default";
     }
-    std::string  directory_s = string{directory};
+    std::string  directory_s = std::string{directory};
     
-    std::string ns_s = string{ns};
+    std::string ns_s = std::string{ns};
     
     std::string diskcache_path = directory_s + "/" + ns_s + "/";
     return diskcache_path;
@@ -168,17 +165,15 @@ void mxlogger::destroy(){
 mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name) : diskcache_path_(diskcache_path),storage_policy_(storage_policy),file_name_(file_name){
     
     
-    console_sink_ = std::make_shared<sinks::console_sink>(stdout);
-    console_sink_ -> set_pattern("[%d][%p]%m");
-    console_sink_ -> set_level(level::level_enum::debug);
-    
-    auto file =   std::make_shared<details::mx_file>();
-    
-    file_sink_ = std::make_shared<sinks::file_sink>(std::move(file));
-    
-    file_sink_ -> mxfile -> set_dir(diskcache_path);
-    
-    file_sink_ -> set_level(level::level_enum::info);
+
+//
+//    auto file =   std::make_shared<details::mx_file>();
+//
+//    file_sink_ = std::make_shared<sinks::file_sink>(std::move(file));
+//
+//    file_sink_ -> mxfile -> set_dir(diskcache_path);
+//
+//    file_sink_ -> set_level(level::level_enum::info);
     
     mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,policy_(storage_policy),file_name == nullptr ? "mxlogger" : file_name);
     
@@ -225,41 +220,41 @@ void mxlogger::set_file_header(const char* header){
 
 // 设置日志文件最大字节数(byte)
 void mxlogger::set_file_max_size(const  long max_size){
-    file_sink_->mxfile->set_max_disk_size(max_size);
+   
 }
 
 // 设置日志文件最大存储时长(s)
 void mxlogger::set_file_max_age(const  long max_age){
-    file_sink_->mxfile->set_max_disk_age(max_age);
+  
 }
 
 // 清理过期文件
 void mxlogger::remove_expire_data(){
     std::lock_guard<std::mutex> lock(logger_mutex);
-    file_sink_->mxfile->remove_expire_data();
+  
 }
 
 //删除所有日志文件
 void mxlogger::remove_all(){
     std::lock_guard<std::mutex> lock(logger_mutex);
-    file_sink_->mxfile->remove_all();
+    
 }
 
 // 缓存日志文件大小(byte)
 long  mxlogger::dir_size(){
     std::lock_guard<std::mutex> lock(logger_mutex);
-    return file_sink_->mxfile->dir_size();
+    return 0;
 }
 void mxlogger::set_console_level(int level){
-    console_sink_ -> set_level(level_(level));
+    
 }
 
 void mxlogger::set_file_level(int level){
-    file_sink_ -> set_level(level_(level));
+    
 }
 
 void mxlogger::set_pattern(const char * pattern){
-    console_sink_ -> set_pattern(pattern);
+   
 }
 
 
@@ -269,25 +264,13 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
     }
     std::lock_guard<std::mutex> lock(logger_mutex);
     
-    level::level_enum lvl = level_(level);
+    flatbuffers::FlatBufferBuilder builder_;
+    auto root = Createlog_serializeDirect(builder_,name,tag,msg,level,is_main_thread,1654501033228);
     
-    string _name = name == nullptr ? string{"mxlogger"} : name;
+        builder_.Finish(root);
     
-    string _tag = tag == nullptr ? string{} : string{tag};
-    
-    string _msg = msg == nullptr ? string{"nullptr"} : msg;
-    
-    details::log_msg log_msg(lvl,_name,_tag,_msg,is_main_thread);
- 
- 
-   if (console_enable_ == true) {
-        console_sink_->log(log_msg);
-    }
+    mmap_sink_ -> log(builder_.GetBufferPointer(), builder_.GetSize(), level_(level));
 
-    if (file_enable_ == true) {
-        mmap_sink_ -> log(log_msg);
-     
-    }
    
 }
 

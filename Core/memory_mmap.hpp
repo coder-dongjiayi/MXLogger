@@ -18,7 +18,6 @@ public:
     ~memory_mmap();
     
    
-
     bool sync();
     
     bool async();
@@ -29,9 +28,8 @@ public:
    
     size_t get_actual_size();
     
-    bool write_data(const std::string &buf,const std::string &fname);
     
-    bool write_data2(const void* buffer, size_t buffer_size, const std::string &fname);
+    bool write_data(const void* buffer, size_t buffer_size, const std::string &fname);
     
 private:
     int fd_ = -1;
@@ -59,8 +57,6 @@ private:
     
     //文件真实大小
     size_t actual_size_ = 0;
-    
-
     
 };
 
