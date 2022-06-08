@@ -20,15 +20,13 @@ memory_mmap::memory_mmap(const std::string &dir_path,const std::string &fname):d
     if (mxlogger::create_dir(dir_path) == false) {
         printf("[mxlogger_error]memory_mmap error:%s\n",strerror(errno));
     }
-    
-    mmap_disk_path_ = dir_path_ + fname;
-    ope_file_();
-   
-    actual_size_ = get_actual_size();
+
 }
 memory_mmap::~memory_mmap(){
     
     close(fd_);
+    munmap(mmap_ptr_, file_size_);
+  
 }
 
 bool memory_mmap::ope_file_(){
@@ -49,7 +47,7 @@ bool memory_mmap::ope_file_(){
     
     file_size_ = mxlogger::file_size(mmap_disk_path_.c_str());
     
-    // 扩容文件
+    // 扩容文件 并且建立内存映射
     truncate_(file_size_);
     
     return true;
@@ -77,28 +75,27 @@ size_t memory_mmap::get_actual_size(){
 
 bool memory_mmap::truncate_(size_t size){
    
-    
-    if (size <= 0 || size % page_size_ != 0 || size == file_size_) {
+    if(size <= 0 || size % page_size_ != 0){
         size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
-    
+
         if (ftruncate(fd_, static_cast<off_t>(capacity_size)) != 0) {
             printf("[mxlogger_error]truncate_ error:%s\n",strerror(errno));
         
             return  false;
         }
-    }
-    
-    if(mmap_ptr_ != nullptr){
-        if (munmap(mmap_ptr_, file_size_) != 0) {
-            printf("[mxlogger_error]munmap_ error:%s\n",strerror(errno));
-            return false;
+        
+        if(mmap_ptr_ != nullptr){
+            if (munmap(mmap_ptr_, file_size_) != 0) {
+                printf("[mxlogger_error]munmap_ error:%s\n",strerror(errno));
+                return false;
+            }
+            mmap_ptr_ = nullptr;
         }
+        file_size_ = capacity_size;
     }
+ 
     
-    file_size_ = mxlogger::file_size(mmap_disk_path_.c_str());
-
-    
-    return mmap();
+    return mmap_ptr_ == nullptr ? mmap() : true;
    
 }
 
@@ -117,6 +114,33 @@ bool memory_mmap::mmap(){
     
     return  true;
 }
+
+
+
+bool memory_mmap::write_data(const void* buffer, size_t buffer_size, const std::string &fname){
+  
+    mmap_disk_path_ = dir_path_ + fname;
+    
+    if (fd_  < 0 || filename_.compare(fname) != 0 || path_exists((mmap_disk_path_).data()) == false) {
+        filename_ = fname;
+        if(ope_file_() == false) return false;
+        actual_size_ = get_actual_size();
+    }
+    
+    size_t total = actual_size_ + buffer_size ;
+    
+    if (total >= file_size_) {
+        truncate_(total + 1);
+    }
+    
+    memcpy(mmap_ptr_  + offset_actual + actual_size_, buffer, buffer_size);
+    
+    write_actual_size(total);
+    
+    return true;
+}
+
+
 bool memory_mmap::msync_(int flag){
     if (msync(mmap_ptr_, file_size_, flag) != 0) {
         printf("[mxlogger_error]msync_ error:%s\n",strerror(errno));
@@ -134,38 +158,5 @@ bool memory_mmap::sync(){
 bool memory_mmap::async(){
     return msync_(MS_ASYNC);
 }
-
-
-bool memory_mmap::write_data(const void* buffer, size_t buffer_size, const std::string &fname){
-  
-    mmap_disk_path_ = dir_path_ + fname;
-    
-    if (fd_  < 0 || filename_.compare(fname) != 0 || path_exists((mmap_disk_path_).data()) == false) {
-        filename_ = fname;
-        if(ope_file_() == false) return false;
- 
-    }
-    
-    size_t total = actual_size_ + buffer_size;
-    
-    if (total >= file_size_) {
-        truncate_(total);
-        sync();
-    }
-    
-    void* result =  memcpy(mmap_ptr_  + offset_actual + actual_size_, buffer, buffer_size);
-    
-    if (result == nullptr) {
-        printf("[mxlogger_error] write_data error:%s\n",strerror(errno));
-        return  false;
-    }
-  
-    write_actual_size(total);
-    
-    return true;
-}
-
-
-
 
 }

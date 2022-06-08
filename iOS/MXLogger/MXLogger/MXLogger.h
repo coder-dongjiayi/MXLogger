@@ -19,6 +19,14 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param nameSpace ns  要调用  destroyWithNamespace 进行释放
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace;
 
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
+
+/// 释放对象的方法
+/// @param nameSpace ns
++(void)destroyWithNamespace:(nonnull NSString*)nameSpace;
++(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
+
+
 /// 初始化方法
 /// @param nameSpace nameSpace
 /// @param directory directory
@@ -31,36 +39,16 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param fileName fileName
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
 
+/// 默认路径初始化
+/// @param nameSpace 默认在 Library目录下
 
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace;
-
-/// 释放对象的方法
-/// @param nameSpace ns
-+(void)destroyWithNamespace:(nonnull NSString*)nameSpace;
-+(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
-
-
-
-
-/// @param diskCacheFilePath 日志路径 /xxx/xxx/mxlog_2022-05-06.log
-+(NSArray<NSString*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath;
-
-
-/// 查询目录下的日志文件
-/// @param directory 目录地址
-/// @return [{"name":"文件名","size":文件大小,"timestamp":"文件最后更新时间"}]
-+(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory;
 
 
 /// 初始化MXLogger
 /// @param nameSpace 命名空间
 /// @param directory 目录
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
-
-
-/// 默认路径初始化
-/// @param nameSpace 默认在 Library目录下
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace;
 
 
 /// 程序结束的时候是否清理过期文件 默认YES

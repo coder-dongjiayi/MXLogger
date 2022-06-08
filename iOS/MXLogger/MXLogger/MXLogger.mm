@@ -25,6 +25,7 @@ static NSString * _defaultDiskCacheDirectory;
 @end
 
 @implementation MXLogger
+
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace{
   
     return [self initializeWithNamespace:nameSpace diskCacheDirectory:NULL];
@@ -113,6 +114,9 @@ static NSString * _defaultDiskCacheDirectory;
 
 
 
+-(instancetype)initWithNamespace:(NSString *)nameSpace diskCacheDirectory:(NSString *)directory{
+    return [self initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:nil fileName:nil];
+}
 
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace{
     return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil];
@@ -293,7 +297,13 @@ static NSString * _defaultDiskCacheDirectory;
 -(void)innerLogWithType:(NSInteger) type level:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
     BOOL isMainThread = [NSThread isMainThread];
   
-    _logger -> log([NSNumber numberWithInteger:type].intValue, [NSNumber numberWithInteger:level].intValue,[name UTF8String], [msg UTF8String], [tag UTF8String], isMainThread);
+    int type_ = [NSNumber numberWithInteger:type].intValue;
+    int level_ = [NSNumber numberWithInteger:level].intValue;
+    const char* name_ = name.UTF8String;
+    const char* tag_ = tag.UTF8String;
+    const char* msg_ = msg.UTF8String;
+    
+    _logger -> log(type_, level_,name_, msg_, tag_, isMainThread);
 }
 
 
