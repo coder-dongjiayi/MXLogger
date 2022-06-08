@@ -22,6 +22,7 @@
 #include "cJson/cJSON.h"
 #include "mmap_sink.hpp"
 #include "mxlogger_file_util.hpp"
+
 namespace mxlogger{
 
 std::unordered_map<string, mxlogger *> *global_instanceDic_ =  new unordered_map<string, mxlogger *>;
@@ -48,6 +49,9 @@ static level::level_enum level_(int lvl){
 }
 static policy::storage_policy policy_(const char* storage_policy){
     
+    if (storage_policy == nullptr) {
+        return policy::storage_policy::yyyy_MM_dd;
+    }
     if (strcmp(storage_policy, "yyyy_MM") == 0) {
         return policy::storage_policy::yyyy_MM;
     }
@@ -115,7 +119,7 @@ std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     return diskcache_path;
 }
 
-mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory){
+mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name){
     
     std::string diskcache_path = get_diskcache_path_(ns,directory);
     if (diskcache_path.data() == nullptr) {
@@ -130,7 +134,7 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory){
         return logger;
     }
     
-    auto logger = new mxlogger(diskcache_path.c_str());
+    auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name);
     logger -> map_key = map_key;
     (*global_instanceDic_)[map_key] = logger;
     return logger;
@@ -161,7 +165,7 @@ void mxlogger::destroy(){
     
 }
 
-mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path){
+mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name) : diskcache_path_(diskcache_path),storage_policy_(storage_policy),file_name_(file_name){
     
     
     console_sink_ = std::make_shared<sinks::console_sink>(stdout);
@@ -176,7 +180,7 @@ mxlogger::mxlogger(const char* diskcache_path) : diskcache_path_(diskcache_path)
     
     file_sink_ -> set_level(level::level_enum::info);
     
-    mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,policy::storage_policy::yyyy_MM_dd);
+    mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,policy_(storage_policy),file_name == nullptr ? "mxlogger" : file_name);
     
     is_debug_tracking_ = is_debuging_();
     
@@ -207,25 +211,16 @@ void mxlogger::set_file_enable(bool enable){
     file_enable_ = enable;
     
 }
-void mxlogger::set_file_policy(const char* policy){
-    
-    file_sink_->set_policy(policy_(policy));
-}
-
-
-void mxlogger::set_file_name(const char* filename){
-    file_sink_->set_filename(filename);
-}
 
 void mxlogger::set_file_header(const char* header){
     
-    std::lock_guard<std::mutex> lock(logger_mutex);
-    
-    cJSON * json = cJSON_CreateObject();
-    cJSON_AddStringToObject(json, "header", header);
-    char * json_chars =  cJSON_PrintUnformatted(json);
-    
-    file_sink_->mxfile->set_header(json_chars);
+//    std::lock_guard<std::mutex> lock(logger_mutex);
+//
+//    cJSON * json = cJSON_CreateObject();
+//    cJSON_AddStringToObject(json, "header", header);
+//    char * json_chars =  cJSON_PrintUnformatted(json);
+//
+//    file_sink_->mxfile->set_header(json_chars);
 }
 
 // 设置日志文件最大字节数(byte)
@@ -291,7 +286,7 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
 
     if (file_enable_ == true) {
         mmap_sink_ -> log(log_msg);
-       // file_sink_ -> log(log_msg);
+     
     }
    
 }

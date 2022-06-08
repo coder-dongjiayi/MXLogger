@@ -14,7 +14,7 @@ namespace  mxlogger{
 class memory_mmap{
   
 public:
-    memory_mmap(const std::string &dir_path);
+    memory_mmap(const std::string &dir_path,const std::string &fname);
     ~memory_mmap();
     
    
@@ -25,8 +25,13 @@ public:
     
     bool mmap();
     
+    void write_actual_size(size_t size);
+   
+    size_t get_actual_size();
     
     bool write_data(const std::string &buf,const std::string &fname);
+    
+    bool write_data2(const void* buffer, size_t buffer_size, const std::string &fname);
     
 private:
     int fd_ = -1;
@@ -49,9 +54,13 @@ private:
     // 文件大小
     size_t file_size_ = 0;
 
-    size_t position_ = 0;
     
-    char* mmap_ptr_ = nullptr;
+    uint8_t* mmap_ptr_ = nullptr;
+    
+    //文件真实大小
+    size_t actual_size_ = 0;
+    
+
     
 };
 

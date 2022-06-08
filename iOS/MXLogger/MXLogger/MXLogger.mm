@@ -29,7 +29,7 @@ static NSString * _defaultDiskCacheDirectory;
   
     return [self initializeWithNamespace:nameSpace diskCacheDirectory:NULL];
 }
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory{
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory {
  
     if (global_instanceDic == nil) {
         global_instanceDic = [NSMutableDictionary dictionary];
@@ -37,7 +37,7 @@ static NSString * _defaultDiskCacheDirectory;
   
     NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
     if ([global_instanceDic objectForKey:key] == nil) {
-        MXLogger * logger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory];
+        MXLogger * logger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:nil fileName:nil];
         [global_instanceDic setObject:logger forKey:key];
         return logger;
     }
@@ -115,16 +115,21 @@ static NSString * _defaultDiskCacheDirectory;
 
 
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace{
-    return [self initWithNamespace:nameSpace diskCacheDirectory:nil];
+    return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil];
 }
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory{
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName{
     if (self = [super init]) {
         if (!directory) {
             directory = [MXLogger defaultDiskCacheDirectory];
         }
         _nameSpace = nameSpace;
         _directory = directory;
-        _logger =  mx_logger::initialize_namespace(nameSpace.UTF8String, directory.UTF8String);
+        
+        const char * file_name = fileName == NULL ? nullptr : fileName.UTF8String;
+        const char * storage_policy = storagePolicy == NULL ? nullptr : storagePolicy.UTF8String;
+        
+        
+        _logger =  mx_logger::initialize_namespace(nameSpace.UTF8String, directory.UTF8String,storage_policy,file_name);
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationWillTerminate:)
@@ -189,10 +194,6 @@ static NSString * _defaultDiskCacheDirectory;
 - (BOOL)isDebugTracking{
     return _logger -> is_debug_tracking();
 }
-- (void)setStoragePolicy:(NSString *)storagePolicy{
-    _storagePolicy = storagePolicy;
-    _logger -> set_file_policy(storagePolicy.UTF8String);
-}
 
 
 - (void)setFileHeader:(NSDictionary *)fileHeader{
@@ -210,12 +211,6 @@ static NSString * _defaultDiskCacheDirectory;
 }
 
 
-
-
-- (void)setFileName:(NSString *)fileName{
-    _fileName = fileName;
-    _logger -> set_file_name(fileName.UTF8String);
-}
 -(void)setEnable:(BOOL)enable{
     _enable = enable;
     _logger -> set_enable(enable);

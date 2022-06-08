@@ -9,6 +9,8 @@
 #define mmap_sink_hpp
 
 #include <stdio.h>
+
+
 #include "memory_mmap.hpp"
 #include "log_msg.hpp"
 #include "sink.hpp"
@@ -17,7 +19,7 @@ namespace sinks {
 class mmap_sink : public sink{
 public:
     
-    mmap_sink(const std::string &dir_path,policy::storage_policy policy);
+    mmap_sink(const std::string &dir_path,policy::storage_policy policy,const std::string &file_name);
     
     ~mmap_sink(){};
     
@@ -25,7 +27,8 @@ public:
     void flush() override;
 
 private:
-    std::atomic_int level_{level::debug};
+  
+    
     
     std::shared_ptr<memory_mmap> mmap_;
     

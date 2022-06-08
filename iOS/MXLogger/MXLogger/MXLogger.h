@@ -19,7 +19,20 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param nameSpace ns  要调用  destroyWithNamespace 进行释放
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace;
 
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
+/// 初始化方法
+/// @param nameSpace nameSpace
+/// @param directory directory
+/// @param storagePolicy
+/// ///  文件存储策略
+///  yyyy_MM                    按月存储
+///  yyyy_MM_dd              按天存储
+///  yyyy_ww                     按周存储
+///  yyyy_MM_dd_HH       按小时存储
+/// @param fileName fileName
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
+
+
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace;
 
 /// 释放对象的方法
 /// @param nameSpace ns
@@ -67,18 +80,11 @@ NS_ASSUME_NONNULL_BEGIN
 /// 禁用/开启 文件写入
 @property (nonatomic,assign)BOOL fileEnable;
 
-///  文件存储策略
-///  yyyy_MM                    按月存储
-///  yyyy_MM_dd              按天存储
-///  yyyy_ww                     按周存储
-///  yyyy_MM_dd_HH       按小时存储
-@property (nonatomic,copy)NSString * storagePolicy;
+
 
 /// 每次创建一个新的日志文件 写入文件头的信息
 @property (nonatomic,copy)NSDictionary * fileHeader;
 
-/// 自定义日志文件名 默认值:mxlog
-@property (nonatomic,copy)NSString *fileName;
 
 /// 日志文件磁盘缓存目录
 @property (nonatomic, copy, nonnull, readonly) NSString *diskCachePath;

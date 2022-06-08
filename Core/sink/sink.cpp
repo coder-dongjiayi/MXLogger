@@ -51,13 +51,13 @@ void sink::handle_date(policy::storage_policy policy){
 
             auto result = mxlogger_helper::string_format("%04d-%s%s",  tm_time.tm_year + 1900,week_n);
 
-            filename_ = result;
+            filename_ = result + "_" + filename_;
         }
             break;
         case policy::storage_policy::yyyy_MM_dd:
         {
             auto result = mxlogger_helper::string_format("%04d-%02d-%02d", tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday);
-            filename_ = result;
+            filename_ = result + "_" + filename_;
         }
 
             break;
@@ -65,7 +65,7 @@ void sink::handle_date(policy::storage_policy policy){
         {
             auto result = mxlogger_helper::string_format("%04d-%02d-%02d-%02d", tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday, tm_time.tm_hour);
 
-            filename_ = result;
+            filename_ = result + "_" + filename_;
         }
             break;
 

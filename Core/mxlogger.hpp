@@ -21,7 +21,7 @@ class mmap_sink;
 class mxlogger{
 private:
     
-    mxlogger(const char *diskcache_path);
+    mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name);
     ~mxlogger();
     
     std::shared_ptr<sinks::console_sink> console_sink_;
@@ -44,7 +44,7 @@ public:
 
   
     // 初始化 logger
-    static mxlogger *initialize_namespace(const char* ns,const char* directory);
+    static mxlogger *initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name);
     
     /// 释放 logger
     static void delete_namespace(const char* ns,const char* directory);
@@ -61,12 +61,6 @@ public:
     void set_enable(bool enable);
     void set_console_enable(bool enable);
     void set_file_enable(bool enable);
-    
-    
-    void set_file_policy(const char* policy);
-    
-    
-     void set_file_name(const char* filename);
     
     
      void set_file_header(const char* header);
@@ -109,6 +103,8 @@ public:
     void log(int type, int level,const char* name, const char* msg,const char* tag,bool is_main_thread);
 private:
     std::string diskcache_path_;
+    const char* storage_policy_;
+    const char* file_name_;
   
 };
 
