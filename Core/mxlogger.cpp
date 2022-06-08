@@ -234,6 +234,7 @@ void mxlogger::set_file_level(int level){
 }
 
 void mxlogger::flush(){
+    std::lock_guard<std::mutex> lock(logger_mutex);
     mmap_sink_ -> flush();
 }
 

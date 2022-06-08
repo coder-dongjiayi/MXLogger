@@ -34,14 +34,7 @@
 
     NSLog(@"目录:%@",_logger.diskCachePath);
     
-//    NSString * isDebug = _logger.isDebugTracking == YES ? @"正在调试" : @"非调试状态";
-//    _logger.fileHeader = @{@"平台":@"ios",@"版本":@"1.0.1"};
-//
-//    [_logger info:@"mxlogger" msg:[NSString stringWithFormat:@"%@",isDebug] tag:@"isDebug"];
-//    [_logger info:@"mxlogger" msg:_logger.diskCachePath tag:@"日志目录"];
-//
-//    [_logger debug:@"mxlogger" msg:[NSString stringWithFormat:@"日志文件大小:%ld",_logger.logSize] tag:@"size"];
-    
+
 }
 
 
@@ -90,25 +83,25 @@
 }
 - (IBAction)tenThousandButtonAction:(id)sender {
 
-//  [_logger info:@"name" msg:@"这是一条日志信息" tag:@"net"];
+   [_logger info:@"name" msg:@"这是一条日志信息" tag:@"net"];
     
-    NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
-    NSTimeInterval start =[dateStart timeIntervalSince1970];
-    NSInteger index = 0;
-    NSLog(@"开始写入日志");
-    for (NSInteger i = 0; i < 100000; i++) {
-
-       NSString * message = [NSString stringWithFormat:@"第%ld条数据",(long)i];
-
-        [self->_logger info:@"name" msg:message tag:@"net"];
-
-    }
-    NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
-    NSTimeInterval end =[dateEnd timeIntervalSince1970];
-
-    [sender setTitle:[NSString stringWithFormat:@"写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
-    NSLog(@"index = %ld",index);
-    NSLog(@"时间:%f",end - start);
+//    NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
+//    NSTimeInterval start =[dateStart timeIntervalSince1970];
+//    NSInteger index = 0;
+//    NSLog(@"开始写入日志");
+//    for (NSInteger i = 0; i < 100000; i++) {
+//
+//       NSString * message = [NSString stringWithFormat:@"第%ld条数据",(long)i];
+//
+//        [self->_logger info:@"name" msg:message tag:@"net"];
+//
+//    }
+//    NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
+//    NSTimeInterval end =[dateEnd timeIntervalSince1970];
+//
+//    [sender setTitle:[NSString stringWithFormat:@"写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
+//    NSLog(@"index = %ld",index);
+//    NSLog(@"时间:%f",end - start);
 
 
    

@@ -6,9 +6,7 @@
 //
 
 #include "mmap_sink.hpp"
-#include "mxlogger_helper.hpp"
 
-#include "mxlogger_file_util.hpp"
 #include "log_serialize.h"
 namespace mxlogger{
 namespace sinks{
@@ -37,8 +35,6 @@ void mmap_sink::log(const void* buffer, size_t buffer_size,  level::level_enum l
 void mmap_sink::flush() {
     mmap_ -> sync();
 }
-
-
 
 
 

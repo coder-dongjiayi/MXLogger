@@ -187,6 +187,7 @@ static NSString * _defaultDiskCacheDirectory;
     if (!self.shouldRemoveExpiredDataWhenTerminate) {
         return;
     }
+    self->_logger->flush();
     dispatch_sync(self.ioQueue, ^{
         [self removeExpireData];
     });
@@ -206,6 +207,8 @@ static NSString * _defaultDiskCacheDirectory;
         [application endBackgroundTask:bgTask];
         bgTask = UIBackgroundTaskInvalid;
     }];
+    self->_logger->flush();
+    
     dispatch_async(self.ioQueue, ^{
         [self removeExpireData];
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -254,8 +257,6 @@ static NSString * _defaultDiskCacheDirectory;
     _fileLevel = fileLevel;
     _logger -> set_file_level([NSNumber numberWithInteger:fileLevel].intValue);
 }
-
-
 
 
 

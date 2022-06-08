@@ -11,7 +11,6 @@
 		BD0DDFF728449DDF0090439D /* mmap_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD0DDFF428449DDF0090439D /* mmap_sink.cpp */; };
 		BD12BD192826513A00BA6D5B /* mxlogger_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */; };
 		BD12BD1A2826544200BA6D5B /* mxlogger_util.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD12BD182826513A00BA6D5B /* mxlogger_util.hpp */; };
-		BD4F9EFB284DAEC60003F77E /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD4F9EED284DAEC50003F77E /* util.cpp */; };
 		BD7BA73728082EA600EDA6AC /* logger_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72528082EA600EDA6AC /* logger_os.cpp */; };
 		BD7BA73828082EA600EDA6AC /* mxlogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA72628082EA600EDA6AC /* mxlogger.cpp */; };
 		BD7BA73F28082EA600EDA6AC /* sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD7BA73328082EA600EDA6AC /* sink.cpp */; };
@@ -42,16 +41,8 @@
 		BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mxlogger_util.cpp; sourceTree = "<group>"; };
 		BD12BD182826513A00BA6D5B /* mxlogger_util.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_util.hpp; sourceTree = "<group>"; };
 		BD406D9727F19C76002C76D5 /* libMXLoggerCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMXLoggerCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		BD4F9EED284DAEC50003F77E /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
-		BD4F9EEE284DAEC50003F77E /* reflection_generated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reflection_generated.h; sourceTree = "<group>"; };
-		BD4F9EEF284DAEC50003F77E /* registry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = registry.h; sourceTree = "<group>"; };
 		BD4F9EF0284DAEC50003F77E /* flatbuffers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = flatbuffers.h; sourceTree = "<group>"; };
-		BD4F9EF2284DAEC50003F77E /* flexbuffers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = flexbuffers.h; sourceTree = "<group>"; };
-		BD4F9EF3284DAEC50003F77E /* minireflect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = minireflect.h; sourceTree = "<group>"; };
-		BD4F9EF4284DAEC50003F77E /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
 		BD4F9EF6284DAEC50003F77E /* stl_emulation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stl_emulation.h; sourceTree = "<group>"; };
-		BD4F9EF8284DAEC50003F77E /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
-		BD4F9EF9284DAEC50003F77E /* reflection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reflection.h; sourceTree = "<group>"; };
 		BD4F9EFA284DAEC50003F77E /* base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = base.h; sourceTree = "<group>"; };
 		BD4F9F06284DF3150003F77E /* log_serialize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = log_serialize.h; sourceTree = "<group>"; };
 		BD7BA72028082EA600EDA6AC /* logger_os.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = logger_os.hpp; sourceTree = "<group>"; };
@@ -126,16 +117,8 @@
 		BD4F9EEB284DAEC50003F77E /* flatbuffers */ = {
 			isa = PBXGroup;
 			children = (
-				BD4F9EED284DAEC50003F77E /* util.cpp */,
-				BD4F9EEE284DAEC50003F77E /* reflection_generated.h */,
-				BD4F9EEF284DAEC50003F77E /* registry.h */,
 				BD4F9EF0284DAEC50003F77E /* flatbuffers.h */,
-				BD4F9EF2284DAEC50003F77E /* flexbuffers.h */,
-				BD4F9EF3284DAEC50003F77E /* minireflect.h */,
-				BD4F9EF4284DAEC50003F77E /* util.h */,
 				BD4F9EF6284DAEC50003F77E /* stl_emulation.h */,
-				BD4F9EF8284DAEC50003F77E /* hash.h */,
-				BD4F9EF9284DAEC50003F77E /* reflection.h */,
 				BD4F9EFA284DAEC50003F77E /* base.h */,
 			);
 			path = flatbuffers;
@@ -210,7 +193,6 @@
 				BD0DDFF728449DDF0090439D /* mmap_sink.cpp in Sources */,
 				BD7BA73828082EA600EDA6AC /* mxlogger.cpp in Sources */,
 				BD7BA73728082EA600EDA6AC /* logger_os.cpp in Sources */,
-				BD4F9EFB284DAEC60003F77E /* util.cpp in Sources */,
 				BD12BD192826513A00BA6D5B /* mxlogger_util.cpp in Sources */,
 				BD0DDFF628449DDF0090439D /* memory_mmap.cpp in Sources */,
 				BD7BA73F28082EA600EDA6AC /* sink.cpp in Sources */,
