@@ -244,6 +244,11 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
     if (enable_ == false) {
         return;
     }
+    if (name == nullptr || strcmp(name, "") == 0) {
+        name = "mxlogger";
+    }
+   
+
     
     flatbuffers::FlatBufferBuilder builder_;
     auto root = Createlog_serializeDirect(builder_,name,tag,msg,level,is_main_thread,mxlogger_helper::time_stamp_milliseconds());

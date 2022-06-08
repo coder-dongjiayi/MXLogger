@@ -96,10 +96,10 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
 
 
         std::map<std::string, std::string> map;
-        
-        map["msg"] = logger->msg()->str();
-        map["tag"] = logger->tag()->str();
-        map["name"] = logger->name()->str();
+    
+        map["msg"] = logger->msg() == nullptr ? "" : logger->msg()->str();
+        map["tag"] = logger->tag() == nullptr ? "" : logger->tag()->str();
+        map["name"] = logger->name()->c_str();
         map["timestamp"] = std::to_string(logger->timestamp());
         map["level"] = std::to_string(logger->level());
         map["is_main_thread"] =std::to_string(logger->is_main_thread());

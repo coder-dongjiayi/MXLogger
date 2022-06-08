@@ -82,15 +82,16 @@ static NSString * _defaultDiskCacheDirectory;
     
     for (int i = (int)(destination.size() - 1); i>=0; i--) {
         
-        std::map<std::string, std::string> log_map = destination[i];
+        std::map<std::string,std::string> log_map = destination[i];
         
-        std::string msg = log_map["msg"];
+       std::string  msg = log_map["msg"];
         std::string name = log_map["name"];
         std::string tag = log_map["tag"];
         std::string is_main_thread = log_map["is_main_thread"];
         std::string timestamp = log_map["timestamp"];
         std::string level = log_map["level"];
         
+
         
         NSDictionary * dictionary = @{
             @"msg":[NSString stringWithUTF8String:msg.data()],
@@ -288,13 +289,23 @@ static NSString * _defaultDiskCacheDirectory;
   
     int type_ = [NSNumber numberWithInteger:type].intValue;
     int level_ = [NSNumber numberWithInteger:level].intValue;
-    const char* name_ = name.UTF8String;
-    const char* tag_ = tag.UTF8String;
-    const char* msg_ = msg.UTF8String;
+   
+    const char* name_ = [self isNull:name] == YES ? nullptr : name.UTF8String;
+    const char* tag_ = [self isNull:tag] == YES ? nullptr : tag.UTF8String;
+    const char* msg_ = [self isNull:msg] == YES ? nullptr : msg.UTF8String;
     
     _logger -> log(type_, level_,name_, msg_, tag_, isMainThread);
 }
 
+-(BOOL)isNull:(NSString*) object{
+    if (object == NULL) {
+        return YES;
+    }
+    if ([object isKindOfClass:[NSNull class]]) {
+        return YES;
+    }
+    return NO;
+}
 
 - (NSString *)diskCachePath{
     return [NSString stringWithUTF8String:_logger->diskcache_path()];
