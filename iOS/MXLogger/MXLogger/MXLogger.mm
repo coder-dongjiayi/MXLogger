@@ -219,33 +219,13 @@ static NSString * _defaultDiskCacheDirectory;
 }
 
 
-- (void)setFileHeader:(NSDictionary *)fileHeader{
-    _fileHeader = fileHeader;
-    NSError * error;
-    
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:fileHeader options:NSJSONWritingPrettyPrinted error:&error];
-    if (error != NULL || jsonData == NULL) {
-        NSLog(@"header 资源转化失败");
-        return;
-    }
-    
-    NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    _logger -> set_file_header(jsonString.UTF8String);
-}
 
 
 -(void)setEnable:(BOOL)enable{
     _enable = enable;
     _logger -> set_enable(enable);
 }
--(void)setConsoleEnable:(BOOL)consoleEnable{
-    _consoleEnable = consoleEnable;
-    _logger -> set_console_enable(consoleEnable);
-}
--(void)setFileEnable:(BOOL)fileEnable{
-    _fileEnable = fileEnable;
-    _logger -> set_file_enable(fileEnable);
-}
+
 -(void)setMaxDiskAge:(NSUInteger)maxDiskAge{
     _maxDiskAge = maxDiskAge;
     
@@ -274,20 +254,9 @@ static NSString * _defaultDiskCacheDirectory;
     _fileLevel = fileLevel;
     _logger -> set_file_level([NSNumber numberWithInteger:fileLevel].intValue);
 }
-- (void)setConsoleLevel:(NSInteger)consoleLevel{
-    _consoleLevel = consoleLevel;
-    
-    _logger -> set_console_level([NSNumber numberWithInteger:consoleLevel].intValue);
-}
 
-- (void)setPattern:(NSString *)pattern{
-    _pattern = pattern;
-    if ([pattern isKindOfClass:[NSNull class]]) {
-        return;
-    }
-    _logger -> set_pattern(pattern.UTF8String);
-}
-    
+
+
 
 
 -(void)debug:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{

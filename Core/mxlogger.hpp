@@ -50,17 +50,11 @@ public:
     /// 释放全部的logger
     static void destroy();
     
-    
+
     
     std::string map_key;
     
     void set_enable(bool enable);
-    void set_console_enable(bool enable);
-    void set_file_enable(bool enable);
-    
-    
-     void set_file_header(const char* header);
-    
     
     // 设置日志文件最大字节数(byte)
     void set_file_max_size(const  long max_size);
@@ -77,13 +71,10 @@ public:
     // 缓存日志文件大小(byte)
     long  dir_size();
     
-    void set_console_level(int level);
     
     void set_file_level(int level);
     
-    // 控制台输出格式
-    void set_pattern(const char * pattern);
-    
+    void flush();
     
     const char* diskcache_path() const;
     

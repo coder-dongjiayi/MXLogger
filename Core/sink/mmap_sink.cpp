@@ -17,6 +17,7 @@ mmap_sink::mmap_sink(const std::string &dir_path,policy::storage_policy policy,c
     
     filename_ = file_name;
     handle_date(policy);
+    set_dir(dir_path);
     
     mmap_ =  std::make_shared<memory_mmap>(dir_path,filename_);
     
@@ -34,7 +35,7 @@ void mmap_sink::log(const void* buffer, size_t buffer_size,  level::level_enum l
     
 }
 void mmap_sink::flush() {
-   
+    mmap_ -> sync();
 }
 
 

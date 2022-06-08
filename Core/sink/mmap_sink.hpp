@@ -13,10 +13,10 @@
 
 #include "memory_mmap.hpp"
 
-#include "sink.hpp"
+#include "base_file_sink.hpp"
 namespace mxlogger{
 namespace sinks {
-class mmap_sink : public sink{
+class mmap_sink : public base_file_sink{
 public:
     
     mmap_sink(const std::string &dir_path,policy::storage_policy policy,const std::string &file_name);

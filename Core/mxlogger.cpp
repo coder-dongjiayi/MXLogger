@@ -7,7 +7,6 @@
 
 #include "mxlogger.hpp"
 
-#include "mx_file.hpp"
 #include <mutex>
 #include <unordered_map>
 #include "mxlogger_helper.hpp"
@@ -199,64 +198,44 @@ void mxlogger::set_enable(bool enable){
     
     enable_ = enable;
 }
-void mxlogger::set_console_enable(bool enable){
-    console_enable_ = enable;
-}
-void mxlogger::set_file_enable(bool enable){
-    file_enable_ = enable;
-    
-}
 
-void mxlogger::set_file_header(const char* header){
-    
-//    std::lock_guard<std::mutex> lock(logger_mutex);
-//
-//    cJSON * json = cJSON_CreateObject();
-//    cJSON_AddStringToObject(json, "header", header);
-//    char * json_chars =  cJSON_PrintUnformatted(json);
-//
-//    file_sink_->mxfile->set_header(json_chars);
-}
 
 // 设置日志文件最大字节数(byte)
 void mxlogger::set_file_max_size(const  long max_size){
-   
+    mmap_sink_ -> set_max_disk_size(max_size);
 }
 
 // 设置日志文件最大存储时长(s)
 void mxlogger::set_file_max_age(const  long max_age){
-  
+    mmap_sink_ -> set_max_disk_age(max_age);
 }
 
 // 清理过期文件
 void mxlogger::remove_expire_data(){
     std::lock_guard<std::mutex> lock(logger_mutex);
-  
+    mmap_sink_ -> remove_expire_data();
 }
 
 //删除所有日志文件
 void mxlogger::remove_all(){
     std::lock_guard<std::mutex> lock(logger_mutex);
-    
+    mmap_sink_ -> remove_all();
 }
 
 // 缓存日志文件大小(byte)
 long  mxlogger::dir_size(){
     std::lock_guard<std::mutex> lock(logger_mutex);
-    return 0;
+    return mmap_sink_->dir_size();
 }
-void mxlogger::set_console_level(int level){
-    
-}
+
 
 void mxlogger::set_file_level(int level){
-    
+    mmap_sink_ -> set_level(level_(level));
 }
 
-void mxlogger::set_pattern(const char * pattern){
-   
+void mxlogger::flush(){
+    mmap_sink_ -> flush();
 }
-
 
 void mxlogger::log(int type, int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
     

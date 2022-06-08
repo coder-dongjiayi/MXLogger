@@ -62,17 +62,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 禁用日志
 @property (nonatomic,assign)BOOL enable;
-/// 禁用/开启 控制台输出 默认情况下 如果进程处于被调试状态(isDebugTracking = YES) 那么就会在控制台输出日志信息，如果处于非调试状态(isDebugTracking = NO)下则只会写入文件不会输出到控制台
-@property (nonatomic,assign)BOOL consoleEnable;
-
-/// 禁用/开启 文件写入
-@property (nonatomic,assign)BOOL fileEnable;
-
-
-
-/// 每次创建一个新的日志文件 写入文件头的信息
-@property (nonatomic,copy)NSDictionary * fileHeader;
-
 
 /// 日志文件磁盘缓存目录
 @property (nonatomic, copy, nonnull, readonly) NSString *diskCachePath;
@@ -87,14 +76,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,assign,readonly)NSUInteger logSize;
 
 
-/// 设置控制台日志输出等级
-@property (nonatomic,assign)NSInteger consoleLevel;
 
 /// 设置写入文件日志等级
 @property (nonatomic,assign)NSInteger fileLevel;
 
-/// 控制台输出样式
-@property (nonatomic,copy)NSString * pattern;
+
 
 
 +(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath;

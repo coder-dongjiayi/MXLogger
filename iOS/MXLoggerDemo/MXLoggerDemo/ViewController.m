@@ -29,11 +29,9 @@
 
     _logger.shouldRemoveExpiredDataWhenTerminate = YES;
 
-    _logger.consoleLevel = 0;
+
     _logger.fileLevel = 1;
 
-    _logger.pattern = @"[%d][%p]%m";
-    _logger.consoleEnable = false;
     NSLog(@"目录:%@",_logger.diskCachePath);
     
 //    NSString * isDebug = _logger.isDebugTracking == YES ? @"正在调试" : @"非调试状态";
