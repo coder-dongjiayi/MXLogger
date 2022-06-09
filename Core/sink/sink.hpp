@@ -18,9 +18,8 @@ class sink{
 protected:
     std::atomic_int level_{level::debug};
     
-    void handle_date(policy::storage_policy policy);
-    
-    std::string filename_;
+   
+
     
 public:
     virtual ~sink() = default;

@@ -73,7 +73,7 @@
         NSString * level = obj[@"level"];
         NSString *  is_main = obj[@"is_main_thread"];
         NSString * threadId = obj[@"thread_id"];
-        NSLog(@"[%@] tm:%@,msg:%@,tag:%@,level:%@ thread_id=%@ is_main=%@",name,tm,msg,tag,level,threadId,is_main);
+        NSLog(@"\n[%@] tm:%@,msg:%@,tag:%@,level:%@ thread_id=%@ is_main=%@",name,tm,msg,tag,level,threadId,is_main);
     }];
 }
 

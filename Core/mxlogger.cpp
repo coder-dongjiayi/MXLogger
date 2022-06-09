@@ -164,17 +164,8 @@ void mxlogger::destroy(){
 mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name) : diskcache_path_(diskcache_path),storage_policy_(storage_policy),file_name_(file_name){
     
     
-
-//
-//    auto file =   std::make_shared<details::mx_file>();
-//
-//    file_sink_ = std::make_shared<sinks::file_sink>(std::move(file));
-//
-//    file_sink_ -> mxfile -> set_dir(diskcache_path);
-//
-//    file_sink_ -> set_level(level::level_enum::info);
     
-    mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,policy_(storage_policy),file_name == nullptr ? "mxlogger" : file_name);
+    mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,policy_(storage_policy));
     
     is_debug_tracking_ = is_debuging_();
     

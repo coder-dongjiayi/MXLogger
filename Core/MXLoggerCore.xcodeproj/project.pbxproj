@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BD0DDFF628449DDF0090439D /* memory_mmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD0DDFF328449DDF0090439D /* memory_mmap.cpp */; };
 		BD0DDFF728449DDF0090439D /* mmap_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD0DDFF428449DDF0090439D /* mmap_sink.cpp */; };
 		BD12BD192826513A00BA6D5B /* mxlogger_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */; };
 		BD12BD1A2826544200BA6D5B /* mxlogger_util.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD12BD182826513A00BA6D5B /* mxlogger_util.hpp */; };
@@ -34,8 +33,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		BD0DDFF228449DDF0090439D /* memory_mmap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = memory_mmap.hpp; sourceTree = "<group>"; };
-		BD0DDFF328449DDF0090439D /* memory_mmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = memory_mmap.cpp; sourceTree = "<group>"; };
 		BD0DDFF428449DDF0090439D /* mmap_sink.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mmap_sink.cpp; sourceTree = "<group>"; };
 		BD0DDFF528449DDF0090439D /* mmap_sink.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mmap_sink.hpp; sourceTree = "<group>"; };
 		BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mxlogger_util.cpp; sourceTree = "<group>"; };
@@ -90,8 +87,6 @@
 				BD4F9F06284DF3150003F77E /* log_serialize.h */,
 				BD4F9EEB284DAEC50003F77E /* flatbuffers */,
 				BD0DDFF82844A0B30090439D /* sink */,
-				BD0DDFF328449DDF0090439D /* memory_mmap.cpp */,
-				BD0DDFF228449DDF0090439D /* memory_mmap.hpp */,
 				BD12BD172826513A00BA6D5B /* mxlogger_util.cpp */,
 				BD12BD182826513A00BA6D5B /* mxlogger_util.hpp */,
 				BDD1CA872823A53F009B94D7 /* mxlogger_file_util.hpp */,
@@ -194,7 +189,6 @@
 				BD7BA73828082EA600EDA6AC /* mxlogger.cpp in Sources */,
 				BD7BA73728082EA600EDA6AC /* logger_os.cpp in Sources */,
 				BD12BD192826513A00BA6D5B /* mxlogger_util.cpp in Sources */,
-				BD0DDFF628449DDF0090439D /* memory_mmap.cpp in Sources */,
 				BD7BA73F28082EA600EDA6AC /* sink.cpp in Sources */,
 				BDABC1872850A5F600A5FF1C /* base_file_sink.cpp in Sources */,
 			);
