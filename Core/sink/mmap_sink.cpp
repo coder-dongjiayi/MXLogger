@@ -12,6 +12,15 @@ static const size_t offset_length = sizeof(uint32_t);
 
 namespace mxlogger{
 namespace sinks{
+mmap_sink::mmap_sink(const std::string &dir_path,policy::storage_policy policy):base_file_sink(dir_path,policy),page_size_(static_cast<size_t>(getpagesize())){
+    
+    open();
+    file_size_ = get_file_size();
+    if (file_size_ == 0) {
+        truncate_(0);
+    }
+    actual_size_ = get_actual_size_();
+}
 mmap_sink::~mmap_sink(){
     munmap_();
 }
@@ -22,20 +31,13 @@ void mmap_sink::log(const void* buffer, size_t buffer_size,  level::level_enum l
         return;
     }
     
-    write_data_(buffer, buffer_size, filename_);
+    
+    write_data_(buffer, buffer_size);
 
     
 }
-bool mmap_sink::write_data_(const void* buffer, size_t buffer_size, const std::string &fname){
+bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){
     
-    if (file_ident < 0 || filename_.compare(fname) !=0) {
-        open(fname);
-        file_size_ = get_file_size();
-        if (file_size_ == 0) {
-            truncate_(0);
-        }
-        actual_size_ = get_actual_size_();
-    }
     
     ///1.、需要写入字节总大小 = 当前文件真实长度 + 需要写入buffer的长度 + offset_length
     

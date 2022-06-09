@@ -28,9 +28,9 @@ static NSString * _defaultDiskCacheDirectory;
 
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace{
   
-    return [self initializeWithNamespace:nameSpace diskCacheDirectory:NULL];
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil];
 }
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory {
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName{
  
     if (global_instanceDic == nil) {
         global_instanceDic = [NSMutableDictionary dictionary];
@@ -38,7 +38,7 @@ static NSString * _defaultDiskCacheDirectory;
   
     NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
     if ([global_instanceDic objectForKey:key] == nil) {
-        MXLogger * logger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:nil fileName:nil];
+        MXLogger * logger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:storagePolicy fileName:fileName];
         [global_instanceDic setObject:logger forKey:key];
         return logger;
     }
@@ -46,6 +46,10 @@ static NSString * _defaultDiskCacheDirectory;
     return logger;
     
 }
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName{
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName];
+}
+
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace{
     [self destroyWithNamespace:nameSpace diskCacheDirectory:NULL];
 }
@@ -58,82 +62,6 @@ static NSString * _defaultDiskCacheDirectory;
     }
 }
 
-+(NSString*)mapKey:(NSString*)nameSpace diskCacheDirectory:(NSString*)directory{
-    
-    if (!directory) {
-        directory = [MXLogger defaultDiskCacheDirectory];
-    }
-    std::string mapKey =  mx_logger::md5(nameSpace.UTF8String, directory.UTF8String);
-    
-    NSString * key =  [NSString stringWithUTF8String:mapKey.data()];
-    return key;
-}
-+(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath{
-
-  
-  
-    std::vector<std::map<std::string, std::string>> destination;
-    
-    mxlogger::util::mxlogger_util::select_log_form_path(diskCacheFilePath.UTF8String, &destination);
-    
-    if(destination.size() == 0) return @[];
-    
-    NSMutableArray<NSDictionary*> *messageList = [NSMutableArray arrayWithCapacity:destination.size()];
-    
-    for (int i = (int)(destination.size() - 1); i>=0; i--) {
-        
-        std::map<std::string,std::string> log_map = destination[i];
-        
-       std::string  msg = log_map["msg"];
-        std::string name = log_map["name"];
-        std::string tag = log_map["tag"];
-        std::string is_main_thread = log_map["is_main_thread"];
-        std::string timestamp = log_map["timestamp"];
-        std::string level = log_map["level"];
-        std::string thread_id = log_map["thread_id"];
-
-        
-        NSDictionary * dictionary = @{
-            @"msg":[NSString stringWithUTF8String:msg.data()],
-            @"name":[NSString stringWithUTF8String:name.data()],
-            @"tag":[NSString stringWithUTF8String:tag.data()],
-            @"is_main_thread":[NSString stringWithUTF8String:is_main_thread.data()],
-            @"thread_id":[NSString stringWithUTF8String:thread_id.data()],
-            @"timestamp":[NSString stringWithUTF8String:timestamp.data()],
-            @"level":[NSString stringWithUTF8String:level.data()]
-            
-        };
-        
-        [messageList addObject:dictionary];
-    }
-
-    return [messageList copy];
-   
-}
-+(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory{
-   
-    std::vector<std::map<std::string, std::string>> destination;
-    
-    mxlogger::util::mxlogger_util::select_logfiles_dir(directory.UTF8String, &destination);
-    
-    NSMutableArray<NSDictionary<NSString*,NSString*>*>* files = [NSMutableArray arrayWithCapacity:destination.size()];
-    
-    for (int i = 0; i< destination.size(); i++) {
-        std::map<std::string, std::string> map = destination[i];
-        NSString * name = [NSString stringWithUTF8String:map["name"].data()];
-        NSString * size = [NSString stringWithUTF8String:map["size"].data()];
-        NSString * timestamp = [NSString stringWithUTF8String:map["timestamp"].data()];
-        
-        NSDictionary *dictionary = @{@"name":name,@"size":size,@"timestamp":timestamp};
-        
-        [files addObject:dictionary];
-    }
-  
-    
-    return [files copy];
-}
-
-
 
 -(instancetype)initWithNamespace:(NSString *)nameSpace diskCacheDirectory:(NSString *)directory{
     return [self initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:nil fileName:nil];
@@ -141,6 +69,9 @@ static NSString * _defaultDiskCacheDirectory;
 
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace{
     return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil];
+}
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName{
+    return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName];
 }
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName{
     if (self = [super init]) {
@@ -255,9 +186,9 @@ static NSString * _defaultDiskCacheDirectory;
    long size =  _logger -> dir_size();
     return [[NSNumber numberWithLong:size] unsignedIntegerValue];
 }
-- (void)setFileLevel:(NSInteger)fileLevel{
-    _fileLevel = fileLevel;
-    _logger -> set_file_level([NSNumber numberWithInteger:fileLevel].intValue);
+- (void)setLevel:(NSInteger)level{
+    _level = level;
+    _logger -> set_file_level([NSNumber numberWithInteger:level].intValue);
 }
 
 
@@ -325,6 +256,82 @@ static NSString * _defaultDiskCacheDirectory;
         _defaultDiskCacheDirectory = [[self userCacheDirectory] stringByAppendingPathComponent:@"com.mxlog.LoggerCache"];
     }
     return _defaultDiskCacheDirectory;
+}
+
++(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath{
+
+  
+  
+    std::vector<std::map<std::string, std::string>> destination;
+    
+    mxlogger::util::mxlogger_util::select_log_form_path(diskCacheFilePath.UTF8String, &destination);
+    
+    if(destination.size() == 0) return @[];
+    
+    NSMutableArray<NSDictionary*> *messageList = [NSMutableArray arrayWithCapacity:destination.size()];
+    
+    for (int i = (int)(destination.size() - 1); i>=0; i--) {
+        
+        std::map<std::string,std::string> log_map = destination[i];
+        
+       std::string  msg = log_map["msg"];
+        std::string name = log_map["name"];
+        std::string tag = log_map["tag"];
+        std::string is_main_thread = log_map["is_main_thread"];
+        std::string timestamp = log_map["timestamp"];
+        std::string level = log_map["level"];
+        std::string thread_id = log_map["thread_id"];
+
+        
+        NSDictionary * dictionary = @{
+            @"msg":[NSString stringWithUTF8String:msg.data()],
+            @"name":[NSString stringWithUTF8String:name.data()],
+            @"tag":[NSString stringWithUTF8String:tag.data()],
+            @"is_main_thread":[NSString stringWithUTF8String:is_main_thread.data()],
+            @"thread_id":[NSString stringWithUTF8String:thread_id.data()],
+            @"timestamp":[NSString stringWithUTF8String:timestamp.data()],
+            @"level":[NSString stringWithUTF8String:level.data()]
+            
+        };
+        
+        [messageList addObject:dictionary];
+    }
+
+    return [messageList copy];
+   
+}
++(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory{
+   
+    std::vector<std::map<std::string, std::string>> destination;
+    
+    mxlogger::util::mxlogger_util::select_logfiles_dir(directory.UTF8String, &destination);
+    
+    NSMutableArray<NSDictionary<NSString*,NSString*>*>* files = [NSMutableArray arrayWithCapacity:destination.size()];
+    
+    for (int i = 0; i< destination.size(); i++) {
+        std::map<std::string, std::string> map = destination[i];
+        NSString * name = [NSString stringWithUTF8String:map["name"].data()];
+        NSString * size = [NSString stringWithUTF8String:map["size"].data()];
+        NSString * timestamp = [NSString stringWithUTF8String:map["timestamp"].data()];
+        
+        NSDictionary *dictionary = @{@"name":name,@"size":size,@"timestamp":timestamp};
+        
+        [files addObject:dictionary];
+    }
+  
+    
+    return [files copy];
+}
+
++(NSString*)mapKey:(NSString*)nameSpace diskCacheDirectory:(NSString*)directory{
+    
+    if (!directory) {
+        directory = [MXLogger defaultDiskCacheDirectory];
+    }
+    std::string mapKey =  mx_logger::md5(nameSpace.UTF8String, directory.UTF8String);
+    
+    NSString * key =  [NSString stringWithUTF8String:mapKey.data()];
+    return key;
 }
 
 @end

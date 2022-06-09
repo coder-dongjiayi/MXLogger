@@ -18,7 +18,7 @@ namespace sinks {
 class mmap_sink : public base_file_sink{
 public:
     
-    mmap_sink(const std::string &dir_path,policy::storage_policy policy):base_file_sink(dir_path,policy),page_size_(static_cast<size_t>(getpagesize())){};
+    mmap_sink(const std::string &dir_path,policy::storage_policy policy);
     
     ~mmap_sink();
     
@@ -39,7 +39,7 @@ private:
     // 映射内存首地址
     uint8_t* mmap_ptr_ = nullptr;
     
-    bool write_data_(const void* buffer, size_t buffer_size, const std::string &fname);
+    bool write_data_(const void* buffer, size_t buffer_size);
     
     bool truncate_(size_t size);
     

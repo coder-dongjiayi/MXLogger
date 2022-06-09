@@ -15,11 +15,15 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MXLogger : NSObject
 
 
-/// 创建对象爱
+/// 创建对象
 /// @param nameSpace ns  要调用  destroyWithNamespace 进行释放
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace;
 
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
+
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
+
+
 
 /// 释放对象的方法
 /// @param nameSpace ns
@@ -36,6 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///  yyyy_MM_dd              按天存储
 ///  yyyy_ww                     按周存储
 ///  yyyy_MM_dd_HH       按小时存储
+ /// 以上是文件的命名策略
 /// @param fileName fileName
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
 
@@ -50,6 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param directory 目录
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
 
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
 
 /// 程序结束的时候是否清理过期文件 默认YES
 @property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenTerminate;
@@ -78,7 +84,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /// 设置写入文件日志等级
-@property (nonatomic,assign)NSInteger fileLevel;
+@property (nonatomic,assign)NSInteger level;
 
 
 

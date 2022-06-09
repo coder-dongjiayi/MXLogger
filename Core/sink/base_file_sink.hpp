@@ -9,6 +9,7 @@
 #define base_file_sink_hpp
 
 #include <stdio.h>
+
 #include "sink.hpp"
 namespace mxlogger{
 namespace sinks {
@@ -24,11 +25,14 @@ private:
     /// 文件夹路径
     std::string dir_path_;
     
-
+    std::string custom_filename_;
     
     policy::storage_policy policy_;
     
+    void handle_date_(policy::storage_policy policy);
 protected:
+    
+   
     
     /// 日志文件名称
     std::string filename_;
@@ -36,11 +40,9 @@ protected:
     /// 完整的日志路径 dir_path_ + filename_
     std::string log_disk_path_;
     
-    ///file_name 文件名
-    bool open(const std::string &filename);
+    ///打开文件
+    bool open();
     
-    
-    void handle_date(policy::storage_policy policy);
     
     int file_ident = -1;
     
@@ -49,6 +51,10 @@ protected:
     
     /// 文件扩容
     bool ftruncate(size_t capacity_size);
+    
+    bool is_exit_path();
+    
+    void update_filename();
     
     void close();
     
@@ -59,6 +65,8 @@ public:
     long  dir_size() const;
     
     void set_dir(const std::string &dir_path);
+    
+    void set_custom_filename(const std::string &filename);
     
     // 文件最大存储时间 默认为0 不限制
     void set_max_disk_age(long long max_age);

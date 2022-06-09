@@ -166,6 +166,7 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     
     
     mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,policy_(storage_policy));
+    mmap_sink_ -> set_custom_filename(file_name);
     
     is_debug_tracking_ = is_debuging_();
     
