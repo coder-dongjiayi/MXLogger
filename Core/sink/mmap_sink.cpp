@@ -18,6 +18,8 @@ mmap_sink::mmap_sink(const std::string &dir_path,policy::storage_policy policy):
     file_size_ = get_file_size();
     if (file_size_ == 0) {
         truncate_(0);
+    }else{
+        mmap_();
     }
     actual_size_ = get_actual_size_();
 }
@@ -82,13 +84,17 @@ bool mmap_sink::truncate_(size_t size){
     if(size <= 0 || size % page_size_ != 0 || size == file_size_){
         size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
 
+        
         if(ftruncate(capacity_size) == false){
             return false;
         }
         munmap_();
+        
+        file_size_ = capacity_size;
     }
     
-    file_size_ = get_file_size();
+    
+   
     
     return mmap_ptr_ == nullptr ? mmap_() : true;
    
