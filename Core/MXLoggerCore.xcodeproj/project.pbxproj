@@ -16,6 +16,7 @@
 		BD7BA77528096BFD00EDA6AC /* mxlogger.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD7BA72728082EA600EDA6AC /* mxlogger.hpp */; };
 		BDA28454280D778E00C833A3 /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = BDA28453280D778E00C833A3 /* md5.c */; };
 		BDABC1872850A5F600A5FF1C /* base_file_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDABC1852850A5F600A5FF1C /* base_file_sink.cpp */; };
+		BDABC1902851F7BF00A5FF1C /* aes_crypt.c in Sources */ = {isa = PBXBuildFile; fileRef = BDABC18D2851F7BF00A5FF1C /* aes_crypt.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -54,6 +55,8 @@
 		BDA28453280D778E00C833A3 /* md5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = md5.c; sourceTree = "<group>"; };
 		BDABC1852850A5F600A5FF1C /* base_file_sink.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = base_file_sink.cpp; sourceTree = "<group>"; };
 		BDABC1862850A5F600A5FF1C /* base_file_sink.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = base_file_sink.hpp; sourceTree = "<group>"; };
+		BDABC18D2851F7BF00A5FF1C /* aes_crypt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aes_crypt.c; sourceTree = "<group>"; };
+		BDABC18F2851F7BF00A5FF1C /* aes_crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aes_crypt.h; sourceTree = "<group>"; };
 		BDD1CA872823A53F009B94D7 /* mxlogger_file_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_file_util.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,6 +87,7 @@
 		BD406D8E27F19C76002C76D5 = {
 			isa = PBXGroup;
 			children = (
+				BDABC18C2851F7BF00A5FF1C /* aes */,
 				BD4F9F06284DF3150003F77E /* log_serialize.h */,
 				BD4F9EEB284DAEC50003F77E /* flatbuffers */,
 				BD0DDFF82844A0B30090439D /* sink */,
@@ -126,6 +130,15 @@
 				BDA28453280D778E00C833A3 /* md5.c */,
 			);
 			path = md5;
+			sourceTree = "<group>";
+		};
+		BDABC18C2851F7BF00A5FF1C /* aes */ = {
+			isa = PBXGroup;
+			children = (
+				BDABC18D2851F7BF00A5FF1C /* aes_crypt.c */,
+				BDABC18F2851F7BF00A5FF1C /* aes_crypt.h */,
+			);
+			path = aes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -191,6 +204,7 @@
 				BD12BD192826513A00BA6D5B /* mxlogger_util.cpp in Sources */,
 				BD7BA73F28082EA600EDA6AC /* sink.cpp in Sources */,
 				BDABC1872850A5F600A5FF1C /* base_file_sink.cpp in Sources */,
+				BDABC1902851F7BF00A5FF1C /* aes_crypt.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
