@@ -47,6 +47,7 @@ bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){
     if (total >=file_size_) {
         
         truncate_(total);
+       
     }
     
     uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
@@ -124,7 +125,7 @@ bool mmap_sink::mmap_(){
 }
 
 void mmap_sink::flush() {
-    sync_();
+    async_();
 }
 bool mmap_sink::msync_(int flag){
     if (msync(mmap_ptr_, get_file_size(), flag) != 0) {
