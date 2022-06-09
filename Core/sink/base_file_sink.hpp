@@ -54,7 +54,7 @@ protected:
     
 public:
      base_file_sink(const std::string &dir_path,policy::storage_policy policy);
-    
+    ~base_file_sink();
     //当前目录下的文件大小
     long  dir_size() const;
     

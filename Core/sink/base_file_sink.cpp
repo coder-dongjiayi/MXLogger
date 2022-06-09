@@ -20,6 +20,9 @@ base_file_sink::base_file_sink(const std::string &dir_path,policy::storage_polic
     handle_date(policy);
     
 }
+base_file_sink::~base_file_sink(){
+    close();
+}
 
 size_t base_file_sink::get_file_size(){
     return mxlogger::file_size(log_disk_path_.data());

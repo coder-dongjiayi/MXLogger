@@ -12,7 +12,9 @@ static const size_t offset_length = sizeof(uint32_t);
 
 namespace mxlogger{
 namespace sinks{
-
+mmap_sink::~mmap_sink(){
+    munmap_();
+}
 
 void mmap_sink::log(const void* buffer, size_t buffer_size,  level::level_enum level){
    
@@ -79,13 +81,7 @@ bool mmap_sink::truncate_(size_t size){
             return false;
         }
         
-        if(mmap_ptr_ != nullptr){
-            if (munmap(mmap_ptr_, get_file_size()) != 0) {
-                printf("[mxlogger_error]munmap_ error:%s\n",strerror(errno));
-                return false;
-            }
-            mmap_ptr_ = nullptr;
-        }
+        munmap_();
         file_size_ = capacity_size;
     }
  
@@ -93,6 +89,18 @@ bool mmap_sink::truncate_(size_t size){
     return mmap_ptr_ == nullptr ? mmap_() : true;
    
 }
+// 解除映射
+bool mmap_sink::munmap_(){
+    if(mmap_ptr_ != nullptr){
+        if (munmap(mmap_ptr_, get_file_size()) != 0) {
+            printf("[mxlogger_error]munmap_ error:%s\n",strerror(errno));
+            return false;
+        }
+        mmap_ptr_ = nullptr;
+    }
+    return true;
+}
+
 // 建立文件与内存的映射
 bool mmap_sink::mmap_(){
     

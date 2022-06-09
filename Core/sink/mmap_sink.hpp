@@ -20,7 +20,7 @@ public:
     
     mmap_sink(const std::string &dir_path,policy::storage_policy policy):base_file_sink(dir_path,policy),page_size_(static_cast<size_t>(getpagesize())){};
     
-    ~mmap_sink(){};
+    ~mmap_sink();
     
     void log(const void* buffer, size_t buffer_size, level::level_enum level) override;
     void flush() override;
@@ -44,6 +44,7 @@ private:
     bool truncate_(size_t size);
     
     bool mmap_();
+    bool munmap_();
     
     size_t get_actual_size_();
     
