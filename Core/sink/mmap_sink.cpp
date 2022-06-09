@@ -33,10 +33,8 @@ void mmap_sink::log(const void* buffer, size_t buffer_size,  level::level_enum l
         return;
     }
     
-    
     write_data_(buffer, buffer_size);
 
-    
 }
 bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){
     
@@ -93,8 +91,6 @@ bool mmap_sink::truncate_(size_t size){
         file_size_ = capacity_size;
     }
     
-    
-   
     
     return mmap_ptr_ == nullptr ? mmap_() : true;
    

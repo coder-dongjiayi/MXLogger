@@ -96,6 +96,11 @@ static NSString * _defaultDiskCacheDirectory;
                                                  selector:@selector(applicationDidEnterBackground:)
                                                      name:UIApplicationDidEnterBackgroundNotification
                                                    object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(applicationDidEnterrForeground:)
+                                                     name:UIApplicationWillEnterForegroundNotification
+                                                   object:nil];
         _shouldRemoveExpiredDataWhenTerminate = YES;
         _shouldRemoveExpiredDataWhenEnterBackground = YES;
         NSString * queueName = [NSString stringWithFormat:@"com.mxlog.LoggerCache.%@",nameSpace];
@@ -124,6 +129,9 @@ static NSString * _defaultDiskCacheDirectory;
     dispatch_sync(self.ioQueue, ^{
         [self removeExpireData];
     });
+}
+-(void)applicationDidEnterrForeground:(NSNotification *)notification{
+    self->_logger->flush();
 }
 /// 进入后台
 - (void)applicationDidEnterBackground:(NSNotification *)notification {
