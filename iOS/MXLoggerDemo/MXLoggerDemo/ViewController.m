@@ -97,9 +97,7 @@
     for (NSInteger i = 0; i < 100000; i++) {
 
        NSString * message = [NSString stringWithFormat:@"第%ld条数据",(long)i];
-        if(i == 4397){
-            NSLog(@"%@",message);
-        }
+      
         [self->_logger info:@"name" msg:message tag:@"net"];
 
     }

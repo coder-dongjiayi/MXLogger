@@ -30,7 +30,10 @@ bool mmap_sink::write_data_(const void* buffer, size_t buffer_size, const std::s
     
     if (file_ident < 0 || filename_.compare(fname) !=0) {
         open(fname);
-        truncate_(get_file_size());
+        file_size_ = get_file_size();
+        if (file_size_ == 0) {
+            truncate_(0);
+        }
         actual_size_ = get_actual_size_();
     }
     
@@ -38,10 +41,10 @@ bool mmap_sink::write_data_(const void* buffer, size_t buffer_size, const std::s
     
     size_t total = actual_size_ + buffer_size + offset_length;
     
-    /// 2、 如果写入长度大于文件长度 进行扩容
-    if (total >= get_file_size()) {
+    /// 2、 如果写入长度大于文件长度的3/4 则 进行扩容
+    if (total >=file_size_) {
         
-        truncate_(total + 1);
+        truncate_(total);
     }
     
     uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
@@ -74,17 +77,16 @@ size_t mmap_sink::get_actual_size_(){
 }
 bool mmap_sink::truncate_(size_t size){
    
-    if(size <= 0 || size % page_size_ != 0){
+    if(size <= 0 || size % page_size_ != 0 || size == file_size_){
         size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
 
         if(ftruncate(capacity_size) == false){
             return false;
         }
-        
         munmap_();
-    
     }
- 
+    
+    file_size_ = get_file_size();
     
     return mmap_ptr_ == nullptr ? mmap_() : true;
    
@@ -92,7 +94,7 @@ bool mmap_sink::truncate_(size_t size){
 // 解除映射
 bool mmap_sink::munmap_(){
     if(mmap_ptr_ != nullptr){
-        if (munmap(mmap_ptr_, get_file_size()) != 0) {
+        if (munmap(mmap_ptr_, file_size_) != 0) {
             printf("[mxlogger_error]munmap_ error:%s\n",strerror(errno));
             return false;
         }
@@ -104,7 +106,7 @@ bool mmap_sink::munmap_(){
 // 建立文件与内存的映射
 bool mmap_sink::mmap_(){
     
-    mmap_ptr_ =  (uint8_t*)::mmap(NULL, get_file_size(), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_SHARED, file_ident, 0);
+    mmap_ptr_ =  (uint8_t*)::mmap(NULL, file_size_, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_SHARED, file_ident, 0);
     
     if (mmap_ptr_ == MAP_FAILED) {
         mmap_ptr_ = nullptr;
