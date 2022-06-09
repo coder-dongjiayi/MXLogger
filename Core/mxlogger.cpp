@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include "mmap_sink.hpp"
 #include "mxlogger_file_util.hpp"
-
+#include "logger_os.hpp"
 namespace mxlogger{
 
 std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::unordered_map<std::string, mxlogger *>;
@@ -251,7 +251,7 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
 
     
     flatbuffers::FlatBufferBuilder builder_;
-    auto root = Createlog_serializeDirect(builder_,name,tag,msg,level,is_main_thread,mxlogger_helper::time_stamp_milliseconds());
+    auto root = Createlog_serializeDirect(builder_,name,tag,msg,level,(uint32_t)details::logger_os::thread_id(),is_main_thread,mxlogger_helper::time_stamp_milliseconds());
     
         builder_.Finish(root);
     

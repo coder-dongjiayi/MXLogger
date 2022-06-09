@@ -68,18 +68,22 @@
     [result enumerateObjectsUsingBlock:^(NSDictionary*  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSString * msg = obj[@"msg"];
         NSString * tm = obj[@"timestamp"];
-        
-        NSLog(@"%@,%@",tm,msg);
+        NSString * tag = obj[@"tag"];
+        NSString * name = obj[@"name"];
+        NSString * level = obj[@"level"];
+        NSString *  is_main = obj[@"is_main_thread"];
+        NSString * threadId = obj[@"thread_id"];
+        NSLog(@"[%@] tm:%@,msg:%@,tag:%@,level:%@ thread_id=%@ is_main=%@",name,tm,msg,tag,level,threadId,is_main);
     }];
 }
 
 - (IBAction)defaultButttonAction:(id)sender {
     [_logger debug:NULL msg:@"这是debug信息" tag:NULL];
-//    [_logger debug:@"mxlogger" msg:@"这是debug信息" tag:NULL];
-//    [_logger info:@"mxlogger" msg:@"这是info信息" tag:NULL];
-//    [_logger warn:@"mxlogger" msg:@"这是warn信息" tag:NULL];
-//    [_logger error:@"mxlogger" msg:@"这是error信息" tag:NULL];
-//    [_logger fatal:@"mxlogger" msg:@"这是fatal信息" tag:NULL];
+    [_logger debug:@"mxlogger" msg:@"这是debug信息" tag:NULL];
+    [_logger info:@"mxlogger" msg:@"这是info信息" tag:NULL];
+    [_logger warn:@"mxlogger" msg:@"这是warn信息" tag:NULL];
+    [_logger error:@"mxlogger" msg:@"这是error信息" tag:NULL];
+    [_logger fatal:@"mxlogger" msg:@"这是fatal信息" tag:NULL];
    
 }
 - (IBAction)tenThousandButtonAction:(id)sender {

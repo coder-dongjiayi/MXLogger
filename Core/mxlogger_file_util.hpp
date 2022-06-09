@@ -103,6 +103,7 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
         map["timestamp"] = std::to_string(logger->timestamp());
         map["level"] = std::to_string(logger->level());
         map["is_main_thread"] =std::to_string(logger->is_main_thread());
+        map["thread_id"] = std::to_string(logger->thread_id());
         
         vector->push_back(map);
         
