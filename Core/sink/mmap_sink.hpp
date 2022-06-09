@@ -27,8 +27,7 @@ public:
 
 private:
     
-    // 文件大小
-    size_t file_size_ = 0;
+
     
     //一页内存大小
     size_t page_size_ = 0;

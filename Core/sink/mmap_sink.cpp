@@ -39,7 +39,7 @@ bool mmap_sink::write_data_(const void* buffer, size_t buffer_size, const std::s
     size_t total = actual_size_ + buffer_size + offset_length;
     
     /// 2、 如果写入长度大于文件长度 进行扩容
-    if (total >= file_size_) {
+    if (total >= get_file_size()) {
         
         truncate_(total + 1);
     }
@@ -82,7 +82,7 @@ bool mmap_sink::truncate_(size_t size){
         }
         
         munmap_();
-        file_size_ = capacity_size;
+    
     }
  
     
@@ -121,7 +121,7 @@ void mmap_sink::flush() {
     sync_();
 }
 bool mmap_sink::msync_(int flag){
-    if (msync(mmap_ptr_, file_size_, flag) != 0) {
+    if (msync(mmap_ptr_, get_file_size(), flag) != 0) {
         printf("[mxlogger_error]msync_ error:%s\n",strerror(errno));
         return false;
     }
