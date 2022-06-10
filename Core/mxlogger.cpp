@@ -9,7 +9,7 @@
 
 #include <mutex>
 #include <unordered_map>
-#include "mxlogger_helper.hpp"
+
 #ifdef  __APPLE__
 #include <sys/sysctl.h>
 #endif
@@ -17,9 +17,8 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include "mmap_sink.hpp"
-#include "mxlogger_file_util.hpp"
-#include "logger_os.hpp"
-
+#include "mxlogger_helper.hpp"
+#include "log_msg.hpp"
 namespace mxlogger{
 
 std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::unordered_map<std::string, mxlogger *>;
@@ -248,17 +247,18 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
     }
    
 
-    
-    // 1、 flatbuffers 序列化为二进制数据
-    flatbuffers::FlatBufferBuilder builder;
-    
-    auto root = Createlog_serializeDirect(builder,name,tag,msg,level,(uint32_t)details::logger_os::thread_id(),is_main_thread,mxlogger_helper::time_stamp_milliseconds());
-    
-     
-    builder.Finish(root);
 
-    uint8_t* point = builder.GetBufferPointer();
-    uint32_t size = builder.GetSize();
+    
+//    // 1、 flatbuffers 序列化为二进制数据
+//    flatbuffers::FlatBufferBuilder builder;
+//
+//    auto root = Createlog_serializeDirect(builder,name,tag,msg,level,(uint32_t)details::logger_os::thread_id(),is_main_thread,mxlogger_helper::time_stamp_milliseconds());
+//
+//
+//    builder.Finish(root);
+//
+//    uint8_t* point = builder.GetBufferPointer();
+//    uint32_t size = builder.GetSize();
     
     
     //2、AES CFB 128位加密
