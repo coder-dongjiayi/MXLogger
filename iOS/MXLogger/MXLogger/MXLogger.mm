@@ -28,9 +28,15 @@ static NSString * _defaultDiskCacheDirectory;
 
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace{
   
-    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil];
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil cryptKey:nil iv:nil];
 }
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName{
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil cryptKey:cryptKey iv:iv];
+}
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName cryptKey:cryptKey iv:iv];
+}
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
  
     if (global_instanceDic == nil) {
         global_instanceDic = [NSMutableDictionary dictionary];
@@ -38,17 +44,20 @@ static NSString * _defaultDiskCacheDirectory;
   
     NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
     if ([global_instanceDic objectForKey:key] == nil) {
-        MXLogger * logger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:storagePolicy fileName:fileName cryptKey:nil iv:nil];
+        MXLogger * logger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:storagePolicy fileName:fileName cryptKey:cryptKey iv:iv];
         [global_instanceDic setObject:logger forKey:key];
         return logger;
     }
     MXLogger * logger = [global_instanceDic objectForKey:key];
+    
     return logger;
     
 }
+
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName{
-    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName];
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName cryptKey:nil iv:nil];
 }
+
 
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace{
     [self destroyWithNamespace:nameSpace diskCacheDirectory:NULL];
@@ -62,7 +71,10 @@ static NSString * _defaultDiskCacheDirectory;
     }
 }
 
-
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
+    
+    return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil cryptKey:cryptKey iv:iv];
+}
 -(instancetype)initWithNamespace:(NSString *)nameSpace diskCacheDirectory:(NSString *)directory{
     return [self initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:nil fileName:nil cryptKey:nil iv:nil];
 }

@@ -18,7 +18,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    _logger =   [MXLogger initializeWithNamespace:@"default" storagePolicy:@"yyyy_MM_dd_HH" fileName:@"custom"];
+    _logger =   [MXLogger initializeWithNamespace:@"default" storagePolicy:@"yyyy_MM_dd_HH" fileName:@"custom" cryptKey:@"0xabcdf578zzz" iv:@"0x66666777777"];
 
    
     _logger.maxDiskAge = 60; // 一个星期
@@ -96,9 +96,8 @@
     NSLog(@"开始写入日志");
     for (NSInteger i = 0; i < 100000; i++) {
 
-       NSString * message = [NSString stringWithFormat:@"第%ld条数据",(long)i];
       
-        [self->_logger info:@"name" msg:message tag:@"net"];
+        [self->_logger info:@"name" msg:@"第99999条数据" tag:@"net"];
 
     }
     NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];

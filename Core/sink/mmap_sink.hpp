@@ -21,13 +21,17 @@ public:
     mmap_sink(const std::string &dir_path,policy::storage_policy policy);
     
     ~mmap_sink();
+    void log(const details::log_msg& msg) override;
     
-    void log(const void* buffer, size_t buffer_size, level::level_enum level) override;
+    
+    
+    
     void flush() override;
 
 private:
     
-
+ 
+    
     size_t file_size_ = 0;
     
     //一页内存大小

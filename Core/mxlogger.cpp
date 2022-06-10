@@ -164,14 +164,13 @@ void mxlogger::destroy(){
 mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv) : diskcache_path_(diskcache_path),storage_policy_(storage_policy),file_name_(file_name){
     
 
-//    std::pair<uint8_t*, uint8_t*> aes = mxlogger_helper::generate_crypt_key(cryptKey, iv);
-//    if (aes.first != nullptr) {
-//        AES_init_ctx_iv(&aes_ctx, aes.first, aes.second);
-//    }
-  
+
     
     mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,policy_(storage_policy));
+   
     mmap_sink_ -> set_custom_filename(file_name);
+    
+    mmap_sink_ -> init_aescfb(cryptKey, iv);
     
     is_debug_tracking_ = is_debuging_();
     
@@ -247,24 +246,15 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
     }
    
 
+    
+    level::level_enum lvl = level_(level);
+    
+
+    details::log_msg log_msg(lvl,name,tag,msg,is_main_thread);
+    
+    mmap_sink_ -> log(log_msg);
 
     
-//    // 1、 flatbuffers 序列化为二进制数据
-//    flatbuffers::FlatBufferBuilder builder;
-//
-//    auto root = Createlog_serializeDirect(builder,name,tag,msg,level,(uint32_t)details::logger_os::thread_id(),is_main_thread,mxlogger_helper::time_stamp_milliseconds());
-//
-//
-//    builder.Finish(root);
-//
-//    uint8_t* point = builder.GetBufferPointer();
-//    uint32_t size = builder.GetSize();
-    
-    
-    //2、AES CFB 128位加密
-   
-    
-    // mmap_sink_ -> log(builder_.GetBufferPointer(), builder_.GetSize(), level_(level));
 
    
 }

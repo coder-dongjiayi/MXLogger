@@ -22,9 +22,6 @@ namespace mxlogger_helper{
 
 
 inline std::pair<uint8_t*, uint8_t*> generate_crypt_key(const char* crypt_key, const char* iv){
-    if (crypt_key == nullptr) {
-        return std::make_pair(nullptr,nullptr);
-    }
     int key_length = 16;
     
     uint8_t key_ptr[key_length];

@@ -9,10 +9,16 @@
 #include <sys/mman.h>
 #include "log_serialize.h"
 static const size_t offset_length = sizeof(uint32_t);
+struct  AES_ctx aes_ctx;
 
 namespace mxlogger{
 namespace sinks{
 mmap_sink::mmap_sink(const std::string &dir_path,policy::storage_policy policy):base_file_sink(dir_path,policy),page_size_(static_cast<size_t>(getpagesize())){
+    
+//    uint8_t key[] = "mxloggermxlogger";
+//    uint8_t iv[]  = "bbbbbbbbbbbbbbbb";
+//
+//    AES_init_ctx_iv(&aes_ctx,key,iv);
     
     open();
     file_size_ = get_file_size();
@@ -26,16 +32,28 @@ mmap_sink::mmap_sink(const std::string &dir_path,policy::storage_policy policy):
 mmap_sink::~mmap_sink(){
     munmap_();
 }
-
-void mmap_sink::log(const void* buffer, size_t buffer_size,  level::level_enum level){
-   
-    if (should_log(level) == false) {
+void mmap_sink::log(const details::log_msg& msg){
+    if (should_log(msg.level) == false) {
         return;
     }
     
-    write_data_(buffer, buffer_size);
+    flatbuffers::FlatBufferBuilder builder;
+    
+    auto root =  Createlog_serializeDirect(builder,msg.name,msg.tag,msg.msg,msg.level,(int32_t)msg.thread_id,msg.is_main_thread,msg.time_stamp);
+   
+    builder.Finish(root);
+    
+  
+    uint8_t* point = builder.GetBufferPointer();
+    uint32_t size = builder.GetSize();
+     
 
+    write_data_(point, size);
+    
+       
+  
 }
+
 bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){
     
     
@@ -53,6 +71,7 @@ bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){
     ///3.、先写入buffer 长度
     memcpy(write_ptr, &buffer_size, offset_length);
     
+  
     ///4、 再写buffer数据
     memcpy(write_ptr + offset_length, buffer, buffer_size);
     

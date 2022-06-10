@@ -20,16 +20,16 @@ namespace details{
 struct log_msg{
     log_msg() = default;
     ~log_msg() = default;
-    log_msg(level::level_enum level, string name,string tag,string msg,bool is_main_thread);
-    string name;
+    log_msg(level::level_enum level, const char* name,const char* tag,const char* msg,bool is_main_thread);
+    const char* name;
     
-    string tag;
+    const char* tag;
     
     size_t thread_id{0};
     
     bool is_main_thread;
     
-    string msg;
+    const char* msg;
     
     int64_t time_stamp;
     

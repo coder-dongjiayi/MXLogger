@@ -19,9 +19,13 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param nameSpace ns  要调用  destroyWithNamespace 进行释放
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace;
 
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
+
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
+
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
 
 
@@ -31,18 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
 
 
-/// 初始化方法
-/// @param nameSpace nameSpace
-/// @param directory directory
-/// @param storagePolicy
-/// ///  文件存储策略
-///  yyyy_MM                    按月存储
-///  yyyy_MM_dd              按天存储
-///  yyyy_ww                     按周存储
-///  yyyy_MM_dd_HH       按小时存储
- /// 以上是文件的命名策略
-/// @param fileName fileName
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
+
 
 /// 默认路径初始化
 /// @param nameSpace 默认在 Library目录下
@@ -55,7 +48,28 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param directory 目录
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
 
+
+/// 加密初始化
+
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
+
+
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
+
+/// 初始化方法
+/// @param nameSpace nameSpace
+/// @param directory directory
+/// @param storagePolicy
+/// ///  文件存储策略
+///  yyyy_MM                    按月存储
+///  yyyy_MM_dd              按天存储
+///  yyyy_ww                     按周存储
+///  yyyy_MM_dd_HH       按小时存储
+ /// 以上是文件的命名策略
+/// @param fileName fileName
+/// cryptKey 16字节 大于16字节自动裁掉 小于16字节填充0
+/// iv 默认和key一样
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
 /// 程序结束的时候是否清理过期文件 默认YES
 @property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenTerminate;
