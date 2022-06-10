@@ -10,6 +10,7 @@
 #include <string>
 #include <stdio.h>
 #include <mutex>
+
 namespace mxlogger{
 namespace sinks {
 
@@ -20,27 +21,33 @@ class mmap_sink;
 class mxlogger{
 private:
     
-    mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name);
+    mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name, const char* cryptKey, const char* iv);
     ~mxlogger();
     
     
     std::shared_ptr<sinks::mmap_sink> mmap_sink_;
     
     bool enable_;
-    bool console_enable_;
-    bool file_enable_;
+
     bool is_debug_tracking_;
     
     std::mutex logger_mutex;
     
     static std::string get_diskcache_path_(const char* ns,const char* directory);
     
+    std::string diskcache_path_;
+    
+    const char* storage_policy_;
+    
+    const char* file_name_;
+    
+        
 public:
    
 
   
     // 初始化 logger
-    static mxlogger *initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name);
+    static mxlogger *initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv);
     
     /// 释放 logger
     static void delete_namespace(const char* ns,const char* directory);
@@ -88,10 +95,8 @@ public:
     /// @param tag 标记
     /// @param is_main_thread 是否在主线程
     void log(int type, int level,const char* name, const char* msg,const char* tag,bool is_main_thread);
-private:
-    std::string diskcache_path_;
-    const char* storage_policy_;
-    const char* file_name_;
+
+   
   
 };
 

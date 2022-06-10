@@ -42,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///  yyyy_MM_dd_HH       按小时存储
  /// 以上是文件的命名策略
 /// @param fileName fileName
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
 /// 默认路径初始化
 /// @param nameSpace 默认在 Library目录下

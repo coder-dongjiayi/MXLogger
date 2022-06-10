@@ -26,7 +26,6 @@ public:
            
     virtual void log(const void* buffer, size_t buffer_size,  level::level_enum level) = 0;
     
-    
     // 刷新
     virtual void flush() = 0;
     // 设置日志等级

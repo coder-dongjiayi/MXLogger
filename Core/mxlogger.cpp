@@ -19,6 +19,7 @@
 #include "mmap_sink.hpp"
 #include "mxlogger_file_util.hpp"
 #include "logger_os.hpp"
+
 namespace mxlogger{
 
 std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::unordered_map<std::string, mxlogger *>;
@@ -115,7 +116,7 @@ std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     return diskcache_path;
 }
 
-mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name){
+mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv){
     
     std::string diskcache_path = get_diskcache_path_(ns,directory);
     if (diskcache_path.data() == nullptr) {
@@ -130,7 +131,7 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,co
         return logger;
     }
     
-    auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name);
+    auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,cryptKey,iv);
     logger -> map_key = map_key;
     (*global_instanceDic_)[map_key] = logger;
     return logger;
@@ -161,9 +162,14 @@ void mxlogger::destroy(){
     
 }
 
-mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name) : diskcache_path_(diskcache_path),storage_policy_(storage_policy),file_name_(file_name){
+mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv) : diskcache_path_(diskcache_path),storage_policy_(storage_policy),file_name_(file_name){
     
-    
+
+//    std::pair<uint8_t*, uint8_t*> aes = mxlogger_helper::generate_crypt_key(cryptKey, iv);
+//    if (aes.first != nullptr) {
+//        AES_init_ctx_iv(&aes_ctx, aes.first, aes.second);
+//    }
+  
     
     mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,policy_(storage_policy));
     mmap_sink_ -> set_custom_filename(file_name);
@@ -171,10 +177,11 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     is_debug_tracking_ = is_debuging_();
     
     enable_ = true;
-    console_enable_ = is_debug_tracking_;
-    file_enable_ = true;
+  
     
 }
+
+    
 
 mxlogger::~mxlogger(){
     
@@ -242,12 +249,22 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
    
 
     
-    flatbuffers::FlatBufferBuilder builder_;
-    auto root = Createlog_serializeDirect(builder_,name,tag,msg,level,(uint32_t)details::logger_os::thread_id(),is_main_thread,mxlogger_helper::time_stamp_milliseconds());
+    // 1、 flatbuffers 序列化为二进制数据
+    flatbuffers::FlatBufferBuilder builder;
     
-        builder_.Finish(root);
+    auto root = Createlog_serializeDirect(builder,name,tag,msg,level,(uint32_t)details::logger_os::thread_id(),is_main_thread,mxlogger_helper::time_stamp_milliseconds());
     
-    mmap_sink_ -> log(builder_.GetBufferPointer(), builder_.GetSize(), level_(level));
+     
+    builder.Finish(root);
+
+    uint8_t* point = builder.GetBufferPointer();
+    uint32_t size = builder.GetSize();
+    
+    
+    //2、AES CFB 128位加密
+   
+    
+    // mmap_sink_ -> log(builder_.GetBufferPointer(), builder_.GetSize(), level_(level));
 
    
 }

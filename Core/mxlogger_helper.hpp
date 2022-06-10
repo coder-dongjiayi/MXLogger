@@ -21,6 +21,32 @@ extern "C"
 namespace mxlogger_helper{
 
 
+inline std::pair<uint8_t*, uint8_t*> generate_crypt_key(const char* crypt_key, const char* iv){
+    if (crypt_key == nullptr) {
+        return std::make_pair(nullptr,nullptr);
+    }
+    int key_length = 16;
+    
+    uint8_t key_ptr[key_length];
+    uint8_t iv_ptr[key_length];
+    
+    memset(key_ptr, 0, key_length);
+    memset(iv_ptr, 0, key_length);
+    
+    
+    const char* iv_ = iv == nullptr ? crypt_key : iv;
+    
+    for (int i=0; i < key_length; i++) {
+        
+        key_ptr[i] = (uint8_t)crypt_key[i];
+        iv_ptr[i] = (uint8_t)iv_[i];
+    }
+    
+   
+    return std::make_pair((uint8_t*)key_ptr,(uint8_t*)iv_ptr);
+}
+
+
 template <typename T>
 inline std::string mx_md5(const std::basic_string<T> &value) {
  
