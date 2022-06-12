@@ -36,7 +36,7 @@ void sink::init_aescfb(const char* crypt_key,const char* crypt_iv){
 
    
 }
-void sink::encrypt(const void *input, void *output, size_t length){
+void sink::cfb128_encrypt(const void *input, void *output, size_t length){
  
     crypt_.encrypt(input, output, length);
     crypt_.reset_iv(crypt_iv_,strlen(crypt_iv_));

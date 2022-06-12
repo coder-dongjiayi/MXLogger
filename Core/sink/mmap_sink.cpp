@@ -44,7 +44,7 @@ void mmap_sink::log(const details::log_msg& msg){
     
 
     if (should_encrypt()) {
-        encrypt(point, point, size);
+        cfb128_encrypt(point, point, size);
     }
     
     write_data_(point, size);

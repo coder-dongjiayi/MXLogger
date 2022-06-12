@@ -32,7 +32,7 @@ protected:
     
   
     
-    void encrypt(const void *input, void *output, size_t length);
+    void cfb128_encrypt(const void *input, void *output, size_t length);
     
 public:
     virtual ~sink() = default;

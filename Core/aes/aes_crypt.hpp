@@ -13,8 +13,8 @@ namespace openssl {
 struct AES_KEY;
 }
 
-constexpr size_t AES_KEY_LEN = 16;
-constexpr size_t AES_KEY_BITSET_LEN = 128;
+const size_t AES_KEY_LEN = 16;
+const size_t AES_KEY_BITSET_LEN = 128;
 
 namespace mxlogger {
 
@@ -40,7 +40,6 @@ public:
     void decrypt(const void *input, void *output, size_t length);
 
     void reset_iv(const void *iv = nullptr, size_t ivLength = 0);
-
 
 };
 
