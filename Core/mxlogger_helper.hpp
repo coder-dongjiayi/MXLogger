@@ -21,26 +21,30 @@ extern "C"
 namespace mxlogger_helper{
 
 
-inline std::pair<uint8_t*, uint8_t*> generate_crypt_key(const char* crypt_key, const char* iv){
+inline std::pair<char*, char*> generate_crypt_key(const char* crypt_key, const char* iv){
     int key_length = 16;
     
-    uint8_t key_ptr[key_length];
-    uint8_t iv_ptr[key_length];
+    char key_ptr[key_length];
+    
+    size_t iv_length = strlen(iv);
+    iv_length = iv_length > key_length ? key_length :  iv_length;
+    
+    char iv_ptr[iv_length];
     
     memset(key_ptr, 0, key_length);
-    memset(iv_ptr, 0, key_length);
+    memset(iv_ptr, 0, iv_length);
     
     
     const char* iv_ = iv == nullptr ? crypt_key : iv;
     
     for (int i=0; i < key_length; i++) {
         
-        key_ptr[i] = (uint8_t)crypt_key[i];
-        iv_ptr[i] = (uint8_t)iv_[i];
+        key_ptr[i] = crypt_key[i];
+        iv_ptr[i] = iv_[i];
     }
     
    
-    return std::make_pair((uint8_t*)key_ptr,(uint8_t*)iv_ptr);
+    return std::make_pair((char*)key_ptr,(char*)iv_ptr);
 }
 
 

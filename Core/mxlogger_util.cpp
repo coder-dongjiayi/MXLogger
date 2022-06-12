@@ -11,10 +11,10 @@ namespace mxlogger{
 namespace util{
 
 
- void mxlogger_util::select_log_form_path(const char* path,std::vector<std::map<std::string, std::string>> *destination){
+ void mxlogger_util::select_log_form_path(const char* path,std::vector<std::map<std::string, std::string>> *destination,const char* cryptKey, const char* iv){
     
      
-   select_form_path(path, destination);
+   select_form_path(path, destination,cryptKey,iv);
      
 
 

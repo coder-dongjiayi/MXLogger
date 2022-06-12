@@ -18,6 +18,8 @@
 #include <sys/file.h>
 #include <unistd.h>
 #include "log_serialize.h"
+#include "mxlogger_helper.hpp"
+#include "aes/aes_crypt.hpp"
 namespace mxlogger{
 inline size_t file_size(const char* path){
     struct stat statbuf;
@@ -67,36 +69,51 @@ bool create_dir(const std::string &path){
     return true;
 }
 
-inline int  select_form_path(const char* path,std::vector<std::map<std::string, std::string>> *vector){
+inline int  select_form_path(const char* path,std::vector<std::map<std::string, std::string>> *vector,const char* crypt_key, const char* iv){
     
-
+    
    
     if (path_exists(path) == false) {
         printf("文件路径不存在\n");
         return  -1;
     }
-    
+
+
+    aes_crypt  crypt;
+    const char* iv_ = iv;
+    if (crypt_key != nullptr) {
+
+        crypt.set_crypt_key(crypt_key, strlen(crypt_key), (void*)iv_, strlen(iv_));
+    }
+
+
     int fd =  open(path, O_RDWR|O_CLOEXEC|O_CREAT,S_IRWXU);
-    
+
     uint32_t size;
     read(fd, &size, sizeof(uint32_t));
-    
+
     size_t begin = sizeof(uint32_t);
     while (begin <= size) {
-        
+
         uint32_t  item_size;
-        
+
         read(fd, &item_size, sizeof(uint32_t));
-        
+
         uint8_t * buffer = (uint8_t*)malloc(item_size);
-        
+
         read(fd, buffer , item_size);
+
+        if (crypt_key != nullptr) {
+
+            crypt.decrypt(buffer, buffer, item_size);
+
+            crypt.reset_iv(iv_,strlen(iv_));
+        }
         
         auto logger =  Getlog_serialize(buffer);
-
-
+        
         std::map<std::string, std::string> map;
-    
+
         map["msg"] = logger->msg() == nullptr ? "" : logger->msg()->str();
         map["tag"] = logger->tag() == nullptr ? "" : logger->tag()->str();
         map["name"] = logger->name()->c_str();
@@ -104,15 +121,15 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
         map["level"] = std::to_string(logger->level());
         map["is_main_thread"] =std::to_string(logger->is_main_thread());
         map["thread_id"] = std::to_string(logger->thread_id());
-        
+
         vector->push_back(map);
-        
+
         begin = begin + sizeof(uint32_t) + item_size;
-        
+
         free(buffer);
-        
+
     }
-    
+
     close(fd);
     
     return 0;

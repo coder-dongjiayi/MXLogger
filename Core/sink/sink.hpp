@@ -12,23 +12,27 @@
 #include "log_enum.h"
 
 #include "log_msg.hpp"
-extern "C" {
-#include "aes_crypt.h"
-}
+#include "../aes/aes_crypt.hpp"
+
 namespace mxlogger{
 namespace sinks {
 
 class sink{
 private:
+  
+   
+    aes_crypt crypt_;
+    
+    const char* crypt_iv_ = nullptr;
+    const char* crypt_key_ = nullptr;
 
-  
-  
     
 protected:
     std::atomic_int level_{level::debug};
     
-    uint8_t* crypt_key_;
-    uint8_t* crypt_iv_;
+  
+    
+    void encrypt(const void *input, void *output, size_t length);
     
 public:
     virtual ~sink() = default;
@@ -53,6 +57,7 @@ public:
     // 初始化AES
     void init_aescfb(const char* crypt_key,const char* crypt_iv);
     
+
   
 };
 };

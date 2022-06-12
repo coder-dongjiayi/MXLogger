@@ -281,13 +281,13 @@ static NSString * _defaultDiskCacheDirectory;
     return _defaultDiskCacheDirectory;
 }
 
-+(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath{
++(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
 
   
   
     std::vector<std::map<std::string, std::string>> destination;
     
-    mxlogger::util::mxlogger_util::select_log_form_path(diskCacheFilePath.UTF8String, &destination);
+    mxlogger::util::mxlogger_util::select_log_form_path(diskCacheFilePath.UTF8String, &destination,cryptKey.UTF8String,iv.UTF8String);
     
     if(destination.size() == 0) return @[];
     

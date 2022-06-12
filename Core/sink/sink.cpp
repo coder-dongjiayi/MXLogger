@@ -19,7 +19,7 @@ bool sink::should_log(level::level_enum msg_level){
 }
 
 bool sink::should_encrypt(){
-    return true;
+    return crypt_key_ != nullptr;
 }
 level::level_enum  sink::level() const{
     return static_cast<level::level_enum>(level_.load(std::memory_order_relaxed));
@@ -29,12 +29,17 @@ void sink::init_aescfb(const char* crypt_key,const char* crypt_iv){
     if (crypt_key == nullptr) {
         return;
     }
-//    std::pair<uint8_t*, uint8_t*> aes = mxlogger_helper::generate_crypt_key(crypt_key, crypt_iv);
-//
-//    memcpy(crypt_key_, aes.first, 16);
-//
-//    memcpy(crypt_iv_, aes.second, 16);
 
+    crypt_iv_ = crypt_iv;
+    crypt_key_ = crypt_key;
+    crypt_.set_crypt_key(crypt_key, strlen(crypt_key), (void*)crypt_iv, strlen(crypt_iv));
+
+   
+}
+void sink::encrypt(const void *input, void *output, size_t length){
+ 
+    crypt_.encrypt(input, output, length);
+    crypt_.reset_iv(crypt_iv_,strlen(crypt_iv_));
    
 }
 

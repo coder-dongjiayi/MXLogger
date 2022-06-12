@@ -10,6 +10,8 @@
 @interface ViewController ()
 {
    MXLogger * _logger;
+    NSString * _cryptKey;
+    NSString * _iv;
 }
 @end
 
@@ -17,8 +19,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    _cryptKey = @"mxloggermxl";
+    _iv = @"bbbbbbb";
     
-    _logger =   [MXLogger initializeWithNamespace:@"default" storagePolicy:@"yyyy_MM_dd_HH" fileName:@"custom" cryptKey:@"0xabcdf578zzz" iv:@"0x66666777777"];
+    _logger =   [MXLogger initializeWithNamespace:@"default" storagePolicy:@"yyyy_MM_dd_HH" fileName:@"custom" cryptKey:_cryptKey iv:_iv];
 
    
     _logger.maxDiskAge = 60; // 一个星期
@@ -63,7 +67,7 @@
 
     NSString * path = [NSString stringWithFormat:@"%@%@",_logger.diskCachePath,array.firstObject[@"name"]];
 
-   NSArray * result =  [MXLogger selectWithDiskCacheFilePath:path];
+   NSArray * result =  [MXLogger selectWithDiskCacheFilePath:path cryptKey:_cryptKey iv:_iv];
 
     [result enumerateObjectsUsingBlock:^(NSDictionary*  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSString * msg = obj[@"msg"];
@@ -92,19 +96,19 @@
     
     NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
     NSTimeInterval start =[dateStart timeIntervalSince1970];
-  
+
     NSLog(@"开始写入日志");
     for (NSInteger i = 0; i < 100000; i++) {
 
-      
-        [self->_logger info:@"name" msg:@"第99999条数据" tag:@"net"];
+        NSString * message = [NSString stringWithFormat:@"这是第%ld条数据",i];
+        [self->_logger info:@"name" msg:message tag:@"net"];
 
     }
     NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
     NSTimeInterval end =[dateEnd timeIntervalSince1970];
 
     [sender setTitle:[NSString stringWithFormat:@"写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
- 
+
     NSLog(@"时间:%f",end - start);
 
 
