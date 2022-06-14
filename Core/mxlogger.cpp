@@ -124,6 +124,9 @@ void mxlogger::set_enable(bool enable){
 void mxlogger::set_enable_console(bool enable){
     enable_console_ = enable;
 }
+void mxlogger::set_debug(bool enable){
+    is_debug_tracking_ = enable;
+}
 
 // 设置日志文件最大字节数(byte)
 void mxlogger::set_file_max_size(const  long max_size){
