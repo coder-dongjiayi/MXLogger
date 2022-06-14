@@ -83,9 +83,9 @@
 }
 
 - (IBAction)defaultButttonAction:(id)sender {
-    [_logger debug:NULL msg:@"这是debug信息" tag:NULL];
-    [_logger debug:@"mxlogger" msg:@"这是debug信息" tag:NULL];
-    [_logger info:@"mxlogger" msg:@"这是info信息" tag:NULL];
+    [_logger debug:NULL msg:@"这是debug信息" tag:@"net"];
+    [_logger debug:@"mxlogger" msg:@"这是debug信息" tag:@"response"];
+    [_logger info:@"mxlogger" msg:@"这是info信息" tag:@"request"];
     [_logger warn:@"mxlogger" msg:@"这是warn信息" tag:NULL];
     [_logger error:@"mxlogger" msg:@"这是error信息" tag:NULL];
     [_logger fatal:@"mxlogger" msg:@"这是fatal信息" tag:NULL];

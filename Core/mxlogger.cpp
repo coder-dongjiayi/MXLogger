@@ -219,8 +219,9 @@ void mxlogger::log(int level,const char* name, const char* msg,const char* tag,b
     if (enable_console_) {
         
         std::string time = mxlogger_helper::micros_time(log_msg.now_time);
+        std::string log = "[" + std::string{name} + "] " + time + "【"+std::string{level_names[level]} + "】" + (tag != nullptr ? "<" + std::string{tag} + ">" : "") + std::string{msg};
         
-        printf("%s %s [%s] [%s]:%s\n",time.c_str(),name,"INFO",tag,msg);
+        printf("%s\n",log.data());
     }
 
    

@@ -7,6 +7,9 @@
 
 #ifndef log_enum_h
 #define log_enum_h
+
+static const char *level_names[]{"DEBUG","INFO ","WARN ","ERROR","FATAL"};
+
 namespace policy {
 enum storage_policy: int {
     yyyy_MM = 0,
