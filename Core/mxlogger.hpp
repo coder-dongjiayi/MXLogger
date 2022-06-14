@@ -59,12 +59,16 @@ public:
     static void destroy();
     
 
-    
     std::string map_key;
     
-    void set_enable(bool enable);
+    /// 是否开启输出调试信息，默认false
+    void set_debug(bool enable);
     
+    // 是否开启日志
+    void set_enable(bool enable);
+    // 是否开启控制台输出
     void set_enable_console(bool enable);
+    
     // 设置日志文件最大字节数(byte)
     void set_file_max_size(const  long max_size);
     
@@ -80,14 +84,15 @@ public:
     // 缓存日志文件大小(byte)
     long  dir_size();
     
-    
+    // 设置日志存储等级
     void set_file_level(int level);
+    
     
     void flush();
     
+    // 返回日志的磁盘路径
     const char* diskcache_path() const;
     
-    const bool is_debug_tracking();
    
     /// 记录日志
   

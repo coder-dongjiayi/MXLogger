@@ -110,6 +110,11 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
             crypt.reset_iv(iv_,strlen(iv_));
         }
         
+//        flatbuffers::Verifier verifier(buffer,item_size);
+//
+//        bool isBuffer =  Verifylog_serializeBuffer(verifier);
+        
+        
         auto logger =  Getlog_serialize(buffer);
         
         std::map<std::string, std::string> map;

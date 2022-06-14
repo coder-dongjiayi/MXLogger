@@ -9,10 +9,6 @@
 
 #include <mutex>
 #include <unordered_map>
-
-#ifdef  __APPLE__
-#include <sys/sysctl.h>
-#endif
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -25,30 +21,6 @@ std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::uno
 
 
 
-/// 暂时先返回true
-static bool is_debuging_() {
-    return true;
-    
-//#ifdef __ANDROID__
-//
-//   return true;
-//
-//#elif __APPLE__
-//    struct kinfo_proc procInfo;
-//    size_t structSize = sizeof(procInfo);
-//    int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
-//
-//    if(sysctl(mib, sizeof(mib)/sizeof(*mib), &procInfo, &structSize, NULL, 0) != 0)
-//    {
-//        strerror(errno);
-//        return false;
-//    }
-//
-//    return (procInfo.kp_proc.p_flag & P_TRACED) != 0;
-//
-//#endif
-//    return false;
-}
 
 
  std::string mxlogger::md5(const char* ns,const char* directory){
@@ -124,16 +96,11 @@ void mxlogger::destroy(){
 
 mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv) : diskcache_path_(diskcache_path),storage_policy_(storage_policy),file_name_(file_name){
     
-
-
-
     mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,mxlogger_helper::policy_(storage_policy));
    
     mmap_sink_ -> set_custom_filename(file_name);
     
     mmap_sink_ -> init_aescfb(cryptKey, iv);
-    
-    is_debug_tracking_ = is_debuging_();
     
     enable_ = true;
     enable_console_ = false;
@@ -149,9 +116,7 @@ mxlogger::~mxlogger(){
 const char* mxlogger::diskcache_path() const{
     return diskcache_path_.c_str();
 }
-const bool mxlogger::is_debug_tracking(){
-    return is_debug_tracking_;
-}
+
 void mxlogger::set_enable(bool enable){
     
     enable_ = enable;
@@ -200,16 +165,16 @@ void mxlogger::flush(){
 
 
 void mxlogger::log(int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
-    
-    std::lock_guard<std::mutex> lock(logger_mutex);
     if (enable_ == false) {
         return;
     }
+    
+    std::lock_guard<std::mutex> lock(logger_mutex);
+    
     if (name == nullptr || strcmp(name, "") == 0) {
         name = "mxlogger";
     }
    
-    
     level::level_enum lvl = mxlogger_helper::level_(level);
 
     details::log_msg log_msg(lvl,name,tag,msg,is_main_thread);

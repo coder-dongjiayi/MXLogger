@@ -77,9 +77,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// 程序进入后台的时候是否清理过期文件 默认YES
 @property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenEnterBackground;
 
-/// 当前进程是否正在被调试
-@property(nonatomic,assign,readonly)BOOL isDebugTracking;
-
 /// 是否开启控制台打印，默认不开启
 @property (nonatomic,assign)BOOL consoleEnable;
 

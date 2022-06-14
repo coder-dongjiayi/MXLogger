@@ -19,7 +19,7 @@ static NSString * _defaultDiskCacheDirectory;
     
 }
 @property (nonatomic, copy, nonnull, readwrite) NSString *diskCachePath;
-@property(nonatomic,assign,readwrite)BOOL isDebugTracking;
+
 @property (nonatomic, strong, nullable) dispatch_queue_t ioQueue;
 
 @end
@@ -173,10 +173,6 @@ static NSString * _defaultDiskCacheDirectory;
         });
     });
 }
-- (BOOL)isDebugTracking{
-    return _logger -> is_debug_tracking();
-}
-
 
 
 
