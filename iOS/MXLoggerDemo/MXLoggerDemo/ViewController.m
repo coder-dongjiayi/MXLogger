@@ -33,7 +33,7 @@
 
     _logger.shouldRemoveExpiredDataWhenTerminate = YES;
 
-//    _logger.consoleEnable = YES;
+    _logger.consoleEnable = YES;
     
     _logger.level = 0;
 

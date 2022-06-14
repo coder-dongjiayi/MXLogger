@@ -32,8 +32,8 @@ struct log_msg{
     const char* msg;
     
     int64_t time_stamp;
-    
-    std::string time_str;
+ 
+    std::chrono::system_clock::time_point now_time;
     
     level::level_enum level{level::debug};
 

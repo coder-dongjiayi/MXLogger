@@ -216,9 +216,12 @@ void mxlogger::log(int level,const char* name, const char* msg,const char* tag,b
     
     mmap_sink_ -> log(log_msg);
    
-//    if (enable_console_) {
-//        printf("%s %s [%s] [%s]:%s\n",log_msg.time_str.c_str(),name,"INFO",tag,msg);
-//    }
+    if (enable_console_) {
+        
+        std::string time = mxlogger_helper::micros_time(log_msg.now_time);
+        
+        printf("%s %s [%s] [%s]:%s\n",time.c_str(),name,"INFO",tag,msg);
+    }
 
    
 }
