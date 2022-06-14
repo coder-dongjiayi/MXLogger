@@ -24,8 +24,9 @@ private:
     aes_crypt crypt_;
     
     const char* crypt_iv_ = nullptr;
-    const char* crypt_key_ = nullptr;
 
+    bool is_aes = false;
+    
     
 protected:
     std::atomic_int level_{level::debug};

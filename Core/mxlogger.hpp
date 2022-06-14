@@ -28,7 +28,8 @@ private:
     std::shared_ptr<sinks::mmap_sink> mmap_sink_;
     
     bool enable_;
-
+    bool enable_console_;
+    
     bool is_debug_tracking_;
     
     std::mutex logger_mutex;
@@ -63,6 +64,7 @@ public:
     
     void set_enable(bool enable);
     
+    void set_enable_console(bool enable);
     // 设置日志文件最大字节数(byte)
     void set_file_max_size(const  long max_size);
     
@@ -88,13 +90,13 @@ public:
     const bool is_debug_tracking();
    
     /// 记录日志
-    /// @param type 1 输出到控制台 2 写入文件 0 先输出到控制台再写入文件
+  
     /// @param level 0 debug 1 info 2warn 3 error 4 fatal
     /// @param name 默认值  mxlogger
     /// @param msg 日志信息
     /// @param tag 标记
     /// @param is_main_thread 是否在主线程
-    void log(int type, int level,const char* name, const char* msg,const char* tag,bool is_main_thread);
+    void log(int level,const char* name, const char* msg,const char* tag,bool is_main_thread);
 
    
   

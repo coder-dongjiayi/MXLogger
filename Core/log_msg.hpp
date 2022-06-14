@@ -33,6 +33,8 @@ struct log_msg{
     
     int64_t time_stamp;
     
+    std::string time_str;
+    
     level::level_enum level{level::debug};
 
 };

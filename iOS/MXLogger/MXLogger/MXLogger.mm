@@ -184,6 +184,10 @@ static NSString * _defaultDiskCacheDirectory;
     _enable = enable;
     _logger -> set_enable(enable);
 }
+-(void)setConsoleEnable:(BOOL)consoleEnable{
+    _consoleEnable = consoleEnable;
+    _logger -> set_enable_console(consoleEnable);
+}
 
 -(void)setMaxDiskAge:(NSUInteger)maxDiskAge{
     _maxDiskAge = maxDiskAge;
@@ -236,20 +240,19 @@ static NSString * _defaultDiskCacheDirectory;
 }
 
 -(void)log:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
-    [self innerLogWithType:0 level:level name:name msg:msg tag:tag];
+    [self innerLogWithLevel:level name:name msg:msg tag:tag];
 }
 
--(void)innerLogWithType:(NSInteger) type level:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
+-(void)innerLogWithLevel:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
     BOOL isMainThread = [NSThread isMainThread];
   
-    int type_ = [NSNumber numberWithInteger:type].intValue;
     int level_ = [NSNumber numberWithInteger:level].intValue;
    
     const char* name_ = [self isNull:name] == YES ? nullptr : name.UTF8String;
     const char* tag_ = [self isNull:tag] == YES ? nullptr : tag.UTF8String;
     const char* msg_ = [self isNull:msg] == YES ? nullptr : msg.UTF8String;
     
-    _logger -> log(type_, level_,name_, msg_, tag_, isMainThread);
+    _logger -> log(level_,name_, msg_, tag_, isMainThread);
 }
 
 -(BOOL)isNull:(NSString*) object{

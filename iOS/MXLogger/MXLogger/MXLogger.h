@@ -80,6 +80,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// 当前进程是否正在被调试
 @property(nonatomic,assign,readonly)BOOL isDebugTracking;
 
+/// 是否开启控制台打印，默认不开启
+@property (nonatomic,assign)BOOL consoleEnable;
+
 /// 禁用日志
 @property (nonatomic,assign)BOOL enable;
 
@@ -96,10 +99,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,assign,readonly)NSUInteger logSize;
 
 
-
 /// 设置写入文件日志等级
 @property (nonatomic,assign)NSInteger level;
-
 
 
 

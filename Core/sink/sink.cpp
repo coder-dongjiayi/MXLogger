@@ -19,7 +19,7 @@ bool sink::should_log(level::level_enum msg_level){
 }
 
 bool sink::should_encrypt(){
-    return crypt_key_ != nullptr;
+    return is_aes;
 }
 level::level_enum  sink::level() const{
     return static_cast<level::level_enum>(level_.load(std::memory_order_relaxed));
@@ -31,7 +31,7 @@ void sink::init_aescfb(const char* crypt_key,const char* crypt_iv){
     }
 
     crypt_iv_ = crypt_iv;
-    crypt_key_ = crypt_key;
+    is_aes = true;
     crypt_.set_crypt_key(crypt_key, strlen(crypt_key), (void*)crypt_iv, strlen(crypt_iv));
 
    
@@ -39,7 +39,8 @@ void sink::init_aescfb(const char* crypt_key,const char* crypt_iv){
 void sink::cfb128_encrypt(const void *input, void *output, size_t length){
  
     crypt_.encrypt(input, output, length);
-    crypt_.reset_iv(crypt_iv_,strlen(crypt_iv_));
+    
+    crypt_.reset_iv(crypt_iv_,crypt_iv_ == nullptr ? 0: strlen(crypt_iv_));
    
 }
 

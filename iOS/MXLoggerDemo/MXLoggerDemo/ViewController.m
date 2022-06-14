@@ -33,7 +33,8 @@
 
     _logger.shouldRemoveExpiredDataWhenTerminate = YES;
 
-
+//    _logger.consoleEnable = YES;
+    
     _logger.level = 0;
 
     NSLog(@"目录:%@",_logger.diskCachePath);
@@ -93,7 +94,7 @@
 - (IBAction)tenThousandButtonAction:(id)sender {
 
   
-    
+   
     NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
     NSTimeInterval start =[dateStart timeIntervalSince1970];
 
@@ -101,6 +102,7 @@
     for (NSInteger i = 0; i < 100000; i++) {
 
         NSString * message = [NSString stringWithFormat:@"这是第%ld条数据",i];
+    
         [self->_logger info:@"name" msg:message tag:@"net"];
 
     }

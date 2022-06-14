@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+#include "log_enum.h"
 extern "C"
    {
 #include "md5/md5.h"
@@ -21,31 +22,47 @@ extern "C"
 namespace mxlogger_helper{
 
 
-inline std::pair<char*, char*> generate_crypt_key(const char* crypt_key, const char* iv){
-    int key_length = 16;
-    
-    char key_ptr[key_length];
-    
-    size_t iv_length = strlen(iv);
-    iv_length = iv_length > key_length ? key_length :  iv_length;
-    
-    char iv_ptr[iv_length];
-    
-    memset(key_ptr, 0, key_length);
-    memset(iv_ptr, 0, iv_length);
-    
-    
-    const char* iv_ = iv == nullptr ? crypt_key : iv;
-    
-    for (int i=0; i < key_length; i++) {
-        
-        key_ptr[i] = crypt_key[i];
-        iv_ptr[i] = iv_[i];
+
+inline level::level_enum level_(int lvl){
+  
+    switch (lvl) {
+        case 0:
+            return level::level_enum::debug;
+        case 1:
+            return level::level_enum::info;
+        case 2:
+            return level::level_enum::warn;
+        case 3:
+            return level::level_enum::error;
+        case 4:
+            return level::level_enum::fatal;
+            
+        default:
+            return level::level_enum::debug;
     }
     
-   
-    return std::make_pair((char*)key_ptr,(char*)iv_ptr);
 }
+inline policy::storage_policy policy_(const char* storage_policy){
+    
+    if (storage_policy == nullptr) {
+        return policy::storage_policy::yyyy_MM_dd;
+    }
+    if (strcmp(storage_policy, "yyyy_MM") == 0) {
+        return policy::storage_policy::yyyy_MM;
+    }
+    if (strcmp(storage_policy, "yyyy_MM_dd") == 0) {
+        return policy::storage_policy::yyyy_MM_dd;
+    }
+    if (strcmp(storage_policy, "yyyy_ww") == 0) {
+        return policy::storage_policy::yyyy_ww;
+    }
+    if (strcmp(storage_policy, "yyyy_MM_dd_HH") == 0) {
+        return policy::storage_policy::yyyy_MM_dd_HH;;
+    }
+    return policy::storage_policy::yyyy_MM_dd;
+}
+
+
 
 
 template <typename T>
@@ -99,13 +116,24 @@ inline ToDuration time_fraction(std::chrono::system_clock::time_point tp)
 }
 
 
-inline int64_t time_stamp_milliseconds()
+inline int64_t time_stamp_milliseconds(std::chrono::system_clock::time_point time)
 {
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp = std::chrono::time_point_cast<std::chrono::milliseconds>(time);
     auto tmp = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
     return tmp.count();
     
    
+}
+
+inline std::string micros_time(std::chrono::system_clock::time_point time){
+    std::tm tm_time = mxlogger_helper::localtime(std::chrono::system_clock::to_time_t(time));
+        
+    auto micro = mxlogger_helper::time_fraction<std::chrono::microseconds>(time);
+
+    using std::chrono:: milliseconds;
+    std::string time_str =  mxlogger_helper::string_format("%02d:%02d:%02d.%06d", tm_time.tm_hour,tm_time.tm_min,tm_time.tm_sec,micro);
+    return time_str;
 }
 
 inline std::string micros_datetime(std::chrono::system_clock::time_point time){

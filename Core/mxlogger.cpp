@@ -24,45 +24,6 @@ namespace mxlogger{
 std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::unordered_map<std::string, mxlogger *>;
 
 
-static level::level_enum level_(int lvl){
-  
-    switch (lvl) {
-        case 0:
-            return level::level_enum::debug;
-        case 1:
-            return level::level_enum::info;
-        case 2:
-            return level::level_enum::warn;
-        case 3:
-            return level::level_enum::error;
-        case 4:
-            return level::level_enum::fatal;
-            
-        default:
-            return level::level_enum::debug;
-    }
-    
-}
-static policy::storage_policy policy_(const char* storage_policy){
-    
-    if (storage_policy == nullptr) {
-        return policy::storage_policy::yyyy_MM_dd;
-    }
-    if (strcmp(storage_policy, "yyyy_MM") == 0) {
-        return policy::storage_policy::yyyy_MM;
-    }
-    if (strcmp(storage_policy, "yyyy_MM_dd") == 0) {
-        return policy::storage_policy::yyyy_MM_dd;
-    }
-    if (strcmp(storage_policy, "yyyy_ww") == 0) {
-        return policy::storage_policy::yyyy_ww;
-    }
-    if (strcmp(storage_policy, "yyyy_MM_dd_HH") == 0) {
-        return policy::storage_policy::yyyy_MM_dd_HH;;
-    }
-    return policy::storage_policy::yyyy_MM_dd;
-}
-
 
 /// 暂时先返回true
 static bool is_debuging_() {
@@ -165,8 +126,8 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     
 
 
-    
-    mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,policy_(storage_policy));
+
+    mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,mxlogger_helper::policy_(storage_policy));
    
     mmap_sink_ -> set_custom_filename(file_name);
     
@@ -175,7 +136,7 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     is_debug_tracking_ = is_debuging_();
     
     enable_ = true;
-  
+    enable_console_ = false;
     
 }
 
@@ -195,7 +156,9 @@ void mxlogger::set_enable(bool enable){
     
     enable_ = enable;
 }
-
+void mxlogger::set_enable_console(bool enable){
+    enable_console_ = enable;
+}
 
 // 设置日志文件最大字节数(byte)
 void mxlogger::set_file_max_size(const  long max_size){
@@ -227,7 +190,7 @@ long  mxlogger::dir_size(){
 
 
 void mxlogger::set_file_level(int level){
-    mmap_sink_ -> set_level(level_(level));
+    mmap_sink_ -> set_level(mxlogger_helper::level_(level));
 }
 
 void mxlogger::flush(){
@@ -235,7 +198,8 @@ void mxlogger::flush(){
     mmap_sink_ -> flush();
 }
 
-void mxlogger::log(int type, int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
+
+void mxlogger::log(int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
     
     std::lock_guard<std::mutex> lock(logger_mutex);
     if (enable_ == false) {
@@ -245,16 +209,16 @@ void mxlogger::log(int type, int level,const char* name, const char* msg,const c
         name = "mxlogger";
     }
    
-
     
-    level::level_enum lvl = level_(level);
-    
+    level::level_enum lvl = mxlogger_helper::level_(level);
 
     details::log_msg log_msg(lvl,name,tag,msg,is_main_thread);
     
     mmap_sink_ -> log(log_msg);
-
-    
+   
+//    if (enable_console_) {
+//        printf("%s %s [%s] [%s]:%s\n",log_msg.time_str.c_str(),name,"INFO",tag,msg);
+//    }
 
    
 }
