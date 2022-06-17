@@ -8,7 +8,7 @@
 #include "mmap_sink.hpp"
 #include <sys/mman.h>
 #include "log_serialize.h"
-#include "../debug_log.hpp"
+
 
 static const size_t offset_length = sizeof(uint32_t);
 

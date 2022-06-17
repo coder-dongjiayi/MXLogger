@@ -13,7 +13,7 @@
 
 #include "log_msg.hpp"
 #include "../aes/aes_crypt.hpp"
-
+#include "../debug_log.hpp"
 namespace mxlogger{
 namespace sinks {
 

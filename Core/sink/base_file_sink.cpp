@@ -15,7 +15,7 @@ namespace sinks{
 base_file_sink::base_file_sink(const std::string &dir_path,policy::storage_policy policy):dir_path_(dir_path),policy_(policy){
     
     if (mxlogger::create_dir(dir_path) == false) {
-        printf("[mxlogger_error]base_file_sink error:%s\n",strerror(errno));
+        MXLoggerError("base_file_sink error:%s\n",strerror(errno));
     }
     custom_filename_ = "mxlog";
     handle_date_(policy);
@@ -35,7 +35,7 @@ void base_file_sink::close(){
 bool base_file_sink::ftruncate(size_t capacity_size){
     
     if (::ftruncate(file_ident, static_cast<off_t>(capacity_size)) != 0) {
-        printf("[mxlogger_error]truncate_ error:%s\n",strerror(errno));
+        MXLoggerError("truncate_ error:%s\n",strerror(errno));
     
         return  false;
     }
@@ -64,7 +64,7 @@ bool base_file_sink::open(){
 
     file_ident =  ::open(log_disk_path_.c_str(), O_RDWR|O_CLOEXEC|O_CREAT,S_IRWXU);
     if (file_ident < 0) {
-        printf("[mxlogger_error]ope_file_ error:%s\n",strerror(errno));
+        MXLoggerError("ope_file_ error:%s\n",strerror(errno));
        
         return  false;
     }
@@ -147,7 +147,8 @@ void base_file_sink::remove_expire_data(){
              
              sprintf(delete_path, "%s%s", dir_path_.c_str(), name.c_str());
              if (remove(delete_path) != 0) {
-                 printf("删除文件失败");
+                 
+                 MXLoggerInfo("删除文件失败");
              }
              
          }
