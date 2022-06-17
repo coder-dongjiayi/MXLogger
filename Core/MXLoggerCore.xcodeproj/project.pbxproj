@@ -22,6 +22,7 @@
 		BDE79FA72855DF7A00204C02 /* openssl_aes_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD228FE22855DAC100794145 /* openssl_aes_core.cpp */; };
 		BDE79FA82855DF7A00204C02 /* openssl_aesv8-armx.S in Sources */ = {isa = PBXBuildFile; fileRef = BD228FE42855DAC100794145 /* openssl_aesv8-armx.S */; };
 		BDE79FA92855DF7A00204C02 /* openssl_aes-armv4.S in Sources */ = {isa = PBXBuildFile; fileRef = BD228FE72855DAC100794145 /* openssl_aes-armv4.S */; };
+		BDE7A7B8285C857400B135FB /* debug_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDE7A7B6285C857300B135FB /* debug_log.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -72,6 +73,8 @@
 		BDABC1952852F52600A5FF1C /* log_msg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log_msg.cpp; sourceTree = "<group>"; };
 		BDABC1962852F52600A5FF1C /* log_msg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = log_msg.hpp; sourceTree = "<group>"; };
 		BDD1CA872823A53F009B94D7 /* mxlogger_file_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_file_util.hpp; sourceTree = "<group>"; };
+		BDE7A7B6285C857300B135FB /* debug_log.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = debug_log.cpp; sourceTree = "<group>"; };
+		BDE7A7B7285C857300B135FB /* debug_log.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug_log.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +118,8 @@
 		BD406D8E27F19C76002C76D5 = {
 			isa = PBXGroup;
 			children = (
+				BDE7A7B6285C857300B135FB /* debug_log.cpp */,
+				BDE7A7B7285C857300B135FB /* debug_log.hpp */,
 				BDABC1952852F52600A5FF1C /* log_msg.cpp */,
 				BDABC1962852F52600A5FF1C /* log_msg.hpp */,
 				BDABC18C2851F7BF00A5FF1C /* aes */,
@@ -228,6 +233,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BDE7A7B8285C857400B135FB /* debug_log.cpp in Sources */,
 				BDE79FA62855DF7A00204C02 /* openssl_cfb128.cpp in Sources */,
 				BDE79FA72855DF7A00204C02 /* openssl_aes_core.cpp in Sources */,
 				BDE79FA82855DF7A00204C02 /* openssl_aesv8-armx.S in Sources */,

@@ -184,6 +184,10 @@ static NSString * _defaultDiskCacheDirectory;
     _consoleEnable = consoleEnable;
     _logger -> set_enable_console(consoleEnable);
 }
+- (void)setDebug:(BOOL)debug{
+    _debug = debug;
+    _logger -> set_debug(debug);
+}
 
 -(void)setMaxDiskAge:(NSUInteger)maxDiskAge{
     _maxDiskAge = maxDiskAge;

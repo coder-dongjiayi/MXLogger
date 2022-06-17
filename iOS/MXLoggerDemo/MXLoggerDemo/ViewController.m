@@ -24,7 +24,8 @@
     
     _logger =   [MXLogger initializeWithNamespace:@"default" storagePolicy:@"yyyy_MM_dd_HH" fileName:@"custom" cryptKey:_cryptKey iv:_iv];
 
-   
+    _logger.debug = YES;
+    
     _logger.maxDiskAge = 60; // 一个星期
     _logger.maxDiskSize = 1024 * 1024 * 10; // 10M
     

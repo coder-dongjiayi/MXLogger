@@ -15,12 +15,10 @@
 #include "mmap_sink.hpp"
 #include "mxlogger_helper.hpp"
 #include "log_msg.hpp"
+#include "debug_log.hpp"
 namespace mxlogger{
 
 std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::unordered_map<std::string, mxlogger *>;
-
-
-
 
 
  std::string mxlogger::md5(const char* ns,const char* directory){
@@ -49,7 +47,7 @@ std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
 }
 
 mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv){
-    
+
     std::string diskcache_path = get_diskcache_path_(ns,directory);
     if (diskcache_path.data() == nullptr) {
         return nullptr;
@@ -70,6 +68,7 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,co
 }
 
 void mxlogger::delete_namespace(const char* ns,const char* directory){
+ 
     std::string diskcache_path = get_diskcache_path_(ns,directory);
     if (diskcache_path.data() == nullptr) {
         return;
@@ -104,7 +103,7 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     
     enable_ = true;
     enable_console_ = false;
-    
+
 }
 
     
@@ -125,7 +124,8 @@ void mxlogger::set_enable_console(bool enable){
     enable_console_ = enable;
 }
 void mxlogger::set_debug(bool enable){
-    is_debug_tracking_ = enable;
+    _debug_tracking = enable;
+
 }
 
 // 设置日志文件最大字节数(byte)

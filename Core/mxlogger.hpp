@@ -30,7 +30,6 @@ private:
     bool enable_;
     bool enable_console_;
     
-    bool is_debug_tracking_;
     
     std::mutex logger_mutex;
     

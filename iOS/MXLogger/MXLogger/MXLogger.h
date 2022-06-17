@@ -83,6 +83,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// 禁用日志
 @property (nonatomic,assign)BOOL enable;
 
+/// 是否开启调试日志
+@property (nonatomic,assign)BOOL debug;
+
 /// 日志文件磁盘缓存目录
 @property (nonatomic, copy, nonnull, readonly) NSString *diskCachePath;
 

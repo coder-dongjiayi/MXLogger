@@ -8,6 +8,8 @@
 #include "mmap_sink.hpp"
 #include <sys/mman.h>
 #include "log_serialize.h"
+#include "../debug_log.hpp"
+
 static const size_t offset_length = sizeof(uint32_t);
 
 
@@ -116,7 +118,9 @@ bool mmap_sink::truncate_(size_t size){
 bool mmap_sink::munmap_(){
     if(mmap_ptr_ != nullptr){
         if (munmap(mmap_ptr_, file_size_) != 0) {
-            printf("[mxlogger_error]munmap_ error:%s\n",strerror(errno));
+        
+            MXLoggerError("munmap_ error:%s",strerror(errno));
+                          
             return false;
         }
         mmap_ptr_ = nullptr;
@@ -131,7 +135,8 @@ bool mmap_sink::mmap_(){
     
     if (mmap_ptr_ == MAP_FAILED) {
         mmap_ptr_ = nullptr;
-        printf("[mxlogger_error]start_mmap error:%s\n",strerror(errno));
+       
+        MXLoggerError("[mxlogger_error]start_mmap error:%s\n",strerror(errno));
         close();
         
         return  false;
@@ -145,7 +150,8 @@ void mmap_sink::flush() {
 }
 bool mmap_sink::msync_(int flag){
     if (msync(mmap_ptr_, get_file_size(), flag) != 0) {
-        printf("[mxlogger_error]msync_ error:%s\n",strerror(errno));
+        
+        MXLoggerError("[mxlogger_error]msync_ error:%s\n",strerror(errno));
         return false;
     }
     return true;
