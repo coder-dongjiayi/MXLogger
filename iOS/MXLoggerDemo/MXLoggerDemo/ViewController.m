@@ -26,7 +26,7 @@
 
     _logger.debug = YES;
     
-    _logger.maxDiskAge = 60; // 一个星期
+    _logger.maxDiskAge = 60*60*24*7; // 一个星期
     _logger.maxDiskSize = 1024 * 1024 * 10; // 10M
     
 

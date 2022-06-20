@@ -29,6 +29,7 @@ mmap_sink::mmap_sink(const std::string &dir_path,policy::storage_policy policy):
 }
 mmap_sink::~mmap_sink(){
     munmap_();
+    MXLoggerInfo("mmap_sink delloc");
 }
 void mmap_sink::log(const details::log_msg& msg){
     if (should_log(msg.level) == false) {

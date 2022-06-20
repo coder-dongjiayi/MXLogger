@@ -77,7 +77,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// 程序进入后台的时候是否清理过期文件 默认YES
 @property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenEnterBackground;
 
-/// 是否开启控制台打印，默认不开启
+/// 是否开启控制台打印，默认不开启, 开始控制台打印会影响 写入效率 ，建议发布模式禁用 consoleEnable
 @property (nonatomic,assign)BOOL consoleEnable;
 
 /// 禁用日志

@@ -64,6 +64,8 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,co
     auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,cryptKey,iv);
     logger -> map_key = map_key;
     (*global_instanceDic_)[map_key] = logger;
+    MXLoggerInfo("map_key:%s storage_policy:%s file_name:%s cryptKey:%s iv:%s",map_key.c_str(),storage_policy,file_name,cryptKey,iv);
+    
     return logger;
 }
 
@@ -103,13 +105,14 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     
     enable_ = true;
     enable_console_ = false;
+  
 
 }
 
     
 
 mxlogger::~mxlogger(){
-    
+    MXLoggerInfo("mxlogger delloc map_key:%s",map_key.c_str());
 }
 
 const char* mxlogger::diskcache_path() const{
@@ -131,17 +134,21 @@ void mxlogger::set_debug(bool enable){
 // 设置日志文件最大字节数(byte)
 void mxlogger::set_file_max_size(const  long max_size){
     mmap_sink_ -> set_max_disk_size(max_size);
+   
+    
 }
 
 // 设置日志文件最大存储时长(s)
 void mxlogger::set_file_max_age(const  long max_age){
     mmap_sink_ -> set_max_disk_age(max_age);
+  
 }
 
 // 清理过期文件
 void mxlogger::remove_expire_data(){
     std::lock_guard<std::mutex> lock(logger_mutex);
     mmap_sink_ -> remove_expire_data();
+   
 }
 
 //删除所有日志文件

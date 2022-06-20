@@ -23,6 +23,7 @@ base_file_sink::base_file_sink(const std::string &dir_path,policy::storage_polic
 }
 base_file_sink::~base_file_sink(){
     close();
+    MXLoggerInfo("base_file_sink delloc");
 }
 
 size_t base_file_sink::get_file_size(){
@@ -76,11 +77,13 @@ bool base_file_sink::open(){
 // 文件最大存储时间 默认为0 不限制
 void base_file_sink::set_max_disk_age(long long max_age){
     max_disk_age_ = max_age;
+    MXLoggerInfo("max_age:%llds",max_age);
 }
 
 // 文件最大存储大小 默认为0 不限制
 void base_file_sink::set_max_disk_size(long long max_size){
     max_disk_size_ = max_size;
+    MXLoggerInfo("max_size:%lld byte",max_size);
 }
 void base_file_sink::set_dir(const std::string &dir_path){
     dir_path_ = dir_path;
@@ -107,6 +110,7 @@ long  base_file_sink::dir_size() const{
 // 删除过期文件
 void base_file_sink::remove_expire_data(){
     
+    MXLoggerInfo("start delete expire data...");
      long   current_cache_size=0;
    
      std::vector<std::string> delete_urls;
@@ -146,9 +150,10 @@ void base_file_sink::remove_expire_data(){
              std::string name = delete_urls[i];
              
              sprintf(delete_path, "%s%s", dir_path_.c_str(), name.c_str());
+             MXLoggerInfo("expire file name:%s",name.c_str());
              if (remove(delete_path) != 0) {
                  
-                 MXLoggerInfo("删除文件失败");
+                 MXLoggerInfo("delete delete_path field!!!",name.c_str());
              }
              
          }
@@ -164,16 +169,18 @@ void base_file_sink::remove_expire_data(){
              char delete_path[256];
              
              sprintf(delete_path, "%s%s", dir_path_.c_str(), file_name.c_str());
+            
+             
              if (remove(delete_path) == 0) {
                  current_cache_size = current_cache_size - file_size;
-            
+                 MXLoggerInfo("over limit size file :%s",file_name.c_str());
                  if (max_disk_size_ >= current_cache_size) {
                      break;
                  }
              }
          }
      }
-     
+    MXLoggerInfo("end delete expire data...");
     
 }
 void base_file_sink::set_custom_filename(const std::string &filename){
@@ -194,6 +201,7 @@ void base_file_sink::remove_all(){
         sprintf(subdir, "%s%s", dir_path_.c_str(), file_name.c_str());
         remove(subdir);
     }
+    MXLoggerInfo("delete all log files");
 }
 
 void base_file_sink::handle_date_(policy::storage_policy policy){
@@ -249,6 +257,7 @@ void base_file_sink::handle_date_(policy::storage_policy policy){
             break;
     }
     filename_ = filename_ + ".log";
+    
     
 }
 }
