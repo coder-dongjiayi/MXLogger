@@ -6,7 +6,7 @@
 #include <cstring>
 #include <ctime>
 #include <stdio.h>
-
+#include "../debug_log.hpp"
 using namespace openssl;
 
 namespace mxlogger {
@@ -29,7 +29,8 @@ void aes_crypt::set_crypt_key(const void *key, size_t keyLength,  void *iv , siz
         memset(m_aesKey, 0, sizeof(AES_KEY));
         int ret = AES_set_encrypt_key(m_key, AES_KEY_BITSET_LEN, m_aesKey);
         if (ret != 0) {
-            printf("[mxlogger_error]AES_set_encrypt_key error :%d\n",ret);
+            MXLoggerError("AES_set_encrypt_key error :%d",ret);
+           
         }
       
     }

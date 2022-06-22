@@ -9,7 +9,7 @@
 #define debug_log_hpp
 
 #include <stdio.h>
-static bool _debug_tracking = false;
+
 extern  void _debug_log(int level,const char *filename, const char *func, int line, const char *format, ...);
 
 #   define MXLoggerError(format, ...)                                                                                     \

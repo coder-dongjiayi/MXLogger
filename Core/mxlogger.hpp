@@ -60,9 +60,7 @@ public:
 
     std::string map_key;
     
-    /// 是否开启输出调试信息，默认false
-    void set_debug(bool enable);
-    
+
     // 是否开启日志
     void set_enable(bool enable);
     // 是否开启控制台输出
