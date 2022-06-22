@@ -31,5 +31,5 @@ void _debug_log(int level, const char *filename, const char *func, int line, con
     }
     std::string info_str = level == 0 ? "[mxlogger_info ]" : "[mxlogger_error]";
     
-    printf("%s <%s:%d::%s> %s\n",info_str.c_str(), filename, line, func, message.c_str());
+    printf("%s %s\n",info_str.c_str(), message.c_str());
 }

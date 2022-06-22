@@ -6,6 +6,10 @@
 //
 
 #import "ViewController.h"
+#include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <net/if_dl.h>
 #import <MXLogger/MXLogger.h>
 @interface ViewController ()
 {
@@ -34,7 +38,7 @@
 
     _logger.shouldRemoveExpiredDataWhenTerminate = YES;
 
-    _logger.consoleEnable = YES;
+    _logger.consoleEnable = NO;
     
     _logger.level = 0;
 
@@ -94,8 +98,8 @@
 }
 - (IBAction)tenThousandButtonAction:(id)sender {
 
-  
-   
+
+
     NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
     NSTimeInterval start =[dateStart timeIntervalSince1970];
 
@@ -103,7 +107,7 @@
     for (NSInteger i = 0; i < 100000; i++) {
 
         NSString * message = [NSString stringWithFormat:@"这是第%ld条数据",i];
-    
+
         [self->_logger info:@"name" msg:message tag:@"net"];
 
     }
@@ -115,8 +119,7 @@
     NSLog(@"时间:%f",end - start);
 
 
-   
- 
+
 
 }
 
@@ -127,5 +130,6 @@
 
     [sender setTitle:[NSString stringWithFormat:@"日志大小:%0.2fM",size] forState:UIControlStateNormal];
 }
+
 
 @end

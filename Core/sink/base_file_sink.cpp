@@ -110,7 +110,7 @@ long  base_file_sink::dir_size() const{
 // 删除过期文件
 void base_file_sink::remove_expire_data(){
     
-    MXLoggerInfo("start delete expire data...");
+   
      long   current_cache_size=0;
    
      std::vector<std::string> delete_urls;
@@ -124,6 +124,7 @@ void base_file_sink::remove_expire_data(){
      std::vector<std::map<std::string, std::string>> destination;
   
      if(max_disk_age_ > 0){
+        
          mxlogger::get_files(&destination, dir_path_.c_str());
          // step1 遍历文件找出过期文件，统计文件size
          for (int i = 0; i < destination.size(); i++) {
@@ -132,7 +133,7 @@ void base_file_sink::remove_expire_data(){
              long size = std::stol(map["size"]);
              time_t last_time = (time_t)std::stol(map["timestamp"]);
              
-             if (last_time < expiration_tp) {
+             if (last_time < expiration_tp && file_name.compare(filename_) != 0) {
                  /// 过期文件
                  delete_urls.push_back(file_name);
                 
@@ -143,6 +144,7 @@ void base_file_sink::remove_expire_data(){
              current_cache_size = current_cache_size + size;
             
          }
+         MXLoggerInfo("start delete expire data(%ld files)...",delete_urls.size());
          //删除过期文件
          for (int i = 0; i< delete_urls.size(); i++) {
              char delete_path[256];
@@ -162,6 +164,7 @@ void base_file_sink::remove_expire_data(){
     
    // step2 清理大于目标size的文件
      if (max_disk_size_ > 0 && current_cache_size > max_disk_size_) {
+         MXLoggerInfo("start over limit data...");
          for (int i = 0; i < final_dir.size(); i++) {
              std::map<std::string, std::string> map = final_dir[i];
              std::string file_name  = map["name"];
@@ -170,17 +173,22 @@ void base_file_sink::remove_expire_data(){
              
              sprintf(delete_path, "%s%s", dir_path_.c_str(), file_name.c_str());
             
-             
+             // 如果需要清理的文件是当前正在写入的文件 则不进行清理
+             if( file_name.compare(filename_) == 0){
+                 continue;
+             }
              if (remove(delete_path) == 0) {
                  current_cache_size = current_cache_size - file_size;
-                 MXLoggerInfo("over limit size file :%s",file_name.c_str());
+                 MXLoggerInfo("over limit size file :%s(%lld byte)",file_name.c_str(),file_size);
                  if (max_disk_size_ >= current_cache_size) {
+                     MXLoggerInfo("over limit data(%ls files)...",i+1);
                      break;
                  }
              }
          }
+         MXLoggerInfo("end over limit data...");
      }
-    MXLoggerInfo("end delete expire data...");
+   
     
 }
 void base_file_sink::set_custom_filename(const std::string &filename){

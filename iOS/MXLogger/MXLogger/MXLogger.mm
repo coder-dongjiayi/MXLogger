@@ -20,7 +20,6 @@ static NSString * _defaultDiskCacheDirectory;
 }
 @property (nonatomic, copy, nonnull, readwrite) NSString *diskCachePath;
 
-@property (nonatomic, strong, nullable) dispatch_queue_t ioQueue;
 
 @end
 
@@ -118,9 +117,7 @@ static NSString * _defaultDiskCacheDirectory;
                                                    object:nil];
         _shouldRemoveExpiredDataWhenTerminate = YES;
         _shouldRemoveExpiredDataWhenEnterBackground = YES;
-        NSString * queueName = [NSString stringWithFormat:@"com.mxlog.LoggerCache.%@",nameSpace];
-        
-        _ioQueue = dispatch_queue_create(queueName.UTF8String, DISPATCH_QUEUE_SERIAL);
+      
        
         
     }
@@ -140,13 +137,12 @@ static NSString * _defaultDiskCacheDirectory;
     if (!self.shouldRemoveExpiredDataWhenTerminate) {
         return;
     }
-    self->_logger->flush();
-    dispatch_sync(self.ioQueue, ^{
-        [self removeExpireData];
-    });
+  
+    [self removeExpireData];
+    mx_logger::destroy();
 }
 -(void)applicationDidEnterrForeground:(NSNotification *)notification{
-    self->_logger->flush();
+
 }
 /// 进入后台
 - (void)applicationDidEnterBackground:(NSNotification *)notification {
@@ -163,15 +159,10 @@ static NSString * _defaultDiskCacheDirectory;
         [application endBackgroundTask:bgTask];
         bgTask = UIBackgroundTaskInvalid;
     }];
-    self->_logger->flush();
-    
-    dispatch_async(self.ioQueue, ^{
-        [self removeExpireData];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [application endBackgroundTask:bgTask];
-            bgTask = UIBackgroundTaskInvalid;
-        });
-    });
+ 
+    [self removeExpireData];
+    [application endBackgroundTask:bgTask];
+    bgTask = UIBackgroundTaskInvalid;
 }
 
 
