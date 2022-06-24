@@ -36,10 +36,7 @@ private:
     static std::string get_diskcache_path_(const char* ns,const char* directory);
     
     std::string diskcache_path_;
-    
-    const char* storage_policy_;
-    
-    const char* file_name_;
+
     
         
 public:

@@ -7,6 +7,9 @@
 
 #include "debug_log.hpp"
 #include <string>
+#ifdef  __ANDROID__
+#include <android/log.h>
+#endif
 void _debug_log(int level, const char *filename, const char *func, int line, const char *format, ...){
  
     
@@ -29,6 +32,11 @@ void _debug_log(int level, const char *filename, const char *func, int line, con
         va_end(args);
     }
     std::string info_str = level == 0 ? "[mxlogger_info]" : "[mxlogger_error]";
-    
+#ifdef __ANDROID__
+    __android_log_write(level ==0 ? ANDROID_LOG_DEBUG : ANDROID_LOG_ERROR,  info_str.data(), message.c_str());
+#elif __APPLE__
     printf("%s %s\n",info_str.c_str(), message.c_str());
+#endif
+
 }
+

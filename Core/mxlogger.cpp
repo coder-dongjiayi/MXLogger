@@ -12,7 +12,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include "mmap_sink.hpp"
+#ifdef  __ANDROID__
+#include <android/log.h>
+#endif
+#include "sink/mmap_sink.hpp"
 #include "mxlogger_helper.hpp"
 #include "log_msg.hpp"
 #include "debug_log.hpp"
@@ -96,7 +99,7 @@ void mxlogger::destroy(){
     
 }
 
-mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv) : diskcache_path_(diskcache_path),storage_policy_(storage_policy),file_name_(file_name){
+mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv) : diskcache_path_(diskcache_path){
     
     mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,mxlogger_helper::policy_(storage_policy));
    
@@ -192,11 +195,38 @@ void mxlogger::log(int level,const char* name, const char* msg,const char* tag,b
     mmap_sink_ -> log(log_msg);
    
     if (enable_console_) {
-        
+
         std::string time = mxlogger_helper::micros_time(log_msg.now_time);
         std::string log = "[" + std::string{name} + "] " + time + "【"+std::string{level_names[level]} + "】" + (tag != nullptr ? "<" + std::string{tag} + ">" : "") + std::string{msg};
-        
+#ifdef __ANDROID__
+        android_LogPriority priority;
+        switch (lvl) {
+            case level::level_enum::debug:
+                priority = ANDROID_LOG_DEBUG;
+                break;
+            case level::level_enum::info:
+                priority = ANDROID_LOG_INFO;
+                break;
+            case level::level_enum::warn:
+                priority = ANDROID_LOG_WARN;
+                break;
+            case level::level_enum::error:
+                priority = ANDROID_LOG_ERROR;
+                break;
+            case level::level_enum::fatal:
+                priority = ANDROID_LOG_FATAL;
+                break;
+            default:
+                priority = ANDROID_LOG_DEBUG;
+                break;
+
+        }
+        log.append("\0");
+        __android_log_write(priority,  log_msg.tag, log.c_str());
+#elif __APPLE__
         printf("%s\n",log.data());
+#endif
+
     }
 
    

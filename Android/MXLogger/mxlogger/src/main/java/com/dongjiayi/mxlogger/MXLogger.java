@@ -14,7 +14,6 @@ public class MXLogger  {
 
     private static  String defaultDiskCacheDirectory;
 
-
     ///  文件存储策略
 ///  yyyy_MM                    按月存储
 ///  yyyy_MM_dd              按天存储

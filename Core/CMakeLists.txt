@@ -69,33 +69,41 @@ add_library(MXLoggerCore
         STATIC
 
         # Provides a relative path to your source file(s).
-        console_sink.cpp
-        console_sink.hpp
-        file_sink.cpp
-        file_sink.hpp
-        flag_formatter.cpp
-        flag_formatter.hpp
+        debug_log.cpp
+        debug_log.hpp
         log_enum.h
         log_msg.cpp
         log_msg.hpp
+        log_serialize.h
         logger_os.cpp
         logger_os.hpp
-        mx_file.cpp
-        mx_file.hpp
-        mxlogger_util.hpp
-        mxlogger_util.cpp
         mxlogger_file_util.hpp
         mxlogger_helper.hpp
+        mxlogger_util.cpp
+        mxlogger_util.hpp
         mxlogger.cpp
         mxlogger.hpp
-        pattern_formatter.cpp
-        pattern_formatter.hpp
-        sink.cpp
-        sink.hpp
+        aes/aes_crypt.hpp
+        aes/aes_crypt.cpp
+        aes/openssl/openssl_aes_core.cpp
+        aes/openssl/openssl_aes_locl.h
+        aes/openssl/openssl_aes-armv4.S
+        aes/openssl/openssl_aes.h
+        aes/openssl/openssl_aesv8-armx.S
+        aes/openssl/openssl_arm_arch.h
+        aes/openssl/openssl_cfb128.cpp
+
+        flatbuffers/base.h
+        flatbuffers/flatbuffers.h
+        flatbuffers/stl_emulation.h
         md5/md5.h
         md5/md5.c
-        cJson/cJSON.h
-        cJson/cJSON.c
+        sink/sink.hpp
+        sink/sink.cpp
+        sink/base_file_sink.cpp
+        sink/base_file_sink.hpp
+        sink/mmap_sink.cpp
+        sink/mmap_sink.hpp
         )
 
 target_include_directories(MXLoggerCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
