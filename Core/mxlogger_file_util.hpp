@@ -110,23 +110,24 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
             crypt.reset_iv(iv_,strlen(iv_));
         }
         
-//        flatbuffers::Verifier verifier(buffer,item_size);
-//
-//        bool isBuffer =  Verifylog_serializeBuffer(verifier);
-        
-        
-        auto logger =  Getlog_serialize(buffer);
-        
+        flatbuffers::Verifier verifier(buffer,item_size);
+
+        bool isBuffer =  Verifylog_serializeBuffer(verifier);
         std::map<std::string, std::string> map;
-
-        map["msg"] = logger->msg() == nullptr ? "" : logger->msg()->str();
-        map["tag"] = logger->tag() == nullptr ? "" : logger->tag()->str();
-        map["name"] = logger->name()->c_str();
-        map["timestamp"] = std::to_string(logger->timestamp());
-        map["level"] = std::to_string(logger->level());
-        map["is_main_thread"] =std::to_string(logger->is_main_thread());
-        map["thread_id"] = std::to_string(logger->thread_id());
-
+        
+        if(isBuffer == true){
+            auto logger =  Getlog_serialize(buffer);
+            map["msg"] = logger->msg() == nullptr ? "" : logger->msg()->str();
+            map["tag"] = logger->tag() == nullptr ? "" : logger->tag()->str();
+            map["name"] = logger->name()->c_str();
+            map["timestamp"] = std::to_string(logger->timestamp());
+            map["level"] = std::to_string(logger->level());
+            map["is_main_thread"] =std::to_string(logger->is_main_thread());
+            map["thread_id"] = std::to_string(logger->thread_id());
+        }else{
+            map["msg"] = "数据异常,可能原因(加密用的key 和 iv 不一致)";
+        }
+    
         vector->push_back(map);
 
         begin = begin + sizeof(uint32_t) + item_size;
