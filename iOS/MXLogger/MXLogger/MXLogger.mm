@@ -59,12 +59,18 @@ static NSString * _defaultDiskCacheDirectory;
 
 
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace{
-    [self destroyWithNamespace:nameSpace diskCacheDirectory:NULL];
+    [self destroyWithNamespace:nameSpace diskCacheDirectory:[MXLogger defaultDiskCacheDirectory]];
 }
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory{
+    
+    mx_logger::delete_namespace(nameSpace.UTF8String, directory.UTF8String);
+    
+    
     NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
+    
     if ([global_instanceDic objectForKey:key]) {
         MXLogger * logger =  [global_instanceDic objectForKey:key];
+        
         logger = nil;
         [global_instanceDic removeObjectForKey:key];
     }

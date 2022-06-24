@@ -33,7 +33,7 @@ std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::uno
 
 std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     if (directory == nullptr) {
-        return std::string{nullptr};
+        return "";
     }
     if (ns == nullptr) {
         ns = "default";
@@ -61,6 +61,7 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,co
         return logger;
     }
     
+    
     auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,cryptKey,iv);
     logger -> map_key = map_key;
     (*global_instanceDic_)[map_key] = logger;
@@ -72,16 +73,16 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,co
 void mxlogger::delete_namespace(const char* ns,const char* directory){
  
     std::string diskcache_path = get_diskcache_path_(ns,directory);
-    if (diskcache_path.data() == nullptr) {
+   
+    if (strcmp(diskcache_path.c_str(), "") == 0) {
         return;
     }
     std::string map_key =  mxlogger_helper::mx_md5(diskcache_path);
-    for (auto &pair : *global_instanceDic_) {
-         std::string key = pair.first;
-        if (key == map_key) {
-            delete pair.second;
-            pair.second = nullptr;
-        }
+    auto itr = global_instanceDic_ -> find(map_key);
+    if (itr != global_instanceDic_ -> end()) {
+        mxlogger * logger = itr -> second;
+        delete logger;
+        global_instanceDic_->erase(itr);
     }
 }
 void mxlogger::destroy(){
@@ -91,7 +92,7 @@ void mxlogger::destroy(){
         delete logger;
         pair.second = nullptr;
     }
-  
+    global_instanceDic_->clear();
     
 }
 
@@ -99,7 +100,9 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     
     mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,mxlogger_helper::policy_(storage_policy));
    
-    mmap_sink_ -> set_custom_filename(file_name);
+    if(file_name != nullptr){
+        mmap_sink_ -> set_custom_filename(file_name);
+    }
     
     mmap_sink_ -> init_aescfb(cryptKey, iv);
     

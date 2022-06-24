@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="rdt-dO-j2R">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
@@ -17,83 +17,45 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="63a-Lo-GkM">
-                                <rect key="frame" x="178.5" y="144" width="57" height="30"/>
-                                <state key="normal" title="默认Log"/>
-                                <connections>
-                                    <action selector="defaultButttonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mGm-JK-sdr"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HQK-MC-3Mh">
-                                <rect key="frame" x="161" y="304" width="92" height="30"/>
-                                <state key="normal" title="日志文件大小"/>
-                                <connections>
-                                    <action selector="logSizeButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="dx3-ec-MyH"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XuW-Ki-bnb">
-                                <rect key="frame" x="160.5" y="190" width="93" height="30"/>
-                                <state key="normal" title="写10万条数据"/>
-                                <connections>
-                                    <action selector="tenThousandButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Q9c-sd-Q4W"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XEH-Y6-v3x">
-                                <rect key="frame" x="152" y="263" width="110" height="31"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ba2-xx-LWQ">
+                                <rect key="frame" x="152" y="459.5" width="110" height="31"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="读取日志文件"/>
+                                <buttonConfiguration key="configuration" style="plain" title="进入日志页面"/>
                                 <connections>
-                                    <action selector="readLogButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hid-BO-yWy"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ub4-oB-vIb">
-                                <rect key="frame" x="137.5" y="354" width="139" height="31"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="删除所有日志文件"/>
-                                <connections>
-                                    <action selector="removeAllButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gxD-Mx-wO6"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="D3u-dv-T7u">
-                                <rect key="frame" x="80.5" y="447" width="253" height="31"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="删除过期文件或超过目标大小的文件"/>
-                                <connections>
-                                    <action selector="removeExpireDataButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="nb0-3L-dN9"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ovf-aQ-Y0J">
-                                <rect key="frame" x="123.5" y="502" width="167" height="31"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="获取缓存目录日志文件"/>
-                                <connections>
-                                    <action selector="cacheDirButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="f5X-f4-cdt"/>
+                                    <action selector="entryLogButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zYA-9I-UKu"/>
                                 </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="XuW-Ki-bnb" firstAttribute="top" secondItem="63a-Lo-GkM" secondAttribute="bottom" constant="16" id="70U-e6-sVl"/>
-                            <constraint firstItem="63a-Lo-GkM" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="AmQ-xF-TaX"/>
-                            <constraint firstItem="XEH-Y6-v3x" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="S7I-FC-Nlj"/>
-                            <constraint firstItem="HQK-MC-3Mh" firstAttribute="top" secondItem="XEH-Y6-v3x" secondAttribute="bottom" constant="10" id="V7x-1v-bu3"/>
-                            <constraint firstItem="HQK-MC-3Mh" firstAttribute="centerX" secondItem="XuW-Ki-bnb" secondAttribute="centerX" id="VED-FZ-Z8t"/>
-                            <constraint firstItem="ovf-aQ-Y0J" firstAttribute="top" secondItem="D3u-dv-T7u" secondAttribute="bottom" constant="24" id="d61-nw-SaZ"/>
-                            <constraint firstItem="ovf-aQ-Y0J" firstAttribute="centerX" secondItem="D3u-dv-T7u" secondAttribute="centerX" id="dIe-Uc-hQH"/>
-                            <constraint firstItem="Ub4-oB-vIb" firstAttribute="centerX" secondItem="HQK-MC-3Mh" secondAttribute="centerX" id="eyS-hX-18c"/>
-                            <constraint firstItem="D3u-dv-T7u" firstAttribute="top" secondItem="Ub4-oB-vIb" secondAttribute="bottom" constant="62" id="f0e-5Y-ZUL"/>
-                            <constraint firstItem="D3u-dv-T7u" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="go7-Vj-XYj"/>
-                            <constraint firstItem="XEH-Y6-v3x" firstAttribute="top" secondItem="XuW-Ki-bnb" secondAttribute="bottom" constant="43" id="moR-53-fu7"/>
-                            <constraint firstItem="Ub4-oB-vIb" firstAttribute="top" secondItem="HQK-MC-3Mh" secondAttribute="bottom" constant="20" id="nuH-AA-6Uo"/>
-                            <constraint firstItem="63a-Lo-GkM" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="100" id="w7H-n9-dZB"/>
-                            <constraint firstItem="XuW-Ki-bnb" firstAttribute="centerX" secondItem="63a-Lo-GkM" secondAttribute="centerX" id="x5X-0i-Lls"/>
+                            <constraint firstItem="ba2-xx-LWQ" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="3Mo-V6-YOD"/>
+                            <constraint firstItem="ba2-xx-LWQ" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="LJy-Us-AK4"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="pnk-aB-qiJ"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="7" y="84"/>
+            <point key="canvasLocation" x="915.94202898550736" y="83.705357142857139"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="ehH-Ib-kn2">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="rdt-dO-j2R" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="fD7-0z-Yt3">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="k3g-nz-E51"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iNM-X4-UPy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5.7971014492753632" y="83.705357142857139"/>
         </scene>
     </scenes>
     <resources>

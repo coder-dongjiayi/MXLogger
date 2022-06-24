@@ -29,7 +29,7 @@ void _debug_log(int level, const char *filename, const char *func, int line, con
         std::vsnprintf(const_cast<char *>(message.data()), static_cast<size_t>(length) + 1, format, args);
         va_end(args);
     }
-    std::string info_str = level == 0 ? "[mxlogger_info ]" : "[mxlogger_error]";
+    std::string info_str = level == 0 ? "[mxlogger_info]" : "[mxlogger_error]";
     
     printf("%s %s\n",info_str.c_str(), message.c_str());
 }

@@ -18,6 +18,10 @@
 		BD62879227EB2FD000362E4C /* MXLoggerDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD62879127EB2FD000362E4C /* MXLoggerDemoUITests.m */; };
 		BD6287BC27EB305600362E4C /* MXLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD6287A927EB2FE400362E4C /* MXLogger.framework */; };
 		BD6287BD27EB305600362E4C /* MXLogger.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = BD6287A927EB2FE400362E4C /* MXLogger.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		BDE926B628658FE100B10C62 /* LogViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = BDE926B328658FE100B10C62 /* LogViewController.xib */; };
+		BDE926B728658FE100B10C62 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BDE926B428658FE100B10C62 /* LogViewController.m */; };
+		BDE926BB2865A19B00B10C62 /* LogListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BDE926B92865A19B00B10C62 /* LogListViewController.m */; };
+		BDE926BC2865A19B00B10C62 /* LogListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = BDE926BA2865A19B00B10C62 /* LogListViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +96,12 @@
 		BD62879127EB2FD000362E4C /* MXLoggerDemoUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MXLoggerDemoUITests.m; sourceTree = "<group>"; };
 		BD62879327EB2FD000362E4C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BD6287A227EB2FE400362E4C /* MXLogger.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MXLogger.xcodeproj; path = ../MXLogger/MXLogger.xcodeproj; sourceTree = "<group>"; };
+		BDE926B328658FE100B10C62 /* LogViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LogViewController.xib; sourceTree = "<group>"; };
+		BDE926B428658FE100B10C62 /* LogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
+		BDE926B528658FE100B10C62 /* LogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogViewController.h; sourceTree = "<group>"; };
+		BDE926B82865A19B00B10C62 /* LogListViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LogListViewController.h; sourceTree = "<group>"; };
+		BDE926B92865A19B00B10C62 /* LogListViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LogListViewController.m; sourceTree = "<group>"; };
+		BDE926BA2865A19B00B10C62 /* LogListViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LogListViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +155,12 @@
 		BD62876927EB2FCD00362E4C /* MXLoggerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				BDE926B82865A19B00B10C62 /* LogListViewController.h */,
+				BDE926B92865A19B00B10C62 /* LogListViewController.m */,
+				BDE926BA2865A19B00B10C62 /* LogListViewController.xib */,
+				BDE926B528658FE100B10C62 /* LogViewController.h */,
+				BDE926B428658FE100B10C62 /* LogViewController.m */,
+				BDE926B328658FE100B10C62 /* LogViewController.xib */,
 				BD62876A27EB2FCD00362E4C /* AppDelegate.h */,
 				BD62876B27EB2FCD00362E4C /* AppDelegate.m */,
 				BD62876D27EB2FCD00362E4C /* SceneDelegate.h */,
@@ -322,8 +338,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BD62877A27EB2FD000362E4C /* LaunchScreen.storyboard in Resources */,
+				BDE926BC2865A19B00B10C62 /* LogListViewController.xib in Resources */,
 				BD62877727EB2FD000362E4C /* Assets.xcassets in Resources */,
 				BD62877527EB2FCD00362E4C /* Main.storyboard in Resources */,
+				BDE926B628658FE100B10C62 /* LogViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,9 +367,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				BD62877227EB2FCD00362E4C /* ViewController.m in Sources */,
+				BDE926B728658FE100B10C62 /* LogViewController.m in Sources */,
 				BD62876C27EB2FCD00362E4C /* AppDelegate.m in Sources */,
 				BD62877D27EB2FD000362E4C /* main.m in Sources */,
 				BD62876F27EB2FCD00362E4C /* SceneDelegate.m in Sources */,
+				BDE926BB2865A19B00B10C62 /* LogListViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
