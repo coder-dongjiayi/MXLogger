@@ -9,7 +9,6 @@
 #include <string>
 void _debug_log(int level, const char *filename, const char *func, int line, const char *format, ...){
  
-//    if(_debug_tracking == false) return;
     
     std::string message;
     char buffer[16];
