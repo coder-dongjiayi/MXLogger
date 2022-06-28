@@ -119,6 +119,7 @@ MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logfiles)(const char * directory,
 }
 
 
+
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_age)(const void *handle,int max_age){
     MXLogger *logger = (__bridge MXLogger *) handle;
     logger.maxDiskAge = max_age;

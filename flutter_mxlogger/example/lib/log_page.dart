@@ -27,7 +27,9 @@ class _LogPageState extends State<LogPage> {
         nameSpace: "flutter.mxlogger",
         cryptKey: _cryptKey,
         iv: _iv);
-    _mxLogger.setEnable(false);
+    _mxLogger.setMaxdiskAge(60*60*24*7);
+    _mxLogger.setMaxdiskSize(1024*1024*10);
+    _mxLogger.setConsoleEnable(true);
     updateSize();
 
     print("path:${_mxLogger.getDiskcachePath()}");
@@ -71,7 +73,7 @@ class _LogPageState extends State<LogPage> {
                     _mxLogger.fatal("这是fatal数据", name: "mxlogger", tag: "f");
                     updateSize();
                   },
-                  child: Text("默认log")),
+                  child: Text("写入log")),
               ElevatedButton(
                 onPressed: () {
                   int m1 = DateTime.now().millisecondsSinceEpoch;
