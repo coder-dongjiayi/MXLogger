@@ -20,9 +20,9 @@
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"mxloggertablecell"];
     
     /// demo 演示只读取时间最靠近的文件
-    NSArray * array =   [MXLogger selectLogfilesWithDirectory:self.mxlogger.diskCachePath];
+    NSArray * array =   [MXLogger selectLogfilesWithDirectory:self.dirPath];
 
-    NSString * path = [NSString stringWithFormat:@"%@%@",self.mxlogger.diskCachePath,array.firstObject[@"name"]];
+    NSString * path = [NSString stringWithFormat:@"%@%@",self.dirPath,array.firstObject[@"name"]];
 
  
     dispatch_async(dispatch_get_global_queue(0, 0), ^{

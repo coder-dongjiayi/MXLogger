@@ -16,6 +16,7 @@ aes_crypt::aes_crypt() {
 }
 
 aes_crypt::~aes_crypt() {
+    MXLoggerInfo("aes encrypt delloc");
     delete m_aesKey;
 }
 

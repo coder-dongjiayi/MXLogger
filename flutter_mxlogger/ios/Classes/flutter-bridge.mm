@@ -13,15 +13,15 @@
 #define MXLOGGERR_FUNC(func) flutter_mxlogger_ ## func
 
 
-MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* directory,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv){
+MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* directory,const char* storage_policy,const char* file_name,const char* crypt_key, const char* iv){
   
     
     NSString * _ns = [NSString stringWithUTF8String:ns];
     NSString * _directory = [NSString stringWithUTF8String:directory];
-    NSString * _storagePolicy = [NSString stringWithUTF8String:storage_policy];
-    NSString * _fileName = [NSString stringWithUTF8String:file_name];
-    NSString * _cryptKey = [NSString stringWithUTF8String:cryptKey];
-    NSString * _iv = [NSString stringWithUTF8String:iv];
+    NSString * _storagePolicy = storage_policy == nullptr ? NULL : [NSString stringWithUTF8String:storage_policy];
+    NSString * _fileName = file_name == nullptr ? NULL : [NSString stringWithUTF8String:file_name];
+    NSString * _cryptKey = crypt_key == nullptr ? NULL : [NSString stringWithUTF8String:crypt_key];
+    NSString * _iv = iv == nullptr ? NULL : [NSString stringWithUTF8String:iv];
     
     MXLogger * logger = [MXLogger initializeWithNamespace:_ns diskCacheDirectory:_directory storagePolicy:_storagePolicy fileName:_fileName cryptKey:_cryptKey iv:_iv];
         
@@ -32,7 +32,7 @@ MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* di
     return (int64_t)logger;
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroy)(const char* ns,const char* directory){
-    [MXLogger destroyWithNamespace:[NSString stringWithUTF8String:ns] diskCacheDirectory:[NSString stringWithUTF8String:directory]];
+    [MXLogger destroyWithNamespace:[NSString stringWithUTF8String:ns] diskCacheDirectory:directory == nullptr ? NULL : [NSString stringWithUTF8String:directory]];
 }
 
 
@@ -43,15 +43,20 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_enable)(const void *handle,int e
     logger.consoleEnable = enable;
 }
 
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_enable)(const void *handle,int enable){
+    MXLogger *logger = (__bridge MXLogger *) handle;
+    logger.enable = enable == 1 ? YES : NO;
+}
 
 
-MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_path, const char* cryptKey, const char* iv,int* number, char ***array_ptr,uint32_t **size_array_ptr){
+
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_path, const char* crypt_key, const char* iv,int* number, char ***array_ptr,uint32_t **size_array_ptr){
     if(diskcache_file_path == nullptr){
         return -1;
     }
     
     
-    NSArray<NSDictionary*> * resultArray =   [MXLogger selectWithDiskCacheFilePath:[NSString stringWithUTF8String:diskcache_file_path] cryptKey:[NSString stringWithUTF8String:cryptKey] iv:[NSString stringWithUTF8String:iv]];
+    NSArray<NSDictionary*> * resultArray =   [MXLogger selectWithDiskCacheFilePath:[NSString stringWithUTF8String:diskcache_file_path] cryptKey:crypt_key == nullptr ? NULL : [NSString stringWithUTF8String:crypt_key] iv:iv == nullptr ? NULL : [NSString stringWithUTF8String:iv]];
     
     int count = (int)resultArray.count;
     
@@ -146,10 +151,12 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(const void *handle){
 
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(log)(const void *handle,const char* name, int lvl,const char* msg,const char* tag){
     MXLogger *logger = (__bridge MXLogger *) handle;
+   
     NSString * _name = name == nullptr ? NULL : [NSString stringWithUTF8String:name];
     NSString * _msg = msg == nullptr ? NULL : [NSString stringWithUTF8String:msg];
     NSString * _tag = tag == nullptr ? NULL : [NSString stringWithUTF8String:tag];
     
+   
     [logger log:lvl name:_name msg: _msg tag:_tag];
 
 }

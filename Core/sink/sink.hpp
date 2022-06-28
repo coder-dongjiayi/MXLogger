@@ -23,8 +23,8 @@ private:
    
     aes_crypt crypt_;
     
-    const char* crypt_iv_ = nullptr;
-
+    uint8_t iv_[AES_KEY_LEN] = {};
+    
     bool is_aes = false;
     
     

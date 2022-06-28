@@ -7,6 +7,7 @@
 
 #include "sink.hpp"
 #include "mxlogger_helper.hpp"
+#include<stdint.h>
 
 namespace mxlogger{
 namespace sinks{
@@ -30,7 +31,8 @@ void sink::init_aescfb(const char* crypt_key,const char* crypt_iv){
         return;
     }
 
-    crypt_iv_ = crypt_iv;
+    memcpy(iv_, (void*)crypt_iv, strlen(crypt_iv));
+
     is_aes = true;
     crypt_.set_crypt_key(crypt_key, strlen(crypt_key), (void*)crypt_iv, strlen(crypt_iv));
 
@@ -40,7 +42,9 @@ void sink::cfb128_encrypt(const void *input, void *output, size_t length){
  
     crypt_.encrypt(input, output, length);
     
-    crypt_.reset_iv(crypt_iv_,crypt_iv_ == nullptr ? 0: strlen(crypt_iv_));
+    const void* crypt_iv = iv_;
+    
+    crypt_.reset_iv(crypt_iv,crypt_iv == nullptr ? 0: strlen((char*)crypt_iv));
    
 }
 
