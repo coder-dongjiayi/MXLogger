@@ -56,9 +56,19 @@
     NSString * level = obj[@"level"];
     NSString *  is_main = obj[@"is_main_thread"];
     NSString * threadId = obj[@"thread_id"];
-    NSString * content = [NSString stringWithFormat:@"[%@] msg:%@,tag:%@,level:%@ thread_id=%@ is_main=%@ tm:%@,",name,msg,tag,level,threadId,is_main,tm];
-    cell.textLabel.text = content;
-    cell.textLabel.numberOfLines = 0;
+    NSString * error_code = obj[@"error_code"];
+    
+    if([error_code integerValue] != 0){
+        NSString * content = [NSString stringWithFormat:@"[%@] msg:%@,tag:%@,level:%@ thread_id=%@ is_main=%@ tm:%@,",name,msg,tag,level,threadId,is_main,tm];
+        cell.textLabel.text = [NSString stringWithFormat:@"数据解析失败:%@",content];
+        cell.textLabel.numberOfLines = 0;
+    }else{
+        NSString * content = [NSString stringWithFormat:@"[%@] msg:%@,tag:%@,level:%@ thread_id=%@ is_main=%@ tm:%@,",name,msg,tag,level,threadId,is_main,tm];
+        cell.textLabel.text = content;
+        cell.textLabel.numberOfLines = 0;
+    }
+    
+    
     return cell;
 }
 

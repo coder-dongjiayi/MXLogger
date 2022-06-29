@@ -301,7 +301,7 @@ static NSString * _defaultDiskCacheDirectory;
         std::string timestamp = log_map["timestamp"];
         std::string level = log_map["level"];
         std::string thread_id = log_map["thread_id"];
-
+        std::string error_code = log_map["error_code"];
         
         NSDictionary * dictionary = @{
             @"msg":[NSString stringWithUTF8String:msg.data()],
@@ -310,7 +310,8 @@ static NSString * _defaultDiskCacheDirectory;
             @"is_main_thread":[NSString stringWithUTF8String:is_main_thread.data()],
             @"thread_id":[NSString stringWithUTF8String:thread_id.data()],
             @"timestamp":[NSString stringWithUTF8String:timestamp.data()],
-            @"level":[NSString stringWithUTF8String:level.data()]
+            @"level":[NSString stringWithUTF8String:level.data()],
+            @"error_code":[NSString stringWithUTF8String:error_code.data()]
             
         };
         

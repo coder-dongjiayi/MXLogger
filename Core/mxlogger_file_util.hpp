@@ -117,6 +117,7 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
         
         if(isBuffer == true){
             auto logger =  Getlog_serialize(buffer);
+            map["error_code"] = "0";
             map["msg"] = logger->msg() == nullptr ? "" : logger->msg()->str();
             map["tag"] = logger->tag() == nullptr ? "" : logger->tag()->str();
             map["name"] = logger->name()->c_str();
@@ -125,6 +126,7 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
             map["is_main_thread"] =std::to_string(logger->is_main_thread());
             map["thread_id"] = std::to_string(logger->thread_id());
         }else{
+            map["error_code"] = "1";
             map["msg"] = "数据异常,可能原因(加密用的key 和 iv 不一致)";
         }
     

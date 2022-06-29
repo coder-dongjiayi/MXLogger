@@ -66,7 +66,7 @@
     NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
     NSTimeInterval start =[dateStart timeIntervalSince1970];
 
-    for (NSInteger i = 0; i < 100000; i++) {
+    for (NSInteger i = 0; i < 1000000; i++) {
 
 
         [self.logger info:@"name" msg:@"This is mxlogger log" tag:@"net"];
