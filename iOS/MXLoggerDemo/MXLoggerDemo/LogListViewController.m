@@ -22,7 +22,7 @@
     /// demo 演示只读取时间最靠近的文件
     NSArray * array =   [MXLogger selectLogfilesWithDirectory:self.dirPath];
 
-    NSString * path = [NSString stringWithFormat:@"%@%@",self.dirPath,array.firstObject[@"name"]];
+    NSString * path = [NSString stringWithFormat:@"%@%@",self.dirPath,array.lastObject[@"name"]];
 
  
     dispatch_async(dispatch_get_global_queue(0, 0), ^{

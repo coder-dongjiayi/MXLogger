@@ -1,0 +1,12 @@
+
+table log_serialize{
+	name:string;
+	tag:string;
+	msg:string;
+	level:int8;
+	thread_id:int32;
+	is_main_thread:ubyte;
+	timestamp:ulong;
+
+}
+root_type log_serialize;
