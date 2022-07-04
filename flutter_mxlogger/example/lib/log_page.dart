@@ -45,12 +45,16 @@ class _LogPageState extends State<LogPage> {
   @override
   Widget build(BuildContext context) {
     String mb = (_size / 1024 / 1024).toStringAsFixed(2);
+
     return Scaffold(
+
         appBar: AppBar(title: Text("mxlogger")),
         body: Center(
           child: Column(
             children: [
               Text("当前日志大小:${mb}MB"),
+
+
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context)

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_mxlogger_analyzer/flutter_mxlogger_analyzer.dart' as MXLogger;
 import 'log_page.dart';
+final navkey = GlobalKey<NavigatorState>();
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -31,6 +32,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
 
     return MaterialApp(
+      navigatorKey: navkey,
       home: Builder(builder: (context){
         return Scaffold(
           appBar: AppBar(
@@ -45,11 +47,7 @@ class _MyAppState extends State<MyApp> {
                       return LogPage();
                     }));
                   },child: Text("进入日志页面")),
-                  ElevatedButton(onPressed: (){
 
-                    MXLogger.show(context, "");
-
-                  },child: Text("查看日志"))
                 ],
               )
           ),
