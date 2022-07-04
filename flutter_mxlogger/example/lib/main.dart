@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 
 
-
+import 'package:flutter_mxlogger_analyzer/flutter_mxlogger_analyzer.dart' as MXLogger;
 import 'log_page.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,12 +37,21 @@ class _MyAppState extends State<MyApp> {
             title: const Text('Plugin example app'),
           ),
           body: Center(
-              child:ElevatedButton(onPressed: (){
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return LogPage();
-                }));
-              },child: Text("进入日志页面"))
+              child:Column(
+                children: [
+                  ElevatedButton(onPressed: (){
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return LogPage();
+                    }));
+                  },child: Text("进入日志页面")),
+                  ElevatedButton(onPressed: (){
+
+                    MXLogger.show(context, "");
+
+                  },child: Text("查看日志"))
+                ],
+              )
           ),
         );
       })
