@@ -12,7 +12,7 @@ class AnalyzerBinary{
     int offsetLength =  sizeofUint32t;
 
 
-    Uint8List  actualUint8List = binaryData.sublist(0,4);
+    Uint8List  actualUint8List = binaryData.sublist(0,sizeofUint32t);
 
     ByteData actualData =  actualUint8List.buffer.asByteData();
     int totalSize =  actualData.getUint32(0,Endian.little);
