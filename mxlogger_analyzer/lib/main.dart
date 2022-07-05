@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:mxlogger_analyzer/analyzer_database.dart';
 
 import 'analyzer_binary.dart';
 
@@ -49,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void loadData() async{
-
+    AnalyzerDatabase.initDataBase();
   }
 
   @override
