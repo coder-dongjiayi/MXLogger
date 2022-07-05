@@ -1,14 +1,11 @@
-import 'dart:io';
 
 import 'package:sqflite/sqflite.dart' as SQLite;
 
-import 'package:sqflite/sqflite.dart';
-
 class AnalyzerDatabase {
-  static late Database _db;
+  static late SQLite.Database _db;
 
   static void initDataBase() async {
-    String database = await getDatabasesPath();
+    String database = await SQLite.getDatabasesPath();
 
     String mxloggerDatabase = database + "/mxlogger_analyzer.db";
 
