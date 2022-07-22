@@ -20,7 +20,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-
         primarySwatch: Colors.blue,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -31,8 +30,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
-
-
   final String title;
 
   @override
@@ -40,8 +37,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-
   @override
   void initState() {
     // TODO: implement initState
@@ -49,26 +44,39 @@ class _MyHomePageState extends State<MyHomePage> {
     loadData();
   }
 
-  void loadData() async{
-    AnalyzerDatabase.initDataBase();
+  void loadData() async {
+    await AnalyzerDatabase.initDataBase();
+    AnalyzerDatabase.insertData(
+        isMainThread: 1,
+        timestamp: 888888,
+        name: "mxlogger",
+        tag: "net,full",
+        level: 1,
+         msg: "这是一条信息"
+    );
+    AnalyzerDatabase.insertData(
+        isMainThread: 1,
+        timestamp: 888888,
+        name: "mxlogger",
+        tag: "net,full",
+        level: 1,
+        msg: "这是二条信息"
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       body: Center(
-
-        child: ElevatedButton(onPressed: () async{
-          XFile? file = await openFile(initialDirectory: "/Users/dongjiayi/Desktop/log");
-          Uint8List? data =   await file?.readAsBytes();
-          if(data == null) return;
-          AnalyzerBinary.decode(binaryData: data);
-
-        }, child: Text("选择日志文件"))
-      ),
-
+          child: ElevatedButton(
+              onPressed: () async {
+                XFile? file = await openFile(
+                    initialDirectory: "/Users/dongjiayi/Desktop/log");
+                Uint8List? data = await file?.readAsBytes();
+                if (data == null) return;
+                AnalyzerBinary.decode(binaryData: data);
+              },
+              child: Text("选择日志文件"))),
     );
   }
 }

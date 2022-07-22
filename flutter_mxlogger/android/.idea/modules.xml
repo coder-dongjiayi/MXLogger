@@ -3,6 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/flutter_mxlogger.iml" filepath="$PROJECT_DIR$/.idea/modules/flutter_mxlogger.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/flutter_mxlogger.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/flutter_mxlogger.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/flutter_mxlogger.main.iml" filepath="$PROJECT_DIR$/.idea/modules/flutter_mxlogger.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/flutter_mxlogger.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/flutter_mxlogger.unitTest.iml" />
     </modules>
   </component>
 </project>
