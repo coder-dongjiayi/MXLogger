@@ -25,6 +25,7 @@ class AnalyzerDatabase {
 
   }
 
+
   static Future<int> insertData(
       {String? name,
       String? tag,
