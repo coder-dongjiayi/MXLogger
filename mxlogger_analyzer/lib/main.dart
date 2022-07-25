@@ -1,4 +1,4 @@
-import 'dart:io';
+
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -8,6 +8,8 @@ import 'package:mxlogger_analyzer/analyzer_database.dart';
 import 'analyzer_binary.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  AnalyzerDatabase.initDataBase();
   runApp(const MyApp());
 }
 
@@ -41,27 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    loadData();
-  }
 
-  void loadData() async {
-    await AnalyzerDatabase.initDataBase();
-    AnalyzerDatabase.insertData(
-        isMainThread: 1,
-        timestamp: 888888,
-        name: "mxlogger",
-        tag: "net,full",
-        level: 1,
-         msg: "这是一条信息"
-    );
-    AnalyzerDatabase.insertData(
-        isMainThread: 1,
-        timestamp: 888888,
-        name: "mxlogger",
-        tag: "net,full",
-        level: 1,
-        msg: "这是二条信息"
-    );
   }
 
   @override
@@ -74,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     initialDirectory: "/Users/dongjiayi/Desktop/log");
                 Uint8List? data = await file?.readAsBytes();
                 if (data == null) return;
-                AnalyzerBinary.decode(binaryData: data);
+                AnalyzerBinary.loadData(binaryData: data);
               },
               child: Text("选择日志文件"))),
     );

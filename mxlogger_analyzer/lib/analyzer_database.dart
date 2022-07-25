@@ -40,7 +40,7 @@ class AnalyzerDatabase {
       " VALUES('$name','$tag','$msg',$level,999,$isMainThread,$timestamp,'${DateTime.now()}')",
     );
 
-    if (result > 0) {
+    if(result > 0){
       print("插入成功");
     }
     return result;
