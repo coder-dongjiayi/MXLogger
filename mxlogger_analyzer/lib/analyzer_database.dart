@@ -10,18 +10,19 @@ class AnalyzerDatabase {
 
     _db = await SQLite.openDatabase(mxloggerDatabase, version: 1,
         onCreate: (db, version) {
-      return db.execute("CREATE TABLE mxlog(id INTEGER, "
+      return db.execute("CREATE TABLE mxlog(id INTEGER PRIMARY KEY AUTOINCREMENT, "
           "name TEXT, "
           "tag TEXT, "
           "msg TEXT, "
           "level INTEGER,"
           "threadId INTEGER,"
           "isMainThread INTEGER, "
-          "timestamp INTEGER PRIMARY KEY,"
-          "dateTime TEXT,"
-
+          "timestamp INTEGER UNIQUE,"
+          "dateTime TEXT"
           ")");
     });
+
+
   }
 
   static Future<int> insertData(
