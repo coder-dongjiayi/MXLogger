@@ -1,16 +1,12 @@
 
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
-import 'package:mxlogger_analyzer/src/page/log_list_page.dart';
+import 'package:mxlogger_analyzer/src/page/lis_page/log_list_page.dart';
 
-import 'src/analyzer_data/analyzer_binary.dart';
-
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  AnalyzerDatabase.initDataBase();
+  await AnalyzerDatabase.initDataBase();
   runApp(const MyApp());
 }
 

@@ -14,4 +14,9 @@ class LogModel {
       this.threadId,
       this.isMainThread,
       required this.timestamp});
+
+  @override
+  String toString(){
+    return "";
+  }
 }

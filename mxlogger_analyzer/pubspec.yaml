@@ -38,6 +38,7 @@ dependencies:
   flat_buffers: ^2.0.5
   file_selector: ^0.8.4+3
   sqflite: ^2.0.2+1
+  provider: ^6.0.3
 
 dev_dependencies:
   flutter_test:

@@ -1,55 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
 
-import '../page/log_model.dart';
+import '../log_model.dart';
 
 typedef LogItemTapCallback = void Function(int index);
 
 class LogListView extends StatefulWidget {
-  LogListView({Key? key, this.dataSource, this.callback, this.loadMoreBack})
+  LogListView({Key? key, required this.dataSource, this.callback})
       : super(key: key);
-  List<LogModel>? dataSource;
+  List<LogModel> dataSource;
   LogItemTapCallback? callback;
-  final VoidCallback? loadMoreBack;
+
   @override
   _LogListViewState createState() => _LogListViewState();
 }
 
 class _LogListViewState extends State<LogListView> {
-  late ScrollController _scrollController;
-  List<LogModel>? _dataSource;
+
   @override
   void initState() {
 
     // TODO: implement initState
     super.initState();
 
-    _scrollController = ScrollController();
-    _dataSource = widget.dataSource;
-
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        widget.loadMoreBack?.call();
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.dataSource == null) return const SizedBox();
 
     return Container(
       margin: const EdgeInsets.only(top: 10),
-      child: ListView.builder(
-          controller: _scrollController,
-          itemCount: _dataSource!.length,
+      child:  ListView.builder(
+          itemCount: widget.dataSource.length,
           physics: const AlwaysScrollableScrollPhysics(),
           itemBuilder: (context, index) {
-            LogModel log = _dataSource![index];
-
-            DateTime time =  DateTime.fromMillisecondsSinceEpoch(1658753938000);
-
+            LogModel log = widget.dataSource[index];
+            DateTime time =  DateTime.fromMillisecondsSinceEpoch(log.timestamp);
 
             return GestureDetector(
                 onTap: () {
@@ -57,12 +43,13 @@ class _LogListViewState extends State<LogListView> {
                 },
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  color: Colors.transparent,
                   child: _item(
                       name: log.name ?? "",
                       msg: log.msg ?? "",
                       level: log.level,
                       time: "${time.toString()}",
-                    tag: log.tag
+                      tag: log.tag
                   ),
                 ));
           }),
@@ -136,7 +123,7 @@ Widget _tag(String? tag) {
     decoration: BoxDecoration(
         color: MXTheme.tag, borderRadius: BorderRadius.all(Radius.circular(5))),
     margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.fromLTRB(5, 2, 5, 2),
+    padding: EdgeInsets.fromLTRB(5, 2, 5, 4),
     child:
         Text(tag, style: TextStyle(color: MXTheme.text, fontSize: 12)),
   );

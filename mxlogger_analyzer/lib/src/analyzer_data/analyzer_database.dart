@@ -25,6 +25,10 @@ class AnalyzerDatabase {
 
   }
 
+  static Future<List<Map<String, Object?>>> selectData() async{
+    List<Map<String, Object?>> result =   await _db.rawQuery("select * from mxlog order by timestamp desc");
+    return result;
+  }
 
   static Future<int> insertData(
       {String? name,
