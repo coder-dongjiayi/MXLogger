@@ -116,11 +116,11 @@ inline ToDuration time_fraction(std::chrono::system_clock::time_point tp)
 }
 
 
-inline int64_t time_stamp_milliseconds(std::chrono::system_clock::time_point time)
+inline int64_t time_stamp_microseconds(std::chrono::system_clock::time_point time)
 {
     
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp = std::chrono::time_point_cast<std::chrono::milliseconds>(time);
-    auto tmp = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::microseconds> tp = std::chrono::time_point_cast<std::chrono::microseconds>(time);
+    auto tmp = std::chrono::duration_cast<std::chrono::microseconds>(tp.time_since_epoch());
     return tmp.count();
     
    

@@ -23,8 +23,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _cryptKey = NULL;
-    _iv = NULL;
+    _cryptKey = @"mxloggerCryptKey";
+    _iv = @"mxloggerCryptKey";
     [self initMXLogger];
     [self updateSize];
 }

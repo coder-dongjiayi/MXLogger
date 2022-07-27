@@ -73,7 +73,7 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
   }
 
   Widget tags(String? tags) {
-    if(tags == null) return SizedBox();
+    if(tags == null) return const SizedBox();
     List<String> tagList = tags.split(",").where((element) => element != "").toList();
     if (tagList.isEmpty) {
       return const SizedBox();
@@ -89,7 +89,7 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
   }
 
   Widget level(int level) {
-    return Text("${levelName(level)}",
+    return Text(levelName(level),
         style: TextStyle(color: MXTheme.colorLevel(level),fontWeight: FontWeight.w900,fontSize: 20));
   }
 
@@ -115,9 +115,9 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
     return Container(
       decoration: BoxDecoration(
           color: MXTheme.tag,
-          borderRadius: BorderRadius.all(Radius.circular(5))),
-      margin: EdgeInsets.only(right: 10),
-      padding: EdgeInsets.fromLTRB(5, 2, 5, 4),
+          borderRadius:const BorderRadius.all(Radius.circular(5))),
+      margin: const EdgeInsets.only(right: 10),
+      padding:const EdgeInsets.fromLTRB(5, 2, 5, 4),
       child: Text(tag, style: TextStyle(color: MXTheme.text, fontSize: 12)),
     );
   }

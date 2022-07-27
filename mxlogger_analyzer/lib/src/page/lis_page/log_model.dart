@@ -16,7 +16,13 @@ class LogModel {
       required this.timestamp});
 
   @override
-  String toString(){
-    return "";
+  String toString() {
+    return "name:$name" +
+        "tag:$tag" +
+        "msg:$msg" +
+        "level:$level" +
+        "threadId:$threadId" +
+        "isMainThread:$isMainThread" +
+        "timestamp:$timestamp";
   }
 }
