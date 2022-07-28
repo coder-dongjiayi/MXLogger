@@ -40,7 +40,7 @@ dependencies:
   sqflite: ^2.0.2+1
   provider: ^6.0.3
   aes_crypt_null_safe: ^2.0.2
-
+  desktop_drop: ^0.3.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

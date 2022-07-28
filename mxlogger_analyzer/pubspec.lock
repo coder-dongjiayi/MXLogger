@@ -64,6 +64,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.5"
+  desktop_drop:
+    dependency: "direct main"
+    description:
+      name: desktop_drop
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.3.3"
   fake_async:
     dependency: transitive
     description:

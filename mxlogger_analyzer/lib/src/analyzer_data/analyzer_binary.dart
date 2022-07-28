@@ -53,7 +53,7 @@ class AnalyzerBinary {
           buffer =   crypt.aesDecrypt(_replenishDataByte(buffer));
         }
         LogSerialize logSerialize = LogSerialize(buffer);
-      
+
         AnalyzerDatabase.insertData(
             name: logSerialize.name,
             tag: logSerialize.tag,
