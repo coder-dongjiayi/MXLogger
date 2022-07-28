@@ -19,23 +19,7 @@ class AnalyzerBinary {
     });
     return completer.future;
   }
- /// 对 key 和 iv 进行补位
-  static Uint8List _replenishByte(String input){
-    List<int> list = utf8.encode(input);
-    Uint8List bytes = Uint8List.fromList(list);
-    if(bytes.length == AES_LENGTH)  return bytes;
-    final uint8List = Uint8List(AES_LENGTH);
-    int number = min(AES_LENGTH, bytes.length);
-    for(int i = 0;i < number; i++){
-      uint8List[i] = bytes[i];
-    }
-    return uint8List;
-  }
 
-  /// 对data 进行补位
-  static Uint8List _replenishDataByte(Uint8List buffer){
-
-  }
   static void _decode(
       {required Uint8List binaryData, String? cryptKey, String? iv}) {
     int sizeofUint32t = 4;
@@ -63,13 +47,13 @@ class AnalyzerBinary {
       int start = begin + sizeofUint32t;
 
       Uint8List buffer = binaryData.sublist(start, start + itemSize);
-
       try{
         if(crypt != null){
 
-         buffer =   crypt.aesDecrypt(buffer);
+          buffer =   crypt.aesDecrypt(_replenishDataByte(buffer));
         }
         LogSerialize logSerialize = LogSerialize(buffer);
+      
         AnalyzerDatabase.insertData(
             name: logSerialize.name,
             tag: logSerialize.tag,
@@ -86,5 +70,31 @@ class AnalyzerBinary {
 
       begin = begin + sizeofUint32t + itemSize;
     }
+  }
+
+  /// 对 key 和 iv 进行补位
+  static Uint8List _replenishByte(String input){
+    List<int> list = utf8.encode(input);
+    Uint8List bytes = Uint8List.fromList(list);
+    if(bytes.length == AES_LENGTH)  return bytes;
+    final uint8List = Uint8List(AES_LENGTH);
+    int number = min(AES_LENGTH, bytes.length);
+    for(int i = 0;i < number; i++){
+      uint8List[i] = bytes[i];
+    }
+    return uint8List;
+  }
+
+  /// 对data 进行补位
+  static Uint8List _replenishDataByte(Uint8List buffer){
+    int bufferLen = buffer.length;
+    if(bufferLen % AES_LENGTH == 0) return buffer;
+
+    int length = (bufferLen / AES_LENGTH).ceil();
+    final uint8List =  Uint8List(length * AES_LENGTH);
+    for(int i =0; i< bufferLen; i++){
+      uint8List[i] = buffer[i];
+    }
+    return  uint8List;
   }
 }
