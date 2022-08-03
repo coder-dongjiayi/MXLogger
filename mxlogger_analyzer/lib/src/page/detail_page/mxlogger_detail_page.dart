@@ -94,7 +94,7 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
   }
 
   Widget time(int timestamp) {
-    DateTime time =  DateTime.fromMillisecondsSinceEpoch(timestamp);
+    DateTime time =  DateTime.fromMicrosecondsSinceEpoch(timestamp);
     return Text("$time", style: TextStyle(color: MXTheme.text,fontSize: 17));
   }
 

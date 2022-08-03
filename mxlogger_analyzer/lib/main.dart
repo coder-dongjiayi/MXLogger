@@ -51,16 +51,17 @@ class _MyHomePageState extends State<MyHomePage> {
    // return LogListPage();
     return  Scaffold(
 
-      body: Center(
-          child: ElevatedButton(
-              onPressed: () async{
-                XFile? file = await openFile(
-                    initialDirectory: "/Users/dongjiayi/Desktop/log");
-                Uint8List? data = await file?.readAsBytes();
-                if (data == null) return;
-                AnalyzerBinary.loadData(binaryData: data);
-              },
-              child: Text("选择日志文件"))),
+      body: LogListPage(),
+      // body: Center(
+      //     child: ElevatedButton(
+      //         onPressed: () async{
+      //           XFile? file = await openFile(
+      //               initialDirectory: "/Users/dongjiayi/Desktop/log");
+      //           Uint8List? data = await file?.readAsBytes();
+      //           if (data == null) return;
+      //           AnalyzerBinary.loadData(binaryData: data);
+      //         },
+      //         child: Text("选择日志文件"))),
     );
   }
 }

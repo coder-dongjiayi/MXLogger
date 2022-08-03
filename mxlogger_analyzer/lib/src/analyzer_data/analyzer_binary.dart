@@ -14,7 +14,7 @@ class AnalyzerBinary {
       {required Uint8List binaryData, String? cryptKey, String? iv}) {
     Completer<void> completer = Completer();
     Future(() {
-      _decode(binaryData: binaryData, cryptKey: "mxloggerCryptKey", iv: "mxloggerCryptKey");
+      _decode(binaryData: binaryData, cryptKey: cryptKey, iv: iv);
       completer.complete();
     });
     return completer.future;

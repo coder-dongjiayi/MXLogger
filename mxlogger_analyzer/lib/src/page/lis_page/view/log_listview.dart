@@ -35,7 +35,7 @@ class _LogListViewState extends State<LogListView> {
           physics: const AlwaysScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             LogModel log = widget.dataSource[index];
-            DateTime time =  DateTime.fromMillisecondsSinceEpoch(log.timestamp);
+            DateTime time =  DateTime.fromMicrosecondsSinceEpoch(log.timestamp);
 
             return GestureDetector(
                 onTap: () {
