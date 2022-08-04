@@ -54,7 +54,6 @@ class _LogPageState extends State<LogPage> {
             children: [
               Text("当前日志大小:${mb}MB"),
 
-
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context)

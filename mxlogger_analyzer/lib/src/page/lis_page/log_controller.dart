@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
+import '../detail_page/view/async_future_loader.dart';
 import 'log_model.dart';
 
 class LogController extends ChangeNotifier {
+
+   AsyncController asyncController = AsyncController();
+
+  Future<void> insertData() async{
+
+  }
+
   Future<List<LogModel>> loadData() async {
     List<Map<String, Object?>> list = await AnalyzerDatabase.selectData();
     List<LogModel> _source = [];

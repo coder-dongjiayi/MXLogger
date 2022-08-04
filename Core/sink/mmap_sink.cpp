@@ -7,6 +7,7 @@
 
 #include "mmap_sink.hpp"
 #include <sys/mman.h>
+#include <cerrno>
 #include "../log_serialize.h"
 
 
@@ -132,7 +133,7 @@ bool mmap_sink::munmap_(){
 // 建立文件与内存的映射
 bool mmap_sink::mmap_(){
     
-    mmap_ptr_ =  (uint8_t*)::mmap(NULL, file_size_, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_SHARED, file_ident, 0);
+    mmap_ptr_ =  (uint8_t*)::mmap(NULL, file_size_, PROT_READ|PROT_WRITE, MAP_SHARED, file_ident, 0);
     
     if (mmap_ptr_ == MAP_FAILED) {
         mmap_ptr_ = nullptr;

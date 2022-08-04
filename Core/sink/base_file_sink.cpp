@@ -9,6 +9,7 @@
 #include <map>
 #include "../mxlogger_helper.hpp"
 #include "../mxlogger_file_util.hpp"
+#include <cerrno>
 namespace mxlogger{
 namespace sinks{
 

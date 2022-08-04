@@ -1,9 +1,6 @@
 
 import 'package:flutter/material.dart';
 
-
-
-import 'package:flutter_mxlogger_analyzer/flutter_mxlogger_analyzer.dart' as MXLogger;
 import 'log_page.dart';
 final navkey = GlobalKey<NavigatorState>();
 void main() async{
