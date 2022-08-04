@@ -36,6 +36,27 @@ public class MXLogger {
     }
 
 
+    public  void debug(@Nullable String tag,@Nullable String name,@Nullable String msg){
+        log(tag,0,name,msg);
+    }
+    public  void info(@Nullable String tag,@Nullable String name,@Nullable String msg){
+        log(tag,1,name,msg);
+    }
+    public  void warn(@Nullable String tag,@Nullable String name,@Nullable String msg){
+        log(tag,2,name,msg);
+    }
+    public  void error(@Nullable String tag,@Nullable String name,@Nullable String msg){
+        log(tag,3,name,msg);
+    }
+    public  void fatal(@Nullable String tag,@Nullable String name,@Nullable String msg){
+        log(tag,4,name,msg);
+    }
+    /**
+     * tag 标记
+     * level 0_debug 1_info 2_warn 3_error 4_fatal
+     * name name
+     * msg 日志信息
+    * */
     public  void log(@Nullable String tag,@Nullable int level,@Nullable String name,@Nullable String msg){
 
         innerLog(tag,level,msg,name);
