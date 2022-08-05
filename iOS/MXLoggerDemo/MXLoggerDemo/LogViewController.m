@@ -23,8 +23,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _cryptKey = @"dongjiayi";
-    _iv = NULL;
+    _cryptKey = @"mxloggercryptkey";
+    _iv = @"mxloggercryptiv";
     [self initMXLogger];
     [self updateSize];
 }
@@ -44,7 +44,7 @@
 
     self.logger.consoleEnable = NO;
     
-    self.logger.level = 0;
+    self.logger.fileLevel = 0;
 
     NSLog(@"目录:%@",self.logger.diskCachePath);
     
