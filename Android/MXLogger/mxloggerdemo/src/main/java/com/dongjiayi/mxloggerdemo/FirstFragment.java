@@ -37,8 +37,12 @@ public class FirstFragment extends Fragment {
         binding.buttonFirst.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                logger.log("net",0,"android","this is message");
+                Log.i("begin","开始写入");
+                for (int i=0;i<100000;i++){
+                    logger.log("net",0,"android","this is message");
+                }
 
+                Log.i("end","结束写入");
             }
         });
     }
