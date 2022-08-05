@@ -13,8 +13,8 @@ class LogPage extends StatefulWidget {
 class _LogPageState extends State<LogPage> {
   late MXLogger _mxLogger;
   int _size = 0;
-  final String _cryptKey = "mxloggeraes128cryptkey";
-  final String _iv = "mxloggeraescfbiv";
+  // final String _cryptKey = "mxloggeraes128cryptkey";
+  // final String _iv = "mxloggeraescfbiv";
   @override
   void initState() {
     // TODO: implement initState
@@ -25,11 +25,13 @@ class _LogPageState extends State<LogPage> {
   Future<void> init() async {
     _mxLogger = await MXLogger.initialize(
         nameSpace: "flutter.mxlogger",
-        cryptKey: _cryptKey,
-        iv: _iv);
+        cryptKey: null,
+        iv: null);
+
     _mxLogger.setMaxdiskAge(60*60*24*7);
     _mxLogger.setMaxdiskSize(1024*1024*10);
     _mxLogger.setConsoleEnable(true);
+
     updateSize();
 
     print("path:${_mxLogger.getDiskcachePath()}");
@@ -60,8 +62,8 @@ class _LogPageState extends State<LogPage> {
                       .push(MaterialPageRoute(builder: (context) {
                     return LogListPage(
                       dirPath: _mxLogger.getDiskcachePath(),
-                      cryptKey: _cryptKey,
-                      iv: _iv,
+                      cryptKey: null,
+                      iv: null,
                     );
                   }));
                 },

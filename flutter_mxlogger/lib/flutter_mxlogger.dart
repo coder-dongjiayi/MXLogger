@@ -213,7 +213,7 @@ class MXLogger with WidgetsBindingObserver {
   ///     2:warn
   ///     3:error
   ///     4:fatal
-  void setLevel(int lvl) {
+  void setFileLevel(int lvl) {
     if (enable == false) return;
     _setLevel(_handle, lvl);
   }

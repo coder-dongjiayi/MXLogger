@@ -207,9 +207,9 @@ static NSString * _defaultDiskCacheDirectory;
    long size =  _logger -> dir_size();
     return [[NSNumber numberWithLong:size] unsignedIntegerValue];
 }
-- (void)setLevel:(NSInteger)level{
-    _level = level;
-    _logger -> set_file_level([NSNumber numberWithInteger:level].intValue);
+- (void)setFileLevel:(NSInteger)fileLevel{
+    _fileLevel = fileLevel;
+    _logger -> set_file_level([NSNumber numberWithInteger:fileLevel].intValue);
 }
 
 

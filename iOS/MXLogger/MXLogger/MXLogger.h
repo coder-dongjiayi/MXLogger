@@ -98,7 +98,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /// 设置写入文件日志等级
-@property (nonatomic,assign)NSInteger level;
+@property (nonatomic,assign)NSInteger fileLevel;
 
 
 

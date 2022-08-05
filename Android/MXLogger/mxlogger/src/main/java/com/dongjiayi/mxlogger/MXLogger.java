@@ -10,8 +10,39 @@ import androidx.annotation.Nullable;
 
 public class MXLogger {
 
+    /**
+  * 是否开启控制台打印，默认不开启, 开始控制台打印会影响 写入效率 ，建议发布模式禁用 consoleEnable
+  * */
+  public boolean consoleEnable;
 
-    private  long nativeHandle;
+    /**
+  * 禁用日志 默认false;
+  * */
+  public boolean enable;
+
+    /**
+   * 日志文件最大字节数 默认0 无限制
+   * */
+  public long maxDiskSize;
+
+  /**
+   * 日志文件最大存储时长 默认0 无限制
+   * */
+  public  long maxDiskAge;
+    /**
+   * 设置写入文件日志等级 低于这个等级的日志不会被写入到文件，只可能被输出到控制台
+   * */
+  public int fileLevel;
+
+    /**
+     * 获取磁盘缓存目录
+     * */
+  public String diskCachePath;
+    /**
+   * 获取当前日志文件大小
+   * */
+  public  long logSize;
+
  /**
   * nameSpace 日志命名空间 建议使用域名反转保证唯一性
   * diskCacheDirectory 日志初始化目录
@@ -35,8 +66,14 @@ public class MXLogger {
 
     }
 
+   public void  removeExpireData(){
+       native_removeExpireData(nativeHandle);
+   }
 
-    public  void debug(@Nullable String tag,@Nullable String name,@Nullable String msg){
+  public  void  removeAll(){
+      native_removeAll(nativeHandle);
+  }
+    public  void debug(@Nullable String tag, @Nullable String name, @Nullable String msg){
         log(tag,0,name,msg);
     }
     public  void info(@Nullable String tag,@Nullable String name,@Nullable String msg){
@@ -62,17 +99,11 @@ public class MXLogger {
         innerLog(tag,level,msg,name);
     }
     private  void innerLog(@Nullable String tag,@Nullable int level,@Nullable String msg,@Nullable String name){
+        if(enable) return;
        boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
         native_log(nativeHandle,name,level,msg,tag,isMainThread);
     }
-    private  static  String defaultDiskCacheDirectory(@NonNull Context context){
 
-        return userCacheDirectory(context) + "/com.mxlog.LoggerCache";
-    }
-    private  static  String userCacheDirectory(@NonNull Context context){
-        String cacheDir = context.getCacheDir().getAbsolutePath();
-        return  cacheDir;
-    }
     public MXLogger(@NonNull Context context,@NonNull String nameSpace) {
 
         this(context,nameSpace,null,null,null,null,null);
@@ -90,8 +121,79 @@ public class MXLogger {
 
     }
 
+    public void setConsoleEnable(boolean consoleEnable) {
+        this.consoleEnable = consoleEnable;
+        native_consoleEnable(nativeHandle,consoleEnable);
+    }
+
+    public boolean isConsoleEnable() {
+        return consoleEnable;
+    }
+
+
+    public int getFileLevel() {
+        return fileLevel;
+    }
+
+    public void setFileLevel(int fileLevel) {
+        this.fileLevel = fileLevel;
+        native_fileLevel(nativeHandle,fileLevel);
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
+
+    public long getMaxDiskSize() {
+        return maxDiskSize;
+    }
+
+    public void setMaxDiskSize(long maxDiskSize) {
+        this.maxDiskSize = maxDiskSize;
+        native_maxDiskSize(nativeHandle,maxDiskSize);
+    }
+
+    public long getMaxDiskAge() {
+        return maxDiskAge;
+    }
+
+    public void setMaxDiskAge(long maxDiskAge) {
+        this.maxDiskAge = maxDiskAge;
+        native_maxDiskAge(nativeHandle,maxDiskAge);
+    }
+
+    public long getLogSize() {
+        return native_logSize(nativeHandle);
+    }
+
+    public String getDiskCachePath() {
+        return native_diskcache_path(nativeHandle);
+    }
+
+
+    private  long nativeHandle;
+    private  static  String defaultDiskCacheDirectory(@NonNull Context context){
+
+        return userCacheDirectory(context) + "/com.mxlog.LoggerCache";
+    }
+    private  static  String userCacheDirectory(@NonNull Context context){
+        String cacheDir = context.getCacheDir().getAbsolutePath();
+        return  cacheDir;
+    }
     private static native long jniInitialize(String nameSpace,String diskCacheDirectory,String storagePolicy,String fileName,String cryptKey,String iv);
 
-    private  static  native void native_log(long handle,String name,int level,String msg,String tag,boolean mainThread);
+    private  static  native void native_log(long nativeHandle,String name,int level,String msg,String tag,boolean mainThread);
 
+    private  static  native  void  native_fileLevel(long nativeHandle,int fileLevel);
+    private  static  native  void  native_consoleEnable(long nativeHandle,boolean enable);
+    private  static  native  void  native_maxDiskAge(long nativeHandle,long maxDiskAge);
+    private  static  native  void  native_maxDiskSize(long nativeHandle,long maxDiskSize);
+    private static   native  long  native_logSize(long nativeHandle);
+    private  static  native String native_diskcache_path(long nativeHandle);
+    private  static  native void native_removeExpireData(long nativeHandle);
+    private static  native  void  native_removeAll(long nativeHandle);
 }

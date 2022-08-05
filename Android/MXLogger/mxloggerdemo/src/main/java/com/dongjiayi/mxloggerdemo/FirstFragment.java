@@ -24,6 +24,7 @@ public class FirstFragment extends Fragment {
     ) {
 
         logger = new MXLogger(this.getContext(),"com.dongjiayi.mxlogger");
+        logger.consoleEnable = false;
 
         binding = FragmentFirstBinding.inflate(inflater, container, false);
         return binding.getRoot();

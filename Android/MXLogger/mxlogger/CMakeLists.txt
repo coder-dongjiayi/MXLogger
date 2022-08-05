@@ -25,8 +25,6 @@ set_target_properties(mxlogger PROPERTIES
         )
 find_library(
         log-lib
-
-
         log )
 
 
