@@ -181,7 +181,7 @@ public class MXLogger {
         return userCacheDirectory(context) + "/com.mxlog.LoggerCache";
     }
     private  static  String userCacheDirectory(@NonNull Context context){
-        
+
         String cacheDir = context.getFilesDir().getAbsolutePath();
         return  cacheDir;
     }

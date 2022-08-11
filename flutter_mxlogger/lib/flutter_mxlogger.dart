@@ -109,6 +109,7 @@ class MXLogger with WidgetsBindingObserver {
     return null;
   }
 
+  /// 目前只对 ios端生效
   static List<String> selectLogMsg(
       {required String diskcacheFilePath, String? cryptKey, String? iv}) {
     List<String> msgList = [];
@@ -153,7 +154,7 @@ class MXLogger with WidgetsBindingObserver {
     }
     return msgList;
   }
-
+  /// 目前只对 ios端生效
   static List<Map<String, dynamic>> selectLogfiles(
       {required String directory}) {
     List<Map<String, dynamic>> logFiles = [];
@@ -231,13 +232,13 @@ class MXLogger with WidgetsBindingObserver {
   }
 
   /// 设置日志文件存储最大时长(s) 默认为0 不限制   60 * 60 *24 *7 即一个星期
-  void setMaxdiskAge(int age) {
+  void setMaxDiskAge(int age) {
     if (enable == false) return;
     _setMaxdiskAge(_handle, age);
   }
 
   /// 设置日志文件存储最大字节数(byte) 默认为0 不限制 1024 * 1024 * 10; 即10M
-  void setMaxdiskSize(int size) {
+  void setMaxDiskSize(int size) {
     if (enable == false) return;
     _setMaxdiskSize(_handle, size);
   }

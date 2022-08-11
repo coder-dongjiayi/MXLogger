@@ -25,12 +25,13 @@ class _LogPageState extends State<LogPage> {
   Future<void> init() async {
     _mxLogger = await MXLogger.initialize(
         nameSpace: "flutter.mxlogger",
+        storagePolicy: "yyyy_MM_dd_HH",
         cryptKey: null,
         iv: null);
 
-    _mxLogger.setMaxdiskAge(60*60*24*7);
-    _mxLogger.setMaxdiskSize(1024*1024*10);
-    _mxLogger.setConsoleEnable(true);
+    _mxLogger.setMaxDiskAge(60*60*24*7);
+    _mxLogger.setMaxDiskSize(1024*1024*10);
+    _mxLogger.setConsoleEnable(false);
 
     updateSize();
 
@@ -72,7 +73,7 @@ class _LogPageState extends State<LogPage> {
               ElevatedButton(
                   onPressed: () {
 
-                    _mxLogger.info("这是info数据", name: "mxlogger", tag: "i");
+                    _mxLogger.info("这是info数据这是info数据这是info数据这是info数据这是info数据这是info数据这是info数据这是info数据这是info数据这是info数据这是info数据", name: "mxlogger", tag: "network");
                     _mxLogger.warn("这是warn数据", name: "mxlogger", tag: "w");
                     _mxLogger.error("这是error数据", name: "mxlogger", tag: "e");
                     _mxLogger.fatal("这是fatal数据", name: "mxlogger", tag: "f");
