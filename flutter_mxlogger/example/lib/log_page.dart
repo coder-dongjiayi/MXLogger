@@ -32,7 +32,7 @@ class _LogPageState extends State<LogPage> {
     _mxLogger.setMaxDiskAge(60*60*24*7);
     _mxLogger.setMaxDiskSize(1024*1024*10);
     _mxLogger.setConsoleEnable(false);
-
+    _mxLogger.setFileLevel(0);
     updateSize();
 
     print("path:${_mxLogger.getDiskcachePath()}");
