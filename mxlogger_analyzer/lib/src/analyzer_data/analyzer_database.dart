@@ -42,7 +42,7 @@ class AnalyzerDatabase {
     int result = await _db.rawInsert(
       "INSERT OR IGNORE INTO mxlog"
       "(name,tag,msg,level,threadId,isMainThread,timestamp,dateTime)"
-      " VALUES('$name','$tag','$msg',$level,999,$isMainThread,$timestamp,'${DateTime.now()}')",
+      " VALUES('$name','$tag','$msg',$level,$threadId,$isMainThread,$timestamp,'${DateTime.now()}')",
     );
 
     if(result > 0){
