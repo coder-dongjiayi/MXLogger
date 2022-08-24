@@ -49,7 +49,7 @@ class _LogListPageState extends State<LogListPage> {
               }, emptyWidgetBuilder:
                   (BuildContext context, List<LogModel>? list) {
                 if (list?.isEmpty == true) {
-                  return const Center(child: Text("拖拽日志文件到窗口"));
+                  return  Center(child: Text("拖拽日志文件到窗口",style: TextStyle(color: MXTheme.white),));
                 }
               }, successWidgetBuilder:
                   (BuildContext context, List<LogModel>? list) {

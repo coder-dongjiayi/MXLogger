@@ -17,8 +17,9 @@ class AnalyzerDatabase {
           "level INTEGER,"
           "threadId INTEGER,"
           "isMainThread INTEGER, "
-          "timestamp INTEGER UNIQUE,"
-          "dateTime TEXT"
+          "timestamp INTEGER UNIQUE," // 日志创建时间戳
+          "dateTime TEXT," // 日志创建时间
+          "createDateTime TEXT" // 日志写入到数据库的时间
           ")");
     });
 
@@ -30,7 +31,7 @@ class AnalyzerDatabase {
     return result;
   }
 
-  static Future<int> insertData(
+  static Future<void> insertData(
       {String? name,
       String? tag,
       String? msg,
@@ -39,15 +40,25 @@ class AnalyzerDatabase {
       int isMainThread = 0,
       required int timestamp}) async {
 
-    int result = await _db.rawInsert(
-      "INSERT OR IGNORE INTO mxlog"
-      "(name,tag,msg,level,threadId,isMainThread,timestamp,dateTime)"
-      " VALUES('$name','$tag','$msg',$level,$threadId,$isMainThread,$timestamp,'${DateTime.now()}')",
-    );
 
-    if(result > 0){
-      print("插入成功");
+    try{
+      _db.insert("mxlog", {
+        "name":name,
+        "tag":tag,
+        "msg":msg,
+        "level":level,
+        "dateTime":DateTime.fromMicrosecondsSinceEpoch(timestamp).toString(),
+        "timestamp":timestamp,
+        "threadId":threadId,
+        "isMainThread":isMainThread,
+        "createDateTime":DateTime.now().toString()
+      });
+    }catch (error){
+
+      print("插入失败:$error");
     }
-    return result;
+
+
+
   }
 }
