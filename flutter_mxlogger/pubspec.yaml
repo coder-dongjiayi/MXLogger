@@ -4,14 +4,13 @@ version: 0.1.1
 homepage:
 
 environment:
-  sdk: ">=2.14.0 <3.0.0"
-  flutter: ">=1.20.0"
+  sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   ffi: ^2.0.1
-  flutter_archive: 4.2.0
+  flutter_archive: ^5.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -29,7 +28,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.dongjiayi.mxlogger
+        package: com.bling.mxlogger
         pluginClass: FlutterMxloggerPlugin
       ios:
         pluginClass: FlutterMxloggerPlugin

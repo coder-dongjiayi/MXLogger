@@ -1,4 +1,4 @@
-group 'com.dongjiayi.mxlogger'
+group 'com.bling.mxlogger'
 version '1.0'
 
 buildscript {
@@ -37,13 +37,14 @@ android {
     }
 
     defaultConfig {
-
+        multiDexEnabled true
         minSdkVersion 21
     }
     dependencies {
 
 
     implementation 'io.github.coder-dongjiayi:mxlogger:0.1.1.1'
+
 //       implementation (name:"mxlogger-DefaultCpp-release",ext:"aar")
 
     }

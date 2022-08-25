@@ -8,11 +8,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 export 'flutter_mxlogger.dart';
 
-typedef LoggerFunction = Void Function(
-    Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
+typedef LoggerFunction = Void Function(Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
 
-typedef FlutterLogFunction = void Function(
-    Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
+typedef FlutterLogFunction = void Function(Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
 
 class MXLogger with WidgetsBindingObserver {
   Pointer<Void> _handle = nullptr;
@@ -24,12 +22,9 @@ class MXLogger with WidgetsBindingObserver {
   bool get enable => _enable;
   bool _shouldRemoveExpiredDataWhenEnterBackground = true;
 
-
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused &&
-        _shouldRemoveExpiredDataWhenEnterBackground == true) {
+    if (state == AppLifecycleState.paused && _shouldRemoveExpiredDataWhenEnterBackground == true) {
       removeExpireData();
     }
   }
@@ -41,23 +36,19 @@ class MXLogger with WidgetsBindingObserver {
       String? fileName,
       String? cryptKey,
       String? iv}) {
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
 
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
     Pointer<Utf8> drPtr = directory.toNativeUtf8();
 
-    Pointer<Utf8> storagePolicyPtr =
-        storagePolicy == null ? nullptr : storagePolicy.toNativeUtf8();
-    Pointer<Utf8> fileNamePtr =
-        fileName == null ? nullptr : fileName.toNativeUtf8();
+    Pointer<Utf8> storagePolicyPtr = storagePolicy == null ? nullptr : storagePolicy.toNativeUtf8();
+    Pointer<Utf8> fileNamePtr = fileName == null ? nullptr : fileName.toNativeUtf8();
 
-    Pointer<Utf8> cryptKeyPtr =
-        cryptKey == null ? nullptr : cryptKey.toNativeUtf8();
+    Pointer<Utf8> cryptKeyPtr = cryptKey == null ? nullptr : cryptKey.toNativeUtf8();
 
     Pointer<Utf8> ivPtr = iv == null ? nullptr : iv.toNativeUtf8();
 
-    _handle = _initialize(
-        nsPtr, drPtr, storagePolicyPtr, fileNamePtr, cryptKeyPtr, ivPtr);
+    _handle = _initialize(nsPtr, drPtr, storagePolicyPtr, fileNamePtr, cryptKeyPtr, ivPtr);
 
     calloc.free(nsPtr);
     calloc.free(drPtr);
@@ -86,17 +77,12 @@ class MXLogger with WidgetsBindingObserver {
     String ns = nameSpace;
     String dr = directory ?? "";
 
-    Map<dynamic, dynamic> result = await _channel.invokeMethod(
-        "initialize", {"nameSpace": nameSpace, "directory": directory});
+    Map<dynamic, dynamic> result =
+        await _channel.invokeMethod("initialize", {"nameSpace": nameSpace, "directory": directory});
     dr = result["directory"];
 
     MXLogger mxLogger = MXLogger(
-        nameSpace: ns,
-        directory: dr,
-        storagePolicy: storagePolicy,
-        fileName: fileName,
-        cryptKey: cryptKey,
-        iv: iv);
+        nameSpace: ns, directory: dr, storagePolicy: storagePolicy, fileName: fileName, cryptKey: cryptKey, iv: iv);
 
     return mxLogger;
   }
@@ -110,8 +96,7 @@ class MXLogger with WidgetsBindingObserver {
   }
 
   /// 目前只对 ios端生效
-  static List<String> selectLogMsg(
-      {required String diskcacheFilePath, String? cryptKey, String? iv}) {
+  static List<String> selectLogMsg({required String diskcacheFilePath, String? cryptKey, String? iv}) {
     List<String> msgList = [];
 
     Pointer<Utf8> dirPathPtr = diskcacheFilePath.toNativeUtf8();
@@ -123,8 +108,7 @@ class MXLogger with WidgetsBindingObserver {
 
     Pointer<Int32> numberPtr = calloc<Int32>();
 
-
-    _select_logmsg(dirPathPtr, cryptKeyPtr,ivPtr,numberPtr, arrayPtr, sizeArrayPtr);
+    _select_logmsg(dirPathPtr, cryptKeyPtr, ivPtr, numberPtr, arrayPtr, sizeArrayPtr);
     final array_ptr = arrayPtr[0];
     final sizeArray_ptr = sizeArrayPtr[0];
 
@@ -146,17 +130,17 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(dirPathPtr);
     calloc.free(arrayPtr);
     calloc.free(sizeArrayPtr);
-    if(cryptKeyPtr != nullptr){
+    if (cryptKeyPtr != nullptr) {
       calloc.free(cryptKeyPtr);
     }
-    if(ivPtr != nullptr){
+    if (ivPtr != nullptr) {
       calloc.free(ivPtr);
     }
     return msgList;
   }
+
   /// 目前只对 ios端生效
-  static List<Map<String, dynamic>> selectLogfiles(
-      {required String directory}) {
+  static List<Map<String, dynamic>> selectLogfiles({required String directory}) {
     List<Map<String, dynamic>> logFiles = [];
 
     Pointer<Utf8> dirPtr = directory.toNativeUtf8();
@@ -173,11 +157,7 @@ class MXLogger with WidgetsBindingObserver {
         String? logInfo = _buffer2String(keyPtr.cast(), size);
         if (logInfo != null) {
           List<String> _list = logInfo.split(",");
-          Map<String, dynamic> _map = {
-            "name": _list[0],
-            "size": int.parse(_list[1]),
-            "timestamp": int.parse(_list[2])
-          };
+          Map<String, dynamic> _map = {"name": _list[0], "size": int.parse(_list[1]), "timestamp": int.parse(_list[2])};
           logFiles.add(_map);
         }
       }
@@ -196,8 +176,7 @@ class MXLogger with WidgetsBindingObserver {
   /// 释放log
   static void destroy({required String nameSpace, String? directory}) {
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
-    Pointer<Utf8> drPtr =
-        directory == null ? nullptr : directory.toNativeUtf8();
+    Pointer<Utf8> drPtr = directory == null ? nullptr : directory.toNativeUtf8();
     _destroy(nsPtr, drPtr);
     calloc.free(nsPtr);
     calloc.free(drPtr);
@@ -304,113 +283,78 @@ class MXLogger with WidgetsBindingObserver {
   }
 }
 
-final DynamicLibrary _nativeLib = Platform.isAndroid
-    ? DynamicLibrary.open("libmxlogger.so")
-    : DynamicLibrary.process();
+final DynamicLibrary _nativeLib = Platform.isAndroid ? DynamicLibrary.open("libmxlogger.so") : DynamicLibrary.process();
 
 String _mxlogger_function(String funcName) {
   return "flutter_mxlogger_" + funcName;
 }
 
 ///初始化logger
-final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>,
-        Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>) _initialize =
-    _nativeLib
+final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>)
+    _initialize = _nativeLib
         .lookup<
             NativeFunction<
-                Pointer<Void> Function(
-                    Pointer<Utf8>,
-                    Pointer<Utf8>,
-                    Pointer<Utf8>,
-                    Pointer<Utf8>,
-                    Pointer<Utf8>,
+                Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>,
                     Pointer<Utf8>)>>(_mxlogger_function("initialize"))
         .asFunction();
 
 final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>) _destroy = _nativeLib
-    .lookup<
-        NativeFunction<
-            Pointer<Void> Function(
-                Pointer<Utf8>, Pointer<Utf8>)>>(_mxlogger_function("destroy"))
+    .lookup<NativeFunction<Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>)>>(_mxlogger_function("destroy"))
     .asFunction();
 
-final void Function(
-        Pointer<Void>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Utf8>) _log =
-    _nativeLib
-        .lookup<
-            NativeFunction<
-                Void Function(Pointer<Void>, Pointer<Utf8>, Int32,
-                    Pointer<Utf8>, Pointer<Utf8>)>>(_mxlogger_function("log"))
-        .asFunction();
+final void Function(Pointer<Void>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Utf8>) _log = _nativeLib
+    .lookup<NativeFunction<Void Function(Pointer<Void>, Pointer<Utf8>, Int32, Pointer<Utf8>, Pointer<Utf8>)>>(
+        _mxlogger_function("log"))
+    .asFunction();
 
 final void Function(Pointer<Void>, int) _setFileLevel = _nativeLib
-    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-        _mxlogger_function("set_file_level"))
+    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(_mxlogger_function("set_file_level"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setEnable = _nativeLib
-    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-        _mxlogger_function("set_enable"))
+    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(_mxlogger_function("set_enable"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setConsoleEnable = _nativeLib
-    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-        _mxlogger_function("set_console_enable"))
+    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(_mxlogger_function("set_console_enable"))
     .asFunction();
 
 final Pointer<Int8> Function(Pointer<Void>) _getdDiskcachePath = _nativeLib
-    .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(
-        _mxlogger_function("get_diskcache_path"))
+    .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(_mxlogger_function("get_diskcache_path"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setMaxdiskAge = _nativeLib
-    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-        _mxlogger_function("set_max_disk_age"))
+    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(_mxlogger_function("set_max_disk_age"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setMaxdiskSize = _nativeLib
-    .lookup<NativeFunction<Void Function(Pointer<Void>, Uint64)>>(
-        _mxlogger_function("set_max_disk_size"))
+    .lookup<NativeFunction<Void Function(Pointer<Void>, Uint64)>>(_mxlogger_function("set_max_disk_size"))
     .asFunction();
 
 final void Function(Pointer<Void>) _removeExpireData = _nativeLib
-    .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
-        _mxlogger_function("remove_expire_data"))
+    .lookup<NativeFunction<Void Function(Pointer<Void>)>>(_mxlogger_function("remove_expire_data"))
     .asFunction();
 
-final int Function(Pointer<Utf8>, Pointer<Pointer<Pointer<Utf8>>>,
-        Pointer<Pointer<Uint32>>) _select_logfiles =
+final int Function(
+    Pointer<Utf8>,
+    Pointer<Pointer<Pointer<Utf8>>>,
+    Pointer<
+        Pointer<Uint32>>) _select_logfiles = _nativeLib
+    .lookup<NativeFunction<Uint64 Function(Pointer<Utf8>, Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>)>>(
+        _mxlogger_function("select_logfiles"))
+    .asFunction();
+
+final int Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Int32>, Pointer<Pointer<Pointer<Utf8>>>,
+        Pointer<Pointer<Uint32>>) _select_logmsg =
     _nativeLib
         .lookup<
-                NativeFunction<
-                    Uint64 Function(
-                        Pointer<Utf8>,
-                        Pointer<Pointer<Pointer<Utf8>>>,
-                        Pointer<Pointer<Uint32>>)>>(
-            _mxlogger_function("select_logfiles"))
+            NativeFunction<
+                Uint64 Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Int32>,
+                    Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>)>>(_mxlogger_function("select_logmsg"))
         .asFunction();
 
-final int Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Int32>,
-        Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>)
-    _select_logmsg = _nativeLib
-        .lookup<
-                NativeFunction<
-                    Uint64 Function(
-                        Pointer<Utf8>,
-                        Pointer<Utf8>,
-                        Pointer<Utf8>,
-                        Pointer<Int32>,
-                        Pointer<Pointer<Pointer<Utf8>>>,
-                        Pointer<Pointer<Uint32>>)>>(
-            _mxlogger_function("select_logmsg"))
-        .asFunction();
+final void Function(Pointer<Void>) _removeAll =
+    _nativeLib.lookup<NativeFunction<Void Function(Pointer<Void>)>>(_mxlogger_function("remove_all")).asFunction();
 
-final void Function(Pointer<Void>) _removeAll = _nativeLib
-    .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
-        _mxlogger_function("remove_all"))
-    .asFunction();
-
-final int Function(Pointer<Void>) _getLogSize = _nativeLib
-    .lookup<NativeFunction<Uint64 Function(Pointer<Void>)>>(
-        _mxlogger_function("get_log_size"))
-    .asFunction();
+final int Function(Pointer<Void>) _getLogSize =
+    _nativeLib.lookup<NativeFunction<Uint64 Function(Pointer<Void>)>>(_mxlogger_function("get_log_size")).asFunction();

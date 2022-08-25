@@ -68,7 +68,7 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,co
     auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,cryptKey,iv);
     logger -> map_key = map_key;
     (*global_instanceDic_)[map_key] = logger;
-    MXLoggerInfo("mxlogger Initialization succeeded: map_key:%s storage_policy:%s file_name:%s cryptKey:%s iv:%s",map_key.c_str(),storage_policy,file_name,cryptKey,iv);
+    MXLoggerInfo("mxlogger Initialization succeeded. map_key:%s storage_policy:%s file_name:%s is_crypt:%s",map_key.c_str(),storage_policy,file_name,cryptKey!=nullptr ? "true" : "false");
     
     return logger;
 }

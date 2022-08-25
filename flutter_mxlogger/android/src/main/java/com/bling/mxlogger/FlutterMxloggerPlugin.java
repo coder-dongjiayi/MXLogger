@@ -1,4 +1,4 @@
-package com.dongjiayi.mxlogger;
+package com.bling.mxlogger;
 
 import android.content.Context;
 
