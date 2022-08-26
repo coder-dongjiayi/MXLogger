@@ -27,6 +27,8 @@ class AnalyzerDatabase {
 
   static Future<List<Map<String, Object?>>> selectData(
       {required int page,int pageSize = 20,String? keyWord}) async {
+
+    print("开始搜索，关键词:${keyWord}");
     int start = (page - 1) * pageSize;
 
     List<Map<String, Object?>> result =

@@ -22,13 +22,16 @@ class LogListPage extends StatefulWidget {
 }
 
 class _LogListPageState extends State<LogListPage> {
+   FocusNode _focusNode = FocusNode();
   @override
   void initState() {
     super.initState();
+
   }
 
   @override
   Widget build(BuildContext context) {
+   
     return ChangeNotifierProvider(
       create: (context) {
         return LogController();
@@ -36,18 +39,22 @@ class _LogListPageState extends State<LogListPage> {
       builder: (context, child) {
         LogController logController =   context.read<LogController>();
 
-        return Scaffold(
+        return KeyboardListener(onKeyEvent: (event){
+          if(event.physicalKey.usbHidUsage == 0x00070028){
+            logController.entry();
+          }
+        }, focusNode: _focusNode, child: Scaffold(
           backgroundColor: MXTheme.themeColor,
-        appBar: const LogAppBar(),
+          appBar: const LogAppBar(),
           body: EasyRefresh(
             onLoad: () async{
               await Future.delayed(const Duration(seconds: 1));
               await logController.loadMore();
             },
             footer: ClassicFooter(
-            textStyle: TextStyle(color: MXTheme.white),
-            messageStyle: TextStyle(color: MXTheme.white),
-              iconTheme: IconThemeData(color: MXTheme.white)
+                textStyle: TextStyle(color: MXTheme.white),
+                messageStyle: TextStyle(color: MXTheme.white),
+                iconTheme: IconThemeData(color: MXTheme.white)
             ),
 
             child: DropTarget(
@@ -67,7 +74,7 @@ class _LogListPageState extends State<LogListPage> {
                   return null;
                 }, successWidgetBuilder:
                     (BuildContext context, bool? result) {
-                   final list =    context.watch<LogController>().dataSource;
+                  final list =    context.watch<LogController>().dataSource;
                   return LogListView(
                     dataSource: list,
                     callback: (index) {
@@ -79,7 +86,7 @@ class _LogListPageState extends State<LogListPage> {
                   );
                 })),
           ),
-        );
+        ));
       },
     );
   }

@@ -10,22 +10,36 @@ class LogController extends ChangeNotifier {
   List<LogModel> get dataSource => _dataSource;
 
   AsyncController asyncController = AsyncController();
-   int page = 1;
 
+  TextEditingController _searchController = TextEditingController();
+
+  TextEditingController get searchController => _searchController;
+  int page = 1;
+  String? _keyWord;
   Future<bool> refresh() async {
     page = 1;
-    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page);
+    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page,keyWord: _keyWord);
     List<LogModel> source = _transformLogModel(list);
     _dataSource = source;
     return true;
   }
   Future<bool> loadMore() async{
     page ++;
-    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page);
+    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page,keyWord: _keyWord);
     List<LogModel> source = _transformLogModel(list);
     _dataSource.addAll(source);
     notifyListeners();
     return true;
+  }
+  /// 点击回车键
+  void entry(){
+    String text =  _searchController.text.trim();
+    if(text == ""){
+      _keyWord = null;
+    }else{
+      _keyWord = text;
+    }
+    asyncController.refresh();
   }
 
   List<LogModel> _transformLogModel( List<Map<String, Object?>> list){
@@ -49,6 +63,13 @@ class LogController extends ChangeNotifier {
       _source.add(model);
     });
     return _source;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+
+    super.dispose();
   }
 
 }

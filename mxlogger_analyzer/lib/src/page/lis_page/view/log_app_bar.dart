@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../level/mx_level.dart';
 import '../../../theme/mx_theme.dart';
+import '../log_controller.dart';
 class LogAppBar extends StatefulWidget implements PreferredSizeWidget{
   const LogAppBar({Key? key}) : super(key: key);
 
@@ -63,14 +65,16 @@ class _LogAppBarState extends State<LogAppBar> {
            Icon(Icons.search,size: 20,color: MXTheme.subText),
           const SizedBox(width: 10),
           Expanded(child: TextField(
+            controller: context.read<LogController>().searchController,
             style: TextStyle(
+              fontSize: 16,
                 color: MXTheme.white
             ),
 
             decoration: InputDecoration(
               isCollapsed: true,
               hintText: "搜索关键词,回车确定",
-              hintStyle: TextStyle(color: MXTheme.text),
+              hintStyle: TextStyle(color: MXTheme.text,fontSize: 16),
               border: InputBorder.none,
             ),
           ))
