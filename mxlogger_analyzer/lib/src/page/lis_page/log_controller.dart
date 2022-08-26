@@ -5,14 +5,30 @@ import 'log_model.dart';
 
 class LogController extends ChangeNotifier {
 
-   AsyncController asyncController = AsyncController();
+  List<LogModel> _dataSource = [];
 
-  Future<void> insertData() async{
+  List<LogModel> get dataSource => _dataSource;
 
+  AsyncController asyncController = AsyncController();
+   int page = 1;
+
+  Future<bool> refresh() async {
+    page = 1;
+    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page);
+    List<LogModel> source = _transformLogModel(list);
+    _dataSource = source;
+    return true;
+  }
+  Future<bool> loadMore() async{
+    page ++;
+    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page);
+    List<LogModel> source = _transformLogModel(list);
+    _dataSource.addAll(source);
+    notifyListeners();
+    return true;
   }
 
-  Future<List<LogModel>> loadData() async {
-    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData();
+  List<LogModel> _transformLogModel( List<Map<String, Object?>> list){
     List<LogModel> _source = [];
     list.forEach((element) {
       int level = element["level"] as int;
@@ -34,4 +50,5 @@ class LogController extends ChangeNotifier {
     });
     return _source;
   }
+
 }

@@ -39,6 +39,7 @@ dependencies:
   file_selector: ^0.8.4+3
   sqflite: ^2.0.2+1
   provider: ^6.0.3
+  easy_refresh: ^3.0.4+2
   aes_crypt_null_safe: ^2.0.2
   desktop_drop: ^0.3.3
 dev_dependencies:
