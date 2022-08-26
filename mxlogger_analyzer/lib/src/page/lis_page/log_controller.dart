@@ -16,20 +16,30 @@ class LogController extends ChangeNotifier {
   TextEditingController get searchController => _searchController;
   int page = 1;
   String? _keyWord;
+
+  String? get keyWord => _keyWord;
+  bool _search = false;
+
+  bool get search => _search;
+
   Future<bool> refresh() async {
     page = 1;
-    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page,keyWord: _keyWord);
-    List<LogModel> source = _transformLogModel(list);
+    List<LogModel> source = await _searchData();
     _dataSource = source;
     return true;
   }
   Future<bool> loadMore() async{
     page ++;
-    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page,keyWord: _keyWord);
-    List<LogModel> source = _transformLogModel(list);
+    List<LogModel> source = await _searchData();
     _dataSource.addAll(source);
     notifyListeners();
     return true;
+  }
+
+  Future<List<LogModel>> _searchData() async{
+    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page,keyWord: _keyWord);
+    List<LogModel> source = _transformLogModel(list);
+    return  source;
   }
   /// 点击回车键
   void entry(){
@@ -39,6 +49,7 @@ class LogController extends ChangeNotifier {
     }else{
       _keyWord = text;
     }
+    _search = true;
     asyncController.refresh();
   }
 

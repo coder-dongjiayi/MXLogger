@@ -69,7 +69,9 @@ class _LogListPageState extends State<LogListPage> {
                 }, emptyWidgetBuilder:
                     (BuildContext context,  bool? result) {
                   if (logController.dataSource.isEmpty == true) {
-                    return  Center(child: Text("拖拽日志文件到窗口",style: TextStyle(color: MXTheme.white),));
+                    String emptyString = logController.keyWord == null ?  "拖拽日志文件到窗口" : "暂无搜索结果";
+
+                    return  Center(child: Text(emptyString,style: TextStyle(color: MXTheme.white),));
                   }
                   return null;
                 }, successWidgetBuilder:
