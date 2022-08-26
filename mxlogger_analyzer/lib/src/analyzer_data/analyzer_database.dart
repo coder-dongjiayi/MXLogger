@@ -26,7 +26,7 @@ class AnalyzerDatabase {
   }
 
   static Future<List<Map<String, Object?>>> selectData(
-      {required int page,int pageSize = 20}) async {
+      {required int page,int pageSize = 20,String? keyWord}) async {
     int start = (page - 1) * pageSize;
 
     List<Map<String, Object?>> result =

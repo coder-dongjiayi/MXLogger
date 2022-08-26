@@ -4,6 +4,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/page/detail_page/mxlogger_detail_page.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/log_model.dart';
+import 'package:mxlogger_analyzer/src/page/lis_page/view/log_app_bar.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/log_listview.dart';
 
 import 'package:provider/provider.dart';
@@ -37,6 +38,7 @@ class _LogListPageState extends State<LogListPage> {
 
         return Scaffold(
           backgroundColor: MXTheme.themeColor,
+        appBar: const LogAppBar(),
           body: EasyRefresh(
             onLoad: () async{
               await Future.delayed(const Duration(seconds: 1));

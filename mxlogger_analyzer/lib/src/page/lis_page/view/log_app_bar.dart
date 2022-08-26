@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 
-import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
-import 'package:mxlogger_analyzer/src/level/mx_level.dart';
-
-class SearchBar extends StatefulWidget {
-  const SearchBar({Key? key}) : super(key: key);
+import '../../../level/mx_level.dart';
+import '../../../theme/mx_theme.dart';
+class LogAppBar extends StatefulWidget implements PreferredSizeWidget{
+  const LogAppBar({Key? key}) : super(key: key);
 
   @override
-  _SearchBarState createState() => _SearchBarState();
+  State<LogAppBar> createState() => _LogAppBarState();
+
+  @override
+  // TODO: implement preferredSize
+  Size get preferredSize => const Size.fromHeight(80);
 }
 
-class _SearchBarState extends State<SearchBar> {
-
+class _LogAppBarState extends State<LogAppBar> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        //_search(),
+    return Container(
+     padding: EdgeInsets.only(top: 10),
+      child:  Column(
+        children: [
+        _search(),
         _level()
-      ],
+    ],
+      )
     );
   }
   Widget _level(){
@@ -48,23 +53,23 @@ class _SearchBarState extends State<SearchBar> {
     return Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: MXTheme.themeColor,
-        borderRadius: BorderRadius.all(Radius.circular(5))
+          color: MXTheme.themeColor,
+          borderRadius: BorderRadius.all(Radius.circular(5))
       ),
       height: 30,
       child: Row(
         children:  [
           const SizedBox(width: 10),
-          const Icon(Icons.search,size: 20),
+           Icon(Icons.search,size: 20,color: MXTheme.subText),
           const SizedBox(width: 10),
           Expanded(child: TextField(
             style: TextStyle(
-              color: MXTheme.white
+                color: MXTheme.white
             ),
 
             decoration: InputDecoration(
               isCollapsed: true,
-              hintText: "搜索关键词",
+              hintText: "搜索关键词,回车确定",
               hintStyle: TextStyle(color: MXTheme.text),
               border: InputBorder.none,
             ),
