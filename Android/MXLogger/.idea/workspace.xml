@@ -15,6 +15,7 @@
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxlogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/build.gradle" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,6 +45,11 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="mxloggerdemo" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="mxloggerdemo" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
@@ -291,10 +297,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.MXLogger:mxlogger [publishReleasePublicationToMavencentralRepository]" />
+        <item itemvalue="Gradle.MX [assemble]" />
         <item itemvalue="Gradle.MXLogger:mxlogger [assemble]" />
         <item itemvalue="Gradle.MXLogger:mxlogger [assembleRelease]" />
         <item itemvalue="Gradle.MXLogger [assembleRelease]" />
-        <item itemvalue="Gradle.MX [assemble]" />
       </list>
     </recent_temporary>
   </component>
