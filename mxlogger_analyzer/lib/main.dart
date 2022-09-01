@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_binary.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/log_list_page.dart';
+import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await AnalyzerDatabase.initDataBase();
+  await MXLoggerStorage.instance.initialize();
   runApp(const MyApp());
 }
 

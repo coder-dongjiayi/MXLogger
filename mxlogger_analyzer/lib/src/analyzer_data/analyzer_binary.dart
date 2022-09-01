@@ -12,10 +12,10 @@ const int AES_LENGTH = 16;
 class AnalyzerBinary {
   static Future<void> loadData(
       {required Uint8List binaryData, String? cryptKey, String? iv}) {
-    ///  cryptKey: "blingabcsudentck",iv: "blingabcsudentiv"
+
     Completer<void> completer = Completer();
     Future(() {
-      _decode(binaryData: binaryData, cryptKey: "blingabcsudentck", iv: "blingabcsudentiv");
+      _decode(binaryData: binaryData, cryptKey: cryptKey, iv: iv);
       completer.complete();
     });
     return completer.future;

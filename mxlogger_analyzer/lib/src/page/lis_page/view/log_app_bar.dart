@@ -73,7 +73,7 @@ class _LogAppBarState extends State<LogAppBar> {
 
             decoration: InputDecoration(
               isCollapsed: true,
-              hintText: "搜索关键词,回车确定",
+              hintText: "搜索关键词 回车确定",
               hintStyle: TextStyle(color: MXTheme.text,fontSize: 16),
               border: InputBorder.none,
             ),

@@ -110,7 +110,7 @@ class LogSerializeBuilder {
 //         _isMainThread = isMainThread,
 //         _timestamp = timestamp;
 //
-//   /// Finish building, and store into the [fbBuilder].
+//   /// Finish building, and storage into the [fbBuilder].
 //   @override
 //   int finish(
 //       fb.Builder fbBuilder) {
