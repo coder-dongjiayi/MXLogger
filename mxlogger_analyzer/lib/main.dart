@@ -49,7 +49,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-   // return LogListPage();
     return  Scaffold(
 
       body: Row(
@@ -69,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 20),
-                    child: const Icon(Icons.settings,color: Colors.white),
+                    child:  Icon(Icons.settings,color:  MXTheme.subText),
                   ),
                 ),
                 items: [
@@ -79,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     highlightSelectedColor: Colors.transparent,
                     isSelected: true,
                     onTap: () {},
-                    icon: const Icon(Icons.home,color: Colors.white),
+                    icon:  Icon(Icons.home,color: MXTheme.white),
                   ),
 
                 ],
