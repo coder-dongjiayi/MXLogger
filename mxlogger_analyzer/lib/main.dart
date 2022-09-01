@@ -68,8 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   },
                   child: Container(
-                    margin: EdgeInsets.only(bottom: 20),
-                    child: Icon(Icons.settings,color: Colors.white),
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: const Icon(Icons.settings,color: Colors.white),
                   ),
                 ),
                 items: [
@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             },
           ),
-          Expanded(child: const LogListPage())
+          const Expanded(child: LogListPage())
         ],
       ),
 
