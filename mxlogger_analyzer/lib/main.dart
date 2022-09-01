@@ -1,13 +1,12 @@
 
 
-import 'dart:typed_data';
+import 'package:flutter_side_menu/flutter_side_menu.dart';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_binary.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/log_list_page.dart';
 import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
+import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await AnalyzerDatabase.initDataBase();
@@ -53,17 +52,44 @@ class _MyHomePageState extends State<MyHomePage> {
    // return LogListPage();
     return  Scaffold(
 
-      body: LogListPage(),
-      // body: Center(
-      //     child: ElevatedButton(
-      //         onPressed: () async{
-      //           XFile? file = await openFile(
-      //               initialDirectory: "/Users/dongjiayi/Desktop/log");
-      //           Uint8List? data = await file?.readAsBytes();
-      //           if (data == null) return;
-      //           AnalyzerBinary.loadData(binaryData: data);
-      //         },
-      //         child: Text("选择日志文件"))),
+      body: Row(
+        children: [
+          SideMenu(
+            backgroundColor: MXTheme.sliderColor,
+            position: SideMenuPosition.left,
+           hasResizer: false,
+          hasResizerToggle: false,
+            maxWidth: 60,
+            minWidth: 60,
+            builder: (data) {
+              return SideMenuData(
+                footer: GestureDetector(
+                  onTap: (){
+
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(bottom: 20),
+                    child: Icon(Icons.settings,color: Colors.white),
+                  ),
+                ),
+                items: [
+                  SideMenuItemDataTile(
+                    unSelectedColor: Colors.transparent,
+                    selectedColor: Colors.transparent,
+                    highlightSelectedColor: Colors.transparent,
+                    isSelected: true,
+                    onTap: () {},
+                    icon: const Icon(Icons.home,color: Colors.white),
+                  ),
+
+                ],
+              );
+            },
+          ),
+          Expanded(child: const LogListPage())
+        ],
+      ),
+
     );
   }
 }

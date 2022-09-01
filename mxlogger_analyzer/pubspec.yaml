@@ -43,6 +43,7 @@ dependencies:
   aes_crypt_null_safe: ^2.0.2
   desktop_drop: ^0.3.3
   shared_preferences: ^2.0.15
+  flutter_side_menu: ^0.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

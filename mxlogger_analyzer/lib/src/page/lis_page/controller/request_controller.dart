@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
-import '../detail_page/view/async_future_loader.dart';
-import 'log_model.dart';
 
-class LogController extends ChangeNotifier {
+import 'package:flutter/cupertino.dart';
+
+import '../../../analyzer_data/analyzer_database.dart';
+import '../../detail_page/view/async_future_loader.dart';
+import '../log_model.dart';
+
+class RequestController extends ChangeNotifier{
 
   List<LogModel> _dataSource = [];
 
@@ -11,17 +13,20 @@ class LogController extends ChangeNotifier {
 
   AsyncController asyncController = AsyncController();
 
-  TextEditingController _searchController = TextEditingController();
-
-  TextEditingController get searchController => _searchController;
   int page = 1;
+
   String? _keyWord;
 
+
   String? get keyWord => _keyWord;
-  bool _search = false;
 
-  bool get search => _search;
 
+  void updateKeyWord(String keyword){
+    String? _kw = keyword == "" ? null : keyword;
+    if(_kw == _keyWord) return;
+    _keyWord = _kw;
+    asyncController.refresh();
+  }
   Future<bool> refresh() async {
     page = 1;
     List<LogModel> source = await _searchData();
@@ -36,23 +41,13 @@ class LogController extends ChangeNotifier {
     return true;
   }
 
+
   Future<List<LogModel>> _searchData() async{
+
     List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page,keyWord: _keyWord);
     List<LogModel> source = _transformLogModel(list);
     return  source;
   }
-  /// 点击回车键
-  void entry(){
-    String text =  _searchController.text.trim();
-    if(text == ""){
-      _keyWord = null;
-    }else{
-      _keyWord = text;
-    }
-    _search = true;
-    asyncController.refresh();
-  }
-
   List<LogModel> _transformLogModel( List<Map<String, Object?>> list){
     List<LogModel> _source = [];
     list.forEach((element) {
@@ -75,12 +70,4 @@ class LogController extends ChangeNotifier {
     });
     return _source;
   }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-
-    super.dispose();
-  }
-
 }

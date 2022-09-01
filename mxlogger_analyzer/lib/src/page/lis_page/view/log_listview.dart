@@ -43,7 +43,7 @@ class _LogListViewState extends State<LogListView> {
                 },
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  color: Colors.transparent,
+                  color: index %2 == 0 ? MXTheme.themeColor : MXTheme.itemBackground,
                   child: _item(
                       name: log.name ?? "",
                       msg: log.msg ?? "",

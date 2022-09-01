@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../level/mx_level.dart';
 import '../../../theme/mx_theme.dart';
-import '../log_controller.dart';
+import '../controller/mx_textfield_controller.dart';
 class LogAppBar extends StatefulWidget implements PreferredSizeWidget{
   const LogAppBar({Key? key}) : super(key: key);
 
@@ -65,11 +65,16 @@ class _LogAppBarState extends State<LogAppBar> {
            Icon(Icons.search,size: 20,color: MXTheme.subText),
           const SizedBox(width: 10),
           Expanded(child: TextField(
-            controller: context.read<LogController>().searchController,
+            autofocus: true,
+            focusNode: context.read<MXTextFieldController>().focusNode,
+            controller: context.read<MXTextFieldController>().searchController,
             style: TextStyle(
               fontSize: 16,
                 color: MXTheme.white
             ),
+            onChanged: (value){
+              context.read<MXTextFieldController>().searchChange(context, value);
+            },
 
             decoration: InputDecoration(
               isCollapsed: true,
