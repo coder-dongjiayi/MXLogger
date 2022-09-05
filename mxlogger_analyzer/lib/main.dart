@@ -48,55 +48,65 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return MultiProvider(providers: [
       ChangeNotifierProvider(create: (_)=> MXLoggerController()),
-    ],child: Scaffold(
-      body: Row(
-        children: [
-          SideMenu(
-            backgroundColor: MXTheme.sliderColor,
-            position: SideMenuPosition.left,
-            hasResizer: false,
-            hasResizerToggle: false,
-            maxWidth: 60,
-            minWidth: 60,
-            builder: (data) {
-              return SideMenuData(
-                footer: GestureDetector(
-                  onTap: () {
-
-                    _pageController.jumpToPage(1);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    child: Icon(Icons.settings, color: MXTheme.subText),
-                  ),
-                ),
-                items: [
-                  SideMenuItemDataTile(
-                    unSelectedColor: Colors.transparent,
-                    selectedColor: Colors.transparent,
-                    highlightSelectedColor: Colors.transparent,
-                    isSelected: true,
+    ],builder: (context,_){
+      return Scaffold(
+        body: Row(
+          children: [
+            SideMenu(
+              backgroundColor: MXTheme.sliderColor,
+              position: SideMenuPosition.left,
+              hasResizer: false,
+              hasResizerToggle: false,
+              maxWidth: 60,
+              minWidth: 60,
+              builder: (data) {
+                return SideMenuData(
+                  footer: GestureDetector(
                     onTap: () {
-                      _pageController.jumpToPage(0);
-                    },
-                    icon: Icon(Icons.home, color: MXTheme.white),
-                  ),
-                ],
-              );
-            },
-          ),
-          Expanded(
-              child: PageView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  controller: _pageController,
-                  itemCount: _dataSource.length,
 
-                  scrollDirection: Axis.vertical,
-                  itemBuilder: (context, index) {
-                    return _dataSource[index];
-                  }))
-        ],
-      ),
-    ),);
+                      _pageController.jumpToPage(1);
+                      context.read<MXLoggerController>().setSelectedIndex(1);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 20),
+                      child: Builder(builder: (context){
+                        int index =  context.select<MXLoggerController,int>((value) => value.selectedIndex);
+                        return Icon(Icons.settings, color: index == 1 ? MXTheme.white :MXTheme.subText);
+                      },),
+                    ),
+                  ),
+                  items: [
+                    SideMenuItemDataTile(
+                      unSelectedColor: Colors.transparent,
+                      selectedColor: Colors.transparent,
+                      highlightSelectedColor: Colors.transparent,
+                      isSelected: true,
+                      onTap: () {
+                        _pageController.jumpToPage(0);
+                        context.read<MXLoggerController>().setSelectedIndex(0);
+                      },
+                      icon: Builder(builder: (context){
+                        int index =  context.select<MXLoggerController,int>((value) => value.selectedIndex);
+                        return Icon(Icons.home, color: index == 0 ? MXTheme.white :MXTheme.subText);
+                      }),
+                    ),
+                  ],
+                );
+              },
+            ),
+            Expanded(
+                child: PageView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    controller: _pageController,
+                    itemCount: _dataSource.length,
+
+                    scrollDirection: Axis.vertical,
+                    itemBuilder: (context, index) {
+                      return _dataSource[index];
+                    }))
+          ],
+        ),
+      );
+    },);
   }
 }

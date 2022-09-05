@@ -5,6 +5,15 @@ import '../page/lis_page/controller/request_controller.dart';
 class MXLoggerController extends ChangeNotifier{
 
   RequestController? _requestController;
+  int _selectedIndex = 0;
+
+  int get selectedIndex => _selectedIndex;
+
+  void setSelectedIndex(int index){
+    if(index == _selectedIndex) return;
+    _selectedIndex = index;
+    notifyListeners();
+  }
 
   void addRequestController(RequestController requestController){
     _requestController = requestController;
