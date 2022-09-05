@@ -2,10 +2,12 @@ import 'package:flutter_side_menu/flutter_side_menu.dart';
 
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
+import 'package:mxlogger_analyzer/src/controller/mxlogger_controller.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/log_list_page.dart';
 import 'package:mxlogger_analyzer/src/page/setting/setting_page.dart';
 import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
 import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +46,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MultiProvider(providers: [
+      ChangeNotifierProvider(create: (_)=> MXLoggerController()),
+    ],child: Scaffold(
       body: Row(
         children: [
           SideMenu(
@@ -83,8 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Expanded(
               child: PageView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                controller: _pageController,
+                  physics: NeverScrollableScrollPhysics(),
+                  controller: _pageController,
                   itemCount: _dataSource.length,
 
                   scrollDirection: Axis.vertical,
@@ -93,6 +97,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   }))
         ],
       ),
-    );
+    ),);
   }
 }

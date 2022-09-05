@@ -31,6 +31,7 @@ class RequestController extends ChangeNotifier{
     page = 1;
     List<LogModel> source = await _searchData();
     _dataSource = source;
+    notifyListeners();
     return true;
   }
   Future<bool> loadMore() async{

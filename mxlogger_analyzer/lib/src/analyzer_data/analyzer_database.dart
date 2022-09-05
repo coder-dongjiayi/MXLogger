@@ -40,7 +40,10 @@ class AnalyzerDatabase {
 
     return result;
   }
-
+ static Future<void> deleteData() async{
+   await _db.delete("mxlog");
+   await _db.delete("sqlite_sequence",where: " name = 'mxlog'");
+ }
   static Future<void> insertData(
       {String? name,
       String? tag,

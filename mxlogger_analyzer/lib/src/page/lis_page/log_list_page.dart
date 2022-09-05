@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:mxlogger_analyzer/src/controller/mxlogger_controller.dart';
 import 'package:mxlogger_analyzer/src/page/detail_page/mxlogger_detail_page.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/controller/request_controller.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/log_model.dart';
@@ -38,7 +39,12 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => RequestController()),
+
+        ChangeNotifierProvider(create: (_){
+          RequestController controller =    RequestController();
+          context.read<MXLoggerController>().addRequestController(controller);
+          return controller;
+        }),
         ChangeNotifierProvider(create: (_) => MXTextFieldController())
       ],
       builder: (context, child) {
@@ -59,6 +65,11 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
                   await Future.delayed(const Duration(seconds: 1));
                   await requestController.loadMore();
                 },
+                header: ClassicHeader(
+                    textStyle: TextStyle(color: MXTheme.white),
+                    messageStyle: TextStyle(color: MXTheme.white),
+                    iconTheme: IconThemeData(color: MXTheme.white)
+                ),
                 footer: ClassicFooter(
                     textStyle: TextStyle(color: MXTheme.white),
                     messageStyle: TextStyle(color: MXTheme.white),
