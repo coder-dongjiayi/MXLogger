@@ -25,8 +25,8 @@ class LogListPage extends StatefulWidget {
   State<LogListPage> createState() => _LogListPageState();
 }
 
-class _LogListPageState extends State<LogListPage> {
-  FocusNode _focusNode = FocusNode();
+class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClientMixin{
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +34,7 @@ class _LogListPageState extends State<LogListPage> {
 
   @override
   Widget build(BuildContext context) {
-
+    super.build(context);
 
     return MultiProvider(
       providers: [
@@ -50,7 +50,7 @@ class _LogListPageState extends State<LogListPage> {
                 textFieldController.entry(context);
               }
             },
-            focusNode: _focusNode,
+            focusNode: FocusNode(),
             child: Scaffold(
               backgroundColor: MXTheme.themeColor,
               appBar: const LogAppBar(),
@@ -116,4 +116,8 @@ class _LogListPageState extends State<LogListPage> {
       },
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
