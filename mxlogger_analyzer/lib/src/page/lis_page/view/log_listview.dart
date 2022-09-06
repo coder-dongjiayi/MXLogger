@@ -30,6 +30,7 @@ class _LogListViewState extends State<LogListView> {
 
     return Container(
       margin: const EdgeInsets.only(top: 10),
+
       child:  ListView.builder(
           itemCount: widget.dataSource.length,
           physics: const AlwaysScrollableScrollPhysics(),
@@ -43,6 +44,7 @@ class _LogListViewState extends State<LogListView> {
                 },
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+
                   color: index %2 == 0 ? MXTheme.themeColor : MXTheme.itemBackground,
                   child: _item(
                       name: log.name ?? "",

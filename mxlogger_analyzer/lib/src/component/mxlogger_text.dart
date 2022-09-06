@@ -7,13 +7,14 @@ enum TitleStyle{
 }
 
 class MXLoggerText extends StatelessWidget {
-  const MXLoggerText({Key? key, required this.text, this.titleStyle}) : super(key: key);
+  const MXLoggerText({Key? key, required this.text, this.titleStyle, this.style}) : super(key: key);
    final String text;
+   final TextStyle? style;
    final TitleStyle? titleStyle;
   @override
   Widget build(BuildContext context) {
 
-    return Text(text,style: TextStyle(color: MXTheme.white,fontSize: _fontSize()));
+    return Text(text,style: style ?? TextStyle(color: MXTheme.white,fontSize: _fontSize()));
   }
 
   double _fontSize(){

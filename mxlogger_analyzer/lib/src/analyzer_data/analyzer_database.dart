@@ -26,15 +26,24 @@ class AnalyzerDatabase {
   }
 
   static Future<List<Map<String, Object?>>> selectData(
-      {required int page, int pageSize = 20, String? keyWord}) async {
+      {required int page, int pageSize = 20, String? keyWord,List<int>? levels}) async {
 
     int start = (page - 1) * pageSize;
 
-    String? where;
+    String where = "1=1";
 
     if(keyWord!= null){
       where = "(msg like'%$keyWord%')";
     }
+   if(levels?.isEmpty == false){
+     List<String> _levelSqls = [];
+     levels?.forEach((element) {
+       _levelSqls.add("level=$element");
+
+     });
+     where = where + " and " + "${_levelSqls.join(" or ")}";
+   }
+
     List<Map<String, Object?>> result = await _db.query("mxlog",
         orderBy: "timestamp desc",limit: pageSize,offset: start,where: where);
 

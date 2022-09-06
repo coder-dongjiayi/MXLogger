@@ -21,26 +21,32 @@ String levelName(int level){
 final List<Map<String,dynamic>> MXLevels = [
   {
     "level":"ALL",
-    "color":MXTheme.white
+    "color":MXTheme.white,
+    "number":-1,
   },
   {
     "level":"DEBUG",
     "color":MXTheme.debug,
+    "number":0,
   },
   {
     "level":"INFO",
     "color":MXTheme.info,
+    "number":1,
   },
   {
     "level":"WAENING",
     "color":MXTheme.warn,
+    "number":2,
   },
   {
     "level":"ERROR",
     "color":MXTheme.error,
+    "number":3,
   },
   {
     "level":"FATAL",
     "color":MXTheme.fatal,
+    "number":4,
   }
 ];

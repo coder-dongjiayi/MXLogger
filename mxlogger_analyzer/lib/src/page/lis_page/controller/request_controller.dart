@@ -20,7 +20,31 @@ class RequestController extends ChangeNotifier{
 
   String? get keyWord => _keyWord;
 
+  final Set<int> _searchLevels = {};
 
+  Set<int> get searchLevels => _searchLevels;
+
+  bool get search=> _keyWord!=null || _searchLevels.isNotEmpty;
+
+
+  bool containsLevel(int level){
+    return _searchLevels.contains(level);
+  }
+
+ void updateLevels(int level){
+   if(level == -1){
+     _searchLevels.clear();
+   }else{
+     if(_searchLevels.contains(level) == true){
+       _searchLevels.remove(level);
+     }else{
+       _searchLevels.add(level);
+     }
+
+   }
+    notifyListeners();
+   asyncController.refresh();
+ }
   void updateKeyWord(String keyword){
     String? _kw = keyword == "" ? null : keyword;
     if(_kw == _keyWord) return;
@@ -45,7 +69,7 @@ class RequestController extends ChangeNotifier{
 
   Future<List<LogModel>> _searchData() async{
 
-    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page,keyWord: _keyWord);
+    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page,keyWord: _keyWord,levels: _searchLevels.toList());
     List<LogModel> source = _transformLogModel(list);
     return  source;
   }

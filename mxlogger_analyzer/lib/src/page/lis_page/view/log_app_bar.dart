@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../level/mx_level.dart';
 import '../../../theme/mx_theme.dart';
 import '../controller/mx_textfield_controller.dart';
+import '../controller/request_controller.dart';
 class LogAppBar extends StatefulWidget implements PreferredSizeWidget{
   const LogAppBar({Key? key}) : super(key: key);
 
@@ -19,10 +20,11 @@ class _LogAppBarState extends State<LogAppBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-     padding: EdgeInsets.only(top: 10),
+     padding: EdgeInsets.only(top: 10,left: 10),
       child:  Column(
         children: [
         _search(),
+
         _level()
     ],
       )
@@ -34,20 +36,31 @@ class _LogAppBarState extends State<LogAppBar> {
       child: ListView(
         scrollDirection:Axis.horizontal,
         children: MXLevels.map((e){
-          return _button(e["level"],e["color"]);
+          return _button(e["number"], e["level"],e["color"]);
         }).toList(),
       ),
     );
   }
 
-  Widget _button(String text,Color textColor){
-    return Container(
-      padding: const EdgeInsets.only(left: 10,right: 10,bottom: 5,top: 10),
-      child: Column(
-        children: [
-          Text(text,style: TextStyle(color: textColor,fontSize: 16))
-        ],
-      ),
+  Widget _button(int number, String text,Color textColor){
+    return GestureDetector(
+      onTap: (){
+       context.read<RequestController>().updateLevels(number);
+      },
+      child: Builder(builder: (context){
+        context.select<RequestController,int>((value) => value.searchLevels.length);
+       Color color =  context.read<RequestController>().containsLevel(number) == true ? MXTheme.buttonColor : Colors.transparent;
+        return Container(
+          padding: const EdgeInsets.only(left: 7,right: 7),
+          margin: EdgeInsets.only(right: 10,top: 10),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: color,
+          ),
+          child: Text(text,style: TextStyle(color: textColor,fontSize: 15)),
+        );
+      },),
     );
   }
   Widget _search(){

@@ -17,12 +17,6 @@ class LogModel {
 
   @override
   String toString() {
-    return "name:$name" +
-        "tag:$tag" +
-        "msg:$msg" +
-        "level:$level" +
-        "threadId:$threadId" +
-        "isMainThread:$isMainThread" +
-        "timestamp:$timestamp";
+    return "name:$name\ntag:$tag\nlevel:$level\nthreadId:$threadId\nisMainThread:$isMainThread\ntimestamp:$timestamp msg:$msg\n";
   }
 }

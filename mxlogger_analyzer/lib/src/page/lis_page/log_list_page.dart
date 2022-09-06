@@ -52,8 +52,11 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
         MXTextFieldController textFieldController = context.read<MXTextFieldController>();
         return KeyboardListener(
             onKeyEvent: (event) {
+
               if (event.physicalKey.usbHidUsage == 0x00070028) {
                 textFieldController.entry(context);
+              }else if(event.physicalKey.usbHidUsage == 0x0007002b){
+                textFieldController.focusNode.requestFocus();
               }
             },
             focusNode: FocusNode(),
@@ -65,18 +68,14 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
                   await Future.delayed(const Duration(seconds: 1));
                   await requestController.loadMore();
                 },
-                header: ClassicHeader(
-                    textStyle: TextStyle(color: MXTheme.white),
-                    messageStyle: TextStyle(color: MXTheme.white),
-                    iconTheme: IconThemeData(color: MXTheme.white)
-                ),
                 footer: ClassicFooter(
                     textStyle: TextStyle(color: MXTheme.white),
                     messageStyle: TextStyle(color: MXTheme.white),
                     iconTheme: IconThemeData(color: MXTheme.white)),
                 child: DropTarget(
                     onDragDone: (detail) async {
-                      await CryptDialog.show(context);
+                    bool? result =   await CryptDialog.show(context);
+                    if(result != true) return;
 
                       XFile file = detail.files.first;
                       Uint8List? data = await file.readAsBytes();
@@ -94,14 +93,11 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
                         emptyWidgetBuilder:
                             (BuildContext context, bool? result) {
                           if (requestController.dataSource.isEmpty == true) {
-                            String emptyString = requestController.keyWord == null
-                                ? "拖拽日志文件到窗口"
-                                : "暂无搜索结果";
-
-                            return Center(
+                            context.read<MXTextFieldController>().focusNode.requestFocus();
+                            return requestController.search == false ? _empty() : Center(
                                 child: Text(
-                              emptyString,
-                              style: TextStyle(color: MXTheme.white),
+                              "暂无搜索结果",
+                              style: TextStyle(color: MXTheme.subText),
                             ));
                           }
                           return null;
@@ -125,6 +121,23 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
               ),
             ));
       },
+    );
+  }
+
+  Widget _empty(){
+
+    return  Center(
+      child: Column(
+        mainAxisAlignment:MainAxisAlignment.center,
+        children: [
+           Icon(Icons.file_copy_sharp,size: 40,color: MXTheme.buttonColor,),
+          const SizedBox(height: 15),
+          Text(
+            "拖拽日志文件到窗口",
+            style: TextStyle(color: MXTheme.subText),
+          )
+        ],
+      ),
     );
   }
 
