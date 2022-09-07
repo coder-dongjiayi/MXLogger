@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mxlogger_analyzer/src/controller/mxlogger_controller.dart';
 import 'package:mxlogger_analyzer/src/page/detail_page/mxlogger_detail_page.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/controller/request_controller.dart';
@@ -63,62 +64,61 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
             child: Scaffold(
               backgroundColor: MXTheme.themeColor,
               appBar: const LogAppBar(),
-              body: EasyRefresh(
-                onLoad: () async {
-                  await Future.delayed(const Duration(seconds: 1));
-                  await requestController.loadMore();
-                },
-                footer: ClassicFooter(
-                    textStyle: TextStyle(color: MXTheme.white),
-                    messageStyle: TextStyle(color: MXTheme.white),
-                    iconTheme: IconThemeData(color: MXTheme.white)),
-                child: DropTarget(
-                    onDragDone: (detail) async {
+              body:  DropTarget(
+                  onDragDone: (detail) async {
                     bool? result =   await CryptDialog.show(context);
                     if(result != true) return;
 
-                      XFile file = detail.files.first;
-                      Uint8List? data = await file.readAsBytes();
-                      await AnalyzerBinary.loadData(
-                          binaryData: data,
-                          cryptKey: MXLoggerStorage.instance.cryptKey,
-                          iv: MXLoggerStorage.instance.cryptIv);
-                      requestController.asyncController.refresh();
-                    },
-                    child: AsyncFutureLoader(
-                        asyncController: requestController.asyncController,
-                        asyncBuilder: () {
-                          return requestController.refresh();
-                        },
-                        emptyWidgetBuilder:
-                            (BuildContext context, bool? result) {
-                          if (requestController.dataSource.isEmpty == true) {
-                            context.read<MXTextFieldController>().focusNode.requestFocus();
-                            return requestController.search == false ? _empty() : Center(
-                                child: Text(
-                              "暂无搜索结果",
-                              style: TextStyle(color: MXTheme.subText),
-                            ));
-                          }
-                          return null;
-                        },
-                        successWidgetBuilder:
-                            (BuildContext context, bool? result) {
-                          final list =
-                              context.watch<RequestController>().dataSource;
+                    XFile file = detail.files.first;
+                    Uint8List? data = await file.readAsBytes();
+
+                    await AnalyzerBinary.loadData(
+                        binaryData: data,
+                        cryptKey: MXLoggerStorage.instance.cryptKey,
+                        iv: MXLoggerStorage.instance.cryptIv,callback: (int total,int current){
+                      double progress = current / total;
+
+                      // Future.delayed(Duration.zero,(){
+                      //   EasyLoading.showProgress(progress,status: "当前进度:${progress * 100}%");
+                      // });
+
+                    });
+
+                    requestController.asyncController.refresh();
+                  },
+                  child: AsyncFutureLoader(
+                      asyncController: requestController.asyncController,
+                      asyncBuilder: () {
+                        return requestController.refresh();
+                      },
+                      emptyWidgetBuilder:
+                          (BuildContext context, bool? result) {
+                        if (requestController.dataSource.isEmpty == true) {
                           context.read<MXTextFieldController>().focusNode.requestFocus();
-                          return LogListView(
-                            dataSource: list,
-                            callback: (index) {
-                              Navigator.of(context)
-                                  .push(MaterialPageRoute(builder: (context) {
-                                return MXLoggerDetailPage(
-                                    logModel: requestController.dataSource[index]);
-                              }));
-                            },
-                          );
-                        })),
-              ),
+                          return requestController.search == false ? _empty() : Center(
+                              child: Text(
+                                "暂无搜索结果",
+                                style: TextStyle(color: MXTheme.subText),
+                              ));
+                        }
+                        return null;
+                      },
+                      successWidgetBuilder:
+                          (BuildContext context, bool? result) {
+                        final list =
+                            context.watch<RequestController>().dataSource;
+                        context.read<MXTextFieldController>().focusNode.requestFocus();
+                        return LogListView(
+                          dataSource: list,
+                          callback: (index) {
+                            Navigator.of(context)
+                                .push(MaterialPageRoute(builder: (context) {
+                              return MXLoggerDetailPage(
+                                  logModel: requestController.dataSource[index]);
+                            }));
+                          },
+                        );
+                      })),
             ));
       },
     );

@@ -7,22 +7,22 @@ import 'log_serialize.dart';
 
 import 'package:aes_crypt_null_safe/aes_crypt_null_safe.dart';
 const int AES_LENGTH = 16;
-
+typedef AnalyzerProgressCallback = void Function(int total,int current);
 
 class AnalyzerBinary {
   static Future<void> loadData(
-      {required Uint8List binaryData, String? cryptKey, String? iv}) {
+      {required Uint8List binaryData, String? cryptKey, String? iv,AnalyzerProgressCallback? callback}) {
 
     Completer<void> completer = Completer();
     Future(() {
-      _decode(binaryData: binaryData, cryptKey: cryptKey, iv: iv);
+      _decode(binaryData: binaryData, cryptKey: cryptKey, iv: iv,callback: callback);
       completer.complete();
     });
     return completer.future;
   }
 
   static void _decode(
-      {required Uint8List binaryData, String? cryptKey, String? iv}) {
+      {required Uint8List binaryData, String? cryptKey, String? iv,AnalyzerProgressCallback? callback}) {
     int sizeofUint32t = 4;
 
     int offsetLength = sizeofUint32t;
@@ -68,7 +68,7 @@ class AnalyzerBinary {
       }
 
 
-
+      callback?.call(totalSize,begin);
       begin = begin + sizeofUint32t + itemSize;
     }
   }

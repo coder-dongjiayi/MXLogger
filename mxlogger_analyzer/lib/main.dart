@@ -8,7 +8,7 @@ import 'package:mxlogger_analyzer/src/page/setting/setting_page.dart';
 import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
 import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
 import 'package:provider/provider.dart';
-
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AnalyzerDatabase.initDataBase();
@@ -22,8 +22,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return  MaterialApp(
       home: MyHomePage(),
+      builder:EasyLoading.init(),
     );
   }
 }

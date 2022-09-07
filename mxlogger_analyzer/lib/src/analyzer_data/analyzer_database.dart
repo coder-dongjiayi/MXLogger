@@ -43,10 +43,11 @@ class AnalyzerDatabase {
      });
      where = where + " and " + "${_levelSqls.join(" or ")}";
    }
+    // List<Map<String, Object?>> result = await _db.query("mxlog",
+    //     orderBy: "timestamp desc",limit: pageSize,offset: start,where: where);
 
     List<Map<String, Object?>> result = await _db.query("mxlog",
-        orderBy: "timestamp desc",limit: pageSize,offset: start,where: where);
-
+        orderBy: "timestamp desc",where: where);
     return result;
   }
  static Future<void> deleteData() async{
