@@ -72,6 +72,7 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
                     XFile file = detail.files.first;
                     Uint8List? data = await file.readAsBytes();
 
+                    EasyLoading.show(status: "正在解析数据,请耐心等待");
                     await AnalyzerBinary.loadData(
                         binaryData: data,
                         cryptKey: MXLoggerStorage.instance.cryptKey,
@@ -83,6 +84,7 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
                       // });
 
                     });
+                    EasyLoading.dismiss();
 
                     requestController.asyncController.refresh();
                   },
