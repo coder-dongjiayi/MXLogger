@@ -76,7 +76,7 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
                         file: file,
                         cryptKey: MXLoggerStorage.instance.cryptKey,
                         iv: MXLoggerStorage.instance.cryptIv,onStartCallback: (){
-                          EasyLoading.show(status: "正在导出数据");
+                          EasyLoading.show(status: "正在导入数据");
                      },onProgressCallback: (int total,int current){
                         double progress = current/total;
                         EasyLoading.showProgress(progress,status: "正在解析数据:${progress.truncate()}");
