@@ -69,24 +69,22 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
                     bool? result =   await CryptDialog.show(context);
                     if(result != true) return;
 
+
                     XFile file = detail.files.first;
-                    Uint8List? data = await file.readAsBytes();
 
-                    EasyLoading.show(status: "正在解析数据,请耐心等待");
-                    await AnalyzerBinary.loadData(
-                        binaryData: data,
+                     AnalyzerBinary.loadData(
+                        file: file,
                         cryptKey: MXLoggerStorage.instance.cryptKey,
-                        iv: MXLoggerStorage.instance.cryptIv,callback: (int total,int current){
-                      double progress = current / total;
+                        iv: MXLoggerStorage.instance.cryptIv,onStartCallback: (){
+                          EasyLoading.show(status: "正在导出数据");
+                     },onProgressCallback: (int total,int current){
+                        double progress = current/total;
+                        EasyLoading.showProgress(progress,status: "正在解析数据:${progress.truncate()}");
+                     },onEndCallback: (number){
+                       EasyLoading.showSuccess("共$number条数据导入成功");
+                       requestController.asyncController.refresh();
+                     });
 
-                      // Future.delayed(Duration.zero,(){
-                      //   EasyLoading.showProgress(progress,status: "当前进度:${progress * 100}%");
-                      // });
-
-                    });
-                    EasyLoading.dismiss();
-
-                    requestController.asyncController.refresh();
                   },
                   child: AsyncFutureLoader(
                       asyncController: requestController.asyncController,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_side_menu/flutter_side_menu.dart';
 
 import 'package:flutter/material.dart';
@@ -9,10 +11,13 @@ import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
 import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AnalyzerDatabase.initDataBase();
+
   await MXLoggerStorage.instance.initialize();
+  await AnalyzerDatabase.initDataBase(MXLoggerStorage.instance.databasePath);
+
   runApp(const MyApp());
 }
 

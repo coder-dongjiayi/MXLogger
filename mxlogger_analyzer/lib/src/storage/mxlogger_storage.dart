@@ -1,16 +1,24 @@
+import 'dart:io';
+
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
 class MXLoggerStorage{
   late SharedPreferences _sharedPreferences;
   static MXLoggerStorage instance = MXLoggerStorage._();
+  static late String  _databasePath;
 
- final String  _aesKey = "com.dongjiayi.mxlogger.aeskey";
+  String get databasePath => _databasePath;
+  final String  _aesKey = "com.dongjiayi.mxlogger.aeskey";
   final String _aesIv = "com.dongjiayi.mxlogger.aesiv";
+
   factory MXLoggerStorage() => instance;
   MXLoggerStorage._();
   Future<void> initialize() async{
     _sharedPreferences =  await SharedPreferences.getInstance();
+    Directory directory =  await getApplicationDocumentsDirectory();
+    _databasePath = directory.path;
   }
 
   String? get cryptKey => _sharedPreferences.getString(_aesKey);

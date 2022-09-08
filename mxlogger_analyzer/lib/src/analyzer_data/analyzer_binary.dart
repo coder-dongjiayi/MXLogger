@@ -1,38 +1,97 @@
 import 'dart:convert';
+
+import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:async';
+import 'package:file_selector/file_selector.dart';
+import 'package:flutter/material.dart';
+
+import '../storage/mxlogger_storage.dart';
 import 'analyzer_database.dart';
 import 'log_serialize.dart';
 
 import 'package:aes_crypt_null_safe/aes_crypt_null_safe.dart';
+
 const int AES_LENGTH = 16;
-typedef AnalyzerProgressCallback = void Function(int total,int current);
+typedef AnalyzerProgressCallback = void Function(int total, int current);
 
 class AnalyzerBinary {
-  static Future<void> loadData(
-      {required Uint8List binaryData, String? cryptKey, String? iv,AnalyzerProgressCallback? callback}) {
+  static void loadData(
+      {required XFile file,
+      String? cryptKey,
+      String? iv,
+      VoidCallback? onStartCallback,
+      AnalyzerProgressCallback? onProgressCallback,
+      ValueChanged<int>? onEndCallback}) async {
+    onStartCallback?.call();
 
-    Completer<void> completer = Completer();
-    Future(() {
-      _decode(binaryData: binaryData, cryptKey: cryptKey, iv: iv,callback: callback);
-      completer.complete();
+    Uint8List? _binaryData = await file.readAsBytes();
+
+    ReceivePort mainPort = ReceivePort();
+    await Isolate.spawn<SendPort>((SendPort port) {
+      _runBinaryData(port);
+    }, mainPort.sendPort);
+
+    mainPort.listen((message) {
+      if (message is Map) {
+        Map<String, dynamic> result = message as Map<String, dynamic>;
+        int finish = result["finish"];
+        if (finish == 1) {
+          int number = result["number"];
+          onEndCallback?.call(number);
+        }
+      } else if (message is SendPort) {
+        SendPort childPort = message;
+        childPort.send({
+          "binaryData": _binaryData,
+          "cryptKey": cryptKey,
+          "iv": iv,
+          "path": MXLoggerStorage.instance.databasePath
+        });
+      }
     });
-    return completer.future;
   }
 
-  static void _decode(
-      {required Uint8List binaryData, String? cryptKey, String? iv,AnalyzerProgressCallback? callback}) {
+  static void _runBinaryData(SendPort mainPort) async {
+    ReceivePort childPort = ReceivePort();
+    mainPort.send(childPort.sendPort);
+    var result = await childPort.first;
+    if ((result is Map) == false) return;
+
+    Uint8List _binaryData = result["binaryData"];
+    String? cryptKey = result["cryptKey"];
+    String? iv = result["iv"];
+    String path = result["path"];
+
+    await AnalyzerDatabase.initDataBase(path);
+   await _decode(
+        binaryData: _binaryData,
+        cryptKey: cryptKey,
+        iv: iv,
+        callback: (int total, int current) {});
+    int number =  AnalyzerDatabase.count();
+    mainPort.send({"finish": 1,"number":number});
+
+    AnalyzerDatabase.db.dispose();
+    mainPort.send(null);
+  }
+
+  static Future<void> _decode(
+      {required Uint8List binaryData,
+      String? cryptKey,
+      String? iv,
+      AnalyzerProgressCallback? callback}) async {
     int sizeofUint32t = 4;
 
     int offsetLength = sizeofUint32t;
 
     AesCrypt? crypt;
-    if(cryptKey != null){
-      crypt =  AesCrypt();
+    if (cryptKey != null) {
+      crypt = AesCrypt();
       Uint8List keyBytes = _replenishByte(cryptKey);
-      Uint8List ivBytes =_replenishByte( iv ?? cryptKey);
-      crypt.aesSetKeys(keyBytes,ivBytes);
+      Uint8List ivBytes = _replenishByte(iv ?? cryptKey);
+      crypt.aesSetKeys(keyBytes, ivBytes);
       crypt.aesSetMode(AesMode.cfb);
     }
 
@@ -48,14 +107,13 @@ class AnalyzerBinary {
       int start = begin + sizeofUint32t;
 
       Uint8List buffer = binaryData.sublist(start, start + itemSize);
-      try{
-        if(crypt != null){
-
-          buffer =   crypt.aesDecrypt(_replenishDataByte(buffer));
+      try {
+        if (crypt != null) {
+          buffer = crypt.aesDecrypt(_replenishDataByte(buffer));
         }
         LogSerialize logSerialize = LogSerialize(buffer);
 
-        AnalyzerDatabase.insertData(
+        await AnalyzerDatabase.insertData(
             name: logSerialize.name,
             tag: logSerialize.tag,
             msg: logSerialize.msg,
@@ -63,39 +121,38 @@ class AnalyzerBinary {
             threadId: logSerialize.threadId,
             isMainThread: logSerialize.isMainThread,
             timestamp: logSerialize.timestamp);
-      }catch(error){
+      } catch (error) {
         print("解析出错:$error");
       }
 
-
-      callback?.call(totalSize,begin);
+      callback?.call(totalSize, begin);
       begin = begin + sizeofUint32t + itemSize;
     }
   }
 
   /// 对 key 和 iv 进行补位
-  static Uint8List _replenishByte(String input){
+  static Uint8List _replenishByte(String input) {
     List<int> list = utf8.encode(input);
     Uint8List bytes = Uint8List.fromList(list);
-    if(bytes.length == AES_LENGTH)  return bytes;
+    if (bytes.length == AES_LENGTH) return bytes;
     final uint8List = Uint8List(AES_LENGTH);
     int number = min(AES_LENGTH, bytes.length);
-    for(int i = 0;i < number; i++){
+    for (int i = 0; i < number; i++) {
       uint8List[i] = bytes[i];
     }
     return uint8List;
   }
 
   /// 对data 进行补位
-  static Uint8List _replenishDataByte(Uint8List buffer){
+  static Uint8List _replenishDataByte(Uint8List buffer) {
     int bufferLen = buffer.length;
-    if(bufferLen % AES_LENGTH == 0) return buffer;
+    if (bufferLen % AES_LENGTH == 0) return buffer;
 
     int length = (bufferLen / AES_LENGTH).ceil();
-    final uint8List =  Uint8List(length * AES_LENGTH);
-    for(int i =0; i< bufferLen; i++){
+    final uint8List = Uint8List(length * AES_LENGTH);
+    for (int i = 0; i < bufferLen; i++) {
       uint8List[i] = buffer[i];
     }
-    return  uint8List;
+    return uint8List;
   }
 }

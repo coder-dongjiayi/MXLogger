@@ -57,6 +57,7 @@ class _CryptDialogState extends State<CryptDialog> {
         CupertinoDialogAction(
           child: const Text("确定"),
           onPressed: () async {
+
             await MXLoggerStorage.instance.saveAES(
                 cryptKey: _aesKeyController.text, iv: _aesIvController.text);
             Navigator.of(context).pop(true);
