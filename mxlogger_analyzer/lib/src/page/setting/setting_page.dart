@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
+import 'package:mxlogger_analyzer/src/page/setting/controller/setting_controller.dart';
 import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
 import 'package:provider/provider.dart';
 
@@ -29,36 +30,53 @@ class _SettingPageState extends State<SettingPage> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ChangeNotifierProvider(create: (_)=>SettingController(),builder: (context,_){
+      return Scaffold(
 
-      backgroundColor:  MXTheme.themeColor,
-      body: Container(
-        margin: const EdgeInsets.only(top: 20,left: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            MXLoggerButton(text: "清空数据",onPressed: (){
-              showAlert();
-            }),
-            const SizedBox(height: 20),
+          backgroundColor:  MXTheme.themeColor,
+          body: Container(
+            margin: const EdgeInsets.only(top: 20,left: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MXLoggerButton(text: "清空数据",onPressed: (){
+                  showAlert();
+                }),
+                const SizedBox(height: 20),
 
-            const MXLoggerText(text: "设置AES",titleStyle: TitleStyle.title,),
+                const MXLoggerText(text: "设置AES",titleStyle: TitleStyle.title,),
 
-            const SizedBox(height: 10),
-           SizedBox(width: 200,height: 35,child:   MXLoggerTextField(controller: keyController, hintText: "CryptKey",),),
+                const SizedBox(height: 10),
+                SizedBox(width: 200,height: 35,child:   MXLoggerTextField(controller: keyController, hintText: "CryptKey",),),
 
-            const SizedBox(height: 10),
-            SizedBox(width: 200,height: 35, child: MXLoggerTextField(controller: ivController, hintText: "CryptIv",)),
-            const SizedBox(height: 10),
-            MXLoggerButton(text: "确定修改",onPressed: (){
+                const SizedBox(height: 10),
+                SizedBox(width: 200,height: 35, child: MXLoggerTextField(controller: ivController, hintText: "CryptIv",)),
 
-              MXLoggerStorage.instance.saveAES(cryptKey: keyController.text.trim(),iv: ivController.text.trim());
 
-            }),
-          ],
-        ),
-      )
-    );
+                const SizedBox(height: 10),
+                MXLoggerButton(text: "确定修改",onPressed: (){
+
+                  MXLoggerStorage.instance.saveAES(cryptKey: keyController.text.trim(),iv: ivController.text.trim());
+
+                }),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                   Builder(builder: (context){
+                   bool selected =   context.select<SettingController,bool>((value) => value.saveCrypt);
+                     return  Checkbox(value: selected, activeColor:MXTheme.debug, onChanged: (value){
+                       context.read<SettingController>().saveCryptState(value ?? false);
+                     });
+                   }),
+
+                    MXLoggerText(text: "拖入日志文件不再提示输入key和iv",style: TextStyle(color: MXTheme.text),),
+                  ],
+                ),
+              ],
+            ),
+          )
+      );
+    },);
   }
 
   void showAlert(){

@@ -12,7 +12,7 @@ class MXLoggerStorage{
   String get databasePath => _databasePath;
   final String  _aesKey = "com.dongjiayi.mxlogger.aeskey";
   final String _aesIv = "com.dongjiayi.mxlogger.aesiv";
-
+  final String _cryptAlertKey = "com.dongjiayi.mxlogger.cryptAlert";
   factory MXLoggerStorage() => instance;
   MXLoggerStorage._();
   Future<void> initialize() async{
@@ -23,6 +23,10 @@ class MXLoggerStorage{
 
   String? get cryptKey => _sharedPreferences.getString(_aesKey);
   String? get cryptIv => _sharedPreferences.getString(_aesIv);
+  bool get cryptAlert => _sharedPreferences.getBool(_cryptAlertKey) ?? false;
+ Future<void> saveCryptAlert(bool? state) async{
+   await _sharedPreferences.setBool(_cryptAlertKey, state ?? false);
+ }
 
   Future<void> saveAES({String? cryptKey,String? iv}) async{
 

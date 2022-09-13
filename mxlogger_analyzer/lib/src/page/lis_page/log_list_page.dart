@@ -75,10 +75,12 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
                 },
                   onDragDone: (detail) async {
 
-                    bool? result =   await CryptDialog.show(context);
-                    mxLoggerController.dropTargetAction(false);
-                    if(result != true) return;
-                    
+                   if(MXLoggerStorage.instance.cryptAlert != true){
+                     bool? result =   await CryptDialog.show(context);
+                     mxLoggerController.dropTargetAction(false);
+                     if(result != true) return;
+                   }
+
                     XFile file = detail.files.first;
 
                      AnalyzerBinary.loadData(
