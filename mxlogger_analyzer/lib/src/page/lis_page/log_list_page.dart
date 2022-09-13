@@ -51,6 +51,8 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
       builder: (context, child) {
         RequestController requestController = context.read<RequestController>();
         MXTextFieldController textFieldController = context.read<MXTextFieldController>();
+        MXLoggerController mxLoggerController = context.read<MXLoggerController>();
+
         return KeyboardListener(
             onKeyEvent: (event) {
 
@@ -65,11 +67,18 @@ class _LogListPageState extends State<LogListPage> with AutomaticKeepAliveClient
               backgroundColor: MXTheme.themeColor,
               appBar: const LogAppBar(),
               body:  DropTarget(
+                 onDragEntered: (detail){
+                   mxLoggerController.dropTargetAction(true);
+                 },
+                onDragExited: (detail){
+                  mxLoggerController.dropTargetAction(false);
+                },
                   onDragDone: (detail) async {
+
                     bool? result =   await CryptDialog.show(context);
+                    mxLoggerController.dropTargetAction(false);
                     if(result != true) return;
-
-
+                    
                     XFile file = detail.files.first;
 
                      AnalyzerBinary.loadData(

@@ -8,7 +8,13 @@ class MXLoggerController extends ChangeNotifier{
   int _selectedIndex = 0;
 
   int get selectedIndex => _selectedIndex;
+  bool _dropVisibility = false;
+  bool get dropVisibility => _dropVisibility;
 
+  void dropTargetAction(bool end){
+    _dropVisibility  = end;
+     notifyListeners();
+  }
   void setSelectedIndex(int index){
     if(index == _selectedIndex) return;
     _selectedIndex = index;

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
 import 'package:mxlogger_analyzer/src/controller/mxlogger_controller.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/log_list_page.dart';
+import 'package:mxlogger_analyzer/src/page/lis_page/view/drop_target_view.dart';
 import 'package:mxlogger_analyzer/src/page/setting/setting_page.dart';
 import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
 import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
@@ -27,9 +28,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
+    return MaterialApp(
       home: MyHomePage(),
-      builder:EasyLoading.init(),
+      builder: EasyLoading.init(),
     );
   }
 }
@@ -52,68 +53,89 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(providers: [
-      ChangeNotifierProvider(create: (_)=> MXLoggerController()),
-    ],builder: (context,_){
-      return Scaffold(
-        body: Row(
-          children: [
-            SideMenu(
-              backgroundColor: MXTheme.sliderColor,
-              position: SideMenuPosition.left,
-              hasResizer: false,
-              hasResizerToggle: false,
-              maxWidth: 60,
-              minWidth: 60,
-              builder: (data) {
-                return SideMenuData(
-                  footer: GestureDetector(
-                    onTap: () {
-
-                      _pageController.jumpToPage(1);
-                      context.read<MXLoggerController>().setSelectedIndex(1);
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 20),
-                      child: Builder(builder: (context){
-                        int index =  context.select<MXLoggerController,int>((value) => value.selectedIndex);
-                        return Icon(Icons.settings, color: index == 1 ? MXTheme.white :MXTheme.subText);
-                      },),
-                    ),
-                  ),
-                  items: [
-                    SideMenuItemDataTile(
-                      unSelectedColor: Colors.transparent,
-                      selectedColor: Colors.transparent,
-                      highlightSelectedColor: Colors.transparent,
-                      isSelected: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MXLoggerController()),
+      ],
+      builder: (context, _) {
+        return Scaffold(
+          body: Row(
+            children: [
+              SideMenu(
+                backgroundColor: MXTheme.sliderColor,
+                position: SideMenuPosition.left,
+                hasResizer: false,
+                hasResizerToggle: false,
+                maxWidth: 60,
+                minWidth: 60,
+                builder: (data) {
+                  return SideMenuData(
+                    footer: GestureDetector(
                       onTap: () {
-                        _pageController.jumpToPage(0);
-                        context.read<MXLoggerController>().setSelectedIndex(0);
+                        _pageController.jumpToPage(1);
+                        context.read<MXLoggerController>().setSelectedIndex(1);
                       },
-                      icon: Builder(builder: (context){
-                        int index =  context.select<MXLoggerController,int>((value) => value.selectedIndex);
-                        return Icon(Icons.home, color: index == 0 ? MXTheme.white :MXTheme.subText);
-                      }),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 20),
+                        child: Builder(
+                          builder: (context) {
+                            int index = context.select<MXLoggerController, int>(
+                                (value) => value.selectedIndex);
+                            return Icon(Icons.settings,
+                                color: index == 1
+                                    ? MXTheme.white
+                                    : MXTheme.subText);
+                          },
+                        ),
+                      ),
                     ),
-                  ],
-                );
-              },
-            ),
-
-            Expanded(
-                child: PageView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    controller: _pageController,
-                    itemCount: _dataSource.length,
-
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (context, index) {
-                      return _dataSource[index];
-                    }))
-          ],
-        ),
-      );
-    },);
+                    items: [
+                      SideMenuItemDataTile(
+                        unSelectedColor: Colors.transparent,
+                        selectedColor: Colors.transparent,
+                        highlightSelectedColor: Colors.transparent,
+                        isSelected: true,
+                        onTap: () {
+                          _pageController.jumpToPage(0);
+                          context
+                              .read<MXLoggerController>()
+                              .setSelectedIndex(0);
+                        },
+                        icon: Builder(builder: (context) {
+                          int index = context.select<MXLoggerController, int>(
+                              (value) => value.selectedIndex);
+                          return Icon(Icons.home,
+                              color:
+                                  index == 0 ? MXTheme.white : MXTheme.subText);
+                        }),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              Expanded(
+                  child: Stack(
+                children: [
+                  PageView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      controller: _pageController,
+                      itemCount: _dataSource.length,
+                      scrollDirection: Axis.vertical,
+                      itemBuilder: (context, index) {
+                        return _dataSource[index];
+                      }),
+                  Builder(builder: (context) {
+                    bool visibility = context.select<MXLoggerController, bool>(
+                        (value) => value.dropVisibility);
+                    return Visibility(
+                        visible: visibility, child: DropTargetView());
+                  })
+                ],
+              ))
+            ],
+          ),
+        );
+      },
+    );
   }
 }
