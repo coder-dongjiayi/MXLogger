@@ -70,6 +70,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 minWidth: 60,
                 builder: (data) {
                   return SideMenuData(
+                    header: Container(
+                      margin: EdgeInsets.only(top: 5),
+                      child: Image.asset("assets/images/logo.png",width: 35,height: 35,),
+                    ),
                     footer: GestureDetector(
                       onTap: () {
                         _pageController.jumpToPage(1);
