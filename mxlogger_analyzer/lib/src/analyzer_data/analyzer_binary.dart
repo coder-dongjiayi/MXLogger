@@ -15,6 +15,7 @@ import 'package:aes_crypt_null_safe/aes_crypt_null_safe.dart';
 
 const int AES_LENGTH = 16;
 typedef AnalyzerProgressCallback = void Function(int total, int current);
+typedef AnalyValueChangedCallback = void Function(int succsss, int field);
 
 class AnalyzerBinary {
   static void loadData(
@@ -23,7 +24,7 @@ class AnalyzerBinary {
       String? iv,
       VoidCallback? onStartCallback,
       AnalyzerProgressCallback? onProgressCallback,
-      ValueChanged<int>? onEndCallback}) async {
+        AnalyValueChangedCallback? onEndCallback}) async {
     onStartCallback?.call();
 
     Uint8List? _binaryData = await file.readAsBytes();
@@ -39,7 +40,8 @@ class AnalyzerBinary {
         int finish = result["finish"];
         if (finish == 1) {
           int number = result["number"];
-          onEndCallback?.call(number);
+          int error = result["errorNumber"];
+          onEndCallback?.call(number,error);
         }
       } else if (message is SendPort) {
         SendPort childPort = message;
@@ -63,15 +65,18 @@ class AnalyzerBinary {
     String? cryptKey = result["cryptKey"];
     String? iv = result["iv"];
     String path = result["path"];
-
+  int _errorNumber = 0;
     await AnalyzerDatabase.initDataBase(path);
    await _decode(
         binaryData: _binaryData,
         cryptKey: cryptKey,
         iv: iv,
+        errorCallback: (int errorNumber){
+          _errorNumber = errorNumber;
+        },
         callback: (int total, int current) {});
     int number =  AnalyzerDatabase.count();
-    mainPort.send({"finish": 1,"number":number});
+    mainPort.send({"finish": 1,"number":number,"errorNumber":_errorNumber});
 
     AnalyzerDatabase.db.dispose();
     mainPort.send(null);
@@ -81,10 +86,13 @@ class AnalyzerBinary {
       {required Uint8List binaryData,
       String? cryptKey,
       String? iv,
+      ValueChanged<int>? errorCallback,
       AnalyzerProgressCallback? callback}) async {
     int sizeofUint32t = 4;
 
     int offsetLength = sizeofUint32t;
+
+    int errorNumber = 0;
 
     AesCrypt? crypt;
     if (cryptKey != null) {
@@ -109,7 +117,9 @@ class AnalyzerBinary {
       Uint8List buffer = binaryData.sublist(start, start + itemSize);
       try {
         if (crypt != null) {
+
           buffer = crypt.aesDecrypt(_replenishDataByte(buffer));
+
         }
         LogSerialize logSerialize = LogSerialize(buffer);
 
@@ -120,14 +130,20 @@ class AnalyzerBinary {
             level: logSerialize.level,
             threadId: logSerialize.threadId,
             isMainThread: logSerialize.isMainThread,
+            errorCallback: (String error){
+              errorNumber = errorNumber + 1;
+            },
             timestamp: logSerialize.timestamp);
       } catch (error) {
-        print("解析出错:$error");
+        errorNumber = errorNumber + 1;
+        debugPrint("二进制文件解析失败:$error");
+
       }
 
       callback?.call(totalSize, begin);
       begin = begin + sizeofUint32t + itemSize;
     }
+    errorCallback?.call(errorNumber);
   }
 
   /// 对 key 和 iv 进行补位
@@ -142,6 +158,7 @@ class AnalyzerBinary {
     }
     return uint8List;
   }
+
 
   /// 对data 进行补位
   static Uint8List _replenishDataByte(Uint8List buffer) {

@@ -1,6 +1,7 @@
 // import 'package:sqflite/sqflite.dart' as SQLite;
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:sqlite3/sqlite3.dart' as SQLite;
 
 class AnalyzerDatabase {
@@ -85,6 +86,7 @@ class AnalyzerDatabase {
       int? level,
       int? threadId,
       int isMainThread = 0,
+      ValueChanged<String>? errorCallback,
       required int timestamp}) async {
     try {
       String dateTime =
@@ -96,7 +98,8 @@ class AnalyzerDatabase {
       stmt.execute([name,tag,msg,level,threadId,isMainThread,timestamp,dateTime,nowTime]);
       stmt.dispose();
     } catch (error) {
-      print("数据插入失败:$error");
+      errorCallback?.call("$error");
+      debugPrint("数据库插入失败:$error");
     }
 
   }

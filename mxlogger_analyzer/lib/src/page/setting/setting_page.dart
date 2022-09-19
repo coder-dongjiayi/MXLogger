@@ -72,6 +72,17 @@ class _SettingPageState extends State<SettingPage> {
                     MXLoggerText(text: "拖入日志文件不再提示输入key和iv",style: TextStyle(color: MXTheme.text),),
                   ],
                 ),
+                const SizedBox(height: 20,),
+                MXLoggerText(text: "日志导入失败可能的原因",style: TextStyle(color: MXTheme.error),),
+                const SizedBox(height: 10,),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MXLoggerText(text: "1.检查设置的key和iv是否一致",style: TextStyle(color: MXTheme.text),),
+                    MXLoggerText(text: "2.检查设置的key和iv是否为16个字母(或者正好为128位)",style: TextStyle(color: MXTheme.text),),
+                    MXLoggerText(text: "3.导入数据是否重复(标记数据重复的依据是日志写入时生成的时间戳(微妙级))",style: TextStyle(color: MXTheme.text),),
+                  ],
+                )
               ],
             ),
           )

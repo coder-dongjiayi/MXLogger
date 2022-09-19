@@ -23,8 +23,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _cryptKey = @"blingabcsudentck";
-    _iv = @"blingabcsudentiv";
+    _cryptKey = @"xdfblingabckey";
+    _iv = @"xdfblingabciv";
     [self initMXLogger];
     [self updateSize];
 }
