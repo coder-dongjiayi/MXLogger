@@ -8,6 +8,8 @@
 #import "LogViewController.h"
 #import "LogListViewController.h"
 #import <MXLogger/MXLogger.h>
+
+
 @interface LogViewController ()
 {
     NSString * _cryptKey;
@@ -16,17 +18,30 @@
 @property(nonatomic,strong)MXLogger * logger;
 @property (weak, nonatomic) IBOutlet UILabel *sizeLabel;
 @property (weak, nonatomic) IBOutlet UILabel *filesLabel;
-
+@property (nonatomic,strong) NSFileHandle * fileHandler;
 @end
 
 @implementation LogViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _cryptKey = @"xdfblingabckey";
-    _iv = @"xdfblingabciv";
+
+    [self initFileHandler];
+    
+//    _cryptKey = @"abcdefgabcdefgob";
+//    _iv = @"abcdefgabcdefgcc";
     [self initMXLogger];
     [self updateSize];
+}
+-(void)initFileHandler{
+    
+    NSString * path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
+    NSString * filePath = [path stringByAppendingFormat:@"%@",@"/Blog.txt"];
+    
+    [[NSFileManager defaultManager]createFileAtPath:filePath contents:nil attributes:nil];
+    
+    self.fileHandler = [NSFileHandle fileHandleForWritingAtPath:filePath];
+    
 }
 
 -(void)initMXLogger{
@@ -75,7 +90,7 @@
     NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
     NSTimeInterval end =[dateEnd timeIntervalSince1970];
 
-    [sender setTitle:[NSString stringWithFormat:@"写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
+    [sender setTitle:[NSString stringWithFormat:@"mxlogger写10万条数据耗时:%f s",end-start] forState:UIControlStateNormal];
 
     NSLog(@"时间:%f",end - start);
     [self updateSize];
@@ -113,6 +128,29 @@
     self.sizeLabel.text = [NSString stringWithFormat:@"当前日志大小:%0.2f MB",size];
     NSLog(@"日志字节大小:%ld byte",logSize);
 }
+- (IBAction)appFileAction:(id)sender {
+    
+    NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
+    NSTimeInterval start =[dateStart timeIntervalSince1970];
+    NSUserDefaults* df = [NSUserDefaults standardUserDefaults];
+    
+    for (int i=0; i<100000; i++) {
+  
+        /// 104字节
+        NSString * log = @"ThisismxloggerlogguvThisismxloggerlogguvThisismxloggerlogguvThisismxloggerlogguvThisismxloggerlogguvoiuy";
+        [self.fileHandler seekToEndOfFile];
+        //写入文件
+        [self.fileHandler writeData:[log dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+ 
+    NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
+    NSTimeInterval end =[dateEnd timeIntervalSince1970];
+    
+
+
+    NSLog(@"NSFileHandle 写10万数据耗时(s):%f",end - start);
+}
+
 
 - (IBAction)lookButtonAction:(id)sender {
     LogListViewController * controller = [[LogListViewController alloc] initWithNibName:nil bundle:nil];
