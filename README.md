@@ -2,7 +2,7 @@
 
 
 
-<img src="/Users/dongjiayi/Documents/github/MXLogger/icon/logo.png" alt="logo" style="zoom:25%;" />
+<img src="./icon/logo.png" alt="logo" style="zoom:25%;" />
 
 # MXLogger
 
