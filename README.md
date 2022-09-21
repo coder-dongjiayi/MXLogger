@@ -2,7 +2,7 @@
 
 
 
-<img src="./icon/logo.png" alt="logo" style="zoom:25%;" />
+<img src="./icon/logo.png" alt="logo" style="zoom:10%;" />
 
 # MXLogger
 
