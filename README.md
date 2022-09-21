@@ -1,3 +1,9 @@
+
+
+[![license](https://img.shields.io/badge/license-BSD_3-brightgreen.svg?style=flat)](https://github.com/coder-dongjiayi/MXLogger/blob/main/LICENSE.TXT)
+
+[![Platform](https://img.shields.io/badge/Platform-%20Android%20%7C%20iOS%20%7C%20flutter-brightgreen.svg)](https://github.com/coder-dongjiayi/MXLogger)
+
 # MXLogger
 
 MXLogger 是基于mmap内存映射机制的跨平台日志库，支持iOS Android Flutter。核心代码使用C/C++实现， Flutter端使用ffi性能几乎与原生一致。 底层序列化使用Google开源的flat_buffers实现，高效稳定。
