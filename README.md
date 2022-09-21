@@ -6,4 +6,4 @@ MXLogger 是基于mmap内存映射机制的跨平台日志库，支持iOS Androi
 
 ## 整体结构如下
 
-<img src="./icon/jiegoutu.jpg" alt="jiegoutu" style="zoom:40%;" />
+<img src="./icon/jiegoutu.jpg" alt="jiegoutu" style="zoom:30%;" />
