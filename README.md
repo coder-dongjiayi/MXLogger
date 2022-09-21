@@ -59,7 +59,7 @@ MXLogger 是基于mmap内存映射机制的跨平台日志库，支持iOS Androi
 
 * 日志查看
 
-​		为了解析产出的二进制数据，我写了一个配套的可以查看的解析工具[mxlogger_analyzer](./mxlogger_analyzer.dmg),他大概长下面这个样子。
+   为了解析产出的二进制数据，我写了一个配套的可以查看的解析工具[mxlogger_analyzer](./mxlogger_analyzer.dmg),他大概长下面这个样子。
 
 | <img src="./icon/mx_1.jpg" alt="mx_1" style="zoom:25%;" /> | <img src="./icon/mx_2.jpg" alt="mx_2" style="zoom:25%;" /> |
 |  ----  | ----  |
