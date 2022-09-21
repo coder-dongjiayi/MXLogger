@@ -1,8 +1,4 @@
-
-
-[![license](https://img.shields.io/badge/license-BSD_3-brightgreen.svg?style=flat)](https://github.com/coder-dongjiayi/MXLogger/blob/main/LICENSE.TXT)
-
-[![Platform](https://img.shields.io/badge/Platform-%20Android%20%7C%20iOS%20%7C%20flutter-brightgreen.svg)](https://github.com/coder-dongjiayi/MXLogger)
+[![license](https://img.shields.io/badge/license-BSD_3-brightgreen.svg?style=flat)](https://github.com/coder-dongjiayi/MXLogger/blob/main/LICENSE.TXT)[![Platform](https://img.shields.io/badge/Platform-%20iOS%20%7C%20Android%20%7C%20Flutter-brightgreen.svg)](https://github.com/coder-dongjiayi/MXLogger)
 
 # MXLogger
 
