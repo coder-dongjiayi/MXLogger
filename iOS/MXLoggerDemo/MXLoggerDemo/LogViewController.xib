@@ -81,6 +81,14 @@
                         <action selector="lookButtonAction:" destination="-1" eventType="touchUpInside" id="dEg-9A-0UQ"/>
                     </connections>
                 </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VPk-ax-v07">
+                    <rect key="frame" x="142.5" y="515" width="129" height="31"/>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="ios系统文件写入"/>
+                    <connections>
+                        <action selector="appFileAction:" destination="-1" eventType="touchUpInside" id="hBl-Kt-oUH"/>
+                    </connections>
+                </button>
             </subviews>
             <viewLayoutGuide key="safeArea" id="Q5M-cg-NOt"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -91,6 +99,7 @@
                 <constraint firstItem="24k-KL-dE9" firstAttribute="centerX" secondItem="Q5M-cg-NOt" secondAttribute="centerX" id="GcJ-5j-e02"/>
                 <constraint firstItem="Od2-7s-RmQ" firstAttribute="top" secondItem="gbD-Ze-Mh3" secondAttribute="bottom" constant="8" symbolic="YES" id="Hqb-1f-mGu"/>
                 <constraint firstItem="AA0-8y-29r" firstAttribute="leading" secondItem="Q5M-cg-NOt" secondAttribute="leading" constant="10" id="NZA-UV-BbB"/>
+                <constraint firstItem="VPk-ax-v07" firstAttribute="top" secondItem="FNL-vj-O9e" secondAttribute="bottom" constant="71" id="RIu-Rl-Umh"/>
                 <constraint firstItem="AA0-8y-29r" firstAttribute="top" secondItem="Do9-En-cis" secondAttribute="bottom" constant="20" id="UJ7-rl-i2I"/>
                 <constraint firstItem="Do9-En-cis" firstAttribute="centerX" secondItem="OwV-wh-DRA" secondAttribute="centerX" id="Yxc-64-uJA"/>
                 <constraint firstItem="gbD-Ze-Mh3" firstAttribute="centerX" secondItem="Od2-7s-RmQ" secondAttribute="centerX" id="Ze6-5y-ejm"/>
@@ -98,6 +107,7 @@
                 <constraint firstItem="Od2-7s-RmQ" firstAttribute="centerX" secondItem="24k-KL-dE9" secondAttribute="centerX" id="bvV-pl-SqH"/>
                 <constraint firstItem="FNL-vj-O9e" firstAttribute="centerX" secondItem="tKQ-v3-ckt" secondAttribute="centerX" id="cpF-tj-y8V"/>
                 <constraint firstItem="OwV-wh-DRA" firstAttribute="top" secondItem="24k-KL-dE9" secondAttribute="bottom" constant="50" id="e2u-x3-JWq"/>
+                <constraint firstItem="VPk-ax-v07" firstAttribute="centerX" secondItem="FNL-vj-O9e" secondAttribute="centerX" id="f8g-J4-A0Q"/>
                 <constraint firstItem="FNL-vj-O9e" firstAttribute="top" secondItem="tKQ-v3-ckt" secondAttribute="bottom" constant="35" id="kXq-bc-fc6"/>
                 <constraint firstItem="tKQ-v3-ckt" firstAttribute="centerX" secondItem="Q5M-cg-NOt" secondAttribute="centerX" id="mxy-pM-lZ7"/>
                 <constraint firstItem="tKQ-v3-ckt" firstAttribute="top" secondItem="AA0-8y-29r" secondAttribute="bottom" constant="10" id="oJN-Uh-CEV"/>
