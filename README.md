@@ -97,6 +97,8 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 
 # 快速开始
 
+设置日志存储目录不要设置在一个可能被系统清理的目录 比如说 ios 的library/cache下，MXLogger并不会在每次写入数据的时候检测目录是否存在，只会在启动的时候创建。
+
 * iOS
 * Android
 * Flutter
