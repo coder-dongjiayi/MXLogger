@@ -138,11 +138,6 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 
 * Flutter
 
-  Flutter端使用ffi，iOS端打release包的时候 符号会被 Xcode 删除。所以要进行以下设置。具体可以[参照官方说明](https://flutter.cn/docs/development/platform-integration/ios/c-interop)
-  
-  * 在 Xcode 中, 点击 **Target Runner > Build Settings > Strip Style**.
-  * 将 **All Symbols** 修改为 **Non-Global Symbols**。
-  
   ```dart
    MXLogger logger = await MXLogger.initialize(
           nameSpace: "flutter.mxlogger",
