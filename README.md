@@ -177,6 +177,17 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 5. 日志控制台彩色输出
 
    
+# 参考代码
+
+* [MMKV](https://github.com/Tencent/MMKV)
+* [spdlog](https://github.com/gabime/spdlog)
+* [log4cplus](https://github.com/log4cplus/log4cplus)
+* [SDWebImage](https://github.com/SDWebImage/SDWebImage)
+* [KSCrash](https://github.com/kstenerud/KSCrash)
+
+   
+
+   
 
 
 
