@@ -124,14 +124,14 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 * Android
 
   ```java
-       MXLogger logger = new MXLogger(this.getContext(),"com.dongjiayi.mxlogger");
-          logger.maxDiskAge = 60*60*24*7; // 一个星期
-  				logger.maxDiskSize = 1024 * 1024 * 10; // 10M
-          logger.debug("request","mxlogger","this is debug");
-          logger.info("response","mxlogger","this is info");
-          logger.warn("tag","mxlogger","this is warn");
-          logger.error("404","mxlogger","this is error");
-          logger.fatal("200","mxlogger","this is fatal");
+  MXLogger logger = new MXLogger(this.getContext(),"com.dongjiayi.mxlogger");
+  logger.maxDiskAge = 60*60*24*7; // 一个星期
+  logger.maxDiskSize = 1024 * 1024 * 10; // 10M
+  logger.debug("request","mxlogger","this is debug");
+  logger.info("response","mxlogger","this is info");
+  logger.warn("tag","mxlogger","this is warn");
+  logger.error("404","mxlogger","this is error");
+  logger.fatal("200","mxlogger","this is fatal");
   ```
 
   
