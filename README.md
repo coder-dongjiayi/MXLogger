@@ -97,13 +97,64 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 
 # 快速开始
 
-设置日志存储目录不要设置在一个可能被系统清理的目录 比如说 ios 的library/cache下，MXLogger并不会在每次写入数据的时候检测目录是否存在，只会在启动的时候创建。
+设置日志存储目录不要设置在一个可能被系统清理的目录 比如说 ios 的```library/cache```下，MXLogger并不会在每次写入数据的时候检测目录是否存在，只会在启动的时候创建，如果再app运行中日志文件被系统清理，程序不会报错，也不会闪退，但是日志也不会被记录。
 
-把工程下载下来，先查看demo，有时间再完善README.md
+更详细的使用，请查看demo
 
 * iOS
+
+  ```objective-c
+  MXLogger * logger =  [MXLogger initializeWithNamespace:@"com.youdomain.logger.space"];
+  logger.maxDiskAge = 60*60*24*7; // 一个星期
+  logger.maxDiskSize = 1024 * 1024 * 10; // 10M
+  logger.fileLevel = 0;// 设置文件写入等级 小于这个等级的日志 不写入文件
+  [logger debug:@"mxlogger" msg:@"这是debug信息" tag:@"response"];
+  [logger info:@"mxlogger" msg:@"这是info信息" tag:@"request"];
+  [logger warn:@"mxlogger" msg:@"这是warn信息" tag:@"step"];
+  [logger error:@"mxlogger" msg:@"这是error信息" tag:NULL];
+  [logger fatal:@"mxlogger" msg:@"这是fatal信息" tag:NULL];
+  ```
+
+  
+
 * Android
+
+  ```java
+       MXLogger logger = new MXLogger(this.getContext(),"com.dongjiayi.mxlogger");
+          logger.maxDiskAge = 60*60*24*7; // 一个星期
+  				logger.maxDiskSize = 1024 * 1024 * 10; // 10M
+          logger.debug("request","mxlogger","this is debug");
+          logger.info("response","mxlogger","this is info");
+          logger.warn("tag","mxlogger","this is warn");
+          logger.error("404","mxlogger","this is error");
+          logger.fatal("200","mxlogger","this is fatal");
+  ```
+
+  
+
 * Flutter
+
+  ```dart
+   MXLogger logger = await MXLogger.initialize(
+          nameSpace: "flutter.mxlogger",
+          storagePolicy: "yyyy_MM_dd_HH",
+          cryptKey: null,
+          iv: null);
+  
+   logger.setMaxDiskAge(60*60*24*7);
+   logger.setMaxDiskSize(1024*1024*10);
+   logger.setFileLevel(0);
+  
+   logger.debug("这是debug数据", name: "mxlogger", tag: "D");
+   logger.info("这是info数据", name: "mxlogger", tag: "w");
+   logger.warn("这是warn数据", name: "mxlogger", tag: "w");
+   logger.error("这是error数据", name: "mxlogger", tag: "e");
+   logger.fatal("这是fatal数据", name: "mxlogger", tag: "f");
+  
+          
+  ```
+
+  
 
 # 性能测试
 
@@ -112,9 +163,14 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 # 后续版本迭代安排
 
 1. 日志文件上传、回捞
+
 2. 日志文件压缩 
-3. 日志控制台彩色输出
-4. mxlogger_analyzer 支持根据tag搜索、分析数据
+
+3. mxlogger_analyzer 支持根据tag搜索、分析数据
+
+4. 日志控制台彩色输出
+
+   
 
 
 

@@ -37,7 +37,7 @@ dependencies:
   path_provider: ^2.0.11
   flat_buffers: ^2.0.5
   file_selector: ^0.8.4+3
-#  sqflite: ^2.0.2+1
+
   sqlite3: ^1.8.0
   provider: ^6.0.3
   easy_refresh: ^3.0.4+2
@@ -46,6 +46,7 @@ dependencies:
   desktop_drop: ^0.3.3
   shared_preferences: ^2.0.15
   flutter_side_menu: ^0.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
