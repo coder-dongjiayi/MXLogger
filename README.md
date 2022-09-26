@@ -54,7 +54,7 @@ MXLogger 是基于mmap内存映射机制的跨平台日志库，支持AES CFB 12
 
   <img src="./icon/haoshi.jpg" alt="haoshi" style="zoom:50%;" />
 
-* 内存波动  下图为写入10条数据内存波动截图
+* 内存波动  下图为写入10万条数据内存波动截图
 
 
 MXLogger | Logan 
