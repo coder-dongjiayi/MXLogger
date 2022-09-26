@@ -146,6 +146,7 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 > MXLogger 提供按月、周、天、小时，4种存储策略。默认情况下是按天存储。
 
 ```objective-c
+
 	yyyy_MM                 按月存储
   yyyy_MM_dd              按天存储
   yyyy_ww                 按周存储
