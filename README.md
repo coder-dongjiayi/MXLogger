@@ -40,9 +40,17 @@ MXLogger 是基于mmap内存映射机制的跨平台日志库，支持AES CFB 12
 
 下面测试结果从三个维度进行比较 写入速度、内存波动、日志体积。以下仅为iOS端测试结果。
 
+> 测试环境
+
+* 测试设备 iphone8pluse 系统版本 14.0
+
+* 每条数据大小约为104个字节 for循环10万次
+
+* 测试10次，取平均值
+
 > 测试结果
 
-* 写入速度 
+* 写入速度  MXLogger 仅为0.3s 左右，Logan平均在31s左右
 
   <img src="./icon/haoshi.jpg" alt="haoshi" style="zoom:50%;" />
 
@@ -60,12 +68,6 @@ MXLogger | Logan
 10M左右 | 1M左右
 
 
-
-> 测试环境
-
-* 测试设备 iphone8pluse 系统版本 14.0
-
-*  每条数据大小约为104个字节 for循环100,000万次
 
 
 # MXLogger介绍
