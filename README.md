@@ -143,7 +143,7 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 
 > 关于日志加密的说明
 
- MXLogger 提供AES CFB 128为加密机制，代码来自于[MMKV](https://github.com/Tencent/MMKV/tree/master/Core/aes)，加密逻辑使用汇编实现，最大程度保障了写入性能。关于加密使用的key和iv 建议使用16个英文字母，因为key和iv的长度不等于128个二进制位，mxlogger_analyzer目前无法正常解析，后续版本会解决这个问题。
+ MXLogger 提供AES CFB 128为加密机制，代码来自于[MMKV](https://github.com/Tencent/MMKV/tree/master/Core/aes)，加密逻辑使用汇编实现，最大程度保障了写入性能。加密使用的cryptKey和iv 应为长度16的英文字符串。
 
 ## 设置存储策略
 
@@ -196,8 +196,8 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
    MXLogger logger = await MXLogger.initialize(
           nameSpace: "flutter.mxlogger",
           storagePolicy: "yyyy_MM_dd_HH",
-          cryptKey: null,
-          iv: null);
+          cryptKey: "abcuioqbsdguijlk",
+          iv: "bccuioqbsdguijiv");
   
    logger.setMaxDiskAge(60*60*24*7);
    logger.setMaxDiskSize(1024*1024*10);
@@ -219,14 +219,10 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 # 后续版本迭代安排
 
 1. 日志文件压缩 
-
-2. mxlogger_analyzer 支持解析任意长度key和iv加密的数据
-
+2. flutter端在插件中使用MXLogger
 3. mxlogger_analyzer 支持根据tag搜索、分析数据
-
 4. 强化控制台日志输出
 
-   
 
 # 参考代码
 
