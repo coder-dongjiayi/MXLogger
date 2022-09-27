@@ -67,6 +67,8 @@ MXLogger | Logan
 
 > 日志文件体积
 
+Logan 对数据进行了压缩，实际产生的体积会比较小。 MXLogger 仅仅对数据进行了二进制序列化，会比纯文本小一点。
+
 MXLogger | Logan 
 ---- | ---
 10M左右 | 1M左右
