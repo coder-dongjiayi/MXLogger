@@ -216,17 +216,16 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 
 # 后续版本迭代安排
 
-1. 日志文件上传
+1. 日志文件压缩 
 
-2. 日志文件压缩 
+2. mxlogger_analyzer 支持解析任意长度key和iv加密的数据
 
-3. mxlogger_analyzer 支持解析任意长度key和iv加密的数据
+3. mxlogger_analyzer 支持根据tag搜索、分析数据
 
-4. mxlogger_analyzer 支持根据tag搜索、分析数据
-
-5. 强化控制台日志输出
+4. 强化控制台日志输出
 
    
+
 # 参考代码
 
 * [MMKV](https://github.com/Tencent/MMKV)
