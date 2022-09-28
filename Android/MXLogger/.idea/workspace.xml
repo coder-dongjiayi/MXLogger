@@ -14,10 +14,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../Core/MXLoggerCore.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcschemes/xcschememanagement.plist" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/MXLoggerCore.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcschemes/xcschememanagement.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/FlutterMxloggerPlugin.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/FlutterMxloggerPlugin.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/FlutterMxloggerPlugin.mm" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/FlutterMxloggerPlugin.mm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcschemes/xcschememanagement.plist" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcschemes/xcschememanagement.plist" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.mm" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.mm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
     </list>

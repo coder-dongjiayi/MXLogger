@@ -68,6 +68,15 @@ namespace mxlogger{
     }
 
 
+    MXLOGGER_JNI jlong  native_value_for_nameSpace(JNIEnv *env,jobject obj,jstring ns,jstring directory){
+        if (ns == nullptr || directory == nullptr) return 0;
+        std::string nsStr = jstring2string(env,ns);
+        std::string directoryStr = jstring2string(env,directory);
+        mxlogger * logger =  mx_logger::global_for_namespace(nsStr.data(),directoryStr.data());
+        if(logger == nullptr) return 0;
+        return jlong (logger);
+    }
+
     MXLOGGER_JNI jlong jniInitialize(JNIEnv *env,
                                      jobject obj,
                                      jstring ns,
@@ -161,7 +170,8 @@ static JNINativeMethod g_methods[] = {
         {"native_logSize","(J)J",(void *)mxlogger::native_logSize},
         {"native_diskcache_path","(J)Ljava/lang/String;",(void *)mxlogger::native_diskcache_path},
         {"native_removeExpireData","(J)V",(void *)mxlogger::native_removeExpireData},
-        {"native_removeAll","(J)V",(void *)mxlogger::native_removeAll}
+        {"native_removeAll","(J)V",(void *)mxlogger::native_removeAll},
+        {"native_value_for_nameSpace","(Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::native_value_for_nameSpace},
 
         //        {"native_destroy","(Ljava/lang/String;Ljava/lang/String;)V",(void *)mxlogger::native_destroy},
 

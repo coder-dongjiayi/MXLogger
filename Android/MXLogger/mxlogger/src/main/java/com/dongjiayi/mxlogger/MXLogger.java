@@ -185,8 +185,9 @@ public class MXLogger {
         String cacheDir = context.getFilesDir().getAbsolutePath();
         return  cacheDir;
     }
-    private static native long jniInitialize(String nameSpace,String diskCacheDirectory,String storagePolicy,String fileName,String cryptKey,String iv);
 
+    private static native long jniInitialize(String nameSpace,String diskCacheDirectory,String storagePolicy,String fileName,String cryptKey,String iv);
+    private  static  native  long native_value_for_nameSpace(String nameSpace,String diskCacheDirectory);
     private  static  native void native_log(long nativeHandle,String name,int level,String msg,String tag,boolean mainThread);
 
     private  static  native  void  native_fileLevel(long nativeHandle,int fileLevel);

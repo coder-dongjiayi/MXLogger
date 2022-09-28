@@ -71,11 +71,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 
-/// 通过nameSpace directory判断 MXLogger 对象是否已经存在了,如果不存在则返回null;
-/// @param nameSpace nameSpace
-/// @param directory directory
-+(MXLogger*) valueForNameSpace:(nonnull NSString*) nameSpace diskCacheDirectory:(nullable NSString*) directory;
-
 /// 程序结束的时候是否清理过期文件 默认YES
 @property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenTerminate;
 

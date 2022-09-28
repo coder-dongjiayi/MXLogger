@@ -53,11 +53,6 @@ static NSString * _defaultDiskCacheDirectory;
     
 }
 
-+(MXLogger*) valueForNameSpace:(nonnull NSString*) nameSpace diskCacheDirectory:(nullable NSString*) directory{
-    NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
-    MXLogger * logger = [global_instanceDic objectForKey:key];
-    return  logger;
-}
 
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName{
     return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName cryptKey:nil iv:nil];
