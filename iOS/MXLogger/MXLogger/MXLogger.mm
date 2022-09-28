@@ -19,7 +19,7 @@ static NSString * _defaultDiskCacheDirectory;
     
 }
 @property (nonatomic, copy, nonnull, readwrite) NSString *diskCachePath;
-
+@property (nonatomic,copy,nonnull,readwrite)NSString* mapKey;
 
 @end
 
@@ -44,7 +44,7 @@ static NSString * _defaultDiskCacheDirectory;
     NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
     if ([global_instanceDic objectForKey:key] == nil) {
         MXLogger * logger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:storagePolicy fileName:fileName cryptKey:cryptKey iv:iv];
-        [global_instanceDic setObject:logger forKey:key];
+      
         return logger;
     }
     MXLogger * logger = [global_instanceDic objectForKey:key];
@@ -75,6 +75,13 @@ static NSString * _defaultDiskCacheDirectory;
         logger = nil;
         [global_instanceDic removeObjectForKey:key];
     }
+}
++(MXLogger*)valueForMapKey:(NSString*)mapKey{
+    if(mapKey == NULL || [mapKey isKindOfClass:[NSNull class]]){
+        return NULL;
+    }
+    MXLogger * logger = [global_instanceDic objectForKey:mapKey];
+    return logger;
 }
 
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
@@ -107,6 +114,8 @@ static NSString * _defaultDiskCacheDirectory;
         
         _logger =  mx_logger::initialize_namespace(nameSpace.UTF8String, directory.UTF8String,storage_policy,file_name,crypt_key,iv_);
         
+        self.mapKey = [NSString stringWithUTF8String:_logger->map_key.data()];
+        
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationWillTerminate:)
@@ -126,6 +135,7 @@ static NSString * _defaultDiskCacheDirectory;
         _shouldRemoveExpiredDataWhenEnterBackground = YES;
       
        
+        [global_instanceDic setObject:self forKey:self.mapKey];
         
     }
     return self;

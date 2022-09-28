@@ -53,7 +53,7 @@ public:
     
     
     /// 通过 ns和directory 返回已存在的 mxlogger 对象，如果不存在则返回null
-    static mxlogger *global_for_namespace(const char* ns,const char* directory);
+    static mxlogger *global_for_map_key(const char* map_key);
     
     /// 释放全部的logger
     static void destroy();

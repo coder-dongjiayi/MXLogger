@@ -61,6 +61,10 @@
     
     self.logger.fileLevel = 0;
 
+    MXLogger * lg = [MXLogger valueForMapKey:self.logger.mapKey];
+    NSLog(@"self.logger:%@",self.logger);
+    NSLog(@"MXLogger: %@",lg);
+    
     NSLog(@"目录:%@",self.logger.diskCachePath);
     
 }

@@ -99,11 +99,16 @@ NS_ASSUME_NONNULL_BEGIN
 /// 设置写入文件日志等级
 @property (nonatomic,assign)NSInteger fileLevel;
 
-
+/// c++ 代码保存logger对象 用到的key值，先返回给业务层 以后可能会用到
+@property (nonatomic,copy,nonnull,readonly)NSString* mapKey;
 
 +(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
 +(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory;
+
+
+/// 通过mapKey  返回logger对象，如果不存在返回null
++(MXLogger*)valueForMapKey:(NSString*)mapKey;
 
 /// 清理过期文件
 -(void)removeExpireData;

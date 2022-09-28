@@ -1,6 +1,19 @@
 #import <Flutter/Flutter.h>
-#import <MXLogger/MXLogger.h>
+
 @interface FlutterMxloggerPlugin : NSObject<FlutterPlugin>
-/// 调用这个方法有效的前提 是已经在主工程中 使用 Future<MXLogger> initialize() 方法初始化完毕，否则这将返回null
-+(MXLogger*)mxlogger;
+
+/// mapKey 需要业务层传过来
+
++(void) debug:(NSString*) mapKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag;
+
++(void) info:(NSString*) mapKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag;
+
+
++(void) warn:(NSString*) mapKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag;
+
+
++(void) error:(NSString*) mapKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag;
+
++(void) fatal:(NSString*) mapKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag;
+
 @end

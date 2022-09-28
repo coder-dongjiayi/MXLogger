@@ -1,33 +1,47 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_archive (0.0.1):
+    - Flutter
+    - ZIPFoundation (= 0.9.13)
   - flutter_mxlogger (0.0.1):
     - Flutter
-    - MXLogger (~> 0.1.1)
-  - MXLogger (0.1.1):
-    - MXLoggerCore (= 0.1.1)
-  - MXLoggerCore (0.1.1)
+    - MXLogger (~> 0.1.2)
+  - MXLogger (0.1.2):
+    - MXLoggerCore (= 0.1.2)
+  - MXLoggerCore (0.1.2)
+  - ZIPFoundation (0.9.13)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_archive (from `.symlinks/plugins/flutter_archive/ios`)
   - flutter_mxlogger (from `.symlinks/plugins/flutter_mxlogger/ios`)
+  - MXLogger (from `/Users/dongjiayi/Documents/github/MXLogger`)
+  - MXLoggerCore (from `/Users/dongjiayi/Documents/github/MXLogger`)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
-    - MXLogger
-    - MXLoggerCore
+    - ZIPFoundation
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_archive:
+    :path: ".symlinks/plugins/flutter_archive/ios"
   flutter_mxlogger:
     :path: ".symlinks/plugins/flutter_mxlogger/ios"
+  MXLogger:
+    :path: "/Users/dongjiayi/Documents/github/MXLogger"
+  MXLoggerCore:
+    :path: "/Users/dongjiayi/Documents/github/MXLogger"
 
 SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
-  flutter_mxlogger: 86e3f0e90e27f8ed34d2abec77e9658e54723c25
-  MXLogger: 25bd5fd00d4a63b26c0db509555bc763ba43d162
-  MXLoggerCore: e9e9708862482122935d66adfa8f7b996817154b
+  flutter_archive: 1805fdd3a695fd284b43edb53dc35ca843fb761c
+  flutter_mxlogger: 0c02fe3d0e7a3befbeb582cf924114ae7239c3b9
+  MXLogger: f22ec66931f9fae721b36ce3668f6178a1f94748
+  MXLoggerCore: 7a05a06742ac8211c521071ff924bc134a84eba9
+  ZIPFoundation: ae5b4b813d216d3bf0a148773267fff14bd51d37
 
-PODFILE CHECKSUM: cba86d2c9d40762e1c77212d40e88b16ac8a8998
+PODFILE CHECKSUM: c9c6714a73664f166c442ddb39f12101ea17d2c8
 
 COCOAPODS: 1.11.2

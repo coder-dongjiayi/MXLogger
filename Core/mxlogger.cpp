@@ -49,12 +49,10 @@ std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     return diskcache_path;
 }
 
-mxlogger *mxlogger::global_for_namespace(const char* ns,const char* directory){
-    std::string diskcache_path = get_diskcache_path_(ns,directory);
-    if (diskcache_path.data() == nullptr) {
-        return nullptr;
-    }
-    std::string map_key =  mxlogger_helper::mx_md5(diskcache_path);
+mxlogger *mxlogger::global_for_map_key(const char* map_key){
+
+    if(map_key == nullptr) return nullptr;
+
     auto itr = global_instanceDic_ -> find(map_key);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
