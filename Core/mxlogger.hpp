@@ -51,6 +51,10 @@ public:
     
     static std::string md5(const char* ns,const char* directory);
     
+    
+    /// 通过 ns和directory 返回已存在的 mxlogger 对象，如果不存在则返回null
+    static mxlogger *global_for_namespace(const char* ns,const char* directory);
+    
     /// 释放全部的logger
     static void destroy();
     

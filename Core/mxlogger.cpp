@@ -49,6 +49,20 @@ std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     return diskcache_path;
 }
 
+mxlogger *mxlogger::global_for_namespace(const char* ns,const char* directory){
+    std::string diskcache_path = get_diskcache_path_(ns,directory);
+    if (diskcache_path.data() == nullptr) {
+        return nullptr;
+    }
+    std::string map_key =  mxlogger_helper::mx_md5(diskcache_path);
+    auto itr = global_instanceDic_ -> find(map_key);
+    if (itr != global_instanceDic_ -> end()) {
+        mxlogger * logger = itr -> second;
+        return logger;
+    }
+    return nullptr;
+}
+
 mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv){
 
     std::string diskcache_path = get_diskcache_path_(ns,directory);
@@ -64,7 +78,6 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,co
         return logger;
     }
     
-    
     auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,cryptKey,iv);
     logger -> map_key = map_key;
     (*global_instanceDic_)[map_key] = logger;
@@ -72,6 +85,7 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,co
     
     return logger;
 }
+
 
 void mxlogger::delete_namespace(const char* ns,const char* directory){
  
@@ -162,7 +176,7 @@ void mxlogger::remove_all(){
 
 // 缓存日志文件大小(byte)
 long  mxlogger::dir_size(){
-    std::lock_guard<std::mutex> lock(logger_mutex);
+   
     return mmap_sink_->dir_size();
 }
 

@@ -64,6 +64,8 @@
     NSLog(@"目录:%@",self.logger.diskCachePath);
     
 }
+
+
 - (IBAction)writeLogButtonAction:(id)sender {
  
     [self.logger debug:NULL msg:@"这是debug信息" tag:@"net"];

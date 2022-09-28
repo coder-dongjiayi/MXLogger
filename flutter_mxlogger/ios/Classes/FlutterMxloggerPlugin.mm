@@ -9,7 +9,12 @@
 @end
 @implementation FlutterMxloggerPlugin
 
+static MXLogger* _mxlogger;
 
++(MXLogger*)mxlogger{
+    
+    return  _mxlogger;
+}
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
  
@@ -35,14 +40,18 @@
       }else{
           directory = arguments[@"directory"];
       }
-
-
+    
+      MXLogger * mxlogger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory];
+      
+      _mxlogger = mxlogger;
+      
       result(@{@"nameSpace":nameSpace,@"directory":directory});
       
   } else {
     result(FlutterMethodNotImplemented);
   }
 }
+
 
 
 @end

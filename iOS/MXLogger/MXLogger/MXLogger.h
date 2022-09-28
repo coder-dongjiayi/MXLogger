@@ -71,6 +71,13 @@ NS_ASSUME_NONNULL_BEGIN
 /// iv 默认和key一样
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
+
+
+/// 通过nameSpace directory判断 MXLogger 对象是否已经存在了,如果不存在则返回null;
+/// @param nameSpace nameSpace
+/// @param directory directory
++(MXLogger*) valueForNameSpace:(nonnull NSString*) nameSpace diskCacheDirectory:(nullable NSString*) directory;
+
 /// 程序结束的时候是否清理过期文件 默认YES
 @property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenTerminate;
 
@@ -113,7 +120,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void)removeAllData;
 
 
-/// 输出日志
+/// 输出日志  
 /// @param level 等级
 /// @param name name
 /// @param tag tag
