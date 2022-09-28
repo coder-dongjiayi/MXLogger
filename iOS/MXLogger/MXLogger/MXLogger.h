@@ -36,7 +36,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 
-
 /// 默认路径初始化
 /// @param nameSpace 默认在 Library目录下
 
@@ -50,7 +49,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /// 加密初始化
-
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
 
@@ -90,7 +88,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// 禁用日志
 @property (nonatomic,assign)BOOL enable;
 
-
 /// 日志文件磁盘缓存目录
 @property (nonatomic, copy, nonnull, readonly) NSString *diskCachePath;
 
@@ -120,7 +117,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void)removeAllData;
 
 
-/// 输出日志  
+/// 输出日志
 /// @param level 等级
 /// @param name name
 /// @param tag tag
