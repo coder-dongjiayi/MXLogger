@@ -25,12 +25,14 @@ public class FirstFragment extends Fragment {
 
         logger = new MXLogger(this.getContext(),"com.dongjiayi.mxlogger");
         logger.consoleEnable = false;
-        logger.maxDiskAge = 10;
         logger.debug("request","mxlogger","this is debug");
         logger.info("request","mxlogger","this is info");
         logger.warn("request","mxlogger","this is warn");
         logger.error("request","mxlogger","this is error");
         logger.fatal("request","mxlogger","this is fatal");
+
+        String mapKey =  logger.getMapKey();
+        MXLogger.log(mapKey,"mapKey",2,"mapName","this is map log");
 
         binding = FragmentFirstBinding.inflate(inflater, container, false);
         return binding.getRoot();

@@ -21,8 +21,8 @@ class MXLoggerStorage{
     _databasePath = directory.path;
   }
 
-  String? get cryptKey => _sharedPreferences.getString(_aesKey);
-  String? get cryptIv => _sharedPreferences.getString(_aesIv);
+  String? get cryptKey => _sharedPreferences.getString(_aesKey) == "" ? null :  _sharedPreferences.getString(_aesKey);
+  String? get cryptIv => _sharedPreferences.getString(_aesIv) == "" ? null : _sharedPreferences.getString(_aesIv);
   bool get cryptAlert => _sharedPreferences.getBool(_cryptAlertKey) ?? false;
  Future<void> saveCryptAlert(bool? state) async{
    await _sharedPreferences.setBool(_cryptAlertKey, state ?? false);

@@ -68,13 +68,38 @@ namespace mxlogger{
     }
 
 
-    MXLOGGER_JNI jlong  native_value_for_nameSpace(JNIEnv *env,jobject obj,jstring ns,jstring directory){
-        if (ns == nullptr || directory == nullptr) return 0;
-        std::string nsStr = jstring2string(env,ns);
-        std::string directoryStr = jstring2string(env,directory);
-        mxlogger * logger =  mx_logger::global_for_namespace(nsStr.data(),directoryStr.data());
-        if(logger == nullptr) return 0;
-        return jlong (logger);
+    MXLOGGER_JNI jstring  native_mapKey(JNIEnv *env, jobject obj,jlong handle){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        return string2jstring(env,logger ->map_key);
+    }
+
+
+    MXLOGGER_JNI void native_log(JNIEnv *env, jobject obj,jlong handle,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
+
+        const char  * log_msg = msg == NULL ? nullptr :jstring2string(env,msg).c_str();
+
+        const char  * log_tag = tag == NULL ? nullptr : jstring2string(env,tag).c_str();
+
+        const char  * log_name = name == NULL ? nullptr : jstring2string(env,name).c_str();
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger ->log(level,log_name,log_msg,log_tag,mainThread);
+
+    }
+
+    MXLOGGER_JNI void native_log_mapKey(JNIEnv *env, jobject obj,jstring mapKey,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
+        const char  * log_msg = msg == NULL ? nullptr :jstring2string(env,msg).c_str();
+
+        const char  * log_tag = tag == NULL ? nullptr : jstring2string(env,tag).c_str();
+
+        const char  * log_name = name == NULL ? nullptr : jstring2string(env,name).c_str();
+
+        const char  * map_key = jstring2string(env,mapKey).c_str();
+
+        mx_logger *logger = mx_logger ::global_for_map_key(map_key);
+        if(logger != nullptr){
+            logger ->log(level,log_name,log_msg,log_tag,mainThread);
+        }
+
     }
 
     MXLOGGER_JNI jlong jniInitialize(JNIEnv *env,
@@ -108,17 +133,6 @@ namespace mxlogger{
         mx_logger::delete_namespace(nsStr.data(),directoryStr.data());
     }
 
-    MXLOGGER_JNI void native_log(JNIEnv *env, jobject obj,jlong handle,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
-
-        const char  * log_msg = msg == NULL ? nullptr :jstring2string(env,msg).c_str();
-
-        const char  * log_tag = tag == NULL ? nullptr : jstring2string(env,tag).c_str();
-
-        const char  * log_name = name == NULL ? nullptr : jstring2string(env,name).c_str();
-        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
-       logger ->log(level,log_name,log_msg,log_tag,mainThread);
-
-    }
 
 
     MXLOGGER_JNI void native_consoleEnable(JNIEnv *env, jobject obj,jlong handle,jboolean enable){
@@ -162,7 +176,6 @@ namespace mxlogger{
 static JNINativeMethod g_methods[] = {
 
         {"jniInitialize","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::jniInitialize},
-        {"native_log","(JLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
         {"native_fileLevel","(JI)V",(void *)mxlogger::native_fileLevel},
         {"native_consoleEnable","(JZ)V",(void *)mxlogger::native_consoleEnable},
         {"native_maxDiskAge","(JJ)V",(void *)mxlogger::native_maxDiskAge},
@@ -171,10 +184,9 @@ static JNINativeMethod g_methods[] = {
         {"native_diskcache_path","(J)Ljava/lang/String;",(void *)mxlogger::native_diskcache_path},
         {"native_removeExpireData","(J)V",(void *)mxlogger::native_removeExpireData},
         {"native_removeAll","(J)V",(void *)mxlogger::native_removeAll},
-        {"native_value_for_nameSpace","(Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::native_value_for_nameSpace},
-
-        //        {"native_destroy","(Ljava/lang/String;Ljava/lang/String;)V",(void *)mxlogger::native_destroy},
-
+        {"native_mapKey","(J)Ljava/lang/String;",(void *)mxlogger::native_mapKey},
+        {"native_log","(JLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
+        {"native_log_mapKey","(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log_mapKey},
 
 
 };
