@@ -1,6 +1,6 @@
 name: flutter_mxlogger
 description: A new Flutter project.
-version: 0.1.1
+version: 1.0.0
 homepage:
 
 environment:
@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   ffi: ^2.0.1
-  flutter_archive: ^5.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
