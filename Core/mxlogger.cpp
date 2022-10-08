@@ -27,9 +27,9 @@ std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::uno
  std::string mxlogger::md5(const char* ns,const char* directory){
      
      std::string diskcache_path = get_diskcache_path_(ns,directory);
-     std::string map_key =  mxlogger_helper::mx_md5(diskcache_path);
+     std::string logger_key =  mxlogger_helper::mx_md5(diskcache_path);
 
-     return map_key;
+     return logger_key;
 }
 
 
@@ -49,11 +49,11 @@ std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     return diskcache_path;
 }
 
-mxlogger *mxlogger::global_for_map_key(const char* map_key){
+mxlogger *mxlogger::global_for_loggerKey(const char* logger_key){
 
-    if(map_key == nullptr) return nullptr;
+    if(logger_key == nullptr) return nullptr;
 
-    auto itr = global_instanceDic_ -> find(map_key);
+    auto itr = global_instanceDic_ -> find(logger_key);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
         return logger;
@@ -68,22 +68,25 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,co
         return nullptr;
     }
     
-    std::string map_key =  mxlogger_helper::mx_md5(diskcache_path);
+    std::string logger_key =  mxlogger_helper::mx_md5(diskcache_path);
     
-    auto itr = global_instanceDic_ -> find(map_key);
+    auto itr = global_instanceDic_ -> find(logger_key);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
         return logger;
     }
     
     auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,cryptKey,iv);
-    logger -> map_key = map_key;
-    (*global_instanceDic_)[map_key] = logger;
-    MXLoggerInfo("mxlogger Initialization succeeded. map_key:%s storage_policy:%s file_name:%s is_crypt:%s",map_key.c_str(),storage_policy,file_name,cryptKey!=nullptr ? "true" : "false");
+    logger -> logger_key_ = logger_key;
+    (*global_instanceDic_)[logger_key] = logger;
+    MXLoggerInfo("mxlogger Initialization succeeded. logger_key:%s storage_policy:%s file_name:%s is_crypt:%s",logger_key.c_str(),storage_policy,file_name,cryptKey!=nullptr ? "true" : "false");
     
     return logger;
 }
 
+void mxlogger::delete_namespace(const char* logger_key){
+    delete_namespace_(logger_key);
+}
 
 void mxlogger::delete_namespace(const char* ns,const char* directory){
  
@@ -92,8 +95,13 @@ void mxlogger::delete_namespace(const char* ns,const char* directory){
     if (strcmp(diskcache_path.c_str(), "") == 0) {
         return;
     }
-    std::string map_key =  mxlogger_helper::mx_md5(diskcache_path);
-    auto itr = global_instanceDic_ -> find(map_key);
+    std::string logger_key =  mxlogger_helper::mx_md5(diskcache_path);
+    delete_namespace_(logger_key.c_str());
+}
+
+//释放指定的logger对象
+void mxlogger::delete_namespace_(const char* logger_key){
+    auto itr = global_instanceDic_ -> find(logger_key);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
         delete logger;
@@ -130,13 +138,16 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     
 
 mxlogger::~mxlogger(){
-    MXLoggerInfo("mxlogger delloc map_key:%s",map_key.c_str());
+    MXLoggerInfo("mxlogger delloc logger_key:%s",logger_key_.c_str());
 }
 
 const char* mxlogger::diskcache_path() const{
     return diskcache_path_.c_str();
 }
 
+const char*  mxlogger::logger_key() const{
+    return logger_key_.c_str();
+}
 void mxlogger::set_enable(bool enable){
     
     enable_ = enable;

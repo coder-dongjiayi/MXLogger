@@ -19,7 +19,7 @@ static NSString * _defaultDiskCacheDirectory;
     
 }
 @property (nonatomic, copy, nonnull, readwrite) NSString *diskCachePath;
-@property (nonatomic,copy,nonnull,readwrite)NSString* mapKey;
+@property (nonatomic,copy,nonnull,readwrite)NSString* loggerKey;
 
 @end
 
@@ -64,9 +64,6 @@ static NSString * _defaultDiskCacheDirectory;
 }
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory{
     
-    mx_logger::delete_namespace(nameSpace.UTF8String, directory.UTF8String);
-    
-    
     NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
     
     if ([global_instanceDic objectForKey:key]) {
@@ -75,12 +72,14 @@ static NSString * _defaultDiskCacheDirectory;
         logger = nil;
         [global_instanceDic removeObjectForKey:key];
     }
+    
+    mx_logger::delete_namespace(nameSpace.UTF8String, directory.UTF8String);
 }
-+(MXLogger*)valueForMapKey:(NSString*)mapKey{
-    if(mapKey == NULL || [mapKey isKindOfClass:[NSNull class]]){
++(MXLogger*)valueForLoggerKey:(NSString*)loggerKey{
+    if(loggerKey == NULL || [loggerKey isKindOfClass:[NSNull class]]){
         return NULL;
     }
-    MXLogger * logger = [global_instanceDic objectForKey:mapKey];
+    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
     return logger;
 }
 
@@ -114,7 +113,7 @@ static NSString * _defaultDiskCacheDirectory;
         
         _logger =  mx_logger::initialize_namespace(nameSpace.UTF8String, directory.UTF8String,storage_policy,file_name,crypt_key,iv_);
         
-        self.mapKey = [NSString stringWithUTF8String:_logger->map_key.data()];
+        self.loggerKey = [NSString stringWithUTF8String:_logger->logger_key()];
         
         
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -135,7 +134,7 @@ static NSString * _defaultDiskCacheDirectory;
         _shouldRemoveExpiredDataWhenEnterBackground = YES;
       
        
-        [global_instanceDic setObject:self forKey:self.mapKey];
+        [global_instanceDic setObject:self forKey:self.loggerKey];
         
     }
     return self;

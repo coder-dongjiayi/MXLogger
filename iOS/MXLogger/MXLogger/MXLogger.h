@@ -36,6 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 
+
+
 /// 默认路径初始化
 /// @param nameSpace 默认在 Library目录下
 
@@ -99,8 +101,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// 设置写入文件日志等级
 @property (nonatomic,assign)NSInteger fileLevel;
 
-/// c++ 代码保存logger对象 用到的key值
-@property (nonatomic,copy,nonnull,readonly)NSString* mapKey;
+/// nameSpace+diskCacheDirectory 做一次md5的值，对应一个logger对象，可以通过这个操作logger
+@property (nonatomic,copy,nonnull,readonly)NSString* loggerKey;
 
 +(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
@@ -108,7 +110,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /// 通过mapKey  返回logger对象，如果不存在返回null
-+(MXLogger*)valueForMapKey:(NSString*)mapKey;
++(MXLogger*)valueForLoggerKey:(NSString*)loggerKey;
 
 /// 清理过期文件
 -(void)removeExpireData;

@@ -118,11 +118,15 @@ MXLOGGER_EXPORT unsigned long MXLOGGERR_FUNC(get_log_size)(void *handle){
     return logger->dir_size();
 }
 
-
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_level)(void *handle,int file_level){
     mx_logger *logger = static_cast<mx_logger*>(handle);
     logger->set_file_level(file_level);
 
+}
+
+MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_loggerKey)(void *handle){
+    mx_logger *logger = static_cast<mx_logger*>(handle);
+    return logger ->logger_key();
 }
 
 MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_diskcache_path)(void *handle){
@@ -139,6 +143,15 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(void *handle){
     mx_logger *logger = static_cast<mx_logger*>(handle);
 
     logger->remove_all();
+}
+
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const char* name, int lvl,const char* msg,const char* tag){
+    if(logger_key == nullptr) return;
+
+    mx_logger *logger = mx_logger::global_for_loggerKey(logger_key);
+
+    logger->log(lvl,name,msg,tag,true);
+
 }
 
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(log)(void *handle,const char* name, int lvl,const char* msg,const char* tag){

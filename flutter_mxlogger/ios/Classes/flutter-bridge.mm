@@ -138,6 +138,11 @@ MXLOGGER_EXPORT unsigned long MXLOGGERR_FUNC(get_log_size)(const void *handle){
     return logger.logSize;
 }
 
+MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_loggerKey)(const void *handle){
+    MXLogger *logger = (__bridge MXLogger *) handle;
+    return logger.loggerKey.UTF8String;
+}
+
 
 MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_diskcache_path)(const void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
@@ -151,6 +156,19 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_expire_data)(const void *handle){
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(const void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
     [logger removeAllData];
+}
+ 
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const char* name, int lvl,const char* msg,const char* tag){
+    if(logger_key == nullptr) return;
+    
+    MXLogger *logger = [MXLogger valueForLoggerKey:[NSString stringWithUTF8String:logger_key]];
+    
+    NSString * _name = name == nullptr ? NULL : [NSString stringWithUTF8String:name];
+    NSString * _msg = msg == nullptr ? NULL : [NSString stringWithUTF8String:msg];
+    NSString * _tag = tag == nullptr ? NULL : [NSString stringWithUTF8String:tag];
+    
+    [logger log:lvl name:_name msg: _msg tag:_tag];
+    
 }
 
 

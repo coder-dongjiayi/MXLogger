@@ -31,10 +31,12 @@ public class FirstFragment extends Fragment {
         logger.error("request","mxlogger","this is error");
         logger.fatal("request","mxlogger","this is fatal");
 
-        String mapKey =  logger.getMapKey();
-        MXLogger.log(mapKey,"mapKey",2,"mapName","this is map log");
+        String loggerKey =  logger.getLoggerKey();
+        MXLogger.log(loggerKey,"loggerKey",2,"mapName","this is loggerKey log");
 
-        binding = FragmentFirstBinding.inflate(inflater, container, false);
+       // MXLogger.destroy(loggerKey);
+
+       binding = FragmentFirstBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }

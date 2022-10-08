@@ -65,7 +65,9 @@ class AnalyzerBinary {
     String? cryptKey = result["cryptKey"];
     String? iv = result["iv"];
     String path = result["path"];
-  int _errorNumber = 0;
+    int _errorNumber = 0;
+    int _totalNumber = 0;
+
     await AnalyzerDatabase.initDataBase(path);
    await _decode(
         binaryData: _binaryData,
@@ -74,9 +76,12 @@ class AnalyzerBinary {
         errorCallback: (int errorNumber){
           _errorNumber = errorNumber;
         },
+       totalCallback: (int totalNumber){
+         _totalNumber =  totalNumber;
+       },
         callback: (int total, int current) {});
-    int number =  AnalyzerDatabase.count();
-    mainPort.send({"finish": 1,"number":number,"errorNumber":_errorNumber});
+
+    mainPort.send({"finish": 1,"number":_totalNumber,"errorNumber":_errorNumber});
 
     AnalyzerDatabase.db.dispose();
     mainPort.send(null);
@@ -87,13 +92,15 @@ class AnalyzerBinary {
       String? cryptKey,
       String? iv,
       ValueChanged<int>? errorCallback,
+        ValueChanged<int>? totalCallback,
+
       AnalyzerProgressCallback? callback}) async {
     int sizeofUint32t = 4;
 
     int offsetLength = sizeofUint32t;
 
     int errorNumber = 0;
-
+    int totalNumber = 0;
     AesCrypt? crypt;
     if (cryptKey != null) {
       crypt = AesCrypt();
@@ -134,6 +141,7 @@ class AnalyzerBinary {
               errorNumber = errorNumber + 1;
             },
             timestamp: logSerialize.timestamp);
+        totalNumber = totalNumber + 1;
       } catch (error) {
         errorNumber = errorNumber + 1;
         debugPrint("二进制文件解析失败:$error");
@@ -144,6 +152,7 @@ class AnalyzerBinary {
       begin = begin + sizeofUint32t + itemSize;
     }
     errorCallback?.call(errorNumber);
+    totalCallback?.call(totalNumber);
   }
 
   /// 对 key 和 iv 进行补位

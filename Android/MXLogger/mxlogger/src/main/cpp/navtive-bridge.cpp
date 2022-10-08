@@ -68,9 +68,9 @@ namespace mxlogger{
     }
 
 
-    MXLOGGER_JNI jstring  native_mapKey(JNIEnv *env, jobject obj,jlong handle){
+    MXLOGGER_JNI jstring  native_loggerKey(JNIEnv *env, jobject obj,jlong handle){
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
-        return string2jstring(env,logger ->map_key);
+        return string2jstring(env,logger ->logger_key());
     }
 
 
@@ -86,16 +86,16 @@ namespace mxlogger{
 
     }
 
-    MXLOGGER_JNI void native_log_mapKey(JNIEnv *env, jobject obj,jstring mapKey,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
+    MXLOGGER_JNI void native_log_loggerKey(JNIEnv *env, jobject obj,jstring loggerKey,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
         const char  * log_msg = msg == NULL ? nullptr :jstring2string(env,msg).c_str();
 
         const char  * log_tag = tag == NULL ? nullptr : jstring2string(env,tag).c_str();
 
         const char  * log_name = name == NULL ? nullptr : jstring2string(env,name).c_str();
 
-        const char  * map_key = jstring2string(env,mapKey).c_str();
+        const char  * logger_key = jstring2string(env,loggerKey).c_str();
 
-        mx_logger *logger = mx_logger ::global_for_map_key(map_key);
+        mx_logger *logger = mx_logger ::global_for_loggerKey(logger_key);
         if(logger != nullptr){
             logger ->log(level,log_name,log_msg,log_tag,mainThread);
         }
@@ -127,12 +127,16 @@ namespace mxlogger{
 
 
     }
+    MXLOGGER_JNI void native_destroy_loggerKey(JNIEnv *env, jobject obj,jstring loggerKey){
+        std::string loggerKeyStr =jstring2string(env,loggerKey);
+        mx_logger::delete_namespace(loggerKeyStr.data());
+    }
+
     MXLOGGER_JNI void native_destroy(JNIEnv *env, jobject obj,jstring ns,jstring directory){
         std::string nsStr =jstring2string(env,ns);
         std::string directoryStr =jstring2string(env,directory);
         mx_logger::delete_namespace(nsStr.data(),directoryStr.data());
     }
-
 
 
     MXLOGGER_JNI void native_consoleEnable(JNIEnv *env, jobject obj,jlong handle,jboolean enable){
@@ -184,9 +188,11 @@ static JNINativeMethod g_methods[] = {
         {"native_diskcache_path","(J)Ljava/lang/String;",(void *)mxlogger::native_diskcache_path},
         {"native_removeExpireData","(J)V",(void *)mxlogger::native_removeExpireData},
         {"native_removeAll","(J)V",(void *)mxlogger::native_removeAll},
-        {"native_mapKey","(J)Ljava/lang/String;",(void *)mxlogger::native_mapKey},
+        {"native_loggerKey","(J)Ljava/lang/String;",(void *)mxlogger::native_loggerKey},
         {"native_log","(JLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
-        {"native_log_mapKey","(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log_mapKey},
+        {"native_log_loggerKey","(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log_loggerKey},
+        {"native_destroy","(Ljava/lang/String;Ljava/lang/String;)V",(void *)mxlogger::native_destroy},
+        {"native_destroy_loggerKey","(Ljava/lang/String;)V",(void *)mxlogger::native_destroy_loggerKey}
 
 
 };

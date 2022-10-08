@@ -182,6 +182,24 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(drPtr);
   }
 
+  /// 类方法 使用 mapKey操作日志
+  static void logLoggerKey(String? loggerKey, int lvl, String msg, {String? name, String? tag}){
+
+    Pointer<Utf8> loggerKeyPtr = loggerKey != null ? loggerKey.toNativeUtf8() : nullptr;
+
+    Pointer<Utf8> namePtr = name != null ? name.toNativeUtf8() : nullptr;
+    Pointer<Utf8> tagPtr = tag != null ? tag.toNativeUtf8() : nullptr;
+    Pointer<Utf8> msgPtr = msg.toNativeUtf8();
+
+
+    _log_loggerKey(loggerKeyPtr, namePtr, lvl, msgPtr, tagPtr);
+
+    calloc.free(loggerKeyPtr);
+    calloc.free(namePtr);
+    calloc.free(tagPtr);
+    calloc.free(msgPtr);
+  }
+
   /// 程序进入后台的时候是否去清理过期文件 默认为YES
   void shouldRemoveExpiredDataWhenEnterBackground(bool should) {
     _shouldRemoveExpiredDataWhenEnterBackground = should;
@@ -242,10 +260,20 @@ class MXLogger with WidgetsBindingObserver {
 
   String getDiskcachePath() {
     if (enable == false) return "";
-    Pointer<Int8> result = _getdDiskcachePath(_handle);
+    Pointer<Int8> result = _getDiskcachePath(_handle);
 
     String path = result.cast<Utf8>().toDartString();
     return path;
+  }
+  String? getLoggerKey(){
+    Pointer<Int8> result = _getLoggerKey(_handle);
+    Pointer<Utf8> mapPoint =  result.cast<Utf8>();
+    if(mapPoint != nullptr){
+      String loggerKey = mapPoint.toDartString();
+      return loggerKey;
+    }
+    return null;
+
   }
 
   void debug(String msg, {String? name, String? tag}) {
@@ -307,6 +335,11 @@ final void Function(Pointer<Void>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Ut
         _mxlogger_function("log"))
     .asFunction();
 
+final void Function(Pointer<Utf8>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Utf8>) _log_loggerKey = _nativeLib
+    .lookup<NativeFunction<Void Function(Pointer<Utf8>, Pointer<Utf8>, Int32, Pointer<Utf8>, Pointer<Utf8>)>>(
+    _mxlogger_function("log_loggerKey"))
+    .asFunction();
+
 final void Function(Pointer<Void>, int) _setFileLevel = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(_mxlogger_function("set_file_level"))
     .asFunction();
@@ -319,8 +352,11 @@ final void Function(Pointer<Void>, int) _setConsoleEnable = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(_mxlogger_function("set_console_enable"))
     .asFunction();
 
-final Pointer<Int8> Function(Pointer<Void>) _getdDiskcachePath = _nativeLib
+final Pointer<Int8> Function(Pointer<Void>) _getDiskcachePath = _nativeLib
     .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(_mxlogger_function("get_diskcache_path"))
+    .asFunction();
+final Pointer<Int8> Function(Pointer<Void>) _getLoggerKey = _nativeLib
+    .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(_mxlogger_function("get_loggerKey"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setMaxdiskAge = _nativeLib

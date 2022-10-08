@@ -1,8 +1,12 @@
 package com.bling.mxlogger;
 
 import android.content.Context;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.dongjiayi.mxlogger.MXLogger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +54,26 @@ public class FlutterMxloggerPlugin implements FlutterPlugin, MethodCallHandler {
     }
   }
 
+  public static  void debug(@NonNull String loggerKey, @Nullable String tag,@Nullable String name,@Nullable String msg){
+    log(loggerKey,tag,0,name,msg);
+  }
 
+  public static  void info(@NonNull String loggerKey, @Nullable String tag,@Nullable String name,@Nullable String msg){
+    log(loggerKey,tag,1,name,msg);
+  }
+  public static  void warn(@NonNull String loggerKey, @Nullable String tag,@Nullable String name,@Nullable String msg){
+    log(loggerKey,tag,2,name,msg);
+  }
+  public static  void error(@NonNull String loggerKey, @Nullable String tag,@Nullable String name,@Nullable String msg){
+    log(loggerKey,tag,3,name,msg);
+  }
+  public static  void fatal(@NonNull String loggerKey, @Nullable String tag,@Nullable String name,@Nullable String msg){
+    log(loggerKey,tag,4,name,msg);
+  }
+
+  private static void log(@NonNull String loggerKey, @Nullable String tag,@NonNull int level,@Nullable String name,@Nullable String msg){
+    MXLogger.log(loggerKey,tag,level,name,msg);
+  }
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     channel.setMethodCallHandler(null);

@@ -15,6 +15,7 @@ class _LogPageState extends State<LogPage> {
   int _size = 0;
   // final String _cryptKey = "mxloggeraes128cryptkey";
   // final String _iv = "mxloggeraescfbiv";
+  String? loggerKey;
   @override
   void initState() {
     // TODO: implement initState
@@ -36,6 +37,10 @@ class _LogPageState extends State<LogPage> {
     updateSize();
 
     print("path:${_mxLogger.getDiskcachePath()}");
+    print("loggerKey:${_mxLogger.getLoggerKey()}");
+
+    loggerKey = _mxLogger.getLoggerKey();
+
   }
 
   @override
@@ -99,6 +104,16 @@ class _LogPageState extends State<LogPage> {
                   updateSize();
                 },
                 child: Text("清理过期日志"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  MXLogger.logLoggerKey(loggerKey, 0, "这是map写入的数据 debug",tag: "loggerKey",name: "mxlogger_loggerKey");
+                  MXLogger.logLoggerKey(loggerKey, 1, "这是map写入的数据 info",tag: "loggerKey",name: "mxlogger_loggerKey");
+                  MXLogger.logLoggerKey(loggerKey, 2, "这是map写入的数据 warn",tag: "loggerKey",name: "mxlogger_loggerKey");
+                  MXLogger.logLoggerKey(loggerKey, 3, "这是map写入的数据 error",tag: "loggerKey",name: "mxlogger_loggerKey");
+                  MXLogger.logLoggerKey(loggerKey, 4, "这是map写入的数据 fatal",tag: "loggerKey",name: "mxlogger_loggerKey");
+                },
+                child: Text("mapKey写入日志"),
               ),
               ElevatedButton(
                 onPressed: () {

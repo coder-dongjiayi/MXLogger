@@ -45,9 +45,9 @@ public class MXLogger {
 
 
     /**
-   * C++层用于保存logger对象的key，可以通过这个值 直接获取到已存在的logger对象
+   *   nameSpace+diskCacheDirectory 做一次md5的值，对应一个logger对象，可以通过这个操作logger
    * */
-  public  String mapKey;
+  public  String loggerKey;
 
  /**
   * nameSpace 日志命名空间 建议使用域名反转保证唯一性
@@ -192,23 +192,40 @@ public class MXLogger {
         return  cacheDir;
     }
 
-    public String getMapKey() {
-        return native_mapKey(nativeHandle);
+    /**
+     *  销毁C++对象
+     * */
+    public static void  destroy(@NonNull Context context, @NonNull String nameSpace,
+                                @Nullable String diskCacheDirectory){
+        if(diskCacheDirectory == null){
+            diskCacheDirectory = defaultDiskCacheDirectory(context);
+        }
+        native_destroy(nameSpace,diskCacheDirectory);
+    }
+
+    /**
+     *  通过loggerKey 销毁C++对象
+     * */
+    public static void  destroy(@NonNull String loggerKey){
+        native_destroy_loggerKey(loggerKey);
+    }
+    public String getLoggerKey() {
+        return native_loggerKey(nativeHandle);
     }
 
     /**
      * 根据mapKey 获取已初始化的logger对象 然后进行日志写入操作
      * 如果没有获取到logger对象 则没有调用这个方法没有任何反应 也不会报错
      * */
-    public static void log(@Nullable String mapKey, @Nullable String tag,@Nullable int level,@Nullable String name,@Nullable String msg){
+    public static void log(@NonNull String loggerKey, @Nullable String tag,@NonNull int level,@Nullable String name,@Nullable String msg){
         boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
-        native_log_mapKey(mapKey,name,level,msg,tag,isMainThread);
+        native_log_loggerKey(loggerKey,name,level,msg,tag,isMainThread);
     }
 
     private static native long jniInitialize(String nameSpace,String diskCacheDirectory,String storagePolicy,String fileName,String cryptKey,String iv);
 
     private  static  native void native_log(long nativeHandle,String name,int level,String msg,String tag,boolean mainThread);
-    private  static  native void native_log_mapKey(String mapKey,String name,int level,String msg,String tag,boolean mainThread);
+    private  static  native void native_log_loggerKey(String loggerKey,String name,int level,String msg,String tag,boolean mainThread);
 
     private  static  native  void  native_fileLevel(long nativeHandle,int fileLevel);
     private  static  native  void  native_consoleEnable(long nativeHandle,boolean enable);
@@ -218,5 +235,7 @@ public class MXLogger {
     private  static  native String native_diskcache_path(long nativeHandle);
     private  static  native void native_removeExpireData(long nativeHandle);
     private static  native  void  native_removeAll(long nativeHandle);
-    private static native  String native_mapKey(long nativeHandle);
+    private static native  String native_loggerKey(long nativeHandle);
+    private  static native  void native_destroy(String nameSpace,String diskCacheDirectory);
+    private static native void native_destroy_loggerKey(String loggerKey);
 }

@@ -61,7 +61,7 @@
     
     self.logger.fileLevel = 0;
 
-    MXLogger * lg = [MXLogger valueForMapKey:self.logger.mapKey];
+    MXLogger * lg = [MXLogger valueForLoggerKey:self.logger.loggerKey];
     NSLog(@"self.logger:%@",self.logger);
     NSLog(@"MXLogger: %@",lg);
     
