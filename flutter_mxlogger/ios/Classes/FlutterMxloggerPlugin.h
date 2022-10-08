@@ -2,7 +2,7 @@
 
 @interface FlutterMxloggerPlugin : NSObject<FlutterPlugin>
 
-/// mapKey 需要业务层传过来
+/// loggerKey 需要业务层传过来
 
 +(void) debug:(NSString*) loggerKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag;
 
