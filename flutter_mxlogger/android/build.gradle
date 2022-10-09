@@ -1,4 +1,4 @@
-group 'com.dongjiayi.mxlogger'
+group 'com.coderdjy.mxlogger'
 version '1.0'
 
 buildscript {

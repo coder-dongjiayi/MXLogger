@@ -1,4 +1,4 @@
-package com.dongjiayi.mxlogger;
+package com.coderdjy.mxlogger;
 
 import android.content.Context;
 import android.os.Looper;

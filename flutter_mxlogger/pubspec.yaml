@@ -28,7 +28,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.dongjiayi.mxlogger
+        package: com.coderdjy.mxlogger
         pluginClass: FlutterMxloggerPlugin
       ios:
         pluginClass: FlutterMxloggerPlugin
