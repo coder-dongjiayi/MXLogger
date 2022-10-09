@@ -2,6 +2,7 @@
 
 MXLogger 是基于mmap内存映射机制的跨平台日志库，支持AES CFB 128位加密，支持iOS Android Flutter。核心代码使用C/C++实现， Flutter端通过ffi调用，性能几乎与原生一致。 底层序列化使用Google开源的flat_buffers实现，高效稳定。
 
+
 # 快速开始
 
 ```dart
@@ -24,5 +25,5 @@ MXLogger logger = await MXLogger.initialize(
 
 # 解析日志文件
 
-产出的二进制文件可以使用 [mxlogger_analyzer](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer.dmg) 进行解析，前往[github](https://github.com/coder-dongjiayi/MXLogger) 查看更过关于解析器的说明
+产出的二进制文件可以使用 [mxlogger_analyzer](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer.dmg) 进行解析，前往[github](https://github.com/coder-dongjiayi/MXLogger) 查看更多关于解析器的说明
 

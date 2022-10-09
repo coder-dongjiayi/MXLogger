@@ -133,7 +133,10 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 
 ### Flutter
 
-没有往[pub](https://pub.flutter-io.cn/)上传，可以[下载源码](https://github.com/coder-dongjiayi/MXLogger/tree/main/flutter_mxlogger) 放到自己公司的git或者作为本地插件的形式集成到flutter工程中
+```
+dependencies:
+  flutter_mxlogger: ^1.1.2
+```
 
 
 
