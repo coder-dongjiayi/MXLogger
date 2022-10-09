@@ -1,4 +1,4 @@
-package com.bling.mxlogger;
+package com.dongjiayi.mxlogger;
 
 import android.content.Context;
 import android.os.Looper;
