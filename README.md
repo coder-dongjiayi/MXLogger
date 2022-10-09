@@ -221,7 +221,6 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 # 后续版本迭代安排
 
 1. 日志文件压缩 
-2. flutter端在插件中使用MXLogger
 3. mxlogger_analyzer 支持根据tag搜索、分析数据
 4. 强化控制台日志输出
 
