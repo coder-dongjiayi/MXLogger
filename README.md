@@ -125,11 +125,11 @@ mxlogger_analyzer 使用flutter编写，目前全平台支持，你也可以定�
 
 ## iOS
 
-``` pod 'MXLogger', '~> 0.1.2 '```
+``` pod 'MXLogger', '~> 1.1.0 '```
 
 ## Android
 
-``` implementation 'io.github.coder-dongjiayi:mxlogger:0.1.2'```
+``` implementation 'io.github.coder-dongjiayi:mxlogger:1.1.0'```
 
 ### Flutter
 

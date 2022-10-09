@@ -41,7 +41,6 @@
 #include "openssl_aes.h"
 #include "openssl_aes_locl.h"
 
-#ifndef MMKV_DISABLE_CRYPT
 
 namespace openssl {
 
@@ -1041,4 +1040,4 @@ void AES_C_decrypt(const uint8_t *in, uint8_t *out, const void *k) {
 
 } // namespace openssl
 
-#endif // MMKV_DISABLE_CRYPT
+

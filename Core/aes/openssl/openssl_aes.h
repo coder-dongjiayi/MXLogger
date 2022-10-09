@@ -16,7 +16,7 @@
 #include<stdint.h>
 
 
-#ifndef MMKV_DISABLE_CRYPT
+
 
 namespace openssl {
 
@@ -113,6 +113,6 @@ void AES_decrypt(const uint8_t *in, uint8_t *out, const AES_KEY *key);
 
 #endif // __ARM_MAX_ARCH__ > 0
 
-#endif // MMKV_DISABLE_CRYPT
+
 #endif // __cplusplus
 #endif // HEADER_AES_H

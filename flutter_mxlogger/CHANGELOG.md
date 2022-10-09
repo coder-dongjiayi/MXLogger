@@ -1,3 +1,4 @@
-## 0.0.1
+## v1.1.0 / 2022-10-09
 
-* TODO: Describe initial release.
+* Keep up with MXLogger native lib v1.1.0.
+* Logs can be written using loggerKey

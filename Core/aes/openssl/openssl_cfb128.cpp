@@ -11,7 +11,7 @@
 
 #include <cstring>
 
-#ifndef  MMKV_DISABLE_CRYPT
+
 
 namespace openssl {
 
@@ -94,4 +94,4 @@ void AES_cfb128_decrypt(const uint8_t *in, uint8_t *out, size_t len, const AES_K
 
 } // namespace openssl
 
-#endif //  MMKV_DISABLE_CRYPT
+
