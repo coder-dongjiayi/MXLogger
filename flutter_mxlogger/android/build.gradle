@@ -41,8 +41,8 @@ android {
         minSdkVersion 21
     }
     dependencies {
-
-    implementation 'io.github.coder-dongjiayi:mxlogger:1.1.0'
+// android端暂时禁用mxlogger
+//    implementation 'io.github.coder-dongjiayi:mxlogger:1.1.0'
 
 //       implementation (name:"mxlogger-DefaultCpp-release",ext:"aar")
 

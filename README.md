@@ -171,7 +171,7 @@ dependencies:
   logger.maxDiskAge = 60*60*24*7; // 一个星期
   logger.maxDiskSize = 1024 * 1024 * 10; // 10M
   logger.fileLevel = 0;// 设置文件写入等级 小于这个等级的日志 不写入文件
-  [logger debug:@"mxlogger" msg:@"这是debug信息" tag:@"response"];
+  [logger debug:@"mxlogger" msg:@"这是debug信息" tag:@"tag1,tag2,tag3"]; //多个tag可以使用,分割
   [logger info:@"mxlogger" msg:@"这是info信息" tag:@"request"];
   [logger warn:@"mxlogger" msg:@"这是warn信息" tag:@"step"];
   [logger error:@"mxlogger" msg:@"这是error信息" tag:NULL];
@@ -186,7 +186,7 @@ dependencies:
   MXLogger logger = new MXLogger(this.getContext(),"com.dongjiayi.mxlogger");
   logger.maxDiskAge = 60*60*24*7; // 一个星期
   logger.maxDiskSize = 1024 * 1024 * 10; // 10M
-  logger.debug("request","mxlogger","this is debug");
+  logger.debug("request","mxlogger","this is debug",tag:"tag1,tag2,tag3");
   logger.info("response","mxlogger","this is info");
   logger.warn("tag","mxlogger","this is warn");
   logger.error("404","mxlogger","this is error");
@@ -208,7 +208,7 @@ dependencies:
    logger.setMaxDiskSize(1024*1024*10);
    logger.setFileLevel(0);
   
-   logger.debug("这是debug数据", name: "mxlogger", tag: "D");
+   logger.debug("这是debug数据", name: "mxlogger", tag: "tag1,tag2,tag3");
    logger.info("这是info数据", name: "mxlogger", tag: "w");
    logger.warn("这是warn数据", name: "mxlogger", tag: "w");
    logger.error("这是error数据", name: "mxlogger", tag: "e");
