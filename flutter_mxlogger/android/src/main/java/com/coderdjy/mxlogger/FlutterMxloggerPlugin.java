@@ -1,15 +1,14 @@
 package com.coderdjy.mxlogger;
 
 import android.content.Context;
-import android.os.Looper;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-//import com.dongjiayi.mxlogger.MXLogger;
+import com.dongjiayi.mxlogger.MXLogger;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
@@ -72,7 +71,7 @@ public class FlutterMxloggerPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private static void log(@NonNull String loggerKey, @Nullable String tag,@NonNull int level,@Nullable String name,@Nullable String msg){
-//    MXLogger.log(loggerKey,tag,level,name,msg);
+    MXLogger.log(loggerKey,tag,level,name,msg);
   }
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
