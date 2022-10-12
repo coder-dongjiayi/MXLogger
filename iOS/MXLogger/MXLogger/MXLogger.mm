@@ -62,18 +62,23 @@ static NSString * _defaultDiskCacheDirectory;
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace{
     [self destroyWithNamespace:nameSpace diskCacheDirectory:[MXLogger defaultDiskCacheDirectory]];
 }
++(void)destroyWithLoggerKey:(nonnull NSString*)loggerKey{
+    
+    if ([global_instanceDic objectForKey:loggerKey]) {
+        MXLogger * logger =  [global_instanceDic objectForKey:loggerKey];
+        
+        logger = nil;
+        [global_instanceDic removeObjectForKey:loggerKey];
+    }
+    
+    mx_logger::delete_namespace(loggerKey.UTF8String);
+}
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory{
     
     NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
     
-    if ([global_instanceDic objectForKey:key]) {
-        MXLogger * logger =  [global_instanceDic objectForKey:key];
-        
-        logger = nil;
-        [global_instanceDic removeObjectForKey:key];
-    }
+    [self destroyWithLoggerKey:key];
     
-    mx_logger::delete_namespace(nameSpace.UTF8String, directory.UTF8String);
 }
 +(MXLogger*)valueForLoggerKey:(NSString*)loggerKey{
     if(loggerKey == NULL || [loggerKey isKindOfClass:[NSNull class]]){
@@ -271,6 +276,43 @@ static NSString * _defaultDiskCacheDirectory;
 
 - (NSString *)diskCachePath{
     return [NSString stringWithUTF8String:_logger->diskcache_path()];
+}
+
+
+
+
++(void)debugWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    
+    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
+  
+    [logger debug:name msg:msg tag:tag];
+}
+
++(void)infoWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
+  
+    [logger info:name msg:msg tag:tag];
+}
+
+
++(void)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
+  
+    [logger warn:name msg:msg tag:tag];
+}
+
++(void)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+  
+    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
+  
+    [logger error:name msg:msg tag:tag];
+}
+
++(void)fatalWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    
+    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
+  
+    [logger fatal:name msg:msg tag:tag];
 }
 
 

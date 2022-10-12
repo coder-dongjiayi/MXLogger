@@ -18,7 +18,7 @@
 @property(nonatomic,strong)MXLogger * logger;
 @property (weak, nonatomic) IBOutlet UILabel *sizeLabel;
 @property (weak, nonatomic) IBOutlet UILabel *filesLabel;
-@property (nonatomic,strong) NSFileHandle * fileHandler;
+
 @end
 
 @implementation LogViewController
@@ -26,22 +26,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    [self initFileHandler];
     
-//    _cryptKey = @"abcdefgabcdefgob";
-//    _iv = @"abcdefgabcdefgcc";
+    _cryptKey = @"abcdefgabcdefgob";
+    _iv = @"abcdefgabcdefgcc";
     [self initMXLogger];
     [self updateSize];
-}
--(void)initFileHandler{
-    
-    NSString * path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
-    NSString * filePath = [path stringByAppendingFormat:@"%@",@"/Blog.txt"];
-    
-    [[NSFileManager defaultManager]createFileAtPath:filePath contents:nil attributes:nil];
-    
-    self.fileHandler = [NSFileHandle fileHandleForWritingAtPath:filePath];
-    
 }
 
 -(void)initMXLogger{
@@ -67,6 +56,7 @@
     
     NSLog(@"目录:%@",self.logger.diskCachePath);
     
+  
 }
 
 
@@ -89,8 +79,9 @@
 
     for (NSInteger i = 0; i < 100000; i++) {
 
-
-        [self.logger info:@"name" msg:@"This is mxlogger log" tag:@"net"];
+     //  [self.logger info:@"name" msg:@"This is mxlogger log" tag:@"net"];
+       
+        [MXLogger infoWithLoggerKey:self.logger.loggerKey name:@"name" msg:@"This is mxlogger log" tag:@"net"];
 
     }
     NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
@@ -134,28 +125,7 @@
     self.sizeLabel.text = [NSString stringWithFormat:@"当前日志大小:%0.2f MB",size];
     NSLog(@"日志字节大小:%ld byte",logSize);
 }
-- (IBAction)appFileAction:(id)sender {
-    
-    NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
-    NSTimeInterval start =[dateStart timeIntervalSince1970];
-    NSUserDefaults* df = [NSUserDefaults standardUserDefaults];
-    
-    for (int i=0; i<100000; i++) {
-  
-        /// 104字节
-        NSString * log = @"ThisismxloggerlogguvThisismxloggerlogguvThisismxloggerlogguvThisismxloggerlogguvThisismxloggerlogguvoiuy";
-        [self.fileHandler seekToEndOfFile];
-        //写入文件
-        [self.fileHandler writeData:[log dataUsingEncoding:NSUTF8StringEncoding]];
-    }
- 
-    NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
-    NSTimeInterval end =[dateEnd timeIntervalSince1970];
-    
 
-
-    NSLog(@"NSFileHandle 写10万数据耗时(s):%f",end - start);
-}
 
 
 - (IBAction)lookButtonAction:(id)sender {

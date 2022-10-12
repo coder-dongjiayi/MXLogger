@@ -46,7 +46,6 @@ private:
 public:
    
 
-  
     // 初始化 logger
     static mxlogger *initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv);
     
@@ -65,6 +64,7 @@ public:
     /// 释放全部的logger
     static void destroy();
     
+
 
     // 是否开启日志
     void set_enable(bool enable);
@@ -89,7 +89,7 @@ public:
     // 设置日志存储等级
     void set_file_level(int level);
     
-    
+    // 基本不需要调用flush
     void flush();
     
     // 返回日志的磁盘路径
@@ -106,7 +106,8 @@ public:
     /// @param tag 标记
     /// @param is_main_thread 是否在主线程
     void log(int level,const char* name, const char* msg,const char* tag,bool is_main_thread);
-
+    
+    
    
   
 };

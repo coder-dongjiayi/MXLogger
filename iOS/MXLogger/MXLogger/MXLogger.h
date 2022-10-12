@@ -30,11 +30,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /// 释放对象的方法
+
+///通过  loggerKey 释放
++(void)destroyWithLoggerKey:(nonnull NSString*)loggerKey;
 /// @param nameSpace ns
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace;
+
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
-
-
 
 
 
@@ -137,6 +139,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(void)fatal:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
 
+
+// 类方法 使用已存在的loggerKey写入日志
+
++(void)debugWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+
++(void)infoWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+
++(void)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+
++(void)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+
++(void)fatalWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
 
 
 @end

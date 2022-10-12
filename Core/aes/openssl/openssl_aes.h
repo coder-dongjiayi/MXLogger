@@ -16,8 +16,6 @@
 #include<stdint.h>
 
 
-
-
 namespace openssl {
 
 /*
