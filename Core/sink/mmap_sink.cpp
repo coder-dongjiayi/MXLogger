@@ -63,7 +63,7 @@ bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){
     
     size_t total = actual_size_ + buffer_size + offset_length;
     
-    /// 2、 如果写入长度大于文件长度的3/4 则 进行扩容
+    /// 2、 如果写入长度大于文件长度进行扩容
     if (total >=file_size_) {
         truncate_(total);
     }
