@@ -61,7 +61,7 @@
 
 
 - (IBAction)writeLogButtonAction:(id)sender {
- 
+  
     [self.logger debug:NULL msg:@"这是debug信息" tag:@"net"];
     [self.logger debug:@"mxlogger" msg:@"这是debug信息" tag:@"response"];
     [self.logger info:@"mxlogger" msg:@"这是info信息" tag:@"request"];

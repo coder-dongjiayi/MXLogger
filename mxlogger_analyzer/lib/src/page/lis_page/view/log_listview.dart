@@ -71,20 +71,25 @@ class _LogListViewState extends State<LogListView> {
     return Stack(
       children: [
         Container(
-            margin: EdgeInsets.only(left: 20),
-            padding: EdgeInsets.only(bottom: 10),
+            margin:const EdgeInsets.only(left: 20),
+            padding:const EdgeInsets.only(bottom: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(time,
-                    style: TextStyle(color: MXTheme.subText, fontSize: 13)),
-                SizedBox(height: 5),
+                Row(
+                  children: [
+                    Text(time,
+                        style: TextStyle(color: MXTheme.subText, fontSize: 13)),
+                    Text("【$name】",style: TextStyle(color: MXTheme.subText, fontSize: 13))
+                  ],
+                ),
+                const SizedBox(height: 5),
                 Row(
                   children: List.generate(tagList?.length ?? 0, (index){
                     return _tag(tagList?[index]);
                   }),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(
                   msg,
                   maxLines: 3,
@@ -99,10 +104,10 @@ class _LogListViewState extends State<LogListView> {
             child: Container(
               width: 10,
               height: 10,
-              margin: EdgeInsets.only(top: 3),
+              margin: const EdgeInsets.only(top: 3),
               decoration: BoxDecoration(
                   color: MXTheme.colorLevel(level),
-                  borderRadius: BorderRadius.all(Radius.circular(5))),
+                  borderRadius:const BorderRadius.all(Radius.circular(5))),
             )),
         Positioned(
             left: 4,
