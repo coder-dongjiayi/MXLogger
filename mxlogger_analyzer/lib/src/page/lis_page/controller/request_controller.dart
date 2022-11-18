@@ -1,9 +1,13 @@
 
 import 'package:flutter/cupertino.dart';
 
+
 import '../../../analyzer_data/analyzer_database.dart';
 import '../../detail_page/view/async_future_loader.dart';
 import '../log_model.dart';
+
+
+
 
 class RequestController extends ChangeNotifier{
 
@@ -28,6 +32,7 @@ class RequestController extends ChangeNotifier{
 
 
   bool containsLevel(int level){
+
     return _searchLevels.contains(level);
   }
 

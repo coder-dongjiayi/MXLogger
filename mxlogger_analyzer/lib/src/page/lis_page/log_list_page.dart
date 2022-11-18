@@ -3,152 +3,139 @@ import 'dart:typed_data';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:mxlogger_analyzer/src/controller/mxlogger_controller.dart';
-import 'package:mxlogger_analyzer/src/page/detail_page/mxlogger_detail_page.dart';
-import 'package:mxlogger_analyzer/src/page/lis_page/controller/request_controller.dart';
-import 'package:mxlogger_analyzer/src/page/lis_page/log_model.dart';
+import 'package:mxlogger_analyzer/src/controller/mxlogger_riverpod.dart';
+
 import 'package:mxlogger_analyzer/src/page/lis_page/view/crypt_dialog.dart';
+
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/log_app_bar.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/log_listview.dart';
-
-import 'package:provider/provider.dart';
-import 'package:desktop_drop/desktop_drop.dart';
+import 'package:tuple/tuple.dart';
 import '../../analyzer_data/analyzer_binary.dart';
 import '../../storage/mxlogger_storage.dart';
 import '../../theme/mx_theme.dart';
-import 'controller/mx_textfield_controller.dart';
-import 'package:mxlogger_analyzer/src/page/detail_page/view/async_future_loader.dart';
-import 'package:easy_refresh/easy_refresh.dart';
 
-class LogListPage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../detail_page/mxlogger_detail_page.dart';
+
+class LogListPage extends ConsumerStatefulWidget {
   const LogListPage({Key? key}) : super(key: key);
 
   @override
-  State<LogListPage> createState() => _LogListPageState();
+  LogListPageState createState() => LogListPageState();
 }
 
-class _LogListPageState extends State<LogListPage>
+class LogListPageState extends ConsumerState<LogListPage>
     with AutomaticKeepAliveClientMixin {
+  String? _keyWord;
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    return Scaffold(
+      backgroundColor: MXTheme.themeColor,
+      appBar: const LogAppBar(),
+      body: DropTarget(onDragEntered: (detail) {
+        // mxLoggerController.dropTargetAction(true);
+      }, onDragExited: (detail) {
+        // mxLoggerController.dropTargetAction(false);
+      }, onDragDone: (detail) async {
+        if (MXLoggerStorage.instance.cryptAlert != true) {
+          bool? result = await CryptDialog.show(context);
+          // mxLoggerController.dropTargetAction(false);
+          if (result != true) return;
+        }
 
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) {
-          RequestController controller = RequestController();
-          context.read<MXLoggerController>().addRequestController(controller);
-          return controller;
-        }),
-        ChangeNotifierProvider(create: (_) => MXTextFieldController())
-      ],
-      builder: (context, child) {
-        RequestController requestController = context.read<RequestController>();
-        MXTextFieldController textFieldController =
-            context.read<MXTextFieldController>();
-        MXLoggerController mxLoggerController =
-            context.read<MXLoggerController>();
+        XFile file = detail.files.first;
 
-        return KeyboardListener(
-            onKeyEvent: (event) {
-              if (event.physicalKey.usbHidUsage == 0x00070028) {
-                textFieldController.entry(context);
-              } else if (event.physicalKey.usbHidUsage == 0x0007002b) {
-                textFieldController.focusNode.requestFocus();
-              }
+        AnalyzerBinary.loadData(
+            file: file,
+            cryptKey: MXLoggerStorage.instance.cryptKey,
+            iv: MXLoggerStorage.instance.cryptIv,
+            onStartCallback: () {
+              EasyLoading.show(status: "正在导入数据");
             },
-            focusNode: FocusNode(),
-            child: Scaffold(
-              backgroundColor: MXTheme.themeColor,
-              appBar: const LogAppBar(),
-              body: DropTarget(
-                  onDragEntered: (detail) {
-                    mxLoggerController.dropTargetAction(true);
-                  },
-                  onDragExited: (detail) {
-                    mxLoggerController.dropTargetAction(false);
-                  },
-                  onDragDone: (detail) async {
-                    if (MXLoggerStorage.instance.cryptAlert != true) {
-                      bool? result = await CryptDialog.show(context);
-                      mxLoggerController.dropTargetAction(false);
-                      if (result != true) return;
-                    }
+            onProgressCallback: (int total, int current) {
+              double progress = current / total;
+              EasyLoading.showProgress(progress,
+                  status: "正在解析数据:${progress.truncate()}");
+            },
+            onEndCallback: (success, field) {
+              if (field == 0) {
+                EasyLoading.showSuccess("共$success条数据导入成功");
+              } else {
+                EasyLoading.showToast("${success}条数据导入成功，$field条数据导入失败",
+                    duration: Duration(seconds: 5));
+              }
 
-                    XFile file = detail.files.first;
+              // requestController.asyncController.refresh();
+            });
+      }, child: Consumer(builder: (context, ref, _) {
+        var config = ref.watch(logPagesProvider);
 
-                    AnalyzerBinary.loadData(
-                        file: file,
-                        cryptKey: MXLoggerStorage.instance.cryptKey,
-                        iv: MXLoggerStorage.instance.cryptIv,
-                        onStartCallback: () {
-                          EasyLoading.show(status: "正在导入数据");
-                        },
-                        onProgressCallback: (int total, int current) {
-                          double progress = current / total;
-                          EasyLoading.showProgress(progress,
-                              status: "正在解析数据:${progress.truncate()}");
-                        },
-                        onEndCallback: (success, field) {
-                          if (field == 0) {
-                            EasyLoading.showSuccess("共$success条数据导入成功");
-                          } else {
-                            EasyLoading.showToast(
-                                "${success}条数据导入成功，$field条数据导入失败",
-                                duration: Duration(seconds: 5));
-                          }
-
-                          requestController.asyncController.refresh();
-                        });
-                  },
-                  child: AsyncFutureLoader(
-                      asyncController: requestController.asyncController,
-                      asyncBuilder: () {
-                        return requestController.refresh();
-                      },
-                      emptyWidgetBuilder: (BuildContext context, bool? result) {
-                        if (requestController.dataSource.isEmpty == true) {
-                          context
-                              .read<MXTextFieldController>()
-                              .focusNode
-                              .requestFocus();
-                          return requestController.search == false
-                              ? _empty()
-                              : Center(
-                                  child: Text(
-                                  "暂无搜索结果",
-                                  style: TextStyle(color: MXTheme.subText),
-                                ));
-                        }
-                        return null;
-                      },
-                      successWidgetBuilder:
-                          (BuildContext context, bool? result) {
-                        final list =
-                            context.watch<RequestController>().dataSource;
-                        context
-                            .read<MXTextFieldController>()
-                            .focusNode
-                            .requestFocus();
-                        return LogListView(
-                          dataSource: list,
-                          callback: (index) {
-                            Navigator.of(context)
-                                .push(MaterialPageRoute(builder: (context) {
-                              return MXLoggerDetailPage(
-                                  logModel:
-                                      requestController.dataSource[index]);
-                            }));
-                          },
-                        );
-                      })),
-            ));
-      },
+        return config.when(
+            data: (list) {
+              return LogListView(
+                dataSource: list,
+                callback: (index) {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return MXLoggerDetailPage(logModel: list[index]);
+                  }));
+                },
+              );
+            },
+            error: (Object error, StackTrace stackTrace) {
+              return const SizedBox();
+            },
+            loading: () => const SizedBox());
+      })),
+      // child: AsyncFutureLoader(
+      //     asyncController: requestController.asyncController,
+      //     asyncBuilder: () {
+      //       return requestController.refresh();
+      //     },
+      //     emptyWidgetBuilder: (BuildContext context, bool? result) {
+      //       if (requestController.dataSource.isEmpty == true) {
+      //         context
+      //             .read<MXTextFieldController>()
+      //             .focusNode
+      //             .requestFocus();
+      //         return requestController.search == false
+      //             ? _empty()
+      //             : Center(
+      //             child: Text(
+      //               "暂无搜索结果",
+      //               style: TextStyle(color: MXTheme.subText),
+      //             ));
+      //       }
+      //       return null;
+      //     },
+      //     successWidgetBuilder:
+      //         (BuildContext context, bool? result) {
+      //       final list =
+      //           context.watch<RequestController>().dataSource;
+      //       context
+      //           .read<MXTextFieldController>()
+      //           .focusNode
+      //           .requestFocus();
+      //       return LogListView(
+      //         dataSource: list,
+      //         callback: (index) {
+      //           Navigator.of(context)
+      //               .push(MaterialPageRoute(builder: (context) {
+      //             return MXLoggerDetailPage(
+      //                 logModel:
+      //                 requestController.dataSource[index]);
+      //           }));
+      //         },
+      //       );
+      //     })),
     );
   }
 

@@ -175,7 +175,7 @@ class _SettingPageState extends State<SettingPage> {
                 child: Text("清空"),
                 onPressed: () async {
                   await AnalyzerDatabase.deleteData();
-                  context.read<MXLoggerController>().deleteData();
+                  // context.read<MXLoggerController>().deleteData();
 
                   Navigator.of(_context).pop();
                 },
