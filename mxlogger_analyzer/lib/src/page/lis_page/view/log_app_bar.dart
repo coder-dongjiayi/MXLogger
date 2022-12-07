@@ -66,36 +66,30 @@ class LogAppBarState extends ConsumerState<LogAppBar> {
   }
 
   Widget _search() {
-    return KeyboardListener(
-        onKeyEvent: (event) {
-          if (event.physicalKey.usbHidUsage == 0x0007002b) {
-            // textFieldController.focusNode.requestFocus();
-          }
-        },
-        focusNode: FocusNode(),
-        child: Container(
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-              color: MXTheme.themeColor,
-              borderRadius: BorderRadius.all(Radius.circular(5))),
-          height: 30,
-          child: Row(
-            children: [
-              const SizedBox(width: 10),
-              Icon(Icons.search, size: 20, color: MXTheme.subText),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: TextField(
+    return Container(
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+          color: MXTheme.themeColor,
+          borderRadius: BorderRadius.all(Radius.circular(5))),
+      height: 30,
+      child: Row(
+        children: [
+          const SizedBox(width: 10),
+          Icon(Icons.search, size: 20, color: MXTheme.subText),
+          const SizedBox(width: 10),
+          Expanded(
+              child: TextField(
                 autofocus: true,
-                // focusNode: context.read<MXTextFieldController>().focusNode,
-                // controller: context.read<MXTextFieldController>().searchController,
-                style: TextStyle(fontSize: 16, color: MXTheme.white),
 
+                style: TextStyle(fontSize: 16, color: MXTheme.white),
+                onChanged: (String? keyword){
+                  if(keyword?.isEmpty == true){
+                    ref.read(keywordSearchProvider.notifier).state = null;
+                  }
+                },
                 onSubmitted: (String? keyword) {
                   ref.read(keywordSearchProvider.notifier).state = keyword;
-
                 },
-
                 decoration: InputDecoration(
                   isCollapsed: true,
                   hintText: "搜索关键词 回车确定",
@@ -103,8 +97,8 @@ class LogAppBarState extends ConsumerState<LogAppBar> {
                   border: InputBorder.none,
                 ),
               ))
-            ],
-          ),
-        ));
+        ],
+      ),
+    );
   }
 }
