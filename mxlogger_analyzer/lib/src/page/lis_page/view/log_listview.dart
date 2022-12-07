@@ -17,13 +17,6 @@ class LogListView extends StatefulWidget {
 
 class _LogListViewState extends State<LogListView> {
 
-  @override
-  void initState() {
-
-    // TODO: implement initState
-    super.initState();
-
-  }
 
   @override
   Widget build(BuildContext context) {

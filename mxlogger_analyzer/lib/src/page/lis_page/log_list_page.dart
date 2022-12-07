@@ -4,6 +4,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:mxlogger_analyzer/src/component/mxlogger_text.dart';
 import 'package:mxlogger_analyzer/src/controller/mxlogger_provider.dart';
 
 import 'package:mxlogger_analyzer/src/page/lis_page/view/crypt_dialog.dart';
@@ -20,7 +21,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../detail_page/mxlogger_detail_page.dart';
 
-
 class LogListPage extends ConsumerStatefulWidget {
   const LogListPage({Key? key}) : super(key: key);
 
@@ -36,7 +36,6 @@ class LogListPageState extends ConsumerState<LogListPage>
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -44,7 +43,6 @@ class LogListPageState extends ConsumerState<LogListPage>
       backgroundColor: MXTheme.themeColor,
       appBar: const LogAppBar(),
       body: DropTarget(onDragEntered: (detail) {
-
         ref.read(dropTargetProvider.notifier).state = true;
       }, onDragExited: (detail) {
         ref.read(dropTargetProvider.notifier).state = false;
@@ -55,58 +53,76 @@ class LogListPageState extends ConsumerState<LogListPage>
           if (result != true) return;
         }
         XFile file = detail.files.first;
-        ref.read(mxloggerRepository).importBinaryData(
-            file: file,
-            cryptKey: MXLoggerStorage.instance.cryptKey,
-            cryptIv: MXLoggerStorage.instance.cryptIv).listen((event) {
-              int status = event["status"];
-              String message = event["message"] ?? "";
-              switch (status) {
-                case 0:
-                  EasyLoading.show(status: message);
-                  break;
-                case 1:
-                  double progress = event["progress"];
-                  EasyLoading.showProgress(progress,status: message);
-                  break;
-                case 2:
-                  EasyLoading.showSuccess(message);
-                  break;
-                case 3:
-                  EasyLoading.showInfo(message);
-                 break;
-              }
-              /// 刷新数据
-              ref.invalidate(logPagesProvider);
-        });
+        ref
+            .read(mxloggerRepository)
+            .importBinaryData(
+                file: file,
+                cryptKey: MXLoggerStorage.instance.cryptKey,
+                cryptIv: MXLoggerStorage.instance.cryptIv)
+            .listen((event) {
+          int status = event["status"];
+          String message = event["message"] ?? "";
+          switch (status) {
+            case 0:
+              EasyLoading.show(status: message);
+              break;
+            case 1:
+              double progress = event["progress"];
+              EasyLoading.showProgress(progress, status: message);
+              break;
+            case 2:
+              EasyLoading.showSuccess(message);
+              break;
+            case 3:
+              EasyLoading.showInfo(message);
+              break;
+          }
 
+          /// 刷新数据
+          ref.invalidate(logPagesProvider);
+        });
       }, child: Consumer(builder: (context, ref, _) {
         var config = ref.watch(logPagesProvider);
         return config.when(
             data: (list) {
-              if(list.isEmpty){
+              if (list.isEmpty) {
                 return _empty();
               }
-              return LogListView(
-                dataSource: list,
-                callback: (index) {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
-                    return MXLoggerDetailPage(logModel: list[index]);
-                  }));
-                },
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 10,top: 10),
+                    child: MXLoggerText(
+                        text: "共产生${list.length}条数据",
+                        style: TextStyle(color: MXTheme.subText,fontSize: 13)),
+                  ),
+                  Expanded(
+                      child: LogListView(
+                    dataSource: list,
+                    callback: (index) {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (context) {
+                        return MXLoggerDetailPage(logModel: list[index]);
+                      }));
+                    },
+                  ))
+                ],
               );
             },
             error: (Object error, StackTrace stackTrace) {
               return const SizedBox();
             },
-            loading: () =>  Center(child: CupertinoActivityIndicator(color: MXTheme.white,)));
+            loading: () => Center(
+                    child: CupertinoActivityIndicator(
+                  color: MXTheme.white,
+                )));
       })),
     );
   }
 
   Widget _empty() {
-   bool  dataEmpty =  ref.read(emptyLogProvider);
+    bool dataEmpty = ref.read(emptyLogProvider);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -118,7 +134,7 @@ class LogListPageState extends ConsumerState<LogListPage>
           ),
           const SizedBox(height: 15),
           Text(
-            dataEmpty != true ? "没有搜索到任何数据" :"拖拽日志文件到窗口",
+            dataEmpty != true ? "没有搜索到任何数据" : "拖拽日志文件到窗口",
             style: TextStyle(color: MXTheme.subText),
           )
         ],
