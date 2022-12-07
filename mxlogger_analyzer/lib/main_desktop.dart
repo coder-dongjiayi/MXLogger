@@ -14,8 +14,6 @@ import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
 import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -47,7 +45,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Widget> _dataSource = [const LogListPage(), const SettingPage()];
-  
+
   @override
   void initState() {
     // TODO: implement initState
@@ -56,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(builder: (context,ref,_){
+    return Consumer(builder: (context, ref, _) {
       return Scaffold(
         body: Row(
           children: [
@@ -71,28 +69,28 @@ class _MyHomePageState extends State<MyHomePage> {
                 return SideMenuData(
                   header: Container(
                     margin: EdgeInsets.only(top: 5),
-                    child: Image.asset("assets/images/logo.png",width: 35,height: 35,),
+                    child: Image.asset(
+                      "assets/images/logo.png",
+                      width: 35,
+                      height: 35,
+                    ),
                   ),
                   footer: GestureDetector(
                     onTap: () {
-                      
-                  
                       ref.read(selectedIndexProvider.notifier).state = 1;
-
                     },
                     child: Container(
-                      margin: const EdgeInsets.only(bottom: 20),
-                      child: Consumer(
-                        builder: (context,ref,_){
-                          int index = ref.watch(selectedIndexProvider);
+                        margin: const EdgeInsets.only(bottom: 20),
+                        child: Consumer(
+                          builder: (context, ref, _) {
+                            int index = ref.watch(selectedIndexProvider);
 
-                          return Icon(Icons.settings,
-                              color: index == 1
-                                  ? MXTheme.white
-                                  : MXTheme.subText);
-                        },
-                      )
-                    ),
+                            return Icon(Icons.settings,
+                                color: index == 1
+                                    ? MXTheme.white
+                                    : MXTheme.subText);
+                          },
+                        )),
                   ),
                   items: [
                     SideMenuItemDataTile(
@@ -104,12 +102,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         ref.read(selectedIndexProvider.notifier).state = 0;
                       },
                       icon: Consumer(
-                        builder: (context,ref,_){
-                          int index   =  ref.watch(selectedIndexProvider);
+                        builder: (context, ref, _) {
+                          int index = ref.watch(selectedIndexProvider);
 
                           return Icon(Icons.home,
                               color:
-                              index == 0 ? MXTheme.white : MXTheme.subText);
+                                  index == 0 ? MXTheme.white : MXTheme.subText);
                         },
                       ),
                     ),
@@ -119,23 +117,22 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Expanded(
                 child: Stack(
-                  children: [
-                    PageView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        controller: ref.read(pageControllerProvider),
-                        itemCount: _dataSource.length,
-                        scrollDirection: Axis.vertical,
-                        itemBuilder: (context, index) {
-                          return _dataSource[index];
-                        }),
-                    Consumer(builder: (context,ref,_){
-
-                     bool visible =  ref.watch(dropTargetProvider);
-                      return Visibility(
-                          visible: visible, child: DropTargetView());
-                    })
-                  ],
-                ))
+              children: [
+                PageView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    controller: ref.read(pageControllerProvider),
+                    itemCount: _dataSource.length,
+                    scrollDirection: Axis.vertical,
+                    itemBuilder: (context, index) {
+                      return _dataSource[index];
+                    }),
+                Consumer(builder: (context, ref, _) {
+                  bool visible = ref.watch(dropTargetProvider);
+                  return Visibility(
+                      visible: visible, child: const DropTargetView());
+                })
+              ],
+            ))
           ],
         ),
       );

@@ -24,7 +24,7 @@ class AnalyzerBinary {
       String? iv,
       VoidCallback? onStartCallback,
       AnalyzerProgressCallback? onProgressCallback,
-        AnalyValueChangedCallback? onEndCallback}) async {
+      AnalyValueChangedCallback? onEndCallback}) async {
     onStartCallback?.call();
 
     Uint8List? _binaryData = await file.readAsBytes();
@@ -41,7 +41,7 @@ class AnalyzerBinary {
         if (finish == 1) {
           int number = result["number"];
           int error = result["errorNumber"];
-          onEndCallback?.call(number,error);
+          onEndCallback?.call(number, error);
         }
       } else if (message is SendPort) {
         SendPort childPort = message;
@@ -69,19 +69,20 @@ class AnalyzerBinary {
     int _totalNumber = 0;
 
     await AnalyzerDatabase.initDataBase(path);
-   await _decode(
+    await _decode(
         binaryData: _binaryData,
         cryptKey: cryptKey,
         iv: iv,
-        errorCallback: (int errorNumber){
+        errorCallback: (int errorNumber) {
           _errorNumber = errorNumber;
         },
-       totalCallback: (int totalNumber){
-         _totalNumber =  totalNumber;
-       },
+        totalCallback: (int totalNumber) {
+          _totalNumber = totalNumber;
+        },
         callback: (int total, int current) {});
 
-    mainPort.send({"finish": 1,"number":_totalNumber,"errorNumber":_errorNumber});
+    mainPort.send(
+        {"finish": 1, "number": _totalNumber, "errorNumber": _errorNumber});
 
     AnalyzerDatabase.db.dispose();
     mainPort.send(null);
@@ -92,8 +93,7 @@ class AnalyzerBinary {
       String? cryptKey,
       String? iv,
       ValueChanged<int>? errorCallback,
-        ValueChanged<int>? totalCallback,
-
+      ValueChanged<int>? totalCallback,
       AnalyzerProgressCallback? callback}) async {
     int sizeofUint32t = 4;
 
@@ -124,9 +124,7 @@ class AnalyzerBinary {
       Uint8List buffer = binaryData.sublist(start, start + itemSize);
       try {
         if (crypt != null) {
-
           buffer = crypt.aesDecrypt(_replenishDataByte(buffer));
-
         }
         LogSerialize logSerialize = LogSerialize(buffer);
 
@@ -137,7 +135,7 @@ class AnalyzerBinary {
             level: logSerialize.level,
             threadId: logSerialize.threadId,
             isMainThread: logSerialize.isMainThread,
-            errorCallback: (String error){
+            errorCallback: (String error) {
               errorNumber = errorNumber + 1;
             },
             timestamp: logSerialize.timestamp);
@@ -145,7 +143,6 @@ class AnalyzerBinary {
       } catch (error) {
         errorNumber = errorNumber + 1;
         debugPrint("二进制文件解析失败:$error");
-
       }
 
       callback?.call(totalSize, begin);
@@ -167,7 +164,6 @@ class AnalyzerBinary {
     }
     return uint8List;
   }
-
 
   /// 对data 进行补位
   static Uint8List _replenishDataByte(Uint8List buffer) {
