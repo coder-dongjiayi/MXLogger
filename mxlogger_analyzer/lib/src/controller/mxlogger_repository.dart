@@ -1,5 +1,9 @@
+import 'dart:async';
+
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../analyzer_data/analyzer_binary.dart';
 import '../analyzer_data/analyzer_database.dart';
 import '../page/lis_page/log_model.dart';
 
@@ -20,6 +24,37 @@ class MXLoggerRepository{
     return source;
   }
 
+  /// 导入二进制数据到数据库
+  Stream<Map<String,dynamic>> importBinaryData({ XFile? file, String? cryptKey, String? cryptIv}) {
+   StreamController<Map<String,dynamic>> _streamController = StreamController();
+   if(file == null){
+     _streamController.add({"status":-1});
+   } else{
+     AnalyzerBinary.loadData(
+         file: file,
+         cryptKey: cryptKey,
+         iv: cryptIv,
+         onStartCallback: () {
+
+           _streamController.add({"status":0,"message":"正在导入数据"});
+         },
+         onProgressCallback: (int total, int current) {
+           double progress = current / total;
+
+           _streamController.add({"status":1,"message":"正在解析数据:${progress.truncate()}"});
+         },
+         onEndCallback: (success, field) {
+           if (field == 0) {
+
+             _streamController.add({"status":2,"message":"共$success条数据导入成功"});
+           } else {
+             _streamController.add({"status":3,"message":"$success条数据导入成功，$field条数据导入失败"});
+           }
+         });
+   }
+
+    return _streamController.stream;
+  }
 
   /// map 转化model
   List<LogModel> _transformLogModel( List<Map<String, Object?>> list){

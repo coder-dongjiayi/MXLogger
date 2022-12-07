@@ -18,7 +18,7 @@ import '../../theme/mx_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../detail_page/mxlogger_detail_page.dart';
-
+import 'package:mxlogger_analyzer/src/extends/async_extends.dart';
 class LogListPage extends ConsumerStatefulWidget {
   const LogListPage({Key? key}) : super(key: key);
 
@@ -28,11 +28,13 @@ class LogListPage extends ConsumerStatefulWidget {
 
 class LogListPageState extends ConsumerState<LogListPage>
     with AutomaticKeepAliveClientMixin {
-  String? _keyWord;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+
   }
 
   @override
@@ -50,31 +52,31 @@ class LogListPageState extends ConsumerState<LogListPage>
           // mxLoggerController.dropTargetAction(false);
           if (result != true) return;
         }
-
         XFile file = detail.files.first;
-
-        AnalyzerBinary.loadData(
-            file: file,
-            cryptKey: MXLoggerStorage.instance.cryptKey,
-            iv: MXLoggerStorage.instance.cryptIv,
-            onStartCallback: () {
-              EasyLoading.show(status: "正在导入数据");
-            },
-            onProgressCallback: (int total, int current) {
-              double progress = current / total;
-              EasyLoading.showProgress(progress,
-                  status: "正在解析数据:${progress.truncate()}");
-            },
-            onEndCallback: (success, field) {
-              if (field == 0) {
-                EasyLoading.showSuccess("共$success条数据导入成功");
-              } else {
-                EasyLoading.showToast("${success}条数据导入成功，$field条数据导入失败",
-                    duration: Duration(seconds: 5));
-              }
-
-              // requestController.asyncController.refresh();
-            });
+        ref.read(updateBinaryXFileProvider.notifier).state = file;
+        //
+        // AnalyzerBinary.loadData(
+        //     file: file,
+        //     cryptKey: MXLoggerStorage.instance.cryptKey,
+        //     iv: MXLoggerStorage.instance.cryptIv,
+        //     onStartCallback: () {
+        //       EasyLoading.show(status: "正在导入数据");
+        //     },
+        //     onProgressCallback: (int total, int current) {
+        //       double progress = current / total;
+        //       EasyLoading.showProgress(progress,
+        //           status: "正在解析数据:${progress.truncate()}");
+        //     },
+        //     onEndCallback: (success, field) {
+        //       if (field == 0) {
+        //         EasyLoading.showSuccess("共$success条数据导入成功");
+        //       } else {
+        //         EasyLoading.showToast("${success}条数据导入成功，$field条数据导入失败",
+        //             duration: Duration(seconds: 5));
+        //       }
+        //
+        //       // requestController.asyncController.refresh();
+        //     });
       }, child: Consumer(builder: (context, ref, _) {
         var config = ref.watch(logPagesProvider);
 
