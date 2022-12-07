@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mxlogger_analyzer/src/controller/mxlogger_provider.dart';
@@ -34,6 +35,7 @@ class LogListPageState extends ConsumerState<LogListPage>
     // TODO: implement initState
     super.initState();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +100,7 @@ class LogListPageState extends ConsumerState<LogListPage>
             error: (Object error, StackTrace stackTrace) {
               return const SizedBox();
             },
-            loading: () => const SizedBox());
+            loading: () =>  Center(child: CupertinoActivityIndicator(color: MXTheme.white,)));
       })),
     );
   }

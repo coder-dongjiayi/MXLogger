@@ -47,7 +47,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Widget> _dataSource = [const LogListPage(), const SettingPage()];
-  PageController _pageController = PageController(initialPage: 0);
+  
   @override
   void initState() {
     // TODO: implement initState
@@ -75,7 +75,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   footer: GestureDetector(
                     onTap: () {
-                      _pageController.jumpToPage(1);
+                      
+                  
                       ref.read(selectedIndexProvider.notifier).state = 1;
 
                     },
@@ -100,7 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       highlightSelectedColor: Colors.transparent,
                       isSelected: true,
                       onTap: () {
-                        _pageController.jumpToPage(0);
                         ref.read(selectedIndexProvider.notifier).state = 0;
                       },
                       icon: Consumer(
@@ -122,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     PageView.builder(
                         physics: NeverScrollableScrollPhysics(),
-                        controller: _pageController,
+                        controller: ref.read(pageControllerProvider),
                         itemCount: _dataSource.length,
                         scrollDirection: Axis.vertical,
                         itemBuilder: (context, index) {

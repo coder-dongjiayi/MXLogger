@@ -170,6 +170,9 @@ class _SettingPageState extends State<SettingPage> {
                 child: Text("清空"),
                 onPressed: () async {
                   await ref.read(mxloggerRepository).deleteData();
+
+                  ref.read(selectedIndexProvider.notifier).state = 0;
+
                   ref.invalidate(logPagesProvider);
 
                   Navigator.of(_context).pop();

@@ -1,4 +1,5 @@
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mxlogger_analyzer/src/controller/mxlogger_repository.dart';
 
@@ -29,8 +30,22 @@ final logPagesProvider = FutureProvider.autoDispose((ref) {
   return logResponse;
 });
 
+final pageControllerProvider = Provider((ref){
+
+  return PageController(initialPage: 0);
+});
+
 /// 首页选择index
-final selectedIndexProvider = StateProvider((ref) => 0);
+final selectedIndexProvider = StateProvider((ref){
+  PageController controller = ref.read(pageControllerProvider);
+  ref.listenSelf((previous, next) {
+    if(previous != null){
+      controller.jumpToPage(next);
+
+    }
+  });
+  return 0;
+});
 
 /// 显示遮罩状态
 final dropTargetProvider = StateProvider((ref) => false);
