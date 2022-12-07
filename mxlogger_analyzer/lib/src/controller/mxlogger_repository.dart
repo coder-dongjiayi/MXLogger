@@ -6,10 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../analyzer_data/analyzer_binary.dart';
 import '../analyzer_data/analyzer_database.dart';
 import '../page/lis_page/log_model.dart';
+import '../storage/mxlogger_storage.dart';
 
 
 
-final mxloggerRepositoryProvider = Provider.autoDispose((ref) => MXLoggerRepository());
+final mxloggerRepository = Provider.autoDispose((ref) => MXLoggerRepository());
+
+
 
 class MXLoggerRepository{
 
@@ -24,34 +27,44 @@ class MXLoggerRepository{
     return source;
   }
 
+  /// 清空数据
+  Future<void> deleteData(){
+    return AnalyzerDatabase.deleteData();
+  }
+
+  /// 查询数据库总条数
+  int fetchLogCount(){
+   return AnalyzerDatabase.count();
+  }
+
+  Future<void> saveAES({String? cryptKey,String? iv}) async{
+    MXLoggerStorage.instance.saveAES(cryptKey: cryptKey,iv: iv);
+  }
+
   /// 导入二进制数据到数据库
-  Stream<Map<String,dynamic>> importBinaryData({ XFile? file, String? cryptKey, String? cryptIv}) {
+  Stream<Map<String,dynamic>> importBinaryData({ required XFile file, String? cryptKey, String? cryptIv}) {
    StreamController<Map<String,dynamic>> _streamController = StreamController();
-   if(file == null){
-     _streamController.add({"status":-1});
-   } else{
-     AnalyzerBinary.loadData(
-         file: file,
-         cryptKey: cryptKey,
-         iv: cryptIv,
-         onStartCallback: () {
+   AnalyzerBinary.loadData(
+       file: file,
+       cryptKey: cryptKey,
+       iv: cryptIv,
+       onStartCallback: () {
 
-           _streamController.add({"status":0,"message":"正在导入数据"});
-         },
-         onProgressCallback: (int total, int current) {
-           double progress = current / total;
+         _streamController.add({"status":0,"message":"正在导入数据"});
+       },
+       onProgressCallback: (int total, int current) {
+         double progress = current / total;
 
-           _streamController.add({"status":1,"message":"正在解析数据:${progress.truncate()}"});
-         },
-         onEndCallback: (success, field) {
-           if (field == 0) {
+         _streamController.add({"status":1, "progress":progress, "message":"正在解析数据:${progress.truncate()}"});
+       },
+       onEndCallback: (success, field) {
+         if (field == 0) {
 
-             _streamController.add({"status":2,"message":"共$success条数据导入成功"});
-           } else {
-             _streamController.add({"status":3,"message":"$success条数据导入成功，$field条数据导入失败"});
-           }
-         });
-   }
+           _streamController.add({"status":2,"message":"共$success条数据导入成功"});
+         } else {
+           _streamController.add({"status":3,"message":"$success条数据导入成功，$field条数据导入失败"});
+         }
+       });
 
     return _streamController.stream;
   }

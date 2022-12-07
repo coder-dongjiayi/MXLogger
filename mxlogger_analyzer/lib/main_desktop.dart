@@ -5,15 +5,14 @@ import 'package:flutter_side_menu/flutter_side_menu.dart';
 
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
-import 'package:mxlogger_analyzer/src/controller/mxloger_state_provider.dart';
-import 'package:mxlogger_analyzer/src/controller/mxlogger_controller.dart';
+
+import 'package:mxlogger_analyzer/src/controller/mxlogger_provider.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/log_list_page.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/drop_target_view.dart';
 import 'package:mxlogger_analyzer/src/page/setting/setting_page.dart';
 import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
 import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-
 
 
 
@@ -130,11 +129,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           return _dataSource[index];
                         }),
                     Consumer(builder: (context,ref,_){
-                      // ref.watch(provider)
-                      // bool visibility = context.select<MXLoggerController, bool>(
-                      //         (value) => value.dropVisibility);
+
+                     bool visible =  ref.watch(dropTargetProvider);
                       return Visibility(
-                          visible: false, child: DropTargetView());
+                          visible: visible, child: DropTargetView());
                     })
                   ],
                 ))

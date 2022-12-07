@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mxlogger_analyzer/src/controller/mxlogger_riverpod.dart';
-import '../../../level/mx_level.dart';
+import 'package:mxlogger_analyzer/src/controller/level_list_state.dart';
+import 'package:mxlogger_analyzer/src/controller/mxlogger_provider.dart';
+
 import '../../../theme/mx_theme.dart';
 
 
@@ -28,34 +29,36 @@ class LogAppBarState extends ConsumerState<LogAppBar> {
   Widget _level() {
     return SizedBox(
       height: 35,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: MXLevels.map((e) {
-          return _button(e["number"], e["level"], e["color"]);
-        }).toList(),
-      ),
+      child: Consumer(builder: (context,ref,_){
+      List<LevelModel> levelList = ref.watch(levelSearchProvider);
+       return ListView(
+          scrollDirection: Axis.horizontal,
+          children: List.generate(levelList.length, (index) {
+            LevelModel model = levelList[index];
+            return _button(model);
+          })
+        );
+      }),
     );
   }
 
-  Widget _button(int number, String text, Color textColor) {
+  Widget _button(LevelModel model) {
     return GestureDetector(
       onTap: () {
-        // context.read<RequestController>().updateLevels(number);
+        ref.read(levelSearchProvider.notifier).selected(level: model.level);
       },
       child: Builder(
         builder: (context) {
-          //  context.select<RequestController,int>((value) => value.searchLevels.length);
-          // Color color =  context.read<RequestController>().containsLevel(number) == true ? MXTheme.buttonColor : Colors.transparent;
-          //
-          return Container(
+
+        return Container(
             padding: const EdgeInsets.only(left: 7, right: 7),
             margin: EdgeInsets.only(right: 10, top: 10),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),
-              color: MXTheme.buttonColor,
+              color: model.selected == true ? MXTheme.buttonColor : Colors.transparent,
             ),
-            child: Text(text, style: TextStyle(color: textColor, fontSize: 15)),
+            child: Text(model.levelDesc, style: TextStyle(color: model.color, fontSize: 15)),
           );
         },
       ),
@@ -89,7 +92,7 @@ class LogAppBarState extends ConsumerState<LogAppBar> {
                 style: TextStyle(fontSize: 16, color: MXTheme.white),
 
                 onSubmitted: (String? keyword) {
-                  ref.read(searchKeywordProvider.notifier).state = keyword;
+                  ref.read(keywordSearchProvider.notifier).state = keyword;
 
                 },
 
