@@ -1,17 +1,13 @@
-import 'dart:io';
-
+import 'package:desktop_drop/desktop_drop.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_side_menu/flutter_side_menu.dart';
-
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
-
+import 'package:mxlogger_analyzer/src/desktop_page.dart';
+import 'package:mxlogger_analyzer/src/page/lis_page/view/crypt_dialog.dart';
 import 'package:mxlogger_analyzer/src/provider/mxlogger_provider.dart';
-import 'package:mxlogger_analyzer/src/page/lis_page/log_list_page.dart';
-import 'package:mxlogger_analyzer/src/page/lis_page/view/drop_target_view.dart';
-import 'package:mxlogger_analyzer/src/page/setting/setting_page.dart';
+import 'package:mxlogger_analyzer/src/provider/mxlogger_repository.dart';
 import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
-import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 void main() async {
@@ -26,116 +22,67 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyHomePage(),
+      home: const MyHomePage(),
       builder: EasyLoading.init(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends ConsumerWidget {
   const MyHomePage({Key? key}) : super(key: key);
-
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final List<Widget> _dataSource = [const LogListPage(), const SettingPage()];
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    return DropTarget(
+        onDragEntered: (detail) {
+          ref.read(dropTargetProvider.notifier).state = true;
+        },
+        onDragExited: (detail) {
+          ref.read(dropTargetProvider.notifier).state = false;
+        },
+        onDragDone: (detail) async {
+          if (MXLoggerStorage.instance.cryptAlert != true) {
+            bool? result = await CryptDialog.show(context);
+            ref.read(dropTargetProvider.notifier).state = false;
+            if (result != true) return;
+          }
+          XFile file = detail.files.first;
+          _onDragDone(ref, file);
+        },
+        child: DesktopPage());
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Consumer(builder: (context, ref, _) {
-      return Scaffold(
-        body: Row(
-          children: [
-            SideMenu(
-              backgroundColor: MXTheme.sliderColor,
-              position: SideMenuPosition.left,
-              hasResizer: false,
-              hasResizerToggle: false,
-              maxWidth: 60,
-              minWidth: 60,
-              builder: (data) {
-                return SideMenuData(
-                  header: Container(
-                    margin: EdgeInsets.only(top: 5),
-                    child: Image.asset(
-                      "assets/images/logo.png",
-                      width: 35,
-                      height: 35,
-                    ),
-                  ),
-                  footer: GestureDetector(
-                    onTap: () {
-                      ref.read(selectedIndexProvider.notifier).state = 1;
-                    },
-                    child: Container(
-                        margin: const EdgeInsets.only(bottom: 20),
-                        child: Consumer(
-                          builder: (context, ref, _) {
-                            int index = ref.watch(selectedIndexProvider);
+  /// 拖拽完成操作
+  void _onDragDone(WidgetRef ref, XFile file) {
+    ref
+        .read(mxloggerRepository)
+        .importBinaryData(
+            file: file,
+            cryptKey: MXLoggerStorage.instance.cryptKey,
+            cryptIv: MXLoggerStorage.instance.cryptIv)
+        .listen((event) {
+      int status = event["status"];
+      String message = event["message"] ?? "";
+      switch (status) {
+        case 0:
+          EasyLoading.show(status: message);
+          break;
+        case 1:
+          double progress = event["progress"];
+          EasyLoading.showProgress(progress, status: message);
+          break;
+        case 2:
+          EasyLoading.showSuccess(message);
+          break;
+        case 3:
+          EasyLoading.showInfo(message);
+          break;
+      }
 
-                            return Icon(Icons.settings,
-                                color: index == 1
-                                    ? MXTheme.white
-                                    : MXTheme.subText);
-                          },
-                        )),
-                  ),
-                  items: [
-                    SideMenuItemDataTile(
-                      unSelectedColor: Colors.transparent,
-                      selectedColor: Colors.transparent,
-                      highlightSelectedColor: Colors.transparent,
-                      isSelected: true,
-                      onTap: () {
-                        ref.read(selectedIndexProvider.notifier).state = 0;
-                      },
-                      icon: Consumer(
-                        builder: (context, ref, _) {
-                          int index = ref.watch(selectedIndexProvider);
-
-                          return Icon(Icons.home,
-                              color:
-                                  index == 0 ? MXTheme.white : MXTheme.subText);
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-            Expanded(
-                child: Stack(
-              children: [
-                PageView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    controller: ref.read(pageControllerProvider),
-                    itemCount: _dataSource.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (context, index) {
-                      return _dataSource[index];
-                    }),
-                Consumer(builder: (context, ref, _) {
-                  bool visible = ref.watch(dropTargetProvider);
-                  return Visibility(
-                      visible: visible, child: const DropTargetView());
-                })
-              ],
-            ))
-          ],
-        ),
-      );
+      /// 刷新数据
+      ref.invalidate(logPagesProvider);
     });
   }
 }

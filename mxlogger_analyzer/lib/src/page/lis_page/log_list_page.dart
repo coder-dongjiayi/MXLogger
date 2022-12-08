@@ -40,46 +40,7 @@ class LogListPageState extends ConsumerState<LogListPage>
     return Scaffold(
       backgroundColor: MXTheme.themeColor,
       appBar: const LogAppBar(),
-      body: DropTarget(onDragEntered: (detail) {
-        ref.read(dropTargetProvider.notifier).state = true;
-      }, onDragExited: (detail) {
-        ref.read(dropTargetProvider.notifier).state = false;
-      }, onDragDone: (detail) async {
-        if (MXLoggerStorage.instance.cryptAlert != true) {
-          bool? result = await CryptDialog.show(context);
-          ref.read(dropTargetProvider.notifier).state = false;
-          if (result != true) return;
-        }
-        XFile file = detail.files.first;
-        ref
-            .read(mxloggerRepository)
-            .importBinaryData(
-                file: file,
-                cryptKey: MXLoggerStorage.instance.cryptKey,
-                cryptIv: MXLoggerStorage.instance.cryptIv)
-            .listen((event) {
-          int status = event["status"];
-          String message = event["message"] ?? "";
-          switch (status) {
-            case 0:
-              EasyLoading.show(status: message);
-              break;
-            case 1:
-              double progress = event["progress"];
-              EasyLoading.showProgress(progress, status: message);
-              break;
-            case 2:
-              EasyLoading.showSuccess(message);
-              break;
-            case 3:
-              EasyLoading.showInfo(message);
-              break;
-          }
-
-          /// 刷新数据
-          ref.invalidate(logPagesProvider);
-        });
-      }, child: Consumer(builder: (context, ref, _) {
+      body: Consumer(builder: (context, ref, _) {
         var config = ref.watch(logPagesProvider);
 
         return config.whenExtension(
@@ -98,19 +59,20 @@ class LogListPageState extends ConsumerState<LogListPage>
                 ),
                 Expanded(
                     child: LogListView(
-                  dataSource: list,
-                  callback: (index) {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) {
-                      return MXLoggerDetailPage(logModel: list[index]);
-                    }));
-                  },
-                ))
+                      dataSource: list,
+                      callback: (index) {
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (context) {
+                          return MXLoggerDetailPage(logModel: list[index]);
+                        }));
+                      },
+                    ))
               ],
             );
           },
         );
-      })),
+      }),
+
     );
   }
 
