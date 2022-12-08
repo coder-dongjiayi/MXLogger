@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mxlogger_analyzer/src/component/mxlogger_text.dart';
-import 'package:mxlogger_analyzer/src/controller/mxlogger_provider.dart';
+import 'package:mxlogger_analyzer/src/provider/mxlogger_provider.dart';
 
 import 'package:mxlogger_analyzer/src/page/lis_page/view/crypt_dialog.dart';
 
@@ -11,7 +11,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/log_app_bar.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/log_listview.dart';
 import 'package:mxlogger_analyzer/src/extends/async_extends.dart';
-import '../../controller/mxlogger_repository.dart';
+import '../../provider/mxlogger_repository.dart';
 import '../../storage/mxlogger_storage.dart';
 import '../../theme/mx_theme.dart';
 

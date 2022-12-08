@@ -6,7 +6,7 @@ import 'package:flutter_side_menu/flutter_side_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
 
-import 'package:mxlogger_analyzer/src/controller/mxlogger_provider.dart';
+import 'package:mxlogger_analyzer/src/provider/mxlogger_provider.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/log_list_page.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/drop_target_view.dart';
 import 'package:mxlogger_analyzer/src/page/setting/setting_page.dart';

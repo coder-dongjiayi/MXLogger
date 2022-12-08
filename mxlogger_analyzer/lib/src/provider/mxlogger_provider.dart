@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mxlogger_analyzer/src/controller/mxlogger_repository.dart';
+import 'package:mxlogger_analyzer/src/provider/mxlogger_repository.dart';
 
 import '../level/mx_level.dart';
 import '../storage/mxlogger_storage.dart';

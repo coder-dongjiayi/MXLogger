@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mxlogger_analyzer/src/controller/level_list_state.dart';
-import 'package:mxlogger_analyzer/src/controller/mxlogger_provider.dart';
+import 'package:mxlogger_analyzer/src/provider/level_list_state.dart';
+import 'package:mxlogger_analyzer/src/provider/mxlogger_provider.dart';
 
 import '../../../theme/mx_theme.dart';
 

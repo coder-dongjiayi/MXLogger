@@ -9,8 +9,8 @@ import '../../component/mxlogger_button.dart';
 import '../../component/mxlogger_text.dart';
 import '../../component/mxlogger_textfield.dart';
 
-import '../../controller/mxlogger_repository.dart';
-import '../../controller/mxlogger_provider.dart';
+import '../../provider/mxlogger_repository.dart';
+import '../../provider/mxlogger_provider.dart';
 import '../../theme/mx_theme.dart';
 
 class SettingPage extends StatefulWidget {
