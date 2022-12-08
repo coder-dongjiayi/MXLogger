@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +10,7 @@ import 'package:mxlogger_analyzer/src/page/lis_page/view/crypt_dialog.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/log_app_bar.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/log_listview.dart';
-
+import 'package:mxlogger_analyzer/src/extends/async_extends.dart';
 import '../../controller/mxlogger_repository.dart';
 import '../../storage/mxlogger_storage.dart';
 import '../../theme/mx_theme.dart';
@@ -83,40 +81,35 @@ class LogListPageState extends ConsumerState<LogListPage>
         });
       }, child: Consumer(builder: (context, ref, _) {
         var config = ref.watch(logPagesProvider);
-        return config.when(
-            data: (list) {
-              if (list.isEmpty) {
-                return _empty();
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(left: 10,top: 10),
-                    child: MXLoggerText(
-                        text: "共产生${list.length}条数据",
-                        style: TextStyle(color: MXTheme.subText,fontSize: 13)),
-                  ),
-                  Expanded(
-                      child: LogListView(
-                    dataSource: list,
-                    callback: (index) {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return MXLoggerDetailPage(logModel: list[index]);
-                      }));
-                    },
-                  ))
-                ],
-              );
-            },
-            error: (Object error, StackTrace stackTrace) {
-              return const SizedBox();
-            },
-            loading: () => Center(
-                    child: CupertinoActivityIndicator(
-                  color: MXTheme.white,
-                )));
+
+        return config.whenExtension(
+          empty: (list) {
+            return list.isEmpty ? _empty() : null;
+          },
+          data: (list) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(left: 10, top: 10),
+                  child: MXLoggerText(
+                      text: "共产生${list.length}条数据",
+                      style: TextStyle(color: MXTheme.subText, fontSize: 13)),
+                ),
+                Expanded(
+                    child: LogListView(
+                  dataSource: list,
+                  callback: (index) {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return MXLoggerDetailPage(logModel: list[index]);
+                    }));
+                  },
+                ))
+              ],
+            );
+          },
+        );
       })),
     );
   }
