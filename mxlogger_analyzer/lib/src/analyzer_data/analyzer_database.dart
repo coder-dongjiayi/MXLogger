@@ -99,7 +99,6 @@ class AnalyzerDatabase {
       stmt.dispose();
     } catch (error) {
       errorCallback?.call("$error");
-      debugPrint("数据库插入失败:$error");
     }
 
   }

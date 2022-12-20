@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_side_menu/flutter_side_menu.dart';
+import 'package:mxlogger_analyzer/src/page/error_page/error_page.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/log_list_page.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/drop_target_view.dart';
 import 'package:mxlogger_analyzer/src/page/setting/setting_page.dart';
@@ -9,7 +10,11 @@ import 'package:mxlogger_analyzer/src/theme/mx_theme.dart';
 
 class DesktopPage extends ConsumerWidget {
   DesktopPage({Key? key}) : super(key: key);
-  final List<Widget> _dataSource = [const LogListPage(), const SettingPage()];
+  final List<Widget> _dataSource = [
+    const LogListPage(),
+    const ErrorPage(),
+    const SettingPage()
+  ];
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
@@ -34,7 +39,7 @@ class DesktopPage extends ConsumerWidget {
                 ),
                 footer: GestureDetector(
                   onTap: () {
-                    ref.read(selectedIndexProvider.notifier).state = 1;
+                    ref.read(selectedIndexProvider.notifier).state = 2;
                   },
                   child: Container(
                       margin: const EdgeInsets.only(bottom: 20),
@@ -44,7 +49,7 @@ class DesktopPage extends ConsumerWidget {
 
                           return Icon(Icons.settings,
                               color:
-                                  index == 1 ? MXTheme.white : MXTheme.subText);
+                                  index == 2 ? MXTheme.white : MXTheme.subText);
                         },
                       )),
                 ),
@@ -67,6 +72,20 @@ class DesktopPage extends ConsumerWidget {
                       },
                     ),
                   ),
+                  SideMenuItemDataTile(
+                      isSelected: false,
+                      onTap: () {
+                        ref.read(selectedIndexProvider.notifier).state = 1;
+                      },
+                      icon: Consumer(
+                        builder: (context, ref, _) {
+                          int index = ref.watch(selectedIndexProvider);
+                          return Icon(
+                            Icons.error_outline_sharp,
+                            color: index == 1 ? MXTheme.white : MXTheme.subText,
+                          );
+                        },
+                      ))
                 ],
               );
             },

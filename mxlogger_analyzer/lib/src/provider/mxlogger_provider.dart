@@ -40,11 +40,20 @@ final selectedIndexProvider = StateProvider((ref){
   PageController controller = ref.read(pageControllerProvider);
   ref.listenSelf((previous, next) {
     if(previous != null){
-      controller.jumpToPage(next);
+
+        controller.jumpToPage(next);
 
     }
   });
   return 0;
+});
+
+final errorProvider = Provider<List<String>>((ref){
+  return [];
+});
+/// 存储错误信息
+final errorListProvider = StateProvider<List<String>>((ref){
+ return [];
 });
 
 /// 显示遮罩状态

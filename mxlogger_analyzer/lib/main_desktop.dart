@@ -79,6 +79,10 @@ class MyHomePage extends ConsumerWidget {
         case 3:
           EasyLoading.showInfo(message);
           break;
+        case 4:
+          ref.read(errorProvider).add(message);
+          ref.read(errorListProvider.notifier).state = List.of(ref.read(errorProvider)).toList();
+          break;
       }
 
       /// 刷新数据

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -28,10 +30,12 @@ class LogListPage extends ConsumerStatefulWidget {
 
 class LogListPageState extends ConsumerState<LogListPage>
     with AutomaticKeepAliveClientMixin {
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
   }
 
   @override

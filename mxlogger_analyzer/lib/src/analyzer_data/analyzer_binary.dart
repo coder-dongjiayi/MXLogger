@@ -23,6 +23,7 @@ class AnalyzerBinary {
       String? cryptKey,
       String? iv,
       VoidCallback? onStartCallback,
+      ValueChanged<String>? onErrorCallback,
       AnalyzerProgressCallback? onProgressCallback,
       AnalyValueChangedCallback? onEndCallback}) async {
     onStartCallback?.call();
@@ -42,6 +43,9 @@ class AnalyzerBinary {
           int number = result["number"];
           int error = result["errorNumber"];
           onEndCallback?.call(number, error);
+        }else{
+          String? errorMsg = result["errorMsg"];
+          onErrorCallback?.call(errorMsg ?? "");
         }
       } else if (message is SendPort) {
         SendPort childPort = message;
@@ -79,6 +83,9 @@ class AnalyzerBinary {
         totalCallback: (int totalNumber) {
           _totalNumber = totalNumber;
         },
+        onErrorDescCallback: (String errorMsg){
+          mainPort.send({"errorMsg":errorMsg,"finish":0});
+        },
         callback: (int total, int current) {});
 
     mainPort.send(
@@ -93,6 +100,7 @@ class AnalyzerBinary {
       String? cryptKey,
       String? iv,
       ValueChanged<int>? errorCallback,
+      ValueChanged<String>? onErrorDescCallback,
       ValueChanged<int>? totalCallback,
       AnalyzerProgressCallback? callback}) async {
     int sizeofUint32t = 4;
@@ -137,12 +145,14 @@ class AnalyzerBinary {
             isMainThread: logSerialize.isMainThread,
             errorCallback: (String error) {
               errorNumber = errorNumber + 1;
+              onErrorDescCallback?.call(error);
             },
             timestamp: logSerialize.timestamp);
         totalNumber = totalNumber + 1;
       } catch (error) {
         errorNumber = errorNumber + 1;
-        debugPrint("二进制文件解析失败:$error");
+        onErrorDescCallback?.call("二进制文件解析失败");
+
       }
 
       callback?.call(totalSize, begin);

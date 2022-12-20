@@ -52,6 +52,9 @@ class MXLoggerRepository{
 
          _streamController.add({"status":0,"message":"正在导入数据"});
        },
+       onErrorCallback: (String errorMsg){
+         _streamController.add({"status":4,"message":errorMsg});
+       },
        onProgressCallback: (int total, int current) {
          double progress = current / total;
 
