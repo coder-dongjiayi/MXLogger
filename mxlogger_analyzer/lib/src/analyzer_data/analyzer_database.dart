@@ -1,4 +1,5 @@
 // import 'package:sqflite/sqflite.dart' as SQLite;
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -88,18 +89,26 @@ class AnalyzerDatabase {
       int isMainThread = 0,
       ValueChanged<String>? errorCallback,
       required int timestamp}) async {
-    try {
-      String dateTime =
-          DateTime.fromMicrosecondsSinceEpoch(timestamp).toString();
-      String nowTime = DateTime.now().toString();
-      String sql =
-          "insert into mxlog (name,tag,msg,level,threadId,isMainThread,timestamp,dateTime,createDateTime) values(?,?,?,?,?,?,?,?,?)";
-      final stmt = _db.prepare(sql);
-      stmt.execute([name,tag,msg,level,threadId,isMainThread,timestamp,dateTime,nowTime]);
-      stmt.dispose();
-    } catch (error) {
-      errorCallback?.call("$error");
-    }
+    Completer<void> _completer = Completer();
+    await Future.delayed(Duration.zero,(){
+      try {
+        String dateTime =
+        DateTime.fromMicrosecondsSinceEpoch(timestamp).toString();
+        String nowTime = DateTime.now().toString();
+        String sql =
+            "insert into mxlog (name,tag,msg,level,threadId,isMainThread,timestamp,dateTime,createDateTime) values(?,?,?,?,?,?,?,?,?)";
+        final stmt = _db.prepare(sql);
+        stmt.execute([name,tag,msg,level,threadId,isMainThread,timestamp,dateTime,nowTime]);
+        stmt.dispose();
+      } catch (error) {
+        errorCallback?.call("$error");
+      } finally{
+        _completer.complete();
+      }
 
+
+    });
+
+    return _completer.future;
   }
 }

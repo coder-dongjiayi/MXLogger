@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/component/mxlogger_text.dart';
@@ -25,7 +26,9 @@ class _ErrorPageState extends State<ErrorPage>  with AutomaticKeepAliveClientMix
         return ListView.builder(
           controller: ScrollController(),
           itemBuilder: (context, index) {
-            return Container(
+            return GestureDetector(onTap: (){
+              _copyClipboard(context,source[index]);
+            },child: Container(
                 margin: EdgeInsets.all(10),
                 color:
                 index % 2 == 0 ? MXTheme.themeColor : MXTheme.itemBackground,
@@ -33,13 +36,24 @@ class _ErrorPageState extends State<ErrorPage>  with AutomaticKeepAliveClientMix
                   text: source[index],
                   style: TextStyle(color: MXTheme.text),
                 )
-            );
+            ));
           },
           itemCount: source.length,
           physics: const AlwaysScrollableScrollPhysics(),
         );
       },),
     );
+  }
+  void _copyClipboard(BuildContext context, String msg) {
+    Clipboard.setData(ClipboardData(text: msg));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: MXTheme.warn,
+      content: Text(
+        "错误信息已复制到剪切板",
+        textAlign: TextAlign.center,
+        style: TextStyle(color: MXTheme.white, fontSize: 18),
+      ),
+    ));
   }
 
   @override
