@@ -26,7 +26,12 @@ class AnalyzerBinary {
       ValueChanged<String>? onErrorCallback,
       AnalyzerProgressCallback? onProgressCallback,
       AnalyValueChangedCallback? onEndCallback}) async {
+
+    /// 加载数据之前先关闭之前的数据库
+    AnalyzerDatabase.db.dispose();
+
     onStartCallback?.call();
+
 
     Uint8List? _binaryData = await file.readAsBytes();
 
@@ -35,11 +40,13 @@ class AnalyzerBinary {
       _runBinaryData(port);
     }, mainPort.sendPort);
 
-    mainPort.listen((message) {
+    mainPort.listen((message) async{
       if (message is Map) {
         Map<String, dynamic> result = message as Map<String, dynamic>;
         int finish = result["finish"];
         if (finish == 1) {
+          /// 加载完数据再重新连接数据库
+          await AnalyzerDatabase.initDataBase(MXLoggerStorage.instance.databasePath);
           int number = result["number"];
           int error = result["errorNumber"];
           onEndCallback?.call(number, error);

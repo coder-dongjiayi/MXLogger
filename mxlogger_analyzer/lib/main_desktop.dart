@@ -75,9 +75,12 @@ class MyHomePage extends ConsumerWidget {
           break;
         case 2:
           EasyLoading.showSuccess(message);
+          // /// 刷新数据
+          ref.invalidate(logPagesProvider);
           break;
         case 3:
           EasyLoading.showInfo(message);
+          ref.invalidate(logPagesProvider);
           break;
         case 4:
           ref.read(errorProvider).add(message);
@@ -85,8 +88,7 @@ class MyHomePage extends ConsumerWidget {
           break;
       }
 
-      /// 刷新数据
-      ref.invalidate(logPagesProvider);
+
     });
   }
 }
