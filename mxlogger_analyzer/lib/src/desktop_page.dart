@@ -18,6 +18,7 @@ class DesktopPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
+      backgroundColor: MXTheme.sliderColor,
       body: Row(
         children: [
           SideMenu(
