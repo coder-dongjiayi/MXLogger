@@ -14,8 +14,8 @@ import 'log_serialize.dart';
 import 'package:aes_crypt_null_safe/aes_crypt_null_safe.dart';
 
 const int AES_LENGTH = 16;
-typedef AnalyzerProgressCallback = void Function(int total, int current);
-typedef AnalyValueChangedCallback = void Function(int succsss, int field);
+typedef AnalyzerProgressCallback = void Function(int total,  int current);
+typedef AnalyValueChangedCallback = void Function(int succsss, int repeat, int field);
 
 class AnalyzerBinary {
   static void loadData(
@@ -49,7 +49,8 @@ class AnalyzerBinary {
           await AnalyzerDatabase.initDataBase(MXLoggerStorage.instance.databasePath);
           int number = result["number"];
           int error = result["errorNumber"];
-          onEndCallback?.call(number, error);
+          int repeatNumber = result["repeatNumber"];
+          onEndCallback?.call(number-repeatNumber, repeatNumber,error);
         }else{
           String? errorMsg = result["errorMsg"];
           onErrorCallback?.call(errorMsg ?? "");
@@ -79,6 +80,7 @@ class AnalyzerBinary {
     int _errorNumber = 0;
     int _totalNumber = 0;
 
+    int  _repeatNumber = 0;
     await AnalyzerDatabase.initDataBase(path);
     await _decode(
         binaryData: _binaryData,
@@ -90,14 +92,19 @@ class AnalyzerBinary {
         totalCallback: (int totalNumber) {
           _totalNumber = totalNumber;
         },
+        onRepeatErrorCallback: (){
+          _repeatNumber = _repeatNumber + 1;
+        },
         onErrorDescCallback: (String errorMsg){
           mainPort.send({"errorMsg":errorMsg,"finish":0});
         },
         callback: (int total, int current) {});
 
-    mainPort.send(
-        {"finish": 1, "number": _totalNumber, "errorNumber": _errorNumber});
 
+    mainPort.send(
+        {"finish": 1, "number": _totalNumber, "errorNumber": _errorNumber,"repeatNumber":_repeatNumber});
+
+    _repeatNumber = 0;
     AnalyzerDatabase.db.dispose();
     mainPort.send(null);
   }
@@ -108,6 +115,7 @@ class AnalyzerBinary {
       String? iv,
       ValueChanged<int>? errorCallback,
       ValueChanged<String>? onErrorDescCallback,
+      VoidCallback? onRepeatErrorCallback,
       ValueChanged<int>? totalCallback,
       AnalyzerProgressCallback? callback}) async {
     int sizeofUint32t = 4;
@@ -150,9 +158,15 @@ class AnalyzerBinary {
             level: logSerialize.level,
             threadId: logSerialize.threadId,
             isMainThread: logSerialize.isMainThread,
-            errorCallback: (String error) {
-              errorNumber = errorNumber + 1;
-              onErrorDescCallback?.call(error);
+            errorCallback: (Map<String,dynamic> error) {
+              /// 2067 为数据重复导入的错误 以timestamp为 唯一标识
+              if(error["code"] != 2067){
+                errorNumber = errorNumber + 1;
+                onErrorDescCallback?.call(error["message"]);
+              }else{
+                onRepeatErrorCallback?.call();
+              }
+
             },
             timestamp: logSerialize.timestamp);
         totalNumber = totalNumber + 1;

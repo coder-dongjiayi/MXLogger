@@ -141,10 +141,6 @@ class _SettingPageState extends State<SettingPage> {
                     text: "2.检查设置的key和iv是否为16个字母(或者正好为128位)",
                     style: TextStyle(color: MXTheme.text),
                   ),
-                  MXLoggerText(
-                    text: "3.导入数据是否重复(标记数据重复的依据是日志写入时生成的时间戳(微妙级))",
-                    style: TextStyle(color: MXTheme.text),
-                  ),
                 ],
               )
             ],

@@ -48,19 +48,19 @@ class AnalyzerDatabase {
       });
       where = where + " and " + "${_levelSqls.join(" or ")}";
     }
-    SQLite.ResultSet resultSet =   _db.select("select * from mxlog where $where order by timestamp desc");
+    SQLite.ResultSet resultSet =
+        _db.select("select * from mxlog where $where order by timestamp desc");
     resultSet.forEach((element) {
-
       Map<String, Object?> map = {
-        "name":element["name"],
-        "tag":element["tag"],
-        "msg":element["msg"],
-        "level":element["level"],
-        "threadId":element["threadId"],
-        "isMainThread":element["isMainThread"],
-        "timestamp":element["timestamp"],
-        "dateTime":element["dateTime"],
-        "createDateTime":element["createDateTime"]
+        "name": element["name"],
+        "tag": element["tag"],
+        "msg": element["msg"],
+        "level": element["level"],
+        "threadId": element["threadId"],
+        "isMainThread": element["isMainThread"],
+        "timestamp": element["timestamp"],
+        "dateTime": element["dateTime"],
+        "createDateTime": element["createDateTime"]
       };
       _result.add(map);
     });
@@ -70,14 +70,13 @@ class AnalyzerDatabase {
 
   static int count() {
     SQLite.ResultSet resultSet = _db.select("select count(*) from mxlog");
-    int number =  resultSet.first["count(*)"];
+    int number = resultSet.first["count(*)"];
     return number;
   }
 
   static Future<void> deleteData() async {
     _db.execute("delete from mxlog");
     _db.execute("delete from sqlite_sequence where name='mxlog'");
-
   }
 
   static Future<void> insertData(
@@ -87,26 +86,40 @@ class AnalyzerDatabase {
       int? level,
       int? threadId,
       int isMainThread = 0,
-      ValueChanged<String>? errorCallback,
+      ValueChanged<Map<String, dynamic>>? errorCallback,
       required int timestamp}) async {
     Completer<void> _completer = Completer();
-    await Future.delayed(Duration.zero,(){
+    await Future.delayed(Duration.zero, () {
+      String dateTime =
+          DateTime.fromMicrosecondsSinceEpoch(timestamp).toString();
+      String nowTime = DateTime.now().toString();
+      String sql =
+          "insert into mxlog (name,tag,msg,level,threadId,isMainThread,timestamp,dateTime,createDateTime) values(?,?,?,?,?,?,?,?,?)";
+      final stmt = _db.prepare(sql);
       try {
-        String dateTime =
-        DateTime.fromMicrosecondsSinceEpoch(timestamp).toString();
-        String nowTime = DateTime.now().toString();
-        String sql =
-            "insert into mxlog (name,tag,msg,level,threadId,isMainThread,timestamp,dateTime,createDateTime) values(?,?,?,?,?,?,?,?,?)";
-        final stmt = _db.prepare(sql);
-        stmt.execute([name,tag,msg,level,threadId,isMainThread,timestamp,dateTime,nowTime]);
-        stmt.dispose();
+        stmt.execute([
+          name,
+          tag,
+          msg,
+          level,
+          threadId,
+          isMainThread,
+          timestamp,
+          dateTime,
+          nowTime
+        ]);
       } catch (error) {
-        errorCallback?.call("$error");
-      } finally{
+        if (error is SQLite.SqliteException) {
+          SQLite.SqliteException e = error;
+          errorCallback
+              ?.call({"code": e.extendedResultCode, "message": e.message});
+        } else {
+          errorCallback?.call({"code": "-1", "message": "未知原因:$error"});
+        }
+      } finally {
+        stmt.dispose();
         _completer.complete();
       }
-
-
     });
 
     return _completer.future;

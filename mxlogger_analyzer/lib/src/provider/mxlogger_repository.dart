@@ -60,10 +60,9 @@ class MXLoggerRepository{
 
          _streamController.add({"status":1, "progress":progress, "message":"正在解析数据:${progress.truncate()}"});
        },
-       onEndCallback: (success, field) {
+       onEndCallback: (success, repeat, field) {
          if (field == 0) {
-
-           _streamController.add({"status":2,"message":"共$success条数据导入成功"});
+           _streamController.add({"status":2,"message":"共$success条数据导入成功","repeat":repeat});
          } else {
            _streamController.add({"status":3,"message":"$success条数据导入成功，$field条数据导入失败"});
          }

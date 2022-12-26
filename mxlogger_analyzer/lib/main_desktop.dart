@@ -67,6 +67,7 @@ class MyHomePage extends ConsumerWidget {
       String message = event["message"] ?? "";
       switch (status) {
         case 0:
+
           EasyLoading.show(status: message);
           break;
         case 1:
@@ -74,7 +75,14 @@ class MyHomePage extends ConsumerWidget {
           EasyLoading.showProgress(progress, status: message);
           break;
         case 2:
-          EasyLoading.showSuccess(message);
+          int repeat = event["repeat"];
+          if(repeat > 0){
+            Future.delayed(Duration(seconds: 1),(){
+              EasyLoading.showInfo("${repeat}条数据已存在,请勿重复导入",duration: Duration(seconds: 3));
+            });
+          }else{
+            EasyLoading.showSuccess(message);
+          }
           // /// 刷新数据
           ref.invalidate(logPagesProvider);
           break;
