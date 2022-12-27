@@ -54,13 +54,17 @@ public class MXLogger {
   * diskCacheDirectory 日志初始化目录
   * storagePolicy 文件存储策略
   * fileName 自定义文件名
+  * fileHeader   日志文件头信息，业务可以在初始化mxlogger的时候 写入一些业务相关的信息 比如app版本 所属平台等等 文件创建的时候这条数据会被写入
   * cryptKey aesCFB128 秘钥
   * iv aesCFB128 iv
+  *
   * */
-    public MXLogger(@NonNull Context context, @NonNull String nameSpace,
+    public MXLogger(@NonNull Context context,
+                    @NonNull String nameSpace,
                     @Nullable String diskCacheDirectory,
                     @Nullable String storagePolicy,
                     @Nullable String fileName,
+                    @Nullable String fileHeader,
                     @Nullable String cryptKey,
                     @Nullable String iv
                          ) {
@@ -68,7 +72,7 @@ public class MXLogger {
             diskCacheDirectory = defaultDiskCacheDirectory(context);
         }
         System.loadLibrary("mxlogger");
-        nativeHandle =  jniInitialize(nameSpace,diskCacheDirectory,storagePolicy,fileName,cryptKey,iv);
+        nativeHandle =  jniInitialize(nameSpace,diskCacheDirectory,storagePolicy,fileName,fileHeader,cryptKey,iv);
 
     }
 
@@ -110,20 +114,24 @@ public class MXLogger {
         native_log(nativeHandle,name,level,msg,tag,isMainThread);
     }
 
-    public MXLogger(@NonNull Context context,@NonNull String nameSpace) {
+    public MXLogger(@NonNull Context context,@NonNull String nameSpace,@Nullable String fileHeader) {
 
-        this(context,nameSpace,null,null,null,null,null);
+        this(context,nameSpace,null,null,null,fileHeader,null,null);
     }
 
-    public MXLogger(@NonNull Context context,@NonNull String nameSpace,
+    public MXLogger(@NonNull Context context,
+                    @NonNull String nameSpace,
+                    @Nullable String fileHeader,
                     @Nullable String cryptKey,
                     @Nullable String iv) {
-        this(context,nameSpace,null,null,null,cryptKey,iv);
+        this(context,nameSpace,null,null,null,fileHeader,cryptKey,iv);
     }
 
-    public MXLogger(@NonNull Context context,@NonNull String nameSpace,
+    public MXLogger(@NonNull Context context,
+                    @Nullable String fileHeader,
+                    @NonNull String nameSpace,
                     @Nullable String diskCacheDirectory) {
-        this(context,nameSpace,diskCacheDirectory,null,null,null,null);
+        this(context,nameSpace,diskCacheDirectory,null,null,fileHeader,null,null);
 
     }
 
@@ -222,7 +230,7 @@ public class MXLogger {
         native_log_loggerKey(loggerKey,name,level,msg,tag,isMainThread);
     }
 
-    private static native long jniInitialize(String nameSpace,String diskCacheDirectory,String storagePolicy,String fileName,String cryptKey,String iv);
+    private static native long jniInitialize(String nameSpace,String diskCacheDirectory,String storagePolicy,String fileName, String fileHeader, String cryptKey,String iv);
 
     private  static  native void native_log(long nativeHandle,String name,int level,String msg,String tag,boolean mainThread);
     private  static  native void native_log_loggerKey(String loggerKey,String name,int level,String msg,String tag,boolean mainThread);

@@ -108,6 +108,7 @@ namespace mxlogger{
                                      jstring directory,
                                      jstring storagePolicy,
                                      jstring fileName,
+                                     jstring  fileHeader,
                                      jstring cryptKey,
                                      jstring  iv
                                      ){
@@ -120,8 +121,8 @@ namespace mxlogger{
         const char * file_name = fileName == nullptr ? nullptr : jstring2string(env,fileName).data();
         const char  * crypt_key = cryptKey == nullptr ? nullptr : jstring2string(env,cryptKey).data();
         const char  * iv_ = iv == nullptr ? nullptr : jstring2string(env,iv).data();
-
-        mxlogger * logger =   mx_logger ::initialize_namespace(nsStr.data(),directoryStr.data(),store_policy,file_name,crypt_key,iv_);
+        const char * file_header = fileHeader == nullptr ? nullptr : jstring2string(env,fileHeader).data();
+        mxlogger * logger =   mx_logger ::initialize_namespace(nsStr.data(),directoryStr.data(),store_policy,file_name,file_header,crypt_key,iv_);
         return jlong (logger);
 
 
@@ -179,7 +180,7 @@ namespace mxlogger{
 }
 static JNINativeMethod g_methods[] = {
 
-        {"jniInitialize","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::jniInitialize},
+        {"jniInitialize","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::jniInitialize},
         {"native_fileLevel","(JI)V",(void *)mxlogger::native_fileLevel},
         {"native_consoleEnable","(JZ)V",(void *)mxlogger::native_consoleEnable},
         {"native_maxDiskAge","(JJ)V",(void *)mxlogger::native_maxDiskAge},

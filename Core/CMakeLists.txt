@@ -102,6 +102,8 @@ add_library(MXLoggerCore
         sink/sink.cpp
         sink/base_file_sink.cpp
         sink/base_file_sink.hpp
+        sink/windows_sink.cpp
+        sink/windows_sink.hpp
         sink/mmap_sink.cpp
         sink/mmap_sink.hpp
         )

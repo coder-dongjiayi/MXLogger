@@ -23,7 +23,7 @@ public class FirstFragment extends Fragment {
             Bundle savedInstanceState
     ) {
 
-        logger = new MXLogger(this.getContext(),"com.dongjiayi.mxlogger");
+        logger = new MXLogger(this.getContext(),"com.djy.mxlogger","这是MXLogger头信息","abnijuioijkolojh","abnijuioijkolccc");
         logger.consoleEnable = false;
         logger.debug("request","mxlogger","this is debug");
         logger.info("request","mxlogger","this is info");
@@ -33,7 +33,7 @@ public class FirstFragment extends Fragment {
 
         String loggerKey =  logger.getLoggerKey();
         MXLogger.log(loggerKey,"loggerKey",2,"mapName","this is loggerKey log");
-
+       Log.i("path","日志路径" + logger.getDiskCachePath());
        // MXLogger.destroy(loggerKey);
 
        binding = FragmentFirstBinding.inflate(inflater, container, false);
