@@ -14,18 +14,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MXLogger : NSObject
 
-
 /// 创建对象
 /// @param nameSpace ns  要调用  destroyWithNamespace 进行释放
+
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace;
 
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace fileHeader:(nullable NSString*)fileHeder;
 
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv fileHeader:(nullable NSString*)fileHeder;
 
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName  fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder;
+
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
 
 
@@ -43,20 +45,20 @@ NS_ASSUME_NONNULL_BEGIN
 /// 默认路径初始化
 /// @param nameSpace 默认在 Library目录下
 
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace;
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace fileHeader:(nullable NSString*)fileHeder;
 
 
 /// 初始化MXLogger
 /// @param nameSpace 命名空间
 /// @param directory 目录
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory fileHeader:(nullable NSString*)fileHeder ;
 
 
 /// 加密初始化
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv fileHeader:(nullable NSString*)fileHeder;
 
 
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName;
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder;
 
 /// 初始化方法
 /// @param nameSpace nameSpace
@@ -69,9 +71,10 @@ NS_ASSUME_NONNULL_BEGIN
 ///  yyyy_MM_dd_HH       按小时存储
  /// 以上是文件的命名策略
 /// @param fileName fileName
-/// cryptKey 16字节 大于16字节自动裁掉 小于16字节填充0
+/// @param cryptKey 16字节 大于16字节自动裁掉 小于16字节填充0
 /// iv 默认和key一样
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
+/// @param fileHeder 日志文件头信息，业务可以在初始化mxlogger的时候 写入一些业务相关的信息 比如app版本 所属平台等等 文件创建的时候这条数据会被写入
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
 
 
@@ -98,6 +101,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 日志文件大小
 @property (nonatomic,assign,readonly)NSUInteger logSize;
+
 
 
 /// 设置写入文件日志等级

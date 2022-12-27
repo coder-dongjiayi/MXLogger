@@ -16,17 +16,21 @@ static const size_t offset_length = sizeof(uint32_t);
 
 namespace mxlogger{
 namespace sinks{
-mmap_sink::mmap_sink(const std::string &dir_path,policy::storage_policy policy):base_file_sink(dir_path,policy),page_size_(static_cast<size_t>(getpagesize())){
+mmap_sink::mmap_sink(const std::string &dir_path, policy::storage_policy policy):base_file_sink(dir_path,policy),page_size_(static_cast<size_t>(getpagesize())){
 
     
     open();
     file_size_ = get_file_size();
     if (file_size_ == 0) {
         truncate_(0);
+        
     }else{
         mmap_();
     }
+
     actual_size_ = get_actual_size_();
+    
+    
 }
 mmap_sink::~mmap_sink(){
     munmap_();
@@ -37,6 +41,18 @@ void mmap_sink::log(const details::log_msg& msg){
         return;
     }
     
+    log_(msg);
+}
+
+void mmap_sink::add_file_heder(const char* msg){
+    
+    if(actual_size_ !=0 || msg == nullptr) return;
+    details::log_msg log_msg(level::level_enum::debug,"com.djy.mxlogger.fileHeader",nullptr,msg,true);
+    log_(log_msg);
+}
+
+
+void mmap_sink::log_(const details::log_msg& msg){
     flatbuffers::FlatBufferBuilder builder;
     
     auto root =  Createlog_serializeDirect(builder,msg.name,msg.tag,msg.msg,msg.level,(uint32_t)msg.thread_id,msg.is_main_thread,msg.time_stamp);
@@ -52,8 +68,6 @@ void mmap_sink::log(const details::log_msg& msg){
     }
     
     write_data_(point, size);
-    
-    
 }
 
 bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){

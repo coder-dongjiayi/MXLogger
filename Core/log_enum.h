@@ -23,6 +23,7 @@ enum storage_policy: int {
 
 namespace level {
 enum   level_enum : int {
+    
     debug = 0,
     info = 1,
     warn = 2,

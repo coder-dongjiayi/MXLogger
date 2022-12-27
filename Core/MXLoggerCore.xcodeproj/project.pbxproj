@@ -17,6 +17,7 @@
 		BDA28454280D778E00C833A3 /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = BDA28453280D778E00C833A3 /* md5.c */; };
 		BDABC1872850A5F600A5FF1C /* base_file_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDABC1852850A5F600A5FF1C /* base_file_sink.cpp */; };
 		BDABC1972852F52600A5FF1C /* log_msg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDABC1952852F52600A5FF1C /* log_msg.cpp */; };
+		BDDD0C1F295AD39300AAE08B /* windows_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDDD0C1D295AD39300AAE08B /* windows_sink.cpp */; };
 		BDE79FA52855DF6400204C02 /* aes_crypt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD228FDF2855DABA00794145 /* aes_crypt.cpp */; };
 		BDE79FA62855DF7A00204C02 /* openssl_cfb128.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD228FE12855DAC100794145 /* openssl_cfb128.cpp */; };
 		BDE79FA72855DF7A00204C02 /* openssl_aes_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD228FE22855DAC100794145 /* openssl_aes_core.cpp */; };
@@ -73,6 +74,8 @@
 		BDABC1952852F52600A5FF1C /* log_msg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log_msg.cpp; sourceTree = "<group>"; };
 		BDABC1962852F52600A5FF1C /* log_msg.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = log_msg.hpp; sourceTree = "<group>"; };
 		BDD1CA872823A53F009B94D7 /* mxlogger_file_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_file_util.hpp; sourceTree = "<group>"; };
+		BDDD0C1D295AD39300AAE08B /* windows_sink.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = windows_sink.cpp; sourceTree = "<group>"; };
+		BDDD0C1E295AD39300AAE08B /* windows_sink.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = windows_sink.hpp; sourceTree = "<group>"; };
 		BDE7A7B6285C857300B135FB /* debug_log.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = debug_log.cpp; sourceTree = "<group>"; };
 		BDE7A7B7285C857300B135FB /* debug_log.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug_log.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -97,6 +100,8 @@
 				BD0DDFF528449DDF0090439D /* mmap_sink.hpp */,
 				BDABC1852850A5F600A5FF1C /* base_file_sink.cpp */,
 				BDABC1862850A5F600A5FF1C /* base_file_sink.hpp */,
+				BDDD0C1D295AD39300AAE08B /* windows_sink.cpp */,
+				BDDD0C1E295AD39300AAE08B /* windows_sink.hpp */,
 			);
 			path = sink;
 			sourceTree = "<group>";
@@ -240,6 +245,7 @@
 				BDE79FA92855DF7A00204C02 /* openssl_aes-armv4.S in Sources */,
 				BDE79FA52855DF6400204C02 /* aes_crypt.cpp in Sources */,
 				BDA28454280D778E00C833A3 /* md5.c in Sources */,
+				BDDD0C1F295AD39300AAE08B /* windows_sink.cpp in Sources */,
 				BD0DDFF728449DDF0090439D /* mmap_sink.cpp in Sources */,
 				BD7BA73828082EA600EDA6AC /* mxlogger.cpp in Sources */,
 				BD7BA73728082EA600EDA6AC /* logger_os.cpp in Sources */,

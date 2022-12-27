@@ -24,18 +24,20 @@ static NSString * _defaultDiskCacheDirectory;
 @end
 
 @implementation MXLogger
-
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace{
+    return  [self initializeWithNamespace:nameSpace fileHeader:nil];
+}
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace fileHeader:(nullable NSString*)fileHeder{
   
-    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil cryptKey:nil iv:nil];
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil  fileHeader:fileHeder  cryptKey:nil iv:nil];
 }
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
-    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil cryptKey:cryptKey iv:iv];
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv fileHeader:(nullable NSString*)fileHeder {
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil  fileHeader:fileHeder  cryptKey:cryptKey iv:iv];
 }
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
-    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName cryptKey:cryptKey iv:iv];
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName  fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName  fileHeader:fileHeder  cryptKey:cryptKey iv:iv];
 }
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
  
     if (global_instanceDic == nil) {
         global_instanceDic = [NSMutableDictionary dictionary];
@@ -43,7 +45,7 @@ static NSString * _defaultDiskCacheDirectory;
   
     NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
     if ([global_instanceDic objectForKey:key] == nil) {
-        MXLogger * logger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:storagePolicy fileName:fileName cryptKey:cryptKey iv:iv];
+        MXLogger * logger = [[MXLogger alloc] initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:storagePolicy fileName:fileName fileHeader:fileHeder  cryptKey:cryptKey iv:iv];
       
         return logger;
     }
@@ -54,8 +56,8 @@ static NSString * _defaultDiskCacheDirectory;
 }
 
 
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName{
-    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName cryptKey:nil iv:nil];
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString *)fileHeder{
+    return [self initializeWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName fileHeader:fileHeder cryptKey:nil iv:nil];
 }
 
 
@@ -88,21 +90,21 @@ static NSString * _defaultDiskCacheDirectory;
     return logger;
 }
 
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv fileHeader:(nullable NSString*)fileHeder {
     
-    return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil cryptKey:cryptKey iv:iv];
+    return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil fileHeader:fileHeder cryptKey:cryptKey iv:iv];
 }
--(instancetype)initWithNamespace:(NSString *)nameSpace diskCacheDirectory:(NSString *)directory{
-    return [self initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:nil fileName:nil cryptKey:nil iv:nil];
+-(instancetype)initWithNamespace:(NSString *)nameSpace diskCacheDirectory:(NSString *)directory fileHeader:(nullable NSString*)fileHeader {
+    return [self initWithNamespace:nameSpace diskCacheDirectory:directory storagePolicy:nil fileName:nil fileHeader:fileHeader cryptKey:nil iv:nil];
 }
 
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace{
-    return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil cryptKey:nil iv:nil];
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace fileHeader:(nullable NSString*)fileHeder {
+    return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:nil fileName:nil fileHeader:fileHeder cryptKey:nil iv:nil];
 }
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName{
-    return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName cryptKey:nil iv:nil];
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder {
+    return [self initWithNamespace:nameSpace diskCacheDirectory:nil storagePolicy:storagePolicy fileName:fileName fileHeader:fileHeder cryptKey:nil iv:nil];
 }
--(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
+-(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(nullable NSString*)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv{
     if (self = [super init]) {
         if (!directory) {
             directory = [MXLogger defaultDiskCacheDirectory];
@@ -115,8 +117,9 @@ static NSString * _defaultDiskCacheDirectory;
         const char * crypt_key = [self isNull:cryptKey] ? nullptr : cryptKey.UTF8String;
         const char * iv_ = [self isNull:iv] ? nullptr : iv.UTF8String;
         
+        const char * file_heder = [self isNull:fileHeder] ? nullptr : fileHeder.UTF8String;
         
-        _logger =  mx_logger::initialize_namespace(nameSpace.UTF8String, directory.UTF8String,storage_policy,file_name,crypt_key,iv_);
+        _logger =  mx_logger::initialize_namespace(nameSpace.UTF8String, directory.UTF8String,storage_policy,file_name,file_heder,crypt_key,iv_);
         
         self.loggerKey = [NSString stringWithUTF8String:_logger->logger_key()];
         

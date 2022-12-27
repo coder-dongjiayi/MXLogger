@@ -21,7 +21,7 @@ class mmap_sink;
 class mxlogger{
 private:
     
-    mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name, const char* cryptKey, const char* iv);
+    mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name,  const char* file_header, const char* cryptKey, const char* iv);
     ~mxlogger();
     
     static void delete_namespace_(const char* logger_key);
@@ -47,7 +47,13 @@ public:
    
 
     // 初始化 logger
-    static mxlogger *initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv);
+    static mxlogger *initialize_namespace(const char* ns,
+                                          const char* directory,
+                                          const char* storage_policy,
+                                          const char* file_name,
+                                          const char* file_header,
+                                          const char* cryptKey,
+                                          const char* iv);
     
     /// 释放 logger
     static void delete_namespace(const char* ns,const char* directory);

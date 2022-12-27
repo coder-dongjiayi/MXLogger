@@ -34,14 +34,14 @@
 }
 
 -(void)initMXLogger{
-   self.logger =  [MXLogger initializeWithNamespace:@"com.dongjiayi.mxlogger" storagePolicy:@"yyyy_MM_dd_HH" fileName:@"mxlogger" cryptKey:_cryptKey iv:_iv];
+   self.logger =  [MXLogger initializeWithNamespace:@"com.dongjiayi.mxlogger" storagePolicy:@"yyyy_MM_dd_HH" fileName:@"mxlogger" fileHeader:nil cryptKey:_cryptKey iv:_iv];
 
     // 使用实例构造器初始化
 //    self.logger = [[MXLogger alloc] initWithNamespace:@"com.dongjiayi.mxlogger" cryptKey:_cryptKey iv:_iv];
     
     self.logger.maxDiskAge = 60*60*24*7; // 一个星期
     self.logger.maxDiskSize = 1024 * 1024 * 10; // 10M
-    
+
     self.logger.shouldRemoveExpiredDataWhenEnterBackground = YES;
 
     self.logger.shouldRemoveExpiredDataWhenTerminate = YES;
@@ -81,7 +81,7 @@
 
      //  [self.logger info:@"name" msg:@"This is mxlogger log" tag:@"net"];
        
-        [MXLogger infoWithLoggerKey:self.logger.loggerKey name:@"name" msg:@"This is mxlogger log" tag:@"net"];
+        [self.logger info:@"name" msg:@"This is mxlogger log" tag:@"net"];
 
     }
     NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];

@@ -13,7 +13,7 @@
 namespace mxlogger{
 namespace sinks{
 
-base_file_sink::base_file_sink(const std::string &dir_path,policy::storage_policy policy):dir_path_(dir_path),policy_(policy){
+base_file_sink::base_file_sink(const std::string &dir_path, policy::storage_policy policy):dir_path_(dir_path),policy_(policy){
     
     if (mxlogger::create_dir(dir_path) == false) {
         MXLoggerError("base_file_sink error:%s\n",strerror(errno));
@@ -63,7 +63,8 @@ bool base_file_sink::open(){
     }
         
     log_disk_path_ = file_path;
-
+    
+    /// 打开文件，如果文件不存在则创建文件
     file_ident =  ::open(log_disk_path_.c_str(), O_RDWR|O_CLOEXEC|O_CREAT,S_IRWXU);
     if (file_ident < 0) {
         MXLoggerError("ope_file_ error:%s\n",strerror(errno));

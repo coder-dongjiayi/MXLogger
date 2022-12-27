@@ -61,7 +61,13 @@ mxlogger *mxlogger::global_for_loggerKey(const char* logger_key){
     return nullptr;
 }
 
-mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv){
+mxlogger *mxlogger::initialize_namespace(const char* ns,
+                                         const char* directory,
+                                         const char* storage_policy,
+                                         const char* file_name,
+                                         const char* file_header,
+                                         const char* cryptKey,
+                                         const char* iv){
 
     std::string diskcache_path = get_diskcache_path_(ns,directory);
     if (diskcache_path.data() == nullptr) {
@@ -76,7 +82,7 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,const char* directory,co
         return logger;
     }
     
-    auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,cryptKey,iv);
+    auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,file_header,cryptKey,iv);
     logger -> logger_key_ = logger_key;
     (*global_instanceDic_)[logger_key] = logger;
     MXLoggerInfo("mxlogger Initialization succeeded. logger_key:%s storage_policy:%s file_name:%s is_crypt:%s",logger_key.c_str(),storage_policy,file_name,cryptKey!=nullptr ? "true" : "false");
@@ -121,7 +127,7 @@ void mxlogger::destroy(){
 
 
 
-mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name,const char* cryptKey, const char* iv) : diskcache_path_(diskcache_path){
+mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name, const char* file_header,const char* cryptKey, const char* iv) : diskcache_path_(diskcache_path){
     
     mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,mxlogger_helper::policy_(storage_policy));
    
@@ -131,10 +137,13 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     
     mmap_sink_ -> init_aescfb(cryptKey, iv);
     
+    mmap_sink_ -> add_file_heder(file_header);
+    
     enable_ = true;
     enable_console_ = false;
   
-
+   
+    
 }
 
     

@@ -23,7 +23,7 @@ public:
     ~mmap_sink();
     void log(const details::log_msg& msg) override;
     
-    
+    void add_file_heder(const char* msg);
     
     
     void flush() override;
@@ -31,7 +31,6 @@ public:
 private:
     
  
-    
     size_t file_size_ = 0;
     
     //一页内存大小
@@ -53,7 +52,8 @@ private:
     size_t get_actual_size_();
     
     void write_actual_size_(size_t size);
-
+    void log_(const details::log_msg& msg);
+   
     bool msync_(int flag);
      bool sync_();
      
