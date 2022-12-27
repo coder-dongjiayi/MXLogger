@@ -13,17 +13,18 @@
 #define MXLOGGERR_FUNC(func) flutter_mxlogger_ ## func
 
 
-MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* directory,const char* storage_policy,const char* file_name,const char* crypt_key, const char* iv){
+MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* directory,const char* storage_policy,const char* file_name, const char* file_header,const char* crypt_key, const char* iv){
   
     
     NSString * _ns = [NSString stringWithUTF8String:ns];
     NSString * _directory = [NSString stringWithUTF8String:directory];
     NSString * _storagePolicy = storage_policy == nullptr ? NULL : [NSString stringWithUTF8String:storage_policy];
     NSString * _fileName = file_name == nullptr ? NULL : [NSString stringWithUTF8String:file_name];
+    NSString * _fileHeader = file_header == nullptr ? NULL : [NSString stringWithUTF8String:file_header];
     NSString * _cryptKey = crypt_key == nullptr ? NULL : [NSString stringWithUTF8String:crypt_key];
     NSString * _iv = iv == nullptr ? NULL : [NSString stringWithUTF8String:iv];
     
-    MXLogger * logger = [MXLogger initializeWithNamespace:_ns diskCacheDirectory:_directory storagePolicy:_storagePolicy fileName:_fileName cryptKey:_cryptKey iv:_iv];
+    MXLogger * logger = [MXLogger initializeWithNamespace:_ns diskCacheDirectory:_directory storagePolicy:_storagePolicy fileName:_fileName fileHeader:_fileHeader  cryptKey:_cryptKey iv:_iv];
         
   
     logger.shouldRemoveExpiredDataWhenTerminate = NO;
@@ -33,6 +34,13 @@ MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* di
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroy)(const char* ns,const char* directory){
     [MXLogger destroyWithNamespace:[NSString stringWithUTF8String:ns] diskCacheDirectory:directory == nullptr ? NULL : [NSString stringWithUTF8String:directory]];
+}
+
+
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerKey)(const char* logger_key){
+    if(logger_key == nullptr)return;
+    
+    [MXLogger destroyWithLoggerKey:[NSString stringWithUTF8String:logger_key]];
 }
 
 

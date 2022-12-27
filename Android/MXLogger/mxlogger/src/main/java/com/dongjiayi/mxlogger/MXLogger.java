@@ -46,6 +46,9 @@ public class MXLogger {
 
     /**
    *   nameSpace+diskCacheDirectory 做一次md5的值，对应一个logger对象，可以通过这个操作logger
+     *  业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
+     * 但是你希望所有子模块(子组件)使用在主工程初始化的log，
+     *  这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
    * */
   public  String loggerKey;
 

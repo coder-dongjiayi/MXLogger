@@ -27,17 +27,18 @@ class _LogPageState extends State<LogPage> {
     _mxLogger = await MXLogger.initialize(
         nameSpace: "flutter.mxlogger",
         storagePolicy: "yyyy_MM_dd_HH",
+        fileHeader: "这是flutter端的header信息",
         cryptKey: null,
         iv: null);
 
     _mxLogger.setMaxDiskAge(60*60*24*7);
     _mxLogger.setMaxDiskSize(1024*1024*10);
-    _mxLogger.setConsoleEnable(false);
+    _mxLogger.setConsoleEnable(true);
     _mxLogger.setFileLevel(0);
     updateSize();
 
-    print("path:${_mxLogger.getDiskcachePath()}");
-    print("loggerKey:${_mxLogger.getLoggerKey()}");
+    print("path:${_mxLogger.diskcachePath}");
+    print("loggerKey:${_mxLogger.loggerKey}");
 
     loggerKey = _mxLogger.getLoggerKey();
 
@@ -46,7 +47,9 @@ class _LogPageState extends State<LogPage> {
   @override
   void dispose() {
     // TODO: implement dispose
-    MXLogger.destroy(nameSpace: "flutter.mxlogger");
+    // MXLogger.destroy(nameSpace: "flutter.mxlogger");
+    MXLogger.destroyWithLoggerKey(loggerKey!);
+
     super.dispose();
   }
 
@@ -128,7 +131,7 @@ class _LogPageState extends State<LogPage> {
   }
 
   void updateSize() {
-    _size = _mxLogger.logSize();
+    _size = _mxLogger.logSize;
     setState(() {});
   }
 }

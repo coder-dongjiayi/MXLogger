@@ -22,6 +22,18 @@ class MXLogger with WidgetsBindingObserver {
   bool get enable => _enable;
   bool _shouldRemoveExpiredDataWhenEnterBackground = true;
 
+  /// 获取日志文件夹的磁盘路径
+  String get diskcachePath=> getDiskcachePath();
+
+  /// 获取日志底层的唯一标识 可以通过这个key操作日志对象
+  /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
+  /// 但是你希望所有子模块(子组件)使用在主工程初始化的log，
+  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
+  String? get loggerKey=> getLoggerKey();
+
+  /// 获取存储的日志大小 (byte)
+  int get logSize => getLogSize();
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused && _shouldRemoveExpiredDataWhenEnterBackground == true) {
@@ -34,6 +46,7 @@ class MXLogger with WidgetsBindingObserver {
       required String directory,
       String? storagePolicy,
       String? fileName,
+      String? fileHeader,
       String? cryptKey,
       String? iv}) {
     WidgetsBinding.instance.addObserver(this);
@@ -43,12 +56,13 @@ class MXLogger with WidgetsBindingObserver {
 
     Pointer<Utf8> storagePolicyPtr = storagePolicy == null ? nullptr : storagePolicy.toNativeUtf8();
     Pointer<Utf8> fileNamePtr = fileName == null ? nullptr : fileName.toNativeUtf8();
+    Pointer<Utf8> fileHeaderPtr = fileHeader == null ? nullptr : fileHeader.toNativeUtf8();
 
     Pointer<Utf8> cryptKeyPtr = cryptKey == null ? nullptr : cryptKey.toNativeUtf8();
 
     Pointer<Utf8> ivPtr = iv == null ? nullptr : iv.toNativeUtf8();
 
-    _handle = _initialize(nsPtr, drPtr, storagePolicyPtr, fileNamePtr, cryptKeyPtr, ivPtr);
+    _handle = _initialize(nsPtr, drPtr, storagePolicyPtr, fileNamePtr, fileHeaderPtr,cryptKeyPtr, ivPtr);
 
     calloc.free(nsPtr);
     calloc.free(drPtr);
@@ -58,6 +72,9 @@ class MXLogger with WidgetsBindingObserver {
     if (fileNamePtr != nullptr) {
       calloc.free(fileNamePtr);
     }
+    if (fileHeaderPtr != nullptr) {
+      calloc.free(fileHeaderPtr);
+    }
     if (cryptKeyPtr != nullptr) {
       calloc.free(cryptKeyPtr);
     }
@@ -66,12 +83,19 @@ class MXLogger with WidgetsBindingObserver {
     }
   }
 
+  /// 初始化MXLogger
+  /// nameSpace: 日志文件的命名空间建议使用域名反转保证唯一性
+  /// directory: 自定义日志文件路径
+  /// fileName: 自定义文件名
+  /// fileHeader:日志文件头信息，业务可以在初始化mxlogger的时候 写入一些业务相关的信息 比如app版本 所属平台等等 文件创建的时候这条数据会被写入
+  /// cryptKey:  如果日志信息需要加密需要填入这个值 应为正好为16个英文字母
+  /// iv: 如果不填默认和cryptKey一致
   static Future<MXLogger> initialize(
-      {bool enable = false,
-      required String nameSpace,
+      {required String nameSpace,
       String? directory,
       String? storagePolicy,
       String? fileName,
+        String? fileHeader,
       String? cryptKey,
       String? iv}) async {
     String ns = nameSpace;
@@ -82,96 +106,12 @@ class MXLogger with WidgetsBindingObserver {
     dr = result["directory"];
 
     MXLogger mxLogger = MXLogger(
-        nameSpace: ns, directory: dr, storagePolicy: storagePolicy, fileName: fileName, cryptKey: cryptKey, iv: iv);
+        nameSpace: ns, directory: dr, storagePolicy: storagePolicy, fileName: fileName, fileHeader: fileHeader, cryptKey: cryptKey, iv: iv);
 
     return mxLogger;
   }
 
-  static String? _buffer2String(Pointer<Uint8>? ptr, int length) {
-    if (ptr != null && ptr != nullptr) {
-      var listView = ptr.asTypedList(length);
-      return const Utf8Decoder().convert(listView);
-    }
-    return null;
-  }
 
-  /// 目前只对 ios端生效
-  static List<String> selectLogMsg({required String diskcacheFilePath, String? cryptKey, String? iv}) {
-    List<String> msgList = [];
-
-    Pointer<Utf8> dirPathPtr = diskcacheFilePath.toNativeUtf8();
-    Pointer<Utf8> cryptKeyPtr = cryptKey == null ? nullptr : cryptKey.toNativeUtf8();
-    Pointer<Utf8> ivPtr = iv == null ? nullptr : iv.toNativeUtf8();
-
-    final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
-    final sizeArrayPtr = calloc<Pointer<Uint32>>();
-
-    Pointer<Int32> numberPtr = calloc<Int32>();
-
-    _select_logmsg(dirPathPtr, cryptKeyPtr, ivPtr, numberPtr, arrayPtr, sizeArrayPtr);
-    final array_ptr = arrayPtr[0];
-    final sizeArray_ptr = sizeArrayPtr[0];
-
-    final number = numberPtr.value;
-
-    calloc.free(numberPtr);
-    for (int i = 0; i < number; i++) {
-      final logArray = array_ptr[i];
-      final size = sizeArray_ptr[i];
-      String? logMsg = _buffer2String(logArray.cast(), size);
-      if (logMsg != null) {
-        msgList.add(logMsg);
-      }
-    }
-
-    calloc.free(array_ptr);
-    calloc.free(sizeArray_ptr);
-
-    calloc.free(dirPathPtr);
-    calloc.free(arrayPtr);
-    calloc.free(sizeArrayPtr);
-    if (cryptKeyPtr != nullptr) {
-      calloc.free(cryptKeyPtr);
-    }
-    if (ivPtr != nullptr) {
-      calloc.free(ivPtr);
-    }
-    return msgList;
-  }
-
-  /// 目前只对 ios端生效
-  static List<Map<String, dynamic>> selectLogfiles({required String directory}) {
-    List<Map<String, dynamic>> logFiles = [];
-
-    Pointer<Utf8> dirPtr = directory.toNativeUtf8();
-    final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
-    final sizeArrayPtr = calloc<Pointer<Uint32>>();
-    final count = _select_logfiles(dirPtr, arrayPtr, sizeArrayPtr);
-    if (count > 0) {
-      final array = arrayPtr[0];
-      final sizeArray = sizeArrayPtr[0];
-
-      for (int i = 0; i < count; i++) {
-        final keyPtr = array[i];
-        final size = sizeArray[i];
-        String? logInfo = _buffer2String(keyPtr.cast(), size);
-        if (logInfo != null) {
-          List<String> _list = logInfo.split(",");
-          Map<String, dynamic> _map = {"name": _list[0], "size": int.parse(_list[1]), "timestamp": int.parse(_list[2])};
-          logFiles.add(_map);
-        }
-      }
-
-      calloc.free(array);
-      calloc.free(sizeArray);
-    }
-
-    calloc.free(dirPtr);
-    calloc.free(arrayPtr);
-    calloc.free(sizeArrayPtr);
-
-    return logFiles;
-  }
 
   /// 释放log
   static void destroy({required String nameSpace, String? directory}) {
@@ -180,6 +120,12 @@ class MXLogger with WidgetsBindingObserver {
     _destroy(nsPtr, drPtr);
     calloc.free(nsPtr);
     calloc.free(drPtr);
+  }
+  /// 通过key 释放log对象
+  static void destroyWithLoggerKey(String loggerKey){
+    Pointer<Utf8> keyPtr = loggerKey.toNativeUtf8();
+    _destroyWithLoggerKey(keyPtr);
+    calloc.free(keyPtr);
   }
 
   /// 类方法 使用 mapKey操作日志
@@ -198,6 +144,22 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(namePtr);
     calloc.free(tagPtr);
     calloc.free(msgPtr);
+  }
+  /// 类方法 方便调用
+  static void debugLog(String? loggerKey,String msg,{String? name, String? tag}){
+    logLoggerKey(loggerKey, 0, msg,name: name,tag: tag);
+  }
+  static void infoLog(String? loggerKey,String msg,{String? name, String? tag}){
+    logLoggerKey(loggerKey, 1, msg,name: name,tag: tag);
+  }
+  static void warnLog(String? loggerKey,String msg,{String? name, String? tag}){
+    logLoggerKey(loggerKey, 2, msg,name: name,tag: tag);
+  }
+  static void errorLog(String? loggerKey,String msg,{String? name, String? tag}){
+    logLoggerKey(loggerKey, 3, msg,name: name,tag: tag);
+  }
+  static void fatalLog(String? loggerKey,String msg,{String? name, String? tag}){
+    logLoggerKey(loggerKey, 4, msg,name: name,tag: tag);
   }
 
   /// 程序进入后台的时候是否去清理过期文件 默认为YES
@@ -253,11 +215,12 @@ class MXLogger with WidgetsBindingObserver {
   }
 
   /// 获取存储的日志大小 (byte)
-  int logSize() {
+  int getLogSize() {
     if (enable == false) return 0;
     return _getLogSize(_handle);
   }
 
+  /// 获取日志文件夹的存储路径
   String getDiskcachePath() {
     if (enable == false) return "";
     Pointer<Int8> result = _getDiskcachePath(_handle);
@@ -265,6 +228,10 @@ class MXLogger with WidgetsBindingObserver {
     String path = result.cast<Utf8>().toDartString();
     return path;
   }
+  /// 获取日志底层的唯一标识 可以通过这个key操作日志对象
+  /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
+  /// 但是你希望所有子模块(子组件)使用在主工程初始化的log，
+  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
   String? getLoggerKey(){
     Pointer<Int8> result = _getLoggerKey(_handle);
     Pointer<Utf8> mapPoint =  result.cast<Utf8>();
@@ -309,6 +276,95 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(tagPtr);
     calloc.free(msgPtr);
   }
+
+  /// 目前只对 ios端生效
+  static List<String> selectLogMsg({required String diskcacheFilePath, String? cryptKey, String? iv}) {
+    if(Platform.isIOS == false) return [];
+    List<String> msgList = [];
+
+    Pointer<Utf8> dirPathPtr = diskcacheFilePath.toNativeUtf8();
+    Pointer<Utf8> cryptKeyPtr = cryptKey == null ? nullptr : cryptKey.toNativeUtf8();
+    Pointer<Utf8> ivPtr = iv == null ? nullptr : iv.toNativeUtf8();
+
+    final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
+    final sizeArrayPtr = calloc<Pointer<Uint32>>();
+
+    Pointer<Int32> numberPtr = calloc<Int32>();
+
+    _select_logmsg(dirPathPtr, cryptKeyPtr, ivPtr, numberPtr, arrayPtr, sizeArrayPtr);
+    final array_ptr = arrayPtr[0];
+    final sizeArray_ptr = sizeArrayPtr[0];
+
+    final number = numberPtr.value;
+
+    calloc.free(numberPtr);
+    for (int i = 0; i < number; i++) {
+      final logArray = array_ptr[i];
+      final size = sizeArray_ptr[i];
+      String? logMsg = _buffer2String(logArray.cast(), size);
+      if (logMsg != null) {
+        msgList.add(logMsg);
+      }
+    }
+
+    calloc.free(array_ptr);
+    calloc.free(sizeArray_ptr);
+
+    calloc.free(dirPathPtr);
+    calloc.free(arrayPtr);
+    calloc.free(sizeArrayPtr);
+    if (cryptKeyPtr != nullptr) {
+      calloc.free(cryptKeyPtr);
+    }
+    if (ivPtr != nullptr) {
+      calloc.free(ivPtr);
+    }
+    return msgList;
+  }
+
+  /// 目前只对 ios端生效
+  static List<Map<String, dynamic>> selectLogfiles({required String directory}) {
+    if(Platform.isIOS == false) return [];
+
+    List<Map<String, dynamic>> logFiles = [];
+
+    Pointer<Utf8> dirPtr = directory.toNativeUtf8();
+    final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
+    final sizeArrayPtr = calloc<Pointer<Uint32>>();
+    final count = _select_logfiles(dirPtr, arrayPtr, sizeArrayPtr);
+    if (count > 0) {
+      final array = arrayPtr[0];
+      final sizeArray = sizeArrayPtr[0];
+
+      for (int i = 0; i < count; i++) {
+        final keyPtr = array[i];
+        final size = sizeArray[i];
+        String? logInfo = _buffer2String(keyPtr.cast(), size);
+        if (logInfo != null) {
+          List<String> _list = logInfo.split(",");
+          Map<String, dynamic> _map = {"name": _list[0], "size": int.parse(_list[1]), "timestamp": int.parse(_list[2])};
+          logFiles.add(_map);
+        }
+      }
+
+      calloc.free(array);
+      calloc.free(sizeArray);
+    }
+
+    calloc.free(dirPtr);
+    calloc.free(arrayPtr);
+    calloc.free(sizeArrayPtr);
+
+    return logFiles;
+  }
+  static String? _buffer2String(Pointer<Uint8>? ptr, int length) {
+    if (ptr != null && ptr != nullptr) {
+      var listView = ptr.asTypedList(length);
+      return const Utf8Decoder().convert(listView);
+    }
+    return null;
+  }
+
 }
 
 final DynamicLibrary _nativeLib = Platform.isAndroid ? DynamicLibrary.open("libmxlogger.so") : DynamicLibrary.process();
@@ -318,16 +374,20 @@ String _mxlogger_function(String funcName) {
 }
 
 ///初始化logger
-final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>)
+final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>,Pointer<Utf8>, Pointer<Utf8>)
     _initialize = _nativeLib
         .lookup<
             NativeFunction<
-                Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>,
+                Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>,Pointer<Utf8>,
                     Pointer<Utf8>)>>(_mxlogger_function("initialize"))
         .asFunction();
 
 final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>) _destroy = _nativeLib
     .lookup<NativeFunction<Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>)>>(_mxlogger_function("destroy"))
+    .asFunction();
+
+final Pointer<Void> Function(Pointer<Utf8>) _destroyWithLoggerKey = _nativeLib
+    .lookup<NativeFunction<Pointer<Void> Function(Pointer<Utf8>)>>(_mxlogger_function("destroyWithLoggerKey"))
     .asFunction();
 
 final void Function(Pointer<Void>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Utf8>) _log = _nativeLib

@@ -99,6 +99,11 @@ MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logfiles)(const char * directory,
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroy)(const char* ns,const char* directory){
     mx_logger ::delete_namespace(ns,directory);
 }
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerKey)(const char* logger_key){
+    if(logger_key == nullptr)return;
+    mx_logger ::delete_namespace(logger_key);
+}
+
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_enable)(void *handle, int enable){
     mx_logger *logger = static_cast<mx_logger*>(handle);
     logger->set_enable_console(enable);
