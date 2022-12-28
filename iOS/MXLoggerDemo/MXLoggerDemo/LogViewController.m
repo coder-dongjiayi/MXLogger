@@ -34,7 +34,17 @@
 }
 
 -(void)initMXLogger{
-   self.logger =  [MXLogger initializeWithNamespace:@"com.dongjiayi.mxlogger" storagePolicy:@"yyyy_MM_dd_HH" fileName:@"mxlogger" fileHeader:nil cryptKey:_cryptKey iv:_iv];
+    NSDictionary * dic = @{
+        @"platform":@"iOS",
+        @"vdersion":@"3.8.0",
+        @"device":@"iphone8",
+        @"disk":@"剩余磁盘空间300M",
+    };
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dic options:NSJSONWritingPrettyPrinted error:NULL];
+
+  NSString*  jsonString = [[NSString alloc]initWithData:jsonData encoding:NSUTF8StringEncoding];
+
+   self.logger =  [MXLogger initializeWithNamespace:@"com.dongjiayi.mxlogger" storagePolicy:@"yyyy_MM_dd_HH" fileName:@"mxlogger" fileHeader:jsonString cryptKey:_cryptKey iv:_iv];
 
     // 使用实例构造器初始化
 //    self.logger = [[MXLogger alloc] initWithNamespace:@"com.dongjiayi.mxlogger" cryptKey:_cryptKey iv:_iv];

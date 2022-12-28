@@ -14,7 +14,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/analyzer_data/analyzer_binary.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/analyzer_data/analyzer_binary.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/analyzer_data/analyzer_database.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/analyzer_data/analyzer_database.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/page/detail_page/mxlogger_detail_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/page/detail_page/mxlogger_detail_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/page/detail_page/view/async_future_loader.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/page/lis_page/log_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/page/lis_page/log_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/provider/mxlogger_repository.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/src/provider/mxlogger_repository.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

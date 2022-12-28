@@ -80,6 +80,7 @@ class MXLoggerRepository{
       String? name = element["name"] as String?;
       String? tag = element["tag"] as String?;
       String? msg = element["msg"] as String?;
+      String? fileHeader = element["fileHeader"] as String?;
       int? threadId = element["threadId"] as int?;
       int? mainThreadId = element["isMainThread"] as int?;
       LogModel model = LogModel(
@@ -89,6 +90,7 @@ class MXLoggerRepository{
           threadId: threadId,
           isMainThread: mainThreadId,
           level: level,
+          fileHeader: fileHeader,
           timestamp: timestamp);
       _source.add(model);
     });

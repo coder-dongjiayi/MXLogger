@@ -13,7 +13,7 @@ class AnalyzerDatabase {
   static Future<void> initDataBase(String path) async {
     String mxloggerDatabase = path + "/mxlogger_analyzer.db";
     _db = SQLite.sqlite3.open(mxloggerDatabase);
-
+    SQLite.sqlite3.version;
     _db.execute(
         "CREATE TABLE if not exists  mxlog(id INTEGER PRIMARY KEY AUTOINCREMENT, "
         "name TEXT, "
@@ -23,6 +23,7 @@ class AnalyzerDatabase {
         "threadId INTEGER,"
         "isMainThread INTEGER, "
         "timestamp INTEGER UNIQUE," // 日志创建时间戳
+        "fileHeader TEXT, " // 文件头
         "dateTime TEXT," // 日志创建时间
         "createDateTime TEXT" // 日志写入到数据库的时间
         ")");
@@ -59,6 +60,7 @@ class AnalyzerDatabase {
         "threadId": element["threadId"],
         "isMainThread": element["isMainThread"],
         "timestamp": element["timestamp"],
+        "fileHeader":element["fileHeader"],
         "dateTime": element["dateTime"],
         "createDateTime": element["createDateTime"]
       };
@@ -81,6 +83,7 @@ class AnalyzerDatabase {
 
   static Future<void> insertData(
       {String? name,
+      String? fileHeader,
       String? tag,
       String? msg,
       int? level,
@@ -94,7 +97,8 @@ class AnalyzerDatabase {
           DateTime.fromMicrosecondsSinceEpoch(timestamp).toString();
       String nowTime = DateTime.now().toString();
       String sql =
-          "insert into mxlog (name,tag,msg,level,threadId,isMainThread,timestamp,dateTime,createDateTime) values(?,?,?,?,?,?,?,?,?)";
+          "insert into mxlog (name,tag,msg,level,threadId,isMainThread,timestamp,fileHeader,dateTime,createDateTime)"
+          " values(?,?,?,?,?,?,?,?,?,?)";
       final stmt = _db.prepare(sql);
       try {
         stmt.execute([
@@ -105,6 +109,7 @@ class AnalyzerDatabase {
           threadId,
           isMainThread,
           timestamp,
+          fileHeader,
           dateTime,
           nowTime
         ]);

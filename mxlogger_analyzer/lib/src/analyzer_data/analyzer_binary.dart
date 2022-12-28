@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:async';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:sqlite3/common.dart';
 
 import '../storage/mxlogger_storage.dart';
 import 'analyzer_database.dart';
@@ -138,6 +139,9 @@ class AnalyzerBinary {
     ByteData actualData = actualUint8List.buffer.asByteData();
     int totalSize = actualData.getUint32(0, Endian.little);
     int begin = offsetLength;
+
+    String? fileHeader;
+
     while (begin <= totalSize) {
       Uint8List itemData = binaryData.sublist(begin, begin + sizeofUint32t);
       int itemSize = itemData.buffer.asByteData().getUint32(0, Endian.little);
@@ -150,29 +154,39 @@ class AnalyzerBinary {
           buffer = crypt.aesDecrypt(_replenishDataByte(buffer));
         }
         LogSerialize logSerialize = LogSerialize(buffer);
+        /// 第一条数据，并且name 为com.djy.mxlogger.fileHeader，则认定为fileHeader
+        if(logSerialize.name == "com.djy.mxlogger.fileHeader" && begin == sizeofUint32t){
+          fileHeader = logSerialize.msg;
+        }else{
+          await AnalyzerDatabase.insertData(
+              name: logSerialize.name,
+              fileHeader: fileHeader,
+              tag: logSerialize.tag,
+              msg: logSerialize.msg,
+              level: logSerialize.level,
+              threadId: logSerialize.threadId,
+              isMainThread: logSerialize.isMainThread,
+              errorCallback: (Map<String,dynamic> error) {
+                /// 2067 为数据重复导入的错误 以timestamp为 唯一标识
+                if(error["code"] != 2067){
+                  errorNumber = errorNumber + 1;
+                  onErrorDescCallback?.call(error["message"]);
+                }else{
+                  onRepeatErrorCallback?.call();
+                }
 
-        await AnalyzerDatabase.insertData(
-            name: logSerialize.name,
-            tag: logSerialize.tag,
-            msg: logSerialize.msg,
-            level: logSerialize.level,
-            threadId: logSerialize.threadId,
-            isMainThread: logSerialize.isMainThread,
-            errorCallback: (Map<String,dynamic> error) {
-              /// 2067 为数据重复导入的错误 以timestamp为 唯一标识
-              if(error["code"] != 2067){
-                errorNumber = errorNumber + 1;
-                onErrorDescCallback?.call(error["message"]);
-              }else{
-                onRepeatErrorCallback?.call();
-              }
+              },
+              timestamp: logSerialize.timestamp);
+          totalNumber = totalNumber + 1;
+        }
 
-            },
-            timestamp: logSerialize.timestamp);
-        totalNumber = totalNumber + 1;
       } catch (error) {
         errorNumber = errorNumber + 1;
-        onErrorDescCallback?.call("二进制文件解析失败");
+        String msg = "二进制文件解析失败";
+        if(error is SqliteException){
+          msg = error.message;
+        }
+        onErrorDescCallback?.call(msg);
 
       }
 

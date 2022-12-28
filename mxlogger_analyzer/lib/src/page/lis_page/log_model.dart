@@ -6,10 +6,12 @@ class LogModel {
   final int? threadId;
   final int? isMainThread;
   final int timestamp;
+  final String? fileHeader;
   LogModel(
       {this.name,
       this.tag,
       this.msg,
+      this.fileHeader,
       required this.level,
       this.threadId,
       this.isMainThread,
