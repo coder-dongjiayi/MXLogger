@@ -129,19 +129,22 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
 
   Widget message(String? msg) {
     var jsonMap = _verifyJson(msg);
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      color: MXTheme.itemBackground,
-      child: GestureDetector(
-        onLongPress: (){
-          _copyClipboard(context, msg);
-        },
+    return GestureDetector(
+      onLongPress: (){
+        _copyClipboard(context, msg);
+      },
+      onDoubleTap: (){
+        _copyClipboard(context, msg);
+      },
+      child: Container(
+          width: MediaQuery.of(context).size.width,
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          color: MXTheme.itemBackground,
           child: jsonMap != null
               ? JsonViewer(jsonMap)
               : Text(msg ?? "",
-              style: TextStyle(color: MXTheme.text, fontSize: 18)),
-      )
+              style: TextStyle(color: MXTheme.text, fontSize: 18))
+      ),
     );
   }
 
