@@ -13,36 +13,35 @@ public class MXLogger {
     /**
   * 是否开启控制台打印，默认不开启, 开始控制台打印会影响 写入效率 ，建议发布模式禁用 consoleEnable
   * */
-  public boolean consoleEnable;
+  private boolean consoleEnable;
 
     /**
   * 禁用日志 默认false;
   * */
-  public boolean enable;
+  private boolean enable;
 
     /**
    * 日志文件最大字节数 默认0 无限制
    * */
-  public long maxDiskSize;
+    private long maxDiskSize;
 
   /**
    * 日志文件最大存储时长 默认0 无限制
    * */
-  public  long maxDiskAge;
+  private  long maxDiskAge;
     /**
    * 设置写入文件日志等级 低于这个等级的日志不会被写入到文件，只可能被输出到控制台
    * */
-  public int fileLevel;
+    private int fileLevel;
 
     /**
      * 获取磁盘缓存目录
      * */
-  public String diskCachePath;
+  private String diskCachePath;
     /**
    * 获取当前日志文件大小
    * */
-  public  long logSize;
-
+    private  long logSize;
 
     /**
    *   nameSpace+diskCacheDirectory 做一次md5的值，对应一个logger对象，可以通过这个操作logger
@@ -50,7 +49,7 @@ public class MXLogger {
      * 但是你希望所有子模块(子组件)使用在主工程初始化的log，
      *  这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
    * */
-  public  String loggerKey;
+  private  String loggerKey;
 
  /**
   * nameSpace 日志命名空间 建议使用域名反转保证唯一性

@@ -266,7 +266,7 @@ void base_file_sink::handle_date_(policy::storage_policy policy){
             filename_ = "null";
             break;
     }
-    filename_ = filename_ + ".log";
+    filename_ = filename_ + ".mx";
     
     
 }

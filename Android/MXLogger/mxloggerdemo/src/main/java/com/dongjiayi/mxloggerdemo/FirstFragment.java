@@ -24,7 +24,7 @@ public class FirstFragment extends Fragment {
     ) {
 
         logger = new MXLogger(this.getContext(),"com.djy.mxlogger","这是MXLogger头信息","abnijuioijkolojh","abnijuioijkolccc");
-        logger.consoleEnable = false;
+        logger.setConsoleEnable(false);
         logger.debug("request","mxlogger","this is debug");
         logger.info("request","mxlogger","this is info");
         logger.warn("request","mxlogger","this is warn");
