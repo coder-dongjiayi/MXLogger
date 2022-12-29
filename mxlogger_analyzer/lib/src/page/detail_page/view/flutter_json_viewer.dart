@@ -73,7 +73,7 @@ class JsonObjectViewerState extends State<JsonObjectViewer> {
           (ex && ink)
               ? InkWell(
                   child: Text(entry.key,
-                      style: TextStyle(color: Colors.purple[900])),
+                      style: TextStyle(color: Colors.teal)),
                   onTap: () {
                     setState(() {
                       openFlag[entry.key] = !(openFlag[entry.key] ?? false);
@@ -152,7 +152,7 @@ class JsonObjectViewerState extends State<JsonObjectViewer> {
       return Expanded(
           child: Text(
         entry.value.toString(),
-        style: const TextStyle(color: Colors.purple),
+        style: const TextStyle(color: Colors.teal),
       ));
     } else if (entry.value is double) {
       return Expanded(
@@ -279,7 +279,7 @@ class _JsonArrayViewerState extends State<JsonArrayViewer> {
               : Text('[$i]',
                   style: TextStyle(
                       color:
-                          content == null ? Colors.grey : Colors.purple[900])),
+                          content == null ? Colors.grey : Colors.teal)),
           Text(
             ':',
             style: TextStyle(color: Colors.grey),
@@ -299,7 +299,7 @@ class _JsonArrayViewerState extends State<JsonArrayViewer> {
 
   getInkWell(int index) {
     return InkWell(
-        child: Text('[$index]', style: TextStyle(color: Colors.purple[900])),
+        child: Text('[$index]', style: TextStyle(color: Colors.teal)),
         onTap: () {
           setState(() {
             openFlag[index] = !(openFlag[index]);
@@ -330,7 +330,7 @@ class _JsonArrayViewerState extends State<JsonArrayViewer> {
       return Expanded(
           child: Text(
         content.toString(),
-        style: TextStyle(color: Colors.purple),
+        style: TextStyle(color: Colors.teal),
       ));
     } else if (content is double) {
       return Expanded(

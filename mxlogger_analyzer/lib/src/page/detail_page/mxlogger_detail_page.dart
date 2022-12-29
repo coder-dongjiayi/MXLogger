@@ -39,8 +39,10 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
                 color: MXTheme.themeColor,
                 padding: EdgeInsets.all(20),
                 width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height / 2.0,
-                child: message(widget.logModel.fileHeader),
+                height: MediaQuery.of(context).size.height *0.7,
+                child: SingleChildScrollView(
+                  child: message(widget.logModel.fileHeader),
+                ),
               );
             });
             },
@@ -144,7 +146,7 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
               ? JsonViewer(jsonMap)
               : Text(msg ?? "",
               style: TextStyle(color: MXTheme.text, fontSize: 18))
-      ),
+      )
     );
   }
 
