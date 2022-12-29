@@ -13,8 +13,8 @@ class LogPage extends StatefulWidget {
 class _LogPageState extends State<LogPage> {
   late MXLogger _mxLogger;
   int _size = 0;
-  // final String _cryptKey = "mxloggeraes128cryptkey";
-  // final String _iv = "mxloggeraescfbiv";
+  final String _cryptKey = "abchjilokiuihjng";
+  final String _iv = "abchjilokiuihqqq";
   String? loggerKey;
   @override
   void initState() {
@@ -27,9 +27,9 @@ class _LogPageState extends State<LogPage> {
     _mxLogger = await MXLogger.initialize(
         nameSpace: "flutter.mxlogger",
         storagePolicy: "yyyy_MM_dd_HH",
-        fileHeader: "这是flutter端的header信息",
-        cryptKey: null,
-        iv: null);
+        fileHeader: "这是ios flutter header",
+        cryptKey: _cryptKey,
+        iv: _iv);
 
     _mxLogger.setMaxDiskAge(60*60*24*7);
     _mxLogger.setMaxDiskSize(1024*1024*10);
@@ -47,7 +47,7 @@ class _LogPageState extends State<LogPage> {
   @override
   void dispose() {
     // TODO: implement dispose
-    // MXLogger.destroy(nameSpace: "flutter.mxlogger");
+
     MXLogger.destroyWithLoggerKey(loggerKey!);
 
     super.dispose();
@@ -71,8 +71,8 @@ class _LogPageState extends State<LogPage> {
                       .push(MaterialPageRoute(builder: (context) {
                     return LogListPage(
                       dirPath: _mxLogger.getDiskcachePath(),
-                      cryptKey: null,
-                      iv: null,
+                      cryptKey: _cryptKey,
+                      iv: _iv,
                     );
                   }));
                 },

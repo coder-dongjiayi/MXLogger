@@ -1,6 +1,6 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mxlogger_analyzer/src/component/mxlogger_button.dart';
 
 import 'package:mxlogger_analyzer/src/component/mxlogger_text.dart';
 import 'package:mxlogger_analyzer/src/provider/mxlogger_provider.dart';
@@ -24,12 +24,10 @@ class LogListPage extends ConsumerStatefulWidget {
 
 class LogListPageState extends ConsumerState<LogListPage>
     with AutomaticKeepAliveClientMixin {
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
   }
 
   @override
@@ -40,7 +38,7 @@ class LogListPageState extends ConsumerState<LogListPage>
       appBar: const LogAppBar(),
       body: Consumer(builder: (context, ref, _) {
         var config = ref.watch(logPagesProvider);
-
+        bool sort = ref.read(sortTimeProvider);
         return config.whenExtension(
           empty: (list) {
             return list.isEmpty ? _empty() : null;
@@ -49,28 +47,42 @@ class LogListPageState extends ConsumerState<LogListPage>
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 10, top: 10),
-                  child: MXLoggerText(
-                      text: "共产生${list.length}条数据",
-                      style: TextStyle(color: MXTheme.subText, fontSize: 13)),
+                Container(
+                  margin: EdgeInsets.only(top: 10, left: 10, right: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      MXLoggerText(
+                          text: "共产生${list.length}条数据",
+                          style:
+                              TextStyle(color: MXTheme.subText, fontSize: 13)),
+                      GestureDetector(
+                        onTap: () {
+                          ref.read(sortTimeProvider.notifier).state = !sort;
+                        },
+                        child: Icon(Icons.swap_vert_rounded,
+                            color: sort == true
+                                ? MXTheme.subText
+                                : MXTheme.buttonColor),
+                      )
+                    ],
+                  ),
                 ),
                 Expanded(
                     child: LogListView(
-                      dataSource: list,
-                      callback: (index) {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(builder: (context) {
-                          return MXLoggerDetailPage(logModel: list[index]);
-                        }));
-                      },
-                    ))
+                  dataSource: list,
+                  callback: (index) {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return MXLoggerDetailPage(logModel: list[index]);
+                    }));
+                  },
+                ))
               ],
             );
           },
         );
       }),
-
     );
   }
 

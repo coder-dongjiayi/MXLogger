@@ -20,9 +20,9 @@ class MXLoggerRepository{
   /// page 当前页数 不传则请求全部
   /// keyWord 搜索关键词
   /// levels 需要过滤的日志等级
-  Future<List<LogModel>> fetchLogs({int? page,String? keyWord,
+  Future<List<LogModel>> fetchLogs({int? page,String? keyWord, String? order,
     List<int>? levels}) async{
-    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page ?? 1,keyWord: keyWord,levels: levels);
+    List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(page: page ?? 1,order: order, keyWord: keyWord,levels: levels);
     List<LogModel> source = _transformLogModel(list);
     return source;
   }

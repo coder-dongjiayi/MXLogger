@@ -15,6 +15,9 @@ final logPagesProvider = FutureProvider.autoDispose((ref) {
   final kw = ref.watch(keywordSearchProvider);
 
   final list = ref.watch(levelSearchProvider);
+
+  final sort = ref.watch(sortTimeProvider);
+
   List<int> _level = [];
   for (var element in list) {
     if(element.selected == true){
@@ -25,7 +28,7 @@ final logPagesProvider = FutureProvider.autoDispose((ref) {
     _level = [];
   }
   final logResponse =
-      repository.fetchLogs(page: null, keyWord: kw, levels: _level);
+      repository.fetchLogs(page: null, keyWord: kw, order: sort == true ? "desc" : "asc", levels: _level);
 
   return logResponse;
 });
@@ -62,6 +65,11 @@ final dropTargetProvider = StateProvider((ref) => false);
 /// 搜索状态
 final keywordSearchProvider = StateProvider<String?>((ref) {
   return null;
+});
+
+/// 日志排序 true 按时间倒序 false 按时间正序
+final sortTimeProvider = StateProvider<bool>((ref) {
+  return true;
 });
 
 /// 数据库数据是否为空

@@ -33,6 +33,8 @@ class AnalyzerDatabase {
       {required int page,
       int pageSize = 20,
       String? keyWord,
+      String? order,
+
       List<int>? levels}) async {
     List<Map<String, Object?>> _result = [];
     int start = (page - 1) * pageSize;
@@ -50,7 +52,7 @@ class AnalyzerDatabase {
       where = where + " and " + "${_levelSqls.join(" or ")}";
     }
     SQLite.ResultSet resultSet =
-        _db.select("select * from mxlog where $where order by timestamp desc");
+        _db.select("select * from mxlog where $where order by timestamp ${order ?? "desc"}");
     resultSet.forEach((element) {
       Map<String, Object?> map = {
         "name": element["name"],

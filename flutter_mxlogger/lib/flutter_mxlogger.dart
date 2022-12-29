@@ -24,7 +24,7 @@ class MXLogger with WidgetsBindingObserver {
   bool get enable => _enable;
   bool _shouldRemoveExpiredDataWhenEnterBackground = true;
 
-  /// 获取日志文件夹的磁盘路径
+  /// 获取日志文件夹的磁盘路径(directory+nameSpace)
   String get diskcachePath => getDiskcachePath();
 
   /// 获取日志底层的唯一标识 可以通过这个key操作日志对象
@@ -44,6 +44,13 @@ class MXLogger with WidgetsBindingObserver {
     }
   }
 
+  /// 使用自定义路径初始化MXLogger
+  /// nameSpace: 日志文件的命名空间建议使用域名反转保证唯一性
+  /// directory: 自定义日志文件路径
+  /// fileName: 自定义文件名
+  /// fileHeader:日志文件头信息，业务可以在初始化mxlogger的时候 写入一些业务相关的信息 比如app版本 所属平台等等 文件创建的时候这条数据会被写入
+  /// cryptKey:  如果日志信息需要加密需要填入这个值 应为正好为16个英文字母
+  /// iv: 如果不填默认和cryptKey一致
   MXLogger(
       {required String nameSpace,
       required String directory,
@@ -94,6 +101,8 @@ class MXLogger with WidgetsBindingObserver {
   /// 初始化MXLogger
   /// nameSpace: 日志文件的命名空间建议使用域名反转保证唯一性
   /// directory: 自定义日志文件路径
+  /// 默认路径 ios:/Library/com.mxlog.LoggerCache/nameSpace
+  ///         android: /files/com.mxlog.LoggerCache/nameSpace
   /// fileName: 自定义文件名
   /// fileHeader:日志文件头信息，业务可以在初始化mxlogger的时候 写入一些业务相关的信息 比如app版本 所属平台等等 文件创建的时候这条数据会被写入
   /// cryptKey:  如果日志信息需要加密需要填入这个值 应为正好为16个英文字母
