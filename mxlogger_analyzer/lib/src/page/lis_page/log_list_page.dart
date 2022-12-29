@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mxlogger_analyzer/src/component/mxlogger_button.dart';
-
 import 'package:mxlogger_analyzer/src/component/mxlogger_text.dart';
 import 'package:mxlogger_analyzer/src/provider/mxlogger_provider.dart';
 
@@ -56,6 +54,7 @@ class LogListPageState extends ConsumerState<LogListPage>
                           text: "共产生${list.length}条数据",
                           style:
                               TextStyle(color: MXTheme.subText, fontSize: 13)),
+
                       GestureDetector(
                         onTap: () {
                           ref.read(sortTimeProvider.notifier).state = !sort;
@@ -63,7 +62,7 @@ class LogListPageState extends ConsumerState<LogListPage>
                         child: Icon(Icons.swap_vert_rounded,
                             color: sort == true
                                 ? MXTheme.subText
-                                : MXTheme.buttonColor),
+                                : MXTheme.buttonColor,size: 15,),
                       )
                     ],
                   ),
