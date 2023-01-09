@@ -1,16 +1,28 @@
 # mxlogger_analyzer
+https://github.com/coder-dongjiayi/MXLogger.git
 
-A new Flutter project.
+##  打包
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+flutter build macos -t lib/main_desktop.dart
 
-A few resources to get you started if this is your first Flutter project:
+### 应用图标生成
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+sips -z 16 16     logo.png --out icons.iconset/icon_16x16.png
+sips -z 32 32     logo.png --out icons.iconset/icon_16x16@2x.png
+sips -z 32 32     logo.png --out icons.iconset/icon_32x32.png
+sips -z 64 64     logo.png --out icons.iconset/icon_32x32@2x.png
+sips -z 128 128   logo.png --out icons.iconset/icon_128x128.png
+sips -z 256 256   logo.png --out icons.iconset/icon_128x128@2x.png
+sips -z 256 256   logo.png --out icons.iconset/icon_256x256.png
+sips -z 512 512   logo.png --out icons.iconset/icon_256x256@2x.png
+sips -z 512 512   logo.png --out icons.iconset/icon_512x512.png
+sips -z 1024 1024   logo.png --out icons.iconset/icon_512x512@2x.png
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+iconutil -c icns icons.iconset -o icon.icns
+
+### dmg包生成
+appdmg <config-json-path> <output-dmg-path-with-file-name>
+#### 如果安装了nvm管理 node版本，需要增加npx
+npx appdmg ./installers/dmg_creator/config.json ./installers/dmg_creator/mxlogger_analyzer.app
+

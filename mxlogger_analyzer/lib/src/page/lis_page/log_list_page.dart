@@ -1,11 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/src/component/mxlogger_text.dart';
+import 'package:mxlogger_analyzer/src/extends/date_time_ext.dart';
+import 'package:mxlogger_analyzer/src/extends/widget_ext.dart';
+import 'package:mxlogger_analyzer/src/page/lis_page/log_model.dart';
 import 'package:mxlogger_analyzer/src/provider/mxlogger_provider.dart';
 
 import 'package:mxlogger_analyzer/src/page/lis_page/view/log_app_bar.dart';
 import 'package:mxlogger_analyzer/src/page/lis_page/view/log_listview.dart';
 import 'package:mxlogger_analyzer/src/extends/async_extends.dart';
+import 'package:mxlogger_analyzer/src/util/date_util.dart';
 
 import '../../theme/mx_theme.dart';
 
@@ -24,9 +28,15 @@ class LogListPageState extends ConsumerState<LogListPage>
     with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
+
+  String startDateStr = "";
+  String startTimeStr = "";
+  int startTimestamp = 0;
+  String endDateStr = "";
+  String endTimeStr = "";
+  int endTimestamp = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -42,38 +52,223 @@ class LogListPageState extends ConsumerState<LogListPage>
             return list.isEmpty ? _empty() : null;
           },
           data: (list) {
+            List<LogModel> filter = [];
+            filter.addAll(list);
+
+            filter.retainWhere((log) {
+              if (startTimestamp > 0 && startTimestamp < endTimestamp) {
+                if (log.timestamp / 1000 < startTimestamp) {
+                  return false;
+                }
+              }
+              if (endTimestamp > 0 && startTimestamp < endTimestamp) {
+                if (log.timestamp / 1000 > endTimestamp) {
+                  return false;
+                }
+              }
+              return true;
+            });
+            debugPrint(
+                "LogListPage  filter:${filter.length}========list:${list.length}==========================");
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  margin: EdgeInsets.only(top: 10, left: 10, right: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                  child: Wrap(
                     children: [
                       MXLoggerText(
-                          text: "共产生${list.length}条数据",
-                          style:
-                              TextStyle(color: MXTheme.subText, fontSize: 13)),
+                        text: "共产生${list.length}条数据",
+                        style: TextStyle(color: MXTheme.subText, fontSize: 13),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          MXLoggerText(
+                            text: "选择过滤时间范围：",
+                            style:
+                                TextStyle(color: MXTheme.subText, fontSize: 13),
+                          ),
 
-                      GestureDetector(
-                        onTap: () {
-                          ref.read(sortTimeProvider.notifier).state = !sort;
-                        },
-                        child: Icon(Icons.swap_vert_rounded,
-                            color: sort == true
-                                ? MXTheme.subText
-                                : MXTheme.buttonColor,size: 15,),
-                      )
+                          ///开始日期
+                          GestureDetector(
+                            onTap: () async {
+                              DateTime? result = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.now()
+                                      .subtract(const Duration(days: 30)),
+                                  lastDate: DateTime.now());
+                              if (result != null) {
+                                startDateStr = result.formatDateLogTimeYMD;
+                                startTimestamp = DateUtil.getDateMsByTimeStr(
+                                        "$startDateStr $startTimeStr") ??
+                                    0;
+                                setState(() {});
+                              }
+                            },
+                            child: MXLoggerText(
+                              text: startDateStr,
+                              style: TextStyle(
+                                  color: MXTheme.subText,
+                                  fontSize: 13,
+                                  height: 1),
+                            ).decorationEx(
+                                bgColor: MXTheme.dropTargetColor,
+                                width: 90,
+                                margin: const EdgeInsets.only(right: 5)),
+                          ),
+
+                          ///开始日期 时间
+                          GestureDetector(
+                            onTap: () async {
+                              TimeOfDay? result = await showTimePicker(
+                                context: context,
+                                initialTime:
+                                    const TimeOfDay(hour: 0, minute: 0),
+                              );
+                              if (result != null) {
+                                startTimeStr = result.formatDateLogTimeHMS;
+                                startTimestamp = DateUtil.getDateMsByTimeStr(
+                                        "$startDateStr $startTimeStr") ??
+                                    0;
+                                setState(() {});
+                              }
+                            },
+                            child: MXLoggerText(
+                              text: startTimeStr,
+                              style: TextStyle(
+                                  color: MXTheme.subText,
+                                  fontSize: 13,
+                                  height: 1),
+                            ).decorationEx(
+                                bgColor: MXTheme.dropTargetColor,
+                                width: 70,
+                                radius: 5),
+                          ),
+
+                          MXLoggerText(
+                            text: "到",
+                            style: TextStyle(
+                                color: MXTheme.subText,
+                                fontSize: 13,
+                                height: 1),
+                          ).pOnly(left: 5, right: 5),
+
+                          ///结束日期
+                          GestureDetector(
+                            onTap: () async {
+                              DateTime? result = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.now().subtract(
+                                    const Duration(days: 30),
+                                  ),
+                                  lastDate: DateTime.now());
+                              if (result != null) {
+                                endDateStr = result.formatDateLogTimeYMD;
+                                endTimestamp = DateUtil.getDateMsByTimeStr(
+                                        "$endDateStr $endTimeStr") ??
+                                    0;
+                                setState(() {});
+                              }
+                            },
+                            child: MXLoggerText(
+                              text: endDateStr,
+                              style: TextStyle(
+                                  color: MXTheme.subText,
+                                  fontSize: 13,
+                                  height: 1),
+                            ).decorationEx(
+                              bgColor: MXTheme.dropTargetColor,
+                              width: 90,
+                              margin: const EdgeInsets.only(right: 5),
+                            ),
+                          ),
+
+                          ///结束日期 时间
+                          GestureDetector(
+                            onTap: () async {
+                              TimeOfDay? result = await showTimePicker(
+                                context: context,
+                                initialEntryMode: TimePickerEntryMode.input,
+                                initialTime:
+                                    const TimeOfDay(hour: 0, minute: 0),
+                              );
+                              if (result != null) {
+                                endTimeStr = result.formatDateLogTimeHMS;
+                                endTimestamp = DateUtil.getDateMsByTimeStr(
+                                        "$endDateStr $endTimeStr") ??
+                                    0;
+                                setState(() {});
+                              }
+                            },
+                            child: MXLoggerText(
+                              text: endTimeStr,
+                              style: TextStyle(
+                                  color: MXTheme.subText,
+                                  fontSize: 13,
+                                  height: 1),
+                            ).decorationEx(
+                              bgColor: MXTheme.dropTargetColor,
+                              width: 70,
+                              radius: 5,
+                            ),
+                          ),
+
+                          ///清除按钮
+                          GestureDetector(
+                            onTap: () async {
+                              startDateStr = "";
+                              startTimeStr = "";
+                              startTimestamp = 0;
+                              endDateStr = "";
+                              endTimeStr = "";
+                              endTimestamp = 0;
+                              setState(() {});
+                            },
+                            child: Icon(
+                              Icons.delete,
+                              color: startTimestamp < endTimestamp &&
+                                      filter.isNotEmpty
+                                  ? MXTheme.tag
+                                  : MXTheme.buttonColor,
+                              size: 15,
+                            ),
+                          ).mOnly(right: 10, left: 10),
+                          if (startTimestamp < endTimestamp &&
+                              filter.isNotEmpty)
+                            MXLoggerText(
+                              text: "当前查询到${filter.length}条数据",
+                              style: TextStyle(
+                                  color: MXTheme.subText, fontSize: 13),
+                            ),
+                          Expanded(child: Container()),
+                          GestureDetector(
+                            onTap: () {
+                              ref.read(sortTimeProvider.notifier).state = !sort;
+                            },
+                            child: Icon(
+                              Icons.swap_vert_rounded,
+                              color: sort == true
+                                  ? MXTheme.subText
+                                  : MXTheme.buttonColor,
+                              size: 15,
+                            ),
+                          )
+                        ],
+                      ),
                     ],
                   ),
                 ),
                 Expanded(
                     child: LogListView(
-                  dataSource: list,
+                  dataSource: filter,
                   callback: (index) {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (context) {
-                      return MXLoggerDetailPage(logModel: list[index]);
+                      return MXLoggerDetailPage(logModel: filter[index]);
                     }));
                   },
                 ))

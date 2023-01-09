@@ -1,6 +1,5 @@
 // import 'package:sqflite/sqflite.dart' as SQLite;
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:sqlite3/sqlite3.dart' as SQLite;
@@ -11,7 +10,7 @@ class AnalyzerDatabase {
   static SQLite.Database get db => _db;
 
   static Future<void> initDataBase(String path) async {
-    String mxloggerDatabase = path + "/mxlogger_analyzer.db";
+    String mxloggerDatabase = "$path/mxlogger_analyzer.db";
     _db = SQLite.sqlite3.open(mxloggerDatabase);
     SQLite.sqlite3.version;
     _db.execute(
@@ -34,9 +33,8 @@ class AnalyzerDatabase {
       int pageSize = 20,
       String? keyWord,
       String? order,
-
       List<int>? levels}) async {
-    List<Map<String, Object?>> _result = [];
+    List<Map<String, Object?>> result = [];
     int start = (page - 1) * pageSize;
 
     String where = "1=1";
@@ -45,15 +43,15 @@ class AnalyzerDatabase {
       where = "(msg like'%$keyWord%')";
     }
     if (levels?.isEmpty == false) {
-      List<String> _levelSqls = [];
+      List<String> levelSqls = [];
       levels?.forEach((element) {
-        _levelSqls.add("level=$element");
+        levelSqls.add("level=$element");
       });
-      where = where + " and " + "${_levelSqls.join(" or ")}";
+      where = "$where and ${levelSqls.join(" or ")}";
     }
-    SQLite.ResultSet resultSet =
-        _db.select("select * from mxlog where $where order by timestamp ${order ?? "desc"}");
-    resultSet.forEach((element) {
+    SQLite.ResultSet resultSet = _db.select(
+        "select * from mxlog where $where order by timestamp ${order ?? "desc"}");
+    for (var element in resultSet) {
       Map<String, Object?> map = {
         "name": element["name"],
         "tag": element["tag"],
@@ -62,14 +60,14 @@ class AnalyzerDatabase {
         "threadId": element["threadId"],
         "isMainThread": element["isMainThread"],
         "timestamp": element["timestamp"],
-        "fileHeader":element["fileHeader"],
+        "fileHeader": element["fileHeader"],
         "dateTime": element["dateTime"],
         "createDateTime": element["createDateTime"]
       };
-      _result.add(map);
-    });
+      result.add(map);
+    }
 
-    return _result;
+    return result;
   }
 
   static int count() {
@@ -93,7 +91,7 @@ class AnalyzerDatabase {
       int isMainThread = 0,
       ValueChanged<Map<String, dynamic>>? errorCallback,
       required int timestamp}) async {
-    Completer<void> _completer = Completer();
+    Completer<void> completer = Completer();
     await Future.delayed(Duration.zero, () {
       String dateTime =
           DateTime.fromMicrosecondsSinceEpoch(timestamp).toString();
@@ -125,10 +123,10 @@ class AnalyzerDatabase {
         }
       } finally {
         stmt.dispose();
-        _completer.complete();
+        completer.complete();
       }
     });
 
-    return _completer.future;
+    return completer.future;
   }
 }

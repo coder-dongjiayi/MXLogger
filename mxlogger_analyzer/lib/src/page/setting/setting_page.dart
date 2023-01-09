@@ -1,3 +1,5 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -69,6 +71,29 @@ class _SettingPageState extends State<SettingPage> {
                                 TextStyle(color: MXTheme.white, fontSize: 18),
                           ),
                         ));
+                      }),
+                  const SizedBox(width: 20),
+                  MXLoggerButton(
+                      text: "导出数据库",
+                      onPressed: (ref) async {
+                        String? selectedDirectory =
+                            await FilePicker.platform.getDirectoryPath();
+                        if (selectedDirectory != null) {
+                          final XFile textFile = XFile(
+                              '${MXLoggerStorage.instance.databasePath}/mxlogger_analyzer.db');
+                          await textFile.saveTo(
+                              '$selectedDirectory/mxlogger_analyzer.db');
+
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            backgroundColor: MXTheme.warn,
+                            content: Text(
+                              "导出数据库成功",
+                              textAlign: TextAlign.center,
+                              style:
+                                  TextStyle(color: MXTheme.white, fontSize: 18),
+                            ),
+                          ));
+                        }
                       }),
                 ],
               ),
@@ -153,17 +178,17 @@ class _SettingPageState extends State<SettingPage> {
         context: context,
         builder: (_context) {
           return CupertinoAlertDialog(
-            title: Text("提示"),
-            content: Text("你确定要清空数据库么"),
+            title: const Text("提示"),
+            content: const Text("你确定要清空数据库么"),
             actions: [
               CupertinoDialogAction(
-                child: Text("取消"),
+                child: const Text("取消"),
                 onPressed: () {
                   Navigator.of(_context).pop();
                 },
               ),
               CupertinoDialogAction(
-                child: Text("清空"),
+                child: const Text("清空"),
                 onPressed: () async {
                   await ref.read(mxloggerRepository).deleteData();
 
