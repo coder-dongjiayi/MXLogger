@@ -158,7 +158,7 @@ dependencies:
 
 	yyyy_MM                 按月存储
   yyyy_MM_dd              按天存储
-  yyyy_WW                 按周存储(注意WW是大写，SDK中的注释写错误了 应该是大写)
+  yyyy_ww                 按周存储
   yyyy_MM_dd_HH     		  按小时存储
 ```
 
@@ -167,7 +167,7 @@ dependencies:
 * iOS
 
   ```objective-c
-  MXLogger * logger =  [MXLogger initializeWithNamespace:@"com.youdomain.logger.space",storagePolicy:@"yyyy_MM_dd_HH"];
+  MXLogger * logger =  [MXLogger initializeWithNamespace:@"com.youdomain.logger.space",storagePolicy:MXStoragePolicyYYYYMMDD];
   logger.maxDiskAge = 60*60*24*7; // 一个星期
   logger.maxDiskSize = 1024 * 1024 * 10; // 10M
   logger.fileLevel = 0;// 设置文件写入等级 小于这个等级的日志 不写入文件
@@ -200,7 +200,7 @@ dependencies:
   ```dart
    MXLogger logger = await MXLogger.initialize(
           nameSpace: "flutter.mxlogger",
-          storagePolicy: "yyyy_MM_dd_HH",
+          storagePolicy: MXStoragePolicyType.yyyy_MM_dd,
           cryptKey: "abcuioqbsdguijlk",
           iv: "bccuioqbsdguijiv");
   
