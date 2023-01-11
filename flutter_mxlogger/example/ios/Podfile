@@ -31,8 +31,8 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks!
 
-  pod "MXLoggerCore", :path => '/Users/dongjiayi/Documents/github/MXLogger'
-  pod "MXLogger", :path => '/Users/dongjiayi/Documents/github/MXLogger'
+#   pod "MXLoggerCore", :path => '/Users/dongjiayi/Documents/github/MXLogger'
+#   pod "MXLogger", :path => '/Users/dongjiayi/Documents/github/MXLogger'
   
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   
