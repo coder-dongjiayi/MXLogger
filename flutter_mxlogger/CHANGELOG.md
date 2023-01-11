@@ -1,12 +1,17 @@
 
 # MXLogger for Flutter Change Log
 
+# v1.2.1/2023-01-12
+* Keep up with MXLogger native lib v1.2.1
+* StoragePolicy arg use enum
+* Fix bugs
+
 # v1.2.0+1/2023-01-03
 * Fixed bugs on android
 
 # v1.2.0/2022-12-28
 * Keep up with MXLogger native lib v1.2.0
-* add fileHeader
+* Add fileHeader
 
 # v1.1.3/2022-10-13
 
@@ -20,7 +25,6 @@
 ## v1.1.1 / 2022-10-09
 
 * Android Change the package name.
-
 
 ## v1.1.0 / 2022-10-09
 * Keep up with MXLogger native lib v1.1.0
