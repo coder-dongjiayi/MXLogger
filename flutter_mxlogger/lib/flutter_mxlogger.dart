@@ -8,6 +8,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 export 'flutter_mxlogger.dart';
 
+///日志文件存储策略
+enum MXStoragePolicyType{
+  yyyy_MM_dd, /// 按天存储 对应文件名: 2023-01-11_filename.mx
+  yyyy_MM_dd_HH, /// 按小时存储 对应文件名: 2023-01-11-15_filename.mx
+  yyyy_ww, /// 按周存储 对应文件名: 2023w02_filename.mx（2023年第二周）
+  yyyy_MM /// 按月存储 对应文件名: 2023-01_filename.mx
+}
+
 typedef LoggerFunction = Void Function(
     Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
 
@@ -54,7 +62,7 @@ class MXLogger with WidgetsBindingObserver {
   MXLogger(
       {required String nameSpace,
       required String directory,
-      String? storagePolicy,
+        MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
       String? fileName,
       String? fileHeader,
       String? cryptKey,
@@ -64,8 +72,9 @@ class MXLogger with WidgetsBindingObserver {
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
     Pointer<Utf8> drPtr = directory.toNativeUtf8();
 
-    Pointer<Utf8> storagePolicyPtr =
-        storagePolicy == null ? nullptr : storagePolicy.toNativeUtf8();
+    String policy = storagePolicy.toString().replaceAll("MXStoragePolicyType.", "");
+
+    Pointer<Utf8> storagePolicyPtr = policy.toNativeUtf8();
     Pointer<Utf8> fileNamePtr =
         fileName == null ? nullptr : fileName.toNativeUtf8();
     Pointer<Utf8> fileHeaderPtr =
@@ -103,14 +112,14 @@ class MXLogger with WidgetsBindingObserver {
   /// directory: 自定义日志文件路径
   /// 默认路径 ios:/Library/com.mxlog.LoggerCache/nameSpace
   ///         android: /files/com.mxlog.LoggerCache/nameSpace
-  /// fileName: 自定义文件名
+  /// fileName: 自定义文件名 默认值 mxlog
   /// fileHeader:日志文件头信息，业务可以在初始化mxlogger的时候 写入一些业务相关的信息 比如app版本 所属平台等等 文件创建的时候这条数据会被写入
   /// cryptKey:  如果日志信息需要加密需要填入这个值 应为正好为16个英文字母
   /// iv: 如果不填默认和cryptKey一致
   static Future<MXLogger> initialize(
       {required String nameSpace,
       String? directory,
-      String? storagePolicy,
+        MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
       String? fileName,
       String? fileHeader,
       String? cryptKey,

@@ -158,7 +158,7 @@ dependencies:
 
 	yyyy_MM                 按月存储
   yyyy_MM_dd              按天存储
-  yyyy_ww                 按周存储
+  yyyy_WW                 按周存储(注意WW是大写，SDK中的注释写错误了 应该是大写)
   yyyy_MM_dd_HH     		  按小时存储
 ```
 

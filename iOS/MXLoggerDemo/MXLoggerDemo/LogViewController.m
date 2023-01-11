@@ -44,7 +44,7 @@
 
   NSString*  jsonString = [[NSString alloc]initWithData:jsonData encoding:NSUTF8StringEncoding];
 
-   self.logger =  [MXLogger initializeWithNamespace:@"com.dongjiayi.mxlogger" storagePolicy:@"yyyy_MM_dd_HH" fileName:@"mxlogger" fileHeader:jsonString cryptKey:_cryptKey iv:_iv];
+   self.logger =  [MXLogger initializeWithNamespace:@"com.dongjiayi.mxlogger" storagePolicy:MXStoragePolicyYYYYWW fileName:@"mxlogger" fileHeader:jsonString cryptKey:_cryptKey iv:_iv];
 
     // 使用实例构造器初始化
 //    self.logger = [[MXLogger alloc] initWithNamespace:@"com.dongjiayi.mxlogger" cryptKey:_cryptKey iv:_iv];
@@ -65,6 +65,7 @@
     NSLog(@"MXLogger: %@",lg);
     
     NSLog(@"目录:%@",self.logger.diskCachePath);
+   
     
   
 }

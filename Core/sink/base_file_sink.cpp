@@ -242,7 +242,7 @@ void base_file_sink::handle_date_(policy::storage_policy policy){
             }
            int  week_n = (base + yd) / 7 + 1;
 
-            auto result = mxlogger_helper::string_format("%04d-%s%s",  tm_time.tm_year + 1900,week_n);
+            auto result = mxlogger_helper::string_format("%04dw%02d",  tm_time.tm_year + 1900,week_n);
 
             filename_ = result + "_" + custom_filename_;
         }

@@ -39,8 +39,8 @@ public class FlutterMxloggerPlugin implements FlutterPlugin, MethodCallHandler {
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
     if (call.method.equals("initialize")) {
       final String nameSpace = call.argument("nameSpace");
-      String directory = "";
-       if (call.argument("directory") == null){
+      String directory = call.argument("directory");
+       if (directory == null){
          directory = _context.getFilesDir().getAbsolutePath() + "/com.mxlog.LoggerCache";
        }
       HashMap<String,String> map = new HashMap<>();

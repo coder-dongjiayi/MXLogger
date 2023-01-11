@@ -1,8 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
 import 'log_list_page.dart';
-
+import 'package:path_provider/path_provider.dart';
 class LogPage extends StatefulWidget {
   const LogPage({Key? key}) : super(key: key);
 
@@ -24,9 +26,12 @@ class _LogPageState extends State<LogPage> {
   }
 
   Future<void> init() async {
+
+    Directory directory = await  getApplicationDocumentsDirectory();
     _mxLogger = await MXLogger.initialize(
         nameSpace: "flutter.mxlogger",
-        storagePolicy: "yyyy_MM_dd_HH",
+        directory: directory.path,
+        storagePolicy: MXStoragePolicyType.yyyy_MM,
         fileHeader: "这是ios flutter header",
         cryptKey: _cryptKey,
         iv: _iv);

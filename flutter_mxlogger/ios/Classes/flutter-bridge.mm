@@ -24,7 +24,19 @@ MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* di
     NSString * _cryptKey = crypt_key == nullptr ? NULL : [NSString stringWithUTF8String:crypt_key];
     NSString * _iv = iv == nullptr ? NULL : [NSString stringWithUTF8String:iv];
     
-    MXLogger * logger = [MXLogger initializeWithNamespace:_ns diskCacheDirectory:_directory storagePolicy:_storagePolicy fileName:_fileName fileHeader:_fileHeader  cryptKey:_cryptKey iv:_iv];
+    MXStoragePolicyType policyType = MXStoragePolicyYYYYMMDD;
+    
+    if([_storagePolicy isEqualToString:@"yyyy_MM_dd"]){
+        policyType = MXStoragePolicyYYYYMMDD;
+    }else if ([_storagePolicy isEqualToString:@"yyyy_MM_dd_HH"]){
+        policyType = MXStoragePolicyYYYYMMDDHH;
+    }else if ([_storagePolicy isEqualToString:@"yyyy_ww"]){
+        policyType = MXStoragePolicyYYYYWW;
+    }else if ([_storagePolicy isEqualToString:@"yyyy_MM"]){
+        policyType = MXStoragePolicyYYYYMM;
+    }
+    
+    MXLogger * logger = [MXLogger initializeWithNamespace:_ns diskCacheDirectory:_directory storagePolicy:policyType fileName:_fileName fileHeader:_fileHeader  cryptKey:_cryptKey iv:_iv];
         
   
     logger.shouldRemoveExpiredDataWhenTerminate = NO;

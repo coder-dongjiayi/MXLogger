@@ -3,11 +3,19 @@ package com.dongjiayi.mxlogger;
 
 import android.content.Context;
 import android.os.Looper;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
+enum MXStoragePolicyType{
+    /** 按天存储 对应文件名: 2023-01-11_filename.mx*/
+    YYYY_MM_DD,
+    /** 按小时存储 对应文件名: 2023-01-11-15_filename.mx*/
+    YYYY_MM_DD_HH,
+    /** 按周存储 对应文件名: 2023w02_filename.mx（2023年第二周）*/
+    YYYY_WW,
+    /** 按月存储 对应文件名: 2023-01_filename.mx*/
+    YYYY_MM
+}
 public class MXLogger {
 
     /**
@@ -64,7 +72,7 @@ public class MXLogger {
     public MXLogger(@NonNull Context context,
                     @NonNull String nameSpace,
                     @Nullable String diskCacheDirectory,
-                    @Nullable String storagePolicy,
+                    @Nullable MXStoragePolicyType storagePolicy,
                     @Nullable String fileName,
                     @Nullable String fileHeader,
                     @Nullable String cryptKey,
@@ -74,7 +82,23 @@ public class MXLogger {
             diskCacheDirectory = defaultDiskCacheDirectory(context);
         }
         System.loadLibrary("mxlogger");
-        nativeHandle =  jniInitialize(nameSpace,diskCacheDirectory,storagePolicy,fileName,fileHeader,cryptKey,iv);
+        String policy = "yyyy_MM_dd";
+        switch (storagePolicy){
+            case YYYY_MM:
+                policy = "yyyy_MM";
+                break;
+            case YYYY_WW:
+                policy = "yyyy_ww";
+                break;
+            case YYYY_MM_DD:
+                policy = "yyyy_MM_dd";
+                break;
+            case YYYY_MM_DD_HH:
+                policy = "yyyy_MM_dd_HH";
+                break;
+        }
+
+        nativeHandle =  jniInitialize(nameSpace,diskCacheDirectory,policy,fileName,fileHeader,cryptKey,iv);
 
     }
 
@@ -118,7 +142,7 @@ public class MXLogger {
 
     public MXLogger(@NonNull Context context,@NonNull String nameSpace,@Nullable String fileHeader) {
 
-        this(context,nameSpace,null,null,null,fileHeader,null,null);
+        this(context,nameSpace,null,MXStoragePolicyType.YYYY_MM_DD,null,fileHeader,null,null);
     }
 
     public MXLogger(@NonNull Context context,
@@ -126,14 +150,14 @@ public class MXLogger {
                     @Nullable String fileHeader,
                     @Nullable String cryptKey,
                     @Nullable String iv) {
-        this(context,nameSpace,null,null,null,fileHeader,cryptKey,iv);
+        this(context,nameSpace,null,MXStoragePolicyType.YYYY_MM_DD,null,fileHeader,cryptKey,iv);
     }
 
     public MXLogger(@NonNull Context context,
                     @Nullable String fileHeader,
                     @NonNull String nameSpace,
                     @Nullable String diskCacheDirectory) {
-        this(context,nameSpace,diskCacheDirectory,null,null,fileHeader,null,null);
+        this(context,nameSpace,diskCacheDirectory,MXStoragePolicyType.YYYY_MM_DD,null,fileHeader,null,null);
 
     }
 

@@ -23,7 +23,12 @@ public class FirstFragment extends Fragment {
             Bundle savedInstanceState
     ) {
 
-        logger = new MXLogger(this.getContext(),"com.djy.mxlogger","这是MXLogger头信息","abnijuioijkolojh","abnijuioijkolccc");
+        logger = new MXLogger(this.getContext(),
+                "com.djy.mxlogger",
+
+                "这是MXLogger头信息",
+                "abnijuioijkolojh",
+                "abnijuioijkolccc");
         logger.setConsoleEnable(false);
         logger.debug("request","mxlogger","this is debug");
         logger.info("request","mxlogger","this is info");

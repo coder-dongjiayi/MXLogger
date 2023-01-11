@@ -1,6 +1,9 @@
 
 # MXLogger for Flutter Change Log
 
+# v1.2.0+1/2023-01-03
+* Fixed bugs on android
+
 # v1.2.0/2022-12-28
 * Keep up with MXLogger native lib v1.2.0
 * add fileHeader
