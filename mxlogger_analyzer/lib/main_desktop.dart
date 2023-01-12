@@ -1,20 +1,13 @@
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/material.dart';
-import 'package:mxlogger_analyzer/src/analyzer_data/analyzer_database.dart';
-import 'package:mxlogger_analyzer/src/desktop_page.dart';
-import 'package:mxlogger_analyzer/src/page/lis_page/view/crypt_dialog.dart';
-import 'package:mxlogger_analyzer/src/provider/mxlogger_provider.dart';
-import 'package:mxlogger_analyzer/src/provider/mxlogger_repository.dart';
-import 'package:mxlogger_analyzer/src/storage/mxlogger_storage.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 
+import 'package:flutter/material.dart';
+import 'package:mxlogger_analyzer/page/desktop_page.dart';
+import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await MXLoggerStorage.instance.initialize();
-  await AnalyzerDatabase.initDataBase(MXLoggerStorage.instance.databasePath);
+  await MXAnalyzerLib_initialize();
 
   runApp(const ProviderScope(child: MyApp()));
 }

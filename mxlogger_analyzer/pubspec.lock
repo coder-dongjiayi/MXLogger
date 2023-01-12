@@ -2,7 +2,7 @@
 # See https://dart.dev/tools/pub/glossary#lockfile
 packages:
   aes_crypt_null_safe:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: aes_crypt_null_safe
       url: "https://pub.flutter-io.cn"
@@ -79,14 +79,14 @@ packages:
     source: hosted
     version: "1.0.5"
   desktop_drop:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: desktop_drop
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.3.3"
   easy_refresh:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: easy_refresh
       url: "https://pub.flutter-io.cn"
@@ -114,7 +114,7 @@ packages:
     source: hosted
     version: "6.1.2"
   file_selector:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: file_selector
       url: "https://pub.flutter-io.cn"
@@ -149,7 +149,7 @@ packages:
     source: hosted
     version: "0.8.2+2"
   flat_buffers:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flat_buffers
       url: "https://pub.flutter-io.cn"
@@ -161,7 +161,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_easyloading:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_easyloading
       url: "https://pub.flutter-io.cn"
@@ -175,7 +175,7 @@ packages:
     source: hosted
     version: "2.0.1"
   flutter_riverpod:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_riverpod
       url: "https://pub.flutter-io.cn"
@@ -254,6 +254,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.7.0"
+  mxlogger_analyzer_lib:
+    dependency: "direct main"
+    description:
+      path: mxlogger_analyzer_lib
+      relative: true
+    source: path
+    version: "0.0.1"
   path:
     dependency: transitive
     description:
@@ -276,7 +283,7 @@ packages:
     source: hosted
     version: "1.0.1"
   path_provider:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: path_provider
       url: "https://pub.flutter-io.cn"
@@ -353,7 +360,7 @@ packages:
     source: hosted
     version: "2.1.1"
   shared_preferences:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: shared_preferences
       url: "https://pub.flutter-io.cn"
@@ -421,7 +428,7 @@ packages:
     source: hosted
     version: "1.8.2"
   sqlite3:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: sqlite3
       url: "https://pub.flutter-io.cn"
