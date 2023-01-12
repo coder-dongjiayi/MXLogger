@@ -79,7 +79,7 @@ class LogAppBarState extends ConsumerState<LogAppBar> {
           const SizedBox(width: 10),
           Expanded(
               child: TextField(
-                autofocus: true,
+                autofocus: false,
 
                 style: TextStyle(fontSize: 16, color: MXTheme.white),
                 onChanged: (String? keyword){

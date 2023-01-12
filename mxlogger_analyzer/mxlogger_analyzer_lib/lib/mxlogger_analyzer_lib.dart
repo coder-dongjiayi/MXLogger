@@ -1,7 +1,10 @@
 library mxlogger_analyzer_lib;
 
+import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer_lib/src/analyzer_data/analyzer_database.dart';
 import 'package:mxlogger_analyzer_lib/src/storage/mxlogger_storage.dart';
+
+import 'mxlogger_analyzer_lib.dart';
 export 'package:flutter_easyloading/flutter_easyloading.dart';
 export 'package:riverpod/riverpod.dart';
 export 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +18,32 @@ export 'package:mxlogger_analyzer_lib/src/page/lis_page/log_list_page.dart';
 export 'package:mxlogger_analyzer_lib/src/page/error_page/error_page.dart';
 export 'package:mxlogger_analyzer_lib/src/page/detail_page/mxlogger_detail_page.dart';
 export 'package:mxlogger_analyzer_lib/src/page/setting/setting_page.dart';
-Future<void> MXAnalyzerLib_initialize() async{
+
+Future<void> MXAnalyzerLib_initialize() async {
   await MXLoggerStorage.instance.initialize();
   await AnalyzerDatabase.initDataBase(MXLoggerStorage.instance.databasePath);
+}
+
+void MXAnalyzerLib_showDebug(BuildContext context) async{
+  await MXAnalyzerLib_initialize();
+  showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: MXTheme.themeColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(15),
+        ),
+      ),
+
+      builder: (context) {
+       return ProviderScope(child: SizedBox(
+         height: MediaQuery.of(context).size.height * 0.7,
+         child:Container(
+           margin: EdgeInsets.only(top: 15),
+           child:  LogListPage(),
+         ),
+       ));
+
+      });
 }
