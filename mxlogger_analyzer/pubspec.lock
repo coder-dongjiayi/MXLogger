@@ -133,7 +133,7 @@ packages:
       name: file_selector_platform_interface
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.0.4"
+    version: "2.4.0"
   file_selector_web:
     dependency: transitive
     description:
@@ -211,14 +211,14 @@ packages:
       name: http
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.13.4"
+    version: "0.13.5"
   http_parser:
     dependency: transitive
     description:
       name: http_parser
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "4.0.1"
+    version: "4.0.2"
   js:
     dependency: transitive
     description:
@@ -254,13 +254,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.7.0"
-  nested:
-    dependency: transitive
-    description:
-      name: nested
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "1.0.0"
   path:
     dependency: transitive
     description:
@@ -352,13 +345,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "4.2.4"
-  provider:
-    dependency: "direct main"
-    description:
-      name: provider
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "6.0.3"
   riverpod:
     dependency: transitive
     description:
@@ -483,13 +469,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.4.9"
-  tuple:
-    dependency: "direct main"
-    description:
-      name: tuple
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.0.1"
   typed_data:
     dependency: transitive
     description:
