@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
     MXStoragePolicyYYYYMMDD = 0, // 按天存储 对应文件名: 2023-01-11_filename.mx
     MXStoragePolicyYYYYMMDDHH,  // 按小时存储 对应文件名: 2023-01-11-15_filename.mx
-    MXStoragePolicyYYYYWW,     // 按周存储 对应文件名: 2023w02_filename.mx（2023年第二周）
+    MXStoragePolicyYYYYWW,     // 按周存储 对应文件名: 2023-01-02w_filename.mx（02w是指一年中的第2周）
     MXStoragePolicyYYYYMM,    // 按月存储 对应文件名: 2023-01_filename.mx
 };
 
@@ -70,7 +70,7 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// @param nameSpace nameSpace
 /// @param directory directory
 /// @param storagePolicy 文件存储策略 默认值MXStoragePolicyYYYYMMDD 按天存
-/// @param fileName fileName
+/// @param fileName fileName 默认log
 /// @param cryptKey 16字节 大于16字节自动裁掉 小于16字节填充0
 /// iv 默认和key一样
 /// @param fileHeder 日志文件头信息，业务可以在初始化mxlogger的时候 写入一些业务相关的信息 比如app版本 所属平台等等 文件创建的时候这条数据会被写入
@@ -85,6 +85,7 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 @property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenEnterBackground;
 
 /// 是否开启控制台打印，默认不开启, 开始控制台打印会影响 写入效率 ，建议发布模式禁用 consoleEnable
+/// 如果要做性能测试 要设置 consoleEnable = NO;
 @property (nonatomic,assign)BOOL consoleEnable;
 
 /// 禁用日志
@@ -107,7 +108,7 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// 设置写入文件日志等级
 @property (nonatomic,assign)NSInteger fileLevel;
 
-/// nameSpace+diskCacheDirectory 做一次md5的值，对应一个logger对象，可以通过这个操作logger
+/// nameSpace+diskCacheDirectory 做一次md5的值，对应一个logger对象，可以通过这个操作logger对象。
  /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
  /// 但是你希望所有子模块(子组件)使用在主工程初始化的log，
  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
@@ -115,7 +116,20 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 
 +(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
-+(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory;
+
+///获取存储的日志文件信息
+/*
+ [
+  {
+    "name":"文件名",
+    "size":"文件大小(字节)",
+    "last_timestamp":"文件最后更新时间",
+    "create_timestamp":"文件创建时间"
+   }
+ ]
+ */
+
+-(NSArray<NSDictionary<NSString*,NSString*>*>*)logFiles;
 
 
 /// 通过mapKey  返回logger对象，如果不存在返回null

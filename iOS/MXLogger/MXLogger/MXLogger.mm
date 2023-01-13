@@ -393,11 +393,13 @@ static NSString * _defaultDiskCacheDirectory;
     return [messageList copy];
    
 }
-+(NSArray<NSDictionary<NSString*,NSString*>*>*)selectLogfilesWithDirectory:(nonnull NSString*)directory{
+
+-(NSArray<NSDictionary<NSString*,NSString*>*>*)logFiles{
    
     std::vector<std::map<std::string, std::string>> destination;
     
-    mxlogger::util::mxlogger_util::select_logfiles_dir(directory.UTF8String, &destination);
+    
+    mxlogger::util::mxlogger_util::select_logfiles_dir(self.diskCachePath.UTF8String, &destination);
     
     NSMutableArray<NSDictionary<NSString*,NSString*>*>* files = [NSMutableArray arrayWithCapacity:destination.size()];
     
@@ -405,9 +407,11 @@ static NSString * _defaultDiskCacheDirectory;
         std::map<std::string, std::string> map = destination[i];
         NSString * name = [NSString stringWithUTF8String:map["name"].data()];
         NSString * size = [NSString stringWithUTF8String:map["size"].data()];
-        NSString * timestamp = [NSString stringWithUTF8String:map["timestamp"].data()];
+        NSString * last_timestamp = [NSString stringWithUTF8String:map["last_timestamp"].data()];
         
-        NSDictionary *dictionary = @{@"name":name,@"size":size,@"timestamp":timestamp};
+        NSString * create_timestamp  =  [NSString stringWithUTF8String:map["create_timestamp"].data()];
+        
+        NSDictionary *dictionary = @{@"name":name,@"size":size,@"last_timestamp":last_timestamp,@"create_timestamp":create_timestamp};
         
         [files addObject:dictionary];
     }

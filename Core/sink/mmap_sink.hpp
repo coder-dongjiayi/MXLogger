@@ -18,7 +18,7 @@ namespace sinks {
 class mmap_sink : public base_file_sink{
 public:
     
-    mmap_sink(const std::string &dir_path,policy::storage_policy policy);
+    mmap_sink(const std::string &dir_path,const std::string &filename, policy::storage_policy policy);
     
     ~mmap_sink();
     void log(const details::log_msg& msg) override;

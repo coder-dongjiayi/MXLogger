@@ -172,24 +172,27 @@ inline int get_files(std::vector<std::map<std::string, std::string>> *destinatio
         long last_time = (long)statbuf.st_ctime;
         long st_size =  (long)statbuf.st_size;
         
+        long create_time = (long)statbuf.st_birthtime;
+        
         std::map<std::string, std::string> map;
         
         std::string name = entry->d_name;
-        std::string time =  std::to_string(last_time);
+        std::string lasttime =  std::to_string(last_time);
         std::string size =  std::to_string(st_size);
-        
+        std::string createtime =  std::to_string(create_time);
         map["name"] = name;
-        map["timestamp"] = time;
+        map["last_timestamp"] = lasttime;
+        map["create_timestamp"] = createtime;
         map["size"] = size;
         
         destination->push_back(map);
       
     }
     std::sort(destination->begin(), destination->end(), [](std::map<std::string, std::string> &a,std::map<std::string, std::string> &b){
-        std::string a_time = a["timestamp"];
+        std::string a_time = a["create_timestamp"];
         long a_t = std::stol(a_time);
         
-        std::string b_time = b["timestamp"];
+        std::string b_time = b["create_timestamp"];
         long b_t = std::stol(b_time);
         return a_t > b_t;
     });

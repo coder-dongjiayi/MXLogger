@@ -15,11 +15,58 @@ import 'log_serialize.dart';
 import 'package:aes_crypt_null_safe/aes_crypt_null_safe.dart';
 
 const int AES_LENGTH = 16;
-typedef AnalyzerProgressCallback = void Function(int total,  int current);
-typedef AnalyValueChangedCallback = void Function(int succsss, int repeat, int field);
+typedef AnalyzerProgressCallback = void Function(int total, int current);
+typedef AnalyValueChangedCallback = void Function(
+    int succsss, int repeat, int field);
 
 class AnalyzerBinary {
-  static void loadData(
+  static Future<void> loadBinaryData(
+      {Uint8List? binary,
+      String? cryptKey,
+      String? iv,
+      VoidCallback? onStartCallback,
+      ValueChanged<String>? onErrorCallback,
+      AnalyzerProgressCallback? onProgressCallback,
+      AnalyValueChangedCallback? onEndCallback}) async {
+    /// 加载数据之前先关闭之前的数据库
+    AnalyzerDatabase.db.dispose();
+
+    onStartCallback?.call();
+
+    ReceivePort mainPort = ReceivePort();
+    await Isolate.spawn<SendPort>((SendPort port) {
+      _runBinaryData(port);
+    }, mainPort.sendPort);
+
+    mainPort.listen((message) async {
+      if (message is Map) {
+        Map<String, dynamic> result = message as Map<String, dynamic>;
+        int finish = result["finish"];
+        if (finish == 1) {
+          /// 加载完数据再重新连接数据库
+          await AnalyzerDatabase.initDataBase(
+              MXLoggerStorage.instance.databasePath);
+          int number = result["number"];
+          int error = result["errorNumber"];
+          int repeatNumber = result["repeatNumber"];
+          onEndCallback?.call(number - repeatNumber, repeatNumber, error);
+        } else {
+          String? errorMsg = result["errorMsg"];
+          onErrorCallback?.call(errorMsg ?? "");
+        }
+      } else if (message is SendPort) {
+        SendPort childPort = message;
+        childPort.send({
+          "binaryData": binary,
+          "cryptKey": cryptKey,
+          "iv": iv,
+          "path": MXLoggerStorage.instance.databasePath
+        });
+      }
+    });
+  }
+
+  static void loadXFile(
       {required XFile file,
       String? cryptKey,
       String? iv,
@@ -27,45 +74,16 @@ class AnalyzerBinary {
       ValueChanged<String>? onErrorCallback,
       AnalyzerProgressCallback? onProgressCallback,
       AnalyValueChangedCallback? onEndCallback}) async {
-
-    /// 加载数据之前先关闭之前的数据库
-    AnalyzerDatabase.db.dispose();
-
-    onStartCallback?.call();
-
-
     Uint8List? _binaryData = await file.readAsBytes();
-
-    ReceivePort mainPort = ReceivePort();
-    await Isolate.spawn<SendPort>((SendPort port) {
-      _runBinaryData(port);
-    }, mainPort.sendPort);
-
-    mainPort.listen((message) async{
-      if (message is Map) {
-        Map<String, dynamic> result = message as Map<String, dynamic>;
-        int finish = result["finish"];
-        if (finish == 1) {
-          /// 加载完数据再重新连接数据库
-          await AnalyzerDatabase.initDataBase(MXLoggerStorage.instance.databasePath);
-          int number = result["number"];
-          int error = result["errorNumber"];
-          int repeatNumber = result["repeatNumber"];
-          onEndCallback?.call(number-repeatNumber, repeatNumber,error);
-        }else{
-          String? errorMsg = result["errorMsg"];
-          onErrorCallback?.call(errorMsg ?? "");
-        }
-      } else if (message is SendPort) {
-        SendPort childPort = message;
-        childPort.send({
-          "binaryData": _binaryData,
-          "cryptKey": cryptKey,
-          "iv": iv,
-          "path": MXLoggerStorage.instance.databasePath
-        });
-      }
-    });
+    await loadBinaryData(
+        binary: _binaryData,
+        cryptKey: cryptKey,
+        iv: iv,
+        onStartCallback: onStartCallback,
+        onErrorCallback: onErrorCallback,
+        onProgressCallback:onProgressCallback,
+        onEndCallback: onEndCallback
+    );
   }
 
   static void _runBinaryData(SendPort mainPort) async {
@@ -81,7 +99,7 @@ class AnalyzerBinary {
     int _errorNumber = 0;
     int _totalNumber = 0;
 
-    int  _repeatNumber = 0;
+    int _repeatNumber = 0;
     await AnalyzerDatabase.initDataBase(path);
     await _decode(
         binaryData: _binaryData,
@@ -93,17 +111,20 @@ class AnalyzerBinary {
         totalCallback: (int totalNumber) {
           _totalNumber = totalNumber;
         },
-        onRepeatErrorCallback: (){
+        onRepeatErrorCallback: () {
           _repeatNumber = _repeatNumber + 1;
         },
-        onErrorDescCallback: (String errorMsg){
-          mainPort.send({"errorMsg":errorMsg,"finish":0});
+        onErrorDescCallback: (String errorMsg) {
+          mainPort.send({"errorMsg": errorMsg, "finish": 0});
         },
         callback: (int total, int current) {});
 
-
-    mainPort.send(
-        {"finish": 1, "number": _totalNumber, "errorNumber": _errorNumber,"repeatNumber":_repeatNumber});
+    mainPort.send({
+      "finish": 1,
+      "number": _totalNumber,
+      "errorNumber": _errorNumber,
+      "repeatNumber": _repeatNumber
+    });
 
     _repeatNumber = 0;
     AnalyzerDatabase.db.dispose();
@@ -154,10 +175,12 @@ class AnalyzerBinary {
           buffer = crypt.aesDecrypt(_replenishDataByte(buffer));
         }
         LogSerialize logSerialize = LogSerialize(buffer);
+
         /// 第一条数据，并且name 为com.djy.mxlogger.fileHeader，则认定为fileHeader
-        if(logSerialize.name == "com.djy.mxlogger.fileHeader" && begin == sizeofUint32t){
+        if (logSerialize.name == "com.djy.mxlogger.fileHeader" &&
+            begin == sizeofUint32t) {
           fileHeader = logSerialize.msg;
-        }else{
+        } else {
           await AnalyzerDatabase.insertData(
               name: logSerialize.name,
               fileHeader: fileHeader,
@@ -166,28 +189,25 @@ class AnalyzerBinary {
               level: logSerialize.level,
               threadId: logSerialize.threadId,
               isMainThread: logSerialize.isMainThread,
-              errorCallback: (Map<String,dynamic> error) {
+              errorCallback: (Map<String, dynamic> error) {
                 /// 2067 为数据重复导入的错误 以timestamp为 唯一标识
-                if(error["code"] != 2067){
+                if (error["code"] != 2067) {
                   errorNumber = errorNumber + 1;
                   onErrorDescCallback?.call(error["message"]);
-                }else{
+                } else {
                   onRepeatErrorCallback?.call();
                 }
-
               },
               timestamp: logSerialize.timestamp);
           totalNumber = totalNumber + 1;
         }
-
       } catch (error) {
         errorNumber = errorNumber + 1;
         String msg = "二进制文件解析失败";
-        if(error is SqliteException){
+        if (error is SqliteException) {
           msg = error.message;
         }
         onErrorDescCallback?.call(msg);
-
       }
 
       callback?.call(totalSize, begin);

@@ -25,7 +25,6 @@ private:
     /// 文件夹路径
     std::string dir_path_;
     
-    std::string custom_filename_;
     
     policy::storage_policy policy_;
     
@@ -54,19 +53,15 @@ protected:
     
     bool is_exit_path();
     
-    void update_filename();
     
     void close();
     
 public:
-     base_file_sink(const std::string &dir_path, policy::storage_policy policy);
+     base_file_sink(const std::string &dir_path,const std::string &filename, policy::storage_policy policy);
     ~base_file_sink();
     //当前目录下的文件大小
     long  dir_size() const;
-    
-    void set_dir(const std::string &dir_path);
-    
-    void set_custom_filename(const std::string &filename);
+
     
     // 文件最大存储时间 默认为0 不限制
     void set_max_disk_age(long long max_age);

@@ -5,6 +5,7 @@ import 'package:mxlogger_analyzer_lib/src/analyzer_data/analyzer_database.dart';
 import 'package:mxlogger_analyzer_lib/src/storage/mxlogger_storage.dart';
 
 import 'mxlogger_analyzer_lib.dart';
+import 'package:mxlogger_analyzer_lib/src/page/debug_page/debug_page.dart';
 export 'package:flutter_easyloading/flutter_easyloading.dart';
 export 'package:riverpod/riverpod.dart';
 export 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +25,7 @@ Future<void> MXAnalyzerLib_initialize() async {
   await AnalyzerDatabase.initDataBase(MXLoggerStorage.instance.databasePath);
 }
 
-void MXAnalyzerLib_showDebug(BuildContext context) async{
+void MXAnalyzerLib_showDebug(BuildContext context,{required String diskcachePath,String? cryptKey,String? iv}) async{
   await MXAnalyzerLib_initialize();
   showModalBottomSheet(
       context: context,
@@ -41,7 +42,11 @@ void MXAnalyzerLib_showDebug(BuildContext context) async{
          height: MediaQuery.of(context).size.height * 0.7,
          child:Container(
            margin: EdgeInsets.only(top: 15),
-           child:  LogListPage(),
+           child: DebugPage(
+             diskcachePath: diskcachePath,
+             cryptKey: cryptKey,
+             iv: iv,
+           ),
          ),
        ));
 

@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface LogListViewController : UIViewController
 @property(nonatomic,strong)NSString * dirPath;
+@property(nonatomic,strong)NSString * loggerKey;
 @property(nonatomic,strong) NSString * cryptKey;
 @property(nonatomic,strong)NSString * iv;
 @end

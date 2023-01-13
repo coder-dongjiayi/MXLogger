@@ -16,7 +16,7 @@ static const size_t offset_length = sizeof(uint32_t);
 
 namespace mxlogger{
 namespace sinks{
-mmap_sink::mmap_sink(const std::string &dir_path, policy::storage_policy policy):base_file_sink(dir_path,policy),page_size_(static_cast<size_t>(getpagesize())){
+mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,policy::storage_policy policy):base_file_sink(dir_path,filename,policy),page_size_(static_cast<size_t>(getpagesize())){
 
     
     open();

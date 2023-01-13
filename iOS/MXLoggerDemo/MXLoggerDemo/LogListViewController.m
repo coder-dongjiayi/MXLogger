@@ -18,9 +18,9 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"mxloggertablecell"];
-    
+   
     /// demo 演示只读取时间最靠近的文件
-    NSArray * array =   [MXLogger selectLogfilesWithDirectory:self.dirPath];
+    NSArray * array =   [[MXLogger valueForLoggerKey:self.loggerKey] logFiles];
 
     NSString * path = [NSString stringWithFormat:@"%@%@",self.dirPath,array.lastObject[@"name"]];
 

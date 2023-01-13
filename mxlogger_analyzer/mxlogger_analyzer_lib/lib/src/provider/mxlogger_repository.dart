@@ -44,7 +44,7 @@ class MXLoggerRepository{
   /// 导入二进制数据到数据库
   Stream<Map<String,dynamic>> importBinaryData({ required XFile file, String? cryptKey, String? cryptIv}) {
    StreamController<Map<String,dynamic>> _streamController = StreamController();
-   AnalyzerBinary.loadData(
+   AnalyzerBinary.loadXFile(
        file: file,
        cryptKey: cryptKey,
        iv: cryptIv,

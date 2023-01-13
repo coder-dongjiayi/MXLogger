@@ -13,12 +13,12 @@
 namespace mxlogger{
 namespace sinks{
 
-base_file_sink::base_file_sink(const std::string &dir_path, policy::storage_policy policy):dir_path_(dir_path),policy_(policy){
+base_file_sink::base_file_sink(const std::string &dir_path, const std::string &filename, policy::storage_policy policy):dir_path_(dir_path), filename_(filename), policy_(policy){
     
     if (mxlogger::create_dir(dir_path) == false) {
         MXLoggerError("base_file_sink error:%s\n",strerror(errno));
     }
-    custom_filename_ = "mxlog";
+
     handle_date_(policy);
     
 }
@@ -47,9 +47,6 @@ bool base_file_sink::ftruncate(size_t capacity_size){
 bool base_file_sink::is_exit_path(){
     
     return path_exists(log_disk_path_.data());
-}
-void base_file_sink::update_filename(){
-    handle_date_(policy_);
 }
 
 bool base_file_sink::open(){
@@ -87,9 +84,7 @@ void base_file_sink::set_max_disk_size(long long max_size){
     max_disk_size_ = max_size;
     MXLoggerInfo("max_size:%lld byte",max_size);
 }
-void base_file_sink::set_dir(const std::string &dir_path){
-    dir_path_ = dir_path;
-}
+
 long  base_file_sink::dir_size() const{
    
     long   current_cache_size=0;
@@ -193,9 +188,7 @@ void base_file_sink::remove_expire_data(){
    
     
 }
-void base_file_sink::set_custom_filename(const std::string &filename){
-    custom_filename_ = filename;
-}
+
 
 // 删除所有日志文件
 void base_file_sink::remove_all(){
@@ -219,12 +212,16 @@ void base_file_sink::handle_date_(policy::storage_policy policy){
 
     std::tm tm_time = mxlogger_helper::now();
 
-
+    int tm_mon = tm_time.tm_mon + 1;
+    int tm_year = tm_time.tm_year + 1900;
+    int tm_mday = tm_time.tm_mday;
+    int tm_hour = tm_time.tm_hour;
+    
     switch (policy) {
         case policy::storage_policy::yyyy_MM:
         {
-            auto result = mxlogger_helper::string_format("%04d-%02d", tm_time.tm_year + 1900, tm_time.tm_mon + 1);
-            filename_ = result + "_" + custom_filename_;
+            auto result = mxlogger_helper::string_format("%04d-%02d", tm_year,tm_mon);
+            filename_ = result + "_" + filename_;
         }
             break;
         case policy::storage_policy::yyyy_ww:
@@ -242,23 +239,23 @@ void base_file_sink::handle_date_(policy::storage_policy policy){
             }
            int  week_n = (base + yd) / 7 + 1;
 
-            auto result = mxlogger_helper::string_format("%04dw%02d",  tm_time.tm_year + 1900,week_n);
+            auto result = mxlogger_helper::string_format("%04d-%02d-%02dw",  tm_year, tm_mon,week_n);
 
-            filename_ = result + "_" + custom_filename_;
+            filename_ = result + "_" + filename_;
         }
             break;
         case policy::storage_policy::yyyy_MM_dd:
         {
-            auto result = mxlogger_helper::string_format("%04d-%02d-%02d", tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday);
-            filename_ = result + "_" + custom_filename_;
+            auto result = mxlogger_helper::string_format("%04d-%02d-%02d", tm_year, tm_mon, tm_mday);
+            filename_ = result + "_" + filename_;
         }
 
             break;
         case policy::storage_policy::yyyy_MM_dd_HH:
         {
-            auto result = mxlogger_helper::string_format("%04d-%02d-%02d-%02d", tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday, tm_time.tm_hour);
+            auto result = mxlogger_helper::string_format("%04d-%02d-%02d-%02d", tm_year, tm_mon, tm_mday, tm_hour);
 
-            filename_ = result + "_" + custom_filename_;
+            filename_ = result + "_" + filename_;
         }
             break;
 

@@ -44,7 +44,7 @@
 
   NSString*  jsonString = [[NSString alloc]initWithData:jsonData encoding:NSUTF8StringEncoding];
 
-   self.logger =  [MXLogger initializeWithNamespace:@"com.dongjiayi.mxlogger" storagePolicy:MXStoragePolicyYYYYWW fileName:@"mxlogger" fileHeader:jsonString cryptKey:_cryptKey iv:_iv];
+   self.logger =  [MXLogger initializeWithNamespace:@"com.djy.mxlogger" storagePolicy:MXStoragePolicyYYYYWW fileName:NULL fileHeader:jsonString cryptKey:_cryptKey iv:_iv];
 
     // 使用实例构造器初始化
 //    self.logger = [[MXLogger alloc] initWithNamespace:@"com.dongjiayi.mxlogger" cryptKey:_cryptKey iv:_iv];
@@ -106,9 +106,9 @@
 - (IBAction)logFileButtonAction:(id)sender {
     NSMutableArray<NSString*> * filesArray = [NSMutableArray array];
     
-    NSArray * array =   [MXLogger selectLogfilesWithDirectory:_logger.diskCachePath];
+    NSArray * array =   [self.logger logFiles];
       [array enumerateObjectsUsingBlock:^(NSDictionary*  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-          NSString * str = [NSString stringWithFormat:@"name:%@ size:%@,timestamp:%@",obj[@"name"],obj[@"size"],obj[@"timestamp"]];
+          NSString * str = [NSString stringWithFormat:@"name:%@ size:%@,create_timestamp:%@",obj[@"name"],obj[@"size"],obj[@"create_timestamp"]];
           [filesArray addObject:str];
           
       }];
@@ -143,6 +143,7 @@
     LogListViewController * controller = [[LogListViewController alloc] initWithNibName:nil bundle:nil];
     controller.dirPath = self.logger.diskCachePath;
     controller.cryptKey = _cryptKey;
+    controller.loggerKey = self.logger.loggerKey;
     controller.iv = _iv;
     [self.navigationController pushViewController:controller animated:YES];
 }

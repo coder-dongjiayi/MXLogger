@@ -11,7 +11,7 @@ enum MXStoragePolicyType{
     YYYY_MM_DD,
     /** 按小时存储 对应文件名: 2023-01-11-15_filename.mx*/
     YYYY_MM_DD_HH,
-    /** 按周存储 对应文件名: 2023w02_filename.mx（2023年第二周）*/
+    /**  按周存储 对应文件名: 2023-01-02w_filename.mx（02w是指一年中的第2周）*/
     YYYY_WW,
     /** 按月存储 对应文件名: 2023-01_filename.mx*/
     YYYY_MM
@@ -52,7 +52,7 @@ public class MXLogger {
     private  long logSize;
 
     /**
-   *   nameSpace+diskCacheDirectory 做一次md5的值，对应一个logger对象，可以通过这个操作logger
+   *   nameSpace+diskCacheDirectory 做一次md5的值，对应一个logger对象，可以通过这个操作logger对象
      *  业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
      * 但是你希望所有子模块(子组件)使用在主工程初始化的log，
      *  这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
@@ -63,7 +63,7 @@ public class MXLogger {
   * nameSpace 日志命名空间 建议使用域名反转保证唯一性
   * diskCacheDirectory 日志初始化目录
   * storagePolicy 文件存储策略
-  * fileName 自定义文件名
+  * fileName 自定义文件名 默认为:log
   * fileHeader   日志文件头信息，业务可以在初始化mxlogger的时候 写入一些业务相关的信息 比如app版本 所属平台等等 文件创建的时候这条数据会被写入
   * cryptKey aesCFB128 秘钥
   * iv aesCFB128 iv

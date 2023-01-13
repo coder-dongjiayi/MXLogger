@@ -1,5 +1,11 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_mxlogger (0.0.1):
+    - Flutter
+    - MXLogger (= 1.2.1)
+  - MXLogger (1.2.1):
+    - MXLoggerCore (= 1.2.1)
+  - MXLoggerCore (1.2.1)
   - path_provider_ios (0.0.1):
     - Flutter
   - shared_preferences_ios (0.0.1):
@@ -7,12 +13,20 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_mxlogger (from `.symlinks/plugins/flutter_mxlogger/ios`)
   - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
   - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
+
+SPEC REPOS:
+  trunk:
+    - MXLogger
+    - MXLoggerCore
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_mxlogger:
+    :path: ".symlinks/plugins/flutter_mxlogger/ios"
   path_provider_ios:
     :path: ".symlinks/plugins/path_provider_ios/ios"
   shared_preferences_ios:
@@ -20,6 +34,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  flutter_mxlogger: eb6309255e204ce85e1a5c0108eafc3a419e23cb
+  MXLogger: ade8d09d6131abba6a8f46d304925396882b6216
+  MXLoggerCore: 5496dc7acfaa5998b5397e57b22516642bd402ac
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
   shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
 
