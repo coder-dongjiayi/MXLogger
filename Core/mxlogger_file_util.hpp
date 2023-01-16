@@ -169,11 +169,16 @@ inline int get_files(std::vector<std::map<std::string, std::string>> *destinatio
        
         lstat(subdir, &statbuf);
         
-        long last_time = (long)statbuf.st_ctime;
+        long last_time = (long)statbuf.st_mtime;
         long st_size =  (long)statbuf.st_size;
         
+#ifdef __ANDROID__
+        long create_time = (long)statbuf.st_atime;
+#elif __APPLE__
         long create_time = (long)statbuf.st_birthtime;
-        
+#endif
+     
+    
         std::map<std::string, std::string> map;
         
         std::string name = entry->d_name;

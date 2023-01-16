@@ -128,7 +128,7 @@ void base_file_sink::remove_expire_data(){
              std::map<std::string, std::string> map = destination[i];
              std::string file_name  = map["name"];
              long size = std::stol(map["size"]);
-             time_t last_time = (time_t)std::stol(map["timestamp"]);
+             time_t last_time = (time_t)std::stol(map["last_timestamp"]);
              
              if (last_time < expiration_tp && file_name.compare(filename_) != 0) {
                  /// 过期文件

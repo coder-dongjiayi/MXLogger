@@ -70,6 +70,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_enable)(const void *handle,int enable){
 
 
 
+
 MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_path, const char* crypt_key, const char* iv,int* number, char ***array_ptr,uint32_t **size_array_ptr){
     if(diskcache_file_path == nullptr){
         return -1;
@@ -108,31 +109,95 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_pa
     return 0;
     
 }
+/// 获取日志文件列表
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(get_logfiles)(const void *handle,char ****array_ptr,uint32_t ***size_array_ptr){
+    MXLogger *logger = (__bridge MXLogger *) handle;
+    NSArray<NSDictionary<NSString*,NSString*>*>* fileArray =  [logger logFiles];
+    if(fileArray.count == 0) return 0;
+    auto array = (char***)malloc(fileArray.count * sizeof(void *));
+    
+    auto size_array = (uint32_t **) malloc(fileArray.count * sizeof(uint32_t *));
+            if(!array){
+                free(array);
+                free(size_array);
+                return 0;
+            }
+    *array_ptr = array;
+    *size_array_ptr = size_array;
+    
+    
+    for(int i=0; i< fileArray.count;i++){
+        NSDictionary<NSString*,NSString*>* map = fileArray[i];
+        
+        NSString * name = [map valueForKey:@"name"];
+        
+        NSString * size = [map valueForKey:@"size"];
+        
+        NSString * last_timestamp = [map valueForKey:@"last_timestamp"];
+        
+        NSString * create_timestamp  =  [map valueForKey:@"create_timestamp"];
+        
+
+         char* c_name =  (char*)name.UTF8String;
+         char* c_size = (char*)size.UTF8String;
+         char* c_last_timestamp = (char*)last_timestamp.UTF8String;
+         char* c_create_timestamp = (char*)create_timestamp.UTF8String;
+        
+        auto itemArray = (char**)malloc(4*sizeof(char*));
+        
+        itemArray[0] = (char*)malloc(strlen(c_name));
+        memcpy(itemArray[0], c_name, strlen(c_name));
+
+
+        itemArray[1] = (char*)malloc(strlen(c_size));
+        memcpy(itemArray[1], c_size, strlen(c_size));
+
+        itemArray[2] = (char*)malloc(strlen(c_last_timestamp));
+        memcpy(itemArray[2], c_last_timestamp, strlen(c_last_timestamp));
+
+        itemArray[3] = (char*)malloc(strlen(c_create_timestamp));
+        memcpy(itemArray[3], c_create_timestamp, strlen(c_create_timestamp));
+
+   
+        
+        auto item_size_array = (uint32_t *) malloc(4 * sizeof(uint32_t *));
+               
+        item_size_array[0] = static_cast<uint32_t>(strlen(c_name));
+        item_size_array[1] = static_cast<uint32_t>(strlen(c_size));
+        item_size_array[2] = static_cast<uint32_t>(strlen(c_last_timestamp));
+        item_size_array[3] = static_cast<uint32_t>(strlen(c_create_timestamp));
+        
+        size_array[i] = item_size_array;
+        array[i] = itemArray;
+    }
+    return (int)fileArray.count;
+}
+
 MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logfiles)(const char * directory, char ***array_ptr,uint32_t **size_array_ptr){
     if(directory == nullptr) return 0;
     
     
-    NSArray<NSDictionary<NSString*,NSString*>*>* list =  [MXLogger selectLogfilesWithDirectory:[NSString stringWithUTF8String:directory]];
-    if(list.count > 0){
-        auto array = (char**)malloc(list.count * sizeof(void *));
-        auto size_array = (uint32_t *) malloc(list.count * sizeof(uint32_t *));
-        if(!array){
-            free(array);
-            free(size_array);
-            return 0;
-        }
-        *array_ptr = array;
-        *size_array_ptr = size_array;
-        
-        for(int i =0;i < list.count;i++){
-            NSDictionary<NSString*,NSString*>* map = list[i];
-            NSString * info = [NSString  stringWithFormat:@"%@,%@,%@",map[@"name"],map[@"size"],map[@"timestamp"]];
-            auto infoData = [info dataUsingEncoding:NSUTF8StringEncoding];
-            size_array[i] = static_cast<uint32_t>(infoData.length);
-            array[i] = (char*)infoData.bytes;
-        }
-        return static_cast<uint32_t>(list.count);
-    }
+//    NSArray<NSDictionary<NSString*,NSString*>*>* list =  [MXLogger selectLogfilesWithDirectory:[NSString stringWithUTF8String:directory]];
+//    if(list.count > 0){
+//        auto array = (char**)malloc(list.count * sizeof(void *));
+//        auto size_array = (uint32_t *) malloc(list.count * sizeof(uint32_t *));
+//        if(!array){
+//            free(array);
+//            free(size_array);
+//            return 0;
+//        }
+//        *array_ptr = array;
+//        *size_array_ptr = size_array;
+//
+//        for(int i =0;i < list.count;i++){
+//            NSDictionary<NSString*,NSString*>* map = list[i];
+//            NSString * info = [NSString  stringWithFormat:@"%@,%@,%@",map[@"name"],map[@"size"],map[@"timestamp"]];
+//            auto infoData = [info dataUsingEncoding:NSUTF8StringEncoding];
+//            size_array[i] = static_cast<uint32_t>(infoData.length);
+//            array[i] = (char*)infoData.bytes;
+//        }
+//        return static_cast<uint32_t>(list.count);
+//    }
     
     return 0;
     

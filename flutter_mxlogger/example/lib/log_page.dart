@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
-import 'log_list_page.dart';
 import 'package:path_provider/path_provider.dart';
 class LogPage extends StatefulWidget {
   const LogPage({Key? key}) : super(key: key);
@@ -31,7 +30,7 @@ class _LogPageState extends State<LogPage> {
     _mxLogger = await MXLogger.initialize(
         nameSpace: "flutter.mxlogger",
         directory: directory.path,
-        storagePolicy: MXStoragePolicyType.yyyy_MM_dd,
+        storagePolicy: MXStoragePolicyType.yyyy_MM,
         fileHeader: "这是ios flutter header",
         cryptKey: _cryptKey,
         iv: _iv);
@@ -69,20 +68,15 @@ class _LogPageState extends State<LogPage> {
           child: Column(
             children: [
               Text("当前日志大小:${mb}MB"),
-
               ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
-                    return LogListPage(
-                      dirPath: _mxLogger.getDiskcachePath(),
-                      cryptKey: _cryptKey,
-                      iv: _iv,
-                    );
-                  }));
+                onPressed: (){
+                  _mxLogger.getLogFiles().forEach((element) {
+                    print("${element.toString()}");
+                  });
                 },
-                child: Text("查看日志"),
+                child: Text("获取日志文件"),
               ),
+
               ElevatedButton(
                   onPressed: () {
 

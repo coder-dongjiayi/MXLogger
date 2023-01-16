@@ -9,11 +9,37 @@ import 'package:flutter/services.dart';
 export 'flutter_mxlogger.dart';
 
 ///日志文件存储策略
-enum MXStoragePolicyType{
-  yyyy_MM_dd, /// 按天存储 对应文件名: 2023-01-11_filename.mx
-  yyyy_MM_dd_HH, /// 按小时存储 对应文件名: 2023-01-11-15_filename.mx
-  yyyy_ww, /// 按周存储 对应文件名: 2023-01-02w_filename.mx（02w是指一年中的第2周）
-  yyyy_MM /// 按月存储 对应文件名: 2023-01_filename.mx
+enum MXStoragePolicyType {
+  yyyy_MM_dd,
+
+  /// 按天存储 对应文件名: 2023-01-11_filename.mx
+  yyyy_MM_dd_HH,
+
+  /// 按小时存储 对应文件名: 2023-01-11-15_filename.mx
+  yyyy_ww,
+
+  /// 按周存储 对应文件名: 2023-01-02w_filename.mx（02w是指一年中的第2周）
+  yyyy_MM
+
+  /// 按月存储 对应文件名: 2023-01_filename.mx
+}
+
+class MXFileEntity {
+  late String? name; /// 文件名
+  late int size; /// 文件大小(byte)
+  late int createTimeStamp; /// 文件创建时间(Android端 createTimeStamp = lastTimeStamp)
+  late int lastTimeStamp; /// 文件最后修改时间
+
+  DateTime get createTime  => DateTime.fromMillisecondsSinceEpoch(createTimeStamp*1000);
+
+  DateTime get lastTime => DateTime.fromMillisecondsSinceEpoch(lastTimeStamp*1000);
+
+  MXFileEntity(
+      {this.name, this.size = 0, this.createTimeStamp = 0, this.lastTimeStamp = 0});
+  @override
+  String toString() {
+   return "name:$name size:$size createTime:$createTime lastTime:$lastTime";
+  }
 }
 
 typedef LoggerFunction = Void Function(
@@ -63,7 +89,7 @@ class MXLogger with WidgetsBindingObserver {
   MXLogger(
       {required String nameSpace,
       required String directory,
-        MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
+      MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
       String? fileName,
       String? fileHeader,
       String? cryptKey,
@@ -73,7 +99,8 @@ class MXLogger with WidgetsBindingObserver {
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
     Pointer<Utf8> drPtr = directory.toNativeUtf8();
 
-    String policy = storagePolicy.toString().replaceAll("MXStoragePolicyType.", "");
+    String policy =
+        storagePolicy.toString().replaceAll("MXStoragePolicyType.", "");
 
     Pointer<Utf8> storagePolicyPtr = policy.toNativeUtf8();
     Pointer<Utf8> fileNamePtr =
@@ -121,7 +148,7 @@ class MXLogger with WidgetsBindingObserver {
   static Future<MXLogger> initialize(
       {required String nameSpace,
       String? directory,
-        MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
+      MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
       String? fileName,
       String? fileHeader,
       String? cryptKey,
@@ -321,52 +348,62 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(msgPtr);
   }
 
-  /// 目前只对 ios端生效
-  static List<String> selectLogMsg(
-      {required String diskcacheFilePath, String? cryptKey, String? iv}) {
-    if (Platform.isIOS == false) return [];
-    List<String> msgList = [];
 
-    Pointer<Utf8> dirPathPtr = diskcacheFilePath.toNativeUtf8();
-    Pointer<Utf8> cryptKeyPtr =
-        cryptKey == null ? nullptr : cryptKey.toNativeUtf8();
-    Pointer<Utf8> ivPtr = iv == null ? nullptr : iv.toNativeUtf8();
+  List<MXFileEntity> getLogFiles() {
+    final arrayPtr = calloc<Pointer<Pointer<Pointer<Utf8>>>>();
+    final sizeArrayPtr = calloc<Pointer<Pointer<Uint32>>>();
+    final count = _getLogfiles(_handle, arrayPtr, sizeArrayPtr);
+    List<MXFileEntity> _mxFileList = [];
+    if (count > 0) {
+      final array_array = arrayPtr[0];
+      final sizeArray_array = sizeArrayPtr[0];
+      for (int i = 0; i < count; i++) {
+        final charArray = array_array[i];
 
-    final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
-    final sizeArrayPtr = calloc<Pointer<Uint32>>();
+        final sizeArray = sizeArray_array[i];
 
-    Pointer<Int32> numberPtr = calloc<Int32>();
+        final point_name = charArray[0];
+        final point_size = charArray[1];
+        final point_last_timestamp = charArray[2];
+        final point_create_timestamp = charArray[3];
 
-    _select_logmsg(
-        dirPathPtr, cryptKeyPtr, ivPtr, numberPtr, arrayPtr, sizeArrayPtr);
-    final array_ptr = arrayPtr[0];
-    final sizeArray_ptr = sizeArrayPtr[0];
+        final point_name_size = sizeArray[0];
+        final point_size_size = sizeArray[1];
+        final point_last_timestamp_size = sizeArray[2];
+        final point_create_timestamp_size = sizeArray[3];
 
-    final number = numberPtr.value;
+        String? name = _buffer2String(point_name.cast(), point_name_size);
+        String? size = _buffer2String(point_size.cast(), point_size_size);
+        String? last_timestamp = _buffer2String(
+            point_last_timestamp.cast(), point_last_timestamp_size);
 
-    calloc.free(numberPtr);
-    for (int i = 0; i < number; i++) {
-      final logArray = array_ptr[i];
-      final size = sizeArray_ptr[i];
-      String? logMsg = _buffer2String(logArray.cast(), size);
-      if (logMsg != null) {
-        msgList.add(logMsg);
+        String? create_timestamp = _buffer2String(
+            point_create_timestamp.cast(), point_create_timestamp_size);
+
+        MXFileEntity entity =  MXFileEntity(
+            name: name,
+            size: int.parse(size ?? "0"),
+            createTimeStamp: int.parse(create_timestamp ?? "0"),
+            lastTimeStamp: int.parse(last_timestamp ?? "0"));
+        _mxFileList.add(entity);
+
+        calloc.free(charArray[0]);
+        calloc.free(charArray[1]);
+        calloc.free(charArray[2]);
+        calloc.free(charArray[3]);
+
+        calloc.free(charArray);
+        calloc.free(sizeArray);
+
       }
+      calloc.free(array_array);
+      calloc.free(sizeArray_array);
+
     }
 
-    calloc.free(array_ptr);
-    calloc.free(sizeArray_ptr);
-
-    calloc.free(dirPathPtr);
     calloc.free(arrayPtr);
     calloc.free(sizeArrayPtr);
-    if (cryptKeyPtr != nullptr) {
-      calloc.free(cryptKeyPtr);
-    }
-    if (ivPtr != nullptr) {
-      calloc.free(ivPtr);
-    }
-    return msgList;
+    return _mxFileList;
   }
 
   /// 目前只对 ios端生效
@@ -515,6 +552,18 @@ final void Function(Pointer<Void>) _removeExpireData = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
         _mxlogger_function("remove_expire_data"))
     .asFunction();
+
+final int Function(Pointer<Void>, Pointer<Pointer<Pointer<Pointer<Utf8>>>>,
+        Pointer<Pointer<Pointer<Uint32>>>) _getLogfiles =
+    _nativeLib
+        .lookup<
+                NativeFunction<
+                    Uint64 Function(
+                        Pointer<Void>,
+                        Pointer<Pointer<Pointer<Pointer<Utf8>>>>,
+                        Pointer<Pointer<Pointer<Uint32>>>)>>(
+            _mxlogger_function("get_logfiles"))
+        .asFunction();
 
 final int Function(Pointer<Utf8>, Pointer<Pointer<Pointer<Utf8>>>,
         Pointer<Pointer<Uint32>>) _select_logfiles =

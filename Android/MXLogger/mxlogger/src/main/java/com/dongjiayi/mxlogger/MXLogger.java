@@ -4,6 +4,10 @@ package com.dongjiayi.mxlogger;
 import android.content.Context;
 import android.os.Looper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 enum MXStoragePolicyType{
@@ -215,6 +219,7 @@ public class MXLogger {
     }
 
 
+
     private  long nativeHandle;
     private  static  String defaultDiskCacheDirectory(@NonNull Context context){
 
@@ -272,4 +277,5 @@ public class MXLogger {
     private static native  String native_loggerKey(long nativeHandle);
     private  static native  void native_destroy(String nameSpace,String diskCacheDirectory);
     private static native void native_destroy_loggerKey(String loggerKey);
+
 }

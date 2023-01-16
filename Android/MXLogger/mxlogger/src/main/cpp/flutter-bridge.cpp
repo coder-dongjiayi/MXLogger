@@ -63,38 +63,63 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_pa
     return 0;
 
 }
-MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logfiles)(const char * directory, char ***array_ptr,uint32_t **size_array_ptr){
-    if(directory == nullptr) return 0;
+/// 获取日志文件列表
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(get_logfiles)(void *handle,char ****array_ptr,uint32_t ***size_array_ptr){
+    mx_logger *logger = static_cast<mx_logger*>(handle);
 
     std::vector<std::map<std::string, std::string>> destination;
-    util::mxlogger_util::select_logfiles_dir(directory, &destination);
 
-    if(destination.size() > 0){
-        auto array = (char**)malloc(destination.size() * sizeof(void *));
-        auto size_array = (uint32_t *) malloc(destination.size() * sizeof(uint32_t *));
-        if(!array){
-            free(array);
-            free(size_array);
-            return 0;
-        }
-        *array_ptr = array;
-        *size_array_ptr = size_array;
+    util::mxlogger_util::select_logfiles_dir(logger->diskcache_path(),&destination);
 
-        for(int i =0;i < destination.size();i++){
-            std::map<std::string, std::string> map = destination[i];
-            std::string  name = map["name"];
-            std::string  size = map["size"];
-            std::string  timestamp = map["timestamp"];
+    if(destination.size() == 0) return 0;
 
-            std::string  infoStr = name + "," + size + "," + "timestamp";
-            auto infoData = infoStr.data();
-            size_array[i] = static_cast<uint32_t>(infoStr.size());
-            array[i] = (char*)infoData;
-        }
-        return static_cast<uint32_t>(destination.size());
+    auto array = (char***)malloc(destination.size() * sizeof(void *));
+
+    auto size_array = (uint32_t **) malloc(destination.size() * sizeof(uint32_t *));
+    if(!array){
+        free(array);
+        free(size_array);
+        return 0;
     }
+    *array_ptr = array;
+    *size_array_ptr = size_array;
 
-    return 0;
+
+    for(int i=0; i< destination.size();i++){
+        std::map<std::string, std::string> map = destination[i];
+
+         char *  c_name =  map["name"].data();
+         char * c_size = map["size"].data();
+         char *  c_last_timestamp =   map["last_timestamp"].data();
+         char *  c_create_timestamp = map["create_timestamp"].data();
+
+        auto itemArray = (char**)malloc(4*sizeof(char*));
+
+        auto item_size_array = (uint32_t *) malloc(4 * sizeof(uint32_t *));
+
+        item_size_array[0] = static_cast<uint32_t>(strlen(c_name));
+        item_size_array[1] = static_cast<uint32_t>(strlen(c_size));
+        item_size_array[2] = static_cast<uint32_t>(strlen(c_last_timestamp));
+        item_size_array[3] = static_cast<uint32_t>(strlen(c_create_timestamp));
+
+        itemArray[0] = (char*)malloc(strlen(c_name));
+        memcpy(itemArray[0], c_name, strlen(c_name));
+
+
+        itemArray[1] = (char*)malloc(strlen(c_size));
+        memcpy(itemArray[1], c_size, strlen(c_size));
+
+        itemArray[2] = (char*)malloc(strlen(c_last_timestamp));
+        memcpy(itemArray[2], c_last_timestamp, strlen(c_last_timestamp));
+
+        itemArray[3] = (char*)malloc(strlen(c_create_timestamp));
+        memcpy(itemArray[3], c_create_timestamp, strlen(c_create_timestamp));
+
+
+        size_array[i] = item_size_array;
+        array[i] = itemArray;
+    }
+    return (int)destination.size();
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroy)(const char* ns,const char* directory){
     mx_logger ::delete_namespace(ns,directory);

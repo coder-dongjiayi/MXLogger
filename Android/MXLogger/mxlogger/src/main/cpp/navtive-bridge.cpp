@@ -7,7 +7,8 @@
 #include <cstdint>
 #include "mxlogger.hpp"
 #include "mxlogger_util.hpp"
-
+#include <vector>
+#include <map>
 static jclass g_cls = nullptr;
 
 static int registerNativeMethods(JNIEnv *env, jclass cls);
@@ -128,6 +129,43 @@ namespace mxlogger{
 
 
     }
+    MXLOGGER_JNI jobjectArray  native_logFiles(JNIEnv *env, jobject obj,jlong handle){
+
+//        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+//
+//        std::vector<std::map<std::string, std::string>> destination;
+//
+//        util::mxlogger_util::select_logfiles_dir(logger->diskcache_path(),&destination);
+//
+//
+//        jclass hasClass= env->FindClass("java/util/HashMap");
+//
+//        jobjectArray array = env->NewObjectArray(destination.size(),hasClass,NULL);
+//
+//        for (int i = 0; i < destination.size(); ++i) {
+//            std::map<std::string, std::string> map = destination[i];
+//            std::string  name = map["name"];
+//            std::string  size = map["size"];
+//            std::string  last_timestamp = map["last_timestamp"];
+//            std::string  create_timestamp = map["create_timestamp"];
+//
+//            jclass hashMapClass= env->FindClass("java/util/HashMap");
+//            jmethodID hashMapInit = env->GetMethodID(hashMapClass, "<init>", "(I)V");
+//            jobject hashMapObj = env->NewObject(hashMapClass, hashMapInit,4);
+//            jmethodID hashMapPut = env->GetMethodID(hashMapClass, "put",
+//                                                    "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+//            for (const auto& it : map) {
+//                env->CallObjectMethod(hashMapObj, hashMapPut,
+//                                      env->NewStringUTF(it.first.c_str()),
+//                                      env->NewStringUTF(it.second.c_str()));
+//            }
+//
+//            env->SetObjectArrayElement(array,i,hashMapClass);
+//        }
+
+        return nullptr;
+
+    }
     MXLOGGER_JNI void native_destroy_loggerKey(JNIEnv *env, jobject obj,jstring loggerKey){
         std::string loggerKeyStr =jstring2string(env,loggerKey);
         mx_logger::delete_namespace(loggerKeyStr.data());
@@ -193,7 +231,8 @@ static JNINativeMethod g_methods[] = {
         {"native_log","(JLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
         {"native_log_loggerKey","(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log_loggerKey},
         {"native_destroy","(Ljava/lang/String;Ljava/lang/String;)V",(void *)mxlogger::native_destroy},
-        {"native_destroy_loggerKey","(Ljava/lang/String;)V",(void *)mxlogger::native_destroy_loggerKey}
+        {"native_destroy_loggerKey","(Ljava/lang/String;)V",(void *)mxlogger::native_destroy_loggerKey},
+//        {"native_logFiles","(J)Ljava/lang/String;",(void*)mxlogger::native_logFiles}
 
 
 };

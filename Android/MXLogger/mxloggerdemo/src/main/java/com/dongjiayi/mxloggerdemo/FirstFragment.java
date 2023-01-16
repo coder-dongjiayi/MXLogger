@@ -13,6 +13,10 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.dongjiayi.mxlogger.MXLogger;
 import com.dongjiayi.mxloggerdemo.databinding.FragmentFirstBinding;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
 public class FirstFragment extends Fragment {
 
     private FragmentFirstBinding binding;
@@ -40,6 +44,7 @@ public class FirstFragment extends Fragment {
         MXLogger.log(loggerKey,"loggerKey",2,"mapName","this is loggerKey log");
        Log.i("path","日志路径" + logger.getDiskCachePath());
        // MXLogger.destroy(loggerKey);
+
 
        binding = FragmentFirstBinding.inflate(inflater, container, false);
         return binding.getRoot();

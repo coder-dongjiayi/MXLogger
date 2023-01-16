@@ -44,7 +44,7 @@
 
   NSString*  jsonString = [[NSString alloc]initWithData:jsonData encoding:NSUTF8StringEncoding];
 
-   self.logger =  [MXLogger initializeWithNamespace:@"com.djy.mxlogger" storagePolicy:MXStoragePolicyYYYYWW fileName:NULL fileHeader:jsonString cryptKey:_cryptKey iv:_iv];
+   self.logger =  [MXLogger initializeWithNamespace:@"com.djy.mxlogger" storagePolicy:MXStoragePolicyYYYYMMDDHH fileName:NULL fileHeader:jsonString cryptKey:_cryptKey iv:_iv];
 
     // 使用实例构造器初始化
 //    self.logger = [[MXLogger alloc] initWithNamespace:@"com.dongjiayi.mxlogger" cryptKey:_cryptKey iv:_iv];
@@ -108,7 +108,7 @@
     
     NSArray * array =   [self.logger logFiles];
       [array enumerateObjectsUsingBlock:^(NSDictionary*  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-          NSString * str = [NSString stringWithFormat:@"name:%@ size:%@,create_timestamp:%@",obj[@"name"],obj[@"size"],obj[@"create_timestamp"]];
+          NSString * str = [NSString stringWithFormat:@"name:%@ size:%@,create:%@ last:%@",obj[@"name"],obj[@"size"],obj[@"create_timestamp"],obj[@"last_timestamp"]];
           [filesArray addObject:str];
           
       }];
