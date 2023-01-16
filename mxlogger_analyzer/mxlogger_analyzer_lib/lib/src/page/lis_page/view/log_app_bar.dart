@@ -96,7 +96,17 @@ class LogAppBarState extends ConsumerState<LogAppBar> {
                   hintStyle: TextStyle(color: MXTheme.text, fontSize: 16),
                   border: InputBorder.none,
                 ),
-              ))
+              )),
+          GestureDetector(
+            onTap: (){
+
+            },
+            child: Container(
+              color: Colors.transparent,
+              padding: EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
+              child: Icon(Icons.refresh,color: MXTheme.subText),
+            ),
+          )
         ],
       ),
     );

@@ -7,6 +7,11 @@ import '../level/mx_level.dart';
 import '../storage/mxlogger_storage.dart';
 import 'level_list_state.dart';
 
+enum AnalyzerPlatform{
+  desktop,
+  mobile,
+  package
+}
 
 ///  查询所有日志数据
 final logPagesProvider = FutureProvider.autoDispose((ref) {
@@ -32,6 +37,8 @@ final logPagesProvider = FutureProvider.autoDispose((ref) {
 
   return logResponse;
 });
+
+final analyzerPlatformProvider =
 
 final pageControllerProvider = Provider((ref){
 

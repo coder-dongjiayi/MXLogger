@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,11 +42,14 @@ class MXLoggerRepository{
     MXLoggerStorage.instance.saveAES(cryptKey: cryptKey,iv: iv);
   }
 
+
+
   /// 导入二进制数据到数据库
-  Stream<Map<String,dynamic>> importBinaryData({ required XFile file, String? cryptKey, String? cryptIv}) {
+  Stream<Map<String,dynamic>> importBytes({Uint8List? binaryData, cryptKey, String? cryptIv}) {
    StreamController<Map<String,dynamic>> _streamController = StreamController();
-   AnalyzerBinary.loadXFile(
-       file: file,
+
+   AnalyzerBinary.loadBinaryData(
+     binary: binaryData,
        cryptKey: cryptKey,
        iv: cryptIv,
        onStartCallback: () {

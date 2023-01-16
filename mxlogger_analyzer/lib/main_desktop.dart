@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
 
@@ -48,11 +50,14 @@ class MyHomePage extends ConsumerWidget {
   }
 
   /// 拖拽完成操作
-  void _onDragDone(WidgetRef ref, XFile file) {
+  void _onDragDone(WidgetRef ref, XFile file) async{
+
+    Uint8List bytes =  await file.readAsBytes();
+
     ref
         .read(mxloggerRepository)
-        .importBinaryData(
-            file: file,
+        .importBytes(
+            binaryData: bytes,
             cryptKey: MXLoggerStorage.instance.cryptKey,
             cryptIv: MXLoggerStorage.instance.cryptIv)
         .listen((event) {

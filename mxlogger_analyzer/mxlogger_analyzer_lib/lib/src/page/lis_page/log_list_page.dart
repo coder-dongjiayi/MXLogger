@@ -46,7 +46,7 @@ class LogListPageState extends ConsumerState<LogListPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  margin: EdgeInsets.only(top: 10, left: 10, right: 10),
+                  margin: EdgeInsets.only(top: 10, left: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -59,10 +59,14 @@ class LogListPageState extends ConsumerState<LogListPage>
                         onTap: () {
                           ref.read(sortTimeProvider.notifier).state = !sort;
                         },
-                        child: Icon(Icons.swap_vert_rounded,
+                        child: Container(
+                          color: Colors.transparent,
+                          padding: EdgeInsets.only(left: 30,right: 10),
+                          child: Icon(Icons.swap_vert_rounded,
                             color: sort == true
                                 ? MXTheme.subText
                                 : MXTheme.buttonColor,size: 15,),
+                        ),
                       )
                     ],
                   ),

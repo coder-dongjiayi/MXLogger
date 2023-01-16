@@ -27,7 +27,7 @@ enum MXStoragePolicyType {
 class MXFileEntity {
   late String? name; /// 文件名
   late int size; /// 文件大小(byte)
-  late int createTimeStamp; /// 文件创建时间(Android端 createTimeStamp = lastTimeStamp)
+  late int createTimeStamp; /// 文件创建时间
   late int lastTimeStamp; /// 文件最后修改时间
 
   DateTime get createTime  => DateTime.fromMillisecondsSinceEpoch(createTimeStamp*1000);
@@ -53,10 +53,9 @@ class MXLogger with WidgetsBindingObserver {
 
   static const MethodChannel _channel = MethodChannel('flutter_mxlogger');
 
-  bool _enable = true;
 
   bool get enable => _enable;
-  bool _shouldRemoveExpiredDataWhenEnterBackground = true;
+
 
   /// 获取日志文件夹的磁盘路径(directory+nameSpace)
   String get diskcachePath => getDiskcachePath();
@@ -66,12 +65,15 @@ class MXLogger with WidgetsBindingObserver {
   /// 但是你希望所有子模块(子组件)使用在主工程初始化的log，
   /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
   String? get loggerKey => getLoggerKey();
-
   /// 获取存储的日志大小 (byte)
   int get logSize => getLogSize();
-
   /// 获取日志文件列表
   List<MXFileEntity> get logFiles => getLogFiles();
+
+  String? get cryptKey => _cryptKey;
+
+  String? get iv => _iv;
+
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -97,6 +99,8 @@ class MXLogger with WidgetsBindingObserver {
       String? fileHeader,
       String? cryptKey,
       String? iv}) {
+    _cryptKey = cryptKey;
+    _iv = iv;
     WidgetsBinding.instance.addObserver(this);
 
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
@@ -457,6 +461,13 @@ class MXLogger with WidgetsBindingObserver {
     }
     return null;
   }
+
+
+  String? _cryptKey;
+  String? _iv;
+  bool _enable = true;
+  bool _shouldRemoveExpiredDataWhenEnterBackground = true;
+
 }
 
 final DynamicLibrary _nativeLib = Platform.isAndroid
