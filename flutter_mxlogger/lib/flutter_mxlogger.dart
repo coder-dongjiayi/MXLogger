@@ -70,6 +70,9 @@ class MXLogger with WidgetsBindingObserver {
   /// 获取存储的日志大小 (byte)
   int get logSize => getLogSize();
 
+  /// 获取日志文件列表
+  List<MXFileEntity> get logFiles => getLogFiles();
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused &&

@@ -20,9 +20,9 @@ rootProject.allprojects {
         google()
         mavenCentral()
         mavenLocal()
-        flatDir {
-            dirs "/Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/mxlogger/build/outputs/aar"
-        }
+//        flatDir {
+//            dirs "/Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/mxlogger/build/outputs/aar"
+//        }
     }
 }
 
@@ -42,9 +42,9 @@ android {
     }
     dependencies {
 
-//    implementation 'io.github.coder-dongjiayi:mxlogger:1.2.1'
+    implementation 'io.github.coder-dongjiayi:mxlogger:1.2.2'
 
-       implementation (name:"mxlogger-DefaultCpp-release",ext:"aar")
+//       implementation (name:"mxlogger-DefaultCpp-release",ext:"aar")
 
     }
 }

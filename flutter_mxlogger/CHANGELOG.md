@@ -1,6 +1,11 @@
 
 # MXLogger for Flutter Change Log
 
+# v1.2.1/2023-01-16
+* Keep up with MXLogger native lib v1.2.2.
+* Add logFiles method.
+* Use `2023-01-02w_filename.mx` named file when storagePolicy is yyyy_ww.
+* Change default name is log
 # v1.2.1/2023-01-12
 * Keep up with MXLogger native lib v1.2.1
 * StoragePolicy arg use enum
