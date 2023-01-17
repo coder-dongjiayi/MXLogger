@@ -79,14 +79,14 @@ packages:
     source: hosted
     version: "1.0.5"
   desktop_drop:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: desktop_drop
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.3.3"
   easy_refresh:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: easy_refresh
       url: "https://pub.flutter-io.cn"
@@ -161,7 +161,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_easyloading:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_easyloading
       url: "https://pub.flutter-io.cn"

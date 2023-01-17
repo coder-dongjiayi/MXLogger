@@ -1,7 +1,7 @@
 import 'dart:convert' as JSON;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
+
 import 'package:mxlogger_analyzer_lib/src/page/detail_page/view/flutter_json_viewer.dart';
 import 'package:mxlogger_analyzer_lib/src/page/lis_page/log_model.dart';
 
