@@ -5,6 +5,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mxlogger_analyzer/page/desktop/desktop_page.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 

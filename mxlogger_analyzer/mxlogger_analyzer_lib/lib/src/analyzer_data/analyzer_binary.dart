@@ -4,7 +4,7 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:async';
-import 'package:file_selector/file_selector.dart';
+
 import 'package:flutter/material.dart';
 import 'package:sqlite3/common.dart';
 
@@ -74,25 +74,6 @@ class AnalyzerBinary {
     });
   }
 
-  static void loadXFile(
-      {required XFile file,
-      String? cryptKey,
-      String? iv,
-      VoidCallback? onStartCallback,
-      ValueChanged<String>? onErrorCallback,
-      AnalyzerProgressCallback? onProgressCallback,
-      AnalyValueChangedCallback? onEndCallback}) async {
-    Uint8List? _binaryData = await file.readAsBytes();
-    await loadBinaryData(
-        binaryList: [_binaryData],
-        cryptKey: cryptKey,
-        iv: iv,
-        onStartCallback: onStartCallback,
-        onErrorCallback: onErrorCallback,
-        onProgressCallback:onProgressCallback,
-        onEndCallback: onEndCallback
-    );
-  }
 
   static void _runBinaryData(SendPort mainPort) async {
     ReceivePort childPort = ReceivePort();

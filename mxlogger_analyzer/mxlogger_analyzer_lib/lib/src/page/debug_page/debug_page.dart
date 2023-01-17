@@ -5,9 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
-import 'package:mxlogger_analyzer_lib/src/analyzer_data/analyzer_database.dart';
 import 'package:mxlogger_analyzer_lib/src/component/mxlogger_text.dart';
-import 'package:mxlogger_analyzer_lib/src/extends/async_extends.dart';
 import 'dart:io';
 
 import 'debug_drawer.dart';

@@ -10,12 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  path_provider: ^2.0.11
   flat_buffers: ^2.0.5
-  file_selector: ^0.8.4+3
+
   flutter_riverpod: ^2.1.1
   sqlite3: ^1.8.0
-
+  path_provider: ^2.0.11
   aes_crypt_null_safe: ^2.0.2
 
   shared_preferences: ^2.0.15

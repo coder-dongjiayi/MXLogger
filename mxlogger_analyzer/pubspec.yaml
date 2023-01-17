@@ -42,7 +42,7 @@ dependencies:
   easy_refresh: ^3.0.4+2
   flutter_easyloading: ^3.0.5
   desktop_drop: ^0.3.3
-
+  file_selector: ^0.8.4+3
   mxlogger_analyzer_lib:
     path: ./mxlogger_analyzer_lib
 

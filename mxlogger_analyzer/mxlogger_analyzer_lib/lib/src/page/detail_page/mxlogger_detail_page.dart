@@ -162,6 +162,13 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
 
   void _copyClipboard(BuildContext context, String? msg) {
     Clipboard.setData(ClipboardData(text: msg));
-    EasyLoading.showSuccess("内容已复制到剪切板");
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: MXTheme.warn,
+      content: Text(
+        "内容已复制到剪切板",
+        textAlign: TextAlign.center,
+        style: TextStyle(color: MXTheme.white, fontSize: 18),
+      ),
+    ));
   }
 }

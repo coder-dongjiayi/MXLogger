@@ -6,7 +6,6 @@ import 'package:mxlogger_analyzer_lib/src/storage/mxlogger_storage.dart';
 
 import 'mxlogger_analyzer_lib.dart';
 import 'package:mxlogger_analyzer_lib/src/page/debug_page/debug_page.dart';
-export 'package:flutter_easyloading/flutter_easyloading.dart';
 export 'package:riverpod/riverpod.dart';
 export 'package:flutter_riverpod/flutter_riverpod.dart';
 
