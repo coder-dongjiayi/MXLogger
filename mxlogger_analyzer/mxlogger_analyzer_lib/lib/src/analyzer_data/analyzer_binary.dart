@@ -15,19 +15,20 @@ import 'log_serialize.dart';
 import 'package:aes_crypt_null_safe/aes_crypt_null_safe.dart';
 
 const int AES_LENGTH = 16;
-typedef AnalyzerProgressCallback = void Function(int total, int current);
+typedef AnalyzerProgressCallback = void Function(int total, int current,int index);
 typedef AnalyValueChangedCallback = void Function(
     int succsss, int repeat, int field);
 
 class AnalyzerBinary {
   static Future<void> loadBinaryData(
-      {Uint8List? binary,
+      {required List<Uint8List> binaryList,
       String? cryptKey,
       String? iv,
       VoidCallback? onStartCallback,
       ValueChanged<String>? onErrorCallback,
       AnalyzerProgressCallback? onProgressCallback,
       AnalyValueChangedCallback? onEndCallback}) async {
+    if(binaryList.isEmpty == true) return Future.value();
     /// 加载数据之前先关闭之前的数据库
     AnalyzerDatabase.db.dispose();
 
@@ -38,18 +39,25 @@ class AnalyzerBinary {
       _runBinaryData(port);
     }, mainPort.sendPort);
 
+
     mainPort.listen((message) async {
       if (message is Map) {
         Map<String, dynamic> result = message as Map<String, dynamic>;
-        int finish = result["finish"];
+        int finish = result["finish"]; /// 1加载完成 0加载失败 2 加载中
         if (finish == 1) {
           /// 加载完数据再重新连接数据库
-          await AnalyzerDatabase.initDataBase(
+           AnalyzerDatabase.initDataBase(
               MXLoggerStorage.instance.databasePath);
           int number = result["number"];
           int error = result["errorNumber"];
           int repeatNumber = result["repeatNumber"];
           onEndCallback?.call(number - repeatNumber, repeatNumber, error);
+        } else if(finish == 2){
+
+          int total = result["total"];
+          int current = result["current"];
+          int index = result["index"];
+          onProgressCallback?.call(total,current,index);
         } else {
           String? errorMsg = result["errorMsg"];
           onErrorCallback?.call(errorMsg ?? "");
@@ -57,7 +65,7 @@ class AnalyzerBinary {
       } else if (message is SendPort) {
         SendPort childPort = message;
         childPort.send({
-          "binaryData": binary,
+          "binaryDataList": binaryList,
           "cryptKey": cryptKey,
           "iv": iv,
           "path": MXLoggerStorage.instance.databasePath
@@ -76,7 +84,7 @@ class AnalyzerBinary {
       AnalyValueChangedCallback? onEndCallback}) async {
     Uint8List? _binaryData = await file.readAsBytes();
     await loadBinaryData(
-        binary: _binaryData,
+        binaryList: [_binaryData],
         cryptKey: cryptKey,
         iv: iv,
         onStartCallback: onStartCallback,
@@ -92,7 +100,7 @@ class AnalyzerBinary {
     var result = await childPort.first;
     if ((result is Map) == false) return;
 
-    Uint8List _binaryData = result["binaryData"];
+    List<Uint8List> _binaryDataList = result["binaryDataList"];
     String? cryptKey = result["cryptKey"];
     String? iv = result["iv"];
     String path = result["path"];
@@ -100,24 +108,34 @@ class AnalyzerBinary {
     int _totalNumber = 0;
 
     int _repeatNumber = 0;
-    await AnalyzerDatabase.initDataBase(path);
-    await _decode(
-        binaryData: _binaryData,
-        cryptKey: cryptKey,
-        iv: iv,
-        errorCallback: (int errorNumber) {
-          _errorNumber = errorNumber;
-        },
-        totalCallback: (int totalNumber) {
-          _totalNumber = totalNumber;
-        },
-        onRepeatErrorCallback: () {
-          _repeatNumber = _repeatNumber + 1;
-        },
-        onErrorDescCallback: (String errorMsg) {
-          mainPort.send({"errorMsg": errorMsg, "finish": 0});
-        },
-        callback: (int total, int current) {});
+     AnalyzerDatabase.initDataBase(path);
+
+     for(int i=0; i< _binaryDataList.length; i++){
+       Uint8List binaryItem = _binaryDataList[i];
+       await _decode(
+           binaryData: binaryItem,
+           cryptKey: cryptKey,
+           iv: iv,
+           errorCallback: (int errorNumber) {
+             _errorNumber = errorNumber;
+           },
+           totalCallback: (int totalNumber) {
+             _totalNumber = totalNumber;
+           },
+           onRepeatErrorCallback: () {
+             _repeatNumber = _repeatNumber + 1;
+           },
+           onErrorDescCallback: (String errorMsg) {
+             mainPort.send({"errorMsg": errorMsg, "finish": 0});
+           },
+           callback: (int total, int current,int index) {
+             mainPort.send({"finish":2,"total":total,"current":current,"index":i});
+
+           });
+
+     }
+
+
 
     mainPort.send({
       "finish": 1,
@@ -210,7 +228,7 @@ class AnalyzerBinary {
         onErrorDescCallback?.call(msg);
       }
 
-      callback?.call(totalSize, begin);
+      callback?.call(totalSize, begin,0);
       begin = begin + sizeofUint32t + itemSize;
     }
     errorCallback?.call(errorNumber);

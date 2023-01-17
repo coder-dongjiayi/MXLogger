@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:desktop_drop/desktop_drop.dart';
@@ -6,6 +7,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer/page/desktop/desktop_page.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -28,6 +30,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends ConsumerWidget {
   const MyHomePage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DropTarget(
@@ -50,22 +53,22 @@ class MyHomePage extends ConsumerWidget {
   }
 
   /// 拖拽完成操作
-  void _onDragDone(WidgetRef ref, XFile file) async{
+  void _onDragDone(WidgetRef ref, XFile file) async {
+    Uint8List bytes = await file.readAsBytes();
+    StreamController<Map<String, dynamic>> streamController =
+        StreamController();
 
-    Uint8List bytes =  await file.readAsBytes();
+    ref.read(mxloggerRepository).importBytes(
+        binaryData: [bytes],
+        streamController: streamController,
+        cryptKey: MXLoggerStorage.instance.cryptKey,
+        cryptIv: MXLoggerStorage.instance.cryptIv);
 
-    ref
-        .read(mxloggerRepository)
-        .importBytes(
-            binaryData: bytes,
-            cryptKey: MXLoggerStorage.instance.cryptKey,
-            cryptIv: MXLoggerStorage.instance.cryptIv)
-        .listen((event) {
+    streamController.stream.listen((event) {
       int status = event["status"];
       String message = event["message"] ?? "";
       switch (status) {
         case 0:
-
           EasyLoading.show(status: message);
           break;
         case 1:
@@ -74,14 +77,18 @@ class MyHomePage extends ConsumerWidget {
           break;
         case 2:
           int repeat = event["repeat"];
-          if(repeat > 0){
-            Future.delayed(Duration(seconds: 1),(){
-              EasyLoading.showInfo("${repeat}条数据已存在,请勿重复导入",duration: Duration(seconds: 3));
+          if (repeat > 0) {
+            Future.delayed(const Duration(seconds: 1), () {
+              EasyLoading.showInfo("$repeat条数据已存在,请勿重复导入",
+                  duration: const Duration(seconds: 3));
             });
-          }else{
+          } else {
             EasyLoading.showSuccess(message);
           }
-          // /// 刷新数据
+
+          streamController.close();
+
+          /// 刷新数据
           ref.invalidate(logPagesProvider);
           break;
         case 3:
@@ -90,11 +97,10 @@ class MyHomePage extends ConsumerWidget {
           break;
         case 4:
           ref.read(errorProvider).add(message);
-          ref.read(errorListProvider.notifier).state = List.of(ref.read(errorProvider)).toList();
+          ref.read(errorListProvider.notifier).state =
+              List.of(ref.read(errorProvider)).toList();
           break;
       }
-
-
     });
   }
 }

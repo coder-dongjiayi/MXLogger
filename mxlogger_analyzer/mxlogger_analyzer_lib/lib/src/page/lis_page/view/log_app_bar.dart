@@ -8,7 +8,8 @@ import '../../../theme/mx_theme.dart';
 
 
 class LogAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget{
-  const LogAppBar({Key? key}) : super(key: key);
+  const LogAppBar({Key? key,this.menuCallback}) : super(key: key);
+  final VoidCallback? menuCallback;
   @override
   // TODO: implement preferredSize
   Size get preferredSize => const Size.fromHeight(80);
@@ -92,23 +93,39 @@ class LogAppBarState extends ConsumerState<LogAppBar> {
                 },
                 decoration: InputDecoration(
                   isCollapsed: true,
-                  hintText: "搜索关键词 回车确定",
+                  hintText: _hitText(),
                   hintStyle: TextStyle(color: MXTheme.text, fontSize: 16),
                   border: InputBorder.none,
                 ),
               )),
-          GestureDetector(
-            onTap: (){
-
-            },
-            child: Container(
-              color: Colors.transparent,
-              padding: EdgeInsets.only(left: 20,right: 20,top: 5,bottom: 5),
-              child: Icon(Icons.refresh,color: MXTheme.subText),
-            ),
-          )
+          _rightIcon()
         ],
       ),
     );
+  }
+  String _hitText(){
+    if(analyzerPlatform == AnalyzerPlatform.desktop){
+      return "搜索关键词 回车确定";
+    }
+    return "搜索关键词";
+  }
+
+  Widget _rightIcon(){
+
+
+    if(analyzerPlatform == AnalyzerPlatform.package){
+      return    GestureDetector(
+        onTap: (){
+        widget.menuCallback?.call();
+        },
+        child: Container(
+          color: Colors.transparent,
+          padding: EdgeInsets.only(left: 20,right: 15,top: 5,bottom: 5),
+          child: Icon(Icons.menu,color: MXTheme.subText),
+        ),
+      );
+    }
+
+    return SizedBox();
   }
 }

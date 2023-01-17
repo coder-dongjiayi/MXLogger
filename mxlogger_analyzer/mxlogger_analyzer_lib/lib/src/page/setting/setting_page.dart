@@ -164,8 +164,8 @@ class _SettingPageState extends State<SettingPage> {
               ),
               CupertinoDialogAction(
                 child: Text("清空"),
-                onPressed: () async {
-                  await ref.read(mxloggerRepository).deleteData();
+                onPressed: ()  {
+                   ref.read(mxloggerRepository).deleteData();
 
                   ref.read(selectedIndexProvider.notifier).state = 0;
 

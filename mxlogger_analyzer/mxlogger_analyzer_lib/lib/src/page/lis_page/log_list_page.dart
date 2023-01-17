@@ -14,8 +14,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../detail_page/mxlogger_detail_page.dart';
 
 class LogListPage extends ConsumerStatefulWidget {
-  const LogListPage({Key? key}) : super(key: key);
-
+  const LogListPage({Key? key,this.menuCallback,this.refreshCallback}) : super(key: key);
+  final VoidCallback? menuCallback;
+  final VoidCallback? refreshCallback;
   @override
   LogListPageState createState() => LogListPageState();
 }
@@ -33,7 +34,7 @@ class LogListPageState extends ConsumerState<LogListPage>
     super.build(context);
     return Scaffold(
       backgroundColor: MXTheme.themeColor,
-      appBar: const LogAppBar(),
+      appBar:  LogAppBar(menuCallback: widget.menuCallback,),
       body: Consumer(builder: (context, ref, _) {
         var config = ref.watch(logPagesProvider);
         bool sort = ref.read(sortTimeProvider);
@@ -95,19 +96,36 @@ class LogListPageState extends ConsumerState<LogListPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            dataEmpty != true ? Icons.hourglass_empty : Icons.file_copy_sharp,
-            size: 40,
-            color: MXTheme.buttonColor,
-          ),
+         InkWell(onTap: (){
+            widget.refreshCallback?.call();
+
+         },child:  Icon(
+           dataEmpty != true ? Icons.hourglass_empty : _initIconData(),
+           size: 40,
+           color: MXTheme.buttonColor,
+         ),),
           const SizedBox(height: 15),
           Text(
-            dataEmpty != true ? "没有搜索到任何数据" : "拖拽日志文件到窗口",
+            dataEmpty != true ? "没有搜索到任何数据" : _initText(),
             style: TextStyle(color: MXTheme.subText),
           )
         ],
       ),
     );
+  }
+
+
+  IconData _initIconData(){
+    if(analyzerPlatform == AnalyzerPlatform.desktop){
+      return Icons.file_copy_sharp;
+    }
+    return Icons.refresh;
+  }
+  String _initText(){
+    if(analyzerPlatform == AnalyzerPlatform.desktop){
+      return "拖拽日志文件到窗口";
+    }
+    return "点击以导入日志数据";
   }
 
   @override

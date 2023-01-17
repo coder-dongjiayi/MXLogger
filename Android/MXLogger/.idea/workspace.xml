@@ -14,10 +14,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/xcuserdata/dongjiayi.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/src/page/debug_page/debug_drawer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/main_package.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/lib/main_package.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/mxlogger_analyzer_lib.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/mxlogger_analyzer_lib.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/src/page/debug_page/debug_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/src/page/debug_page/debug_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/src/page/lis_page/log_list_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/src/page/lis_page/log_list_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/src/page/lis_page/view/log_app_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/src/page/lis_page/view/log_app_bar.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/src/provider/mxlogger_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/lib/src/provider/mxlogger_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -22,8 +22,9 @@ export 'package:mxlogger_analyzer_lib/src/page/setting/setting_page.dart';
 
 Future<void> MXAnalyzerLib_initialize() async {
   await MXLoggerStorage.instance.initialize();
-  await AnalyzerDatabase.initDataBase(MXLoggerStorage.instance.databasePath);
+   AnalyzerDatabase.initDataBase(MXLoggerStorage.instance.databasePath);
 }
+
 
 void MXAnalyzerLib_showDebug(BuildContext context,{required String diskcachePath,String? cryptKey,String? iv}) async{
   await MXAnalyzerLib_initialize();
@@ -31,17 +32,13 @@ void MXAnalyzerLib_showDebug(BuildContext context,{required String diskcachePath
       context: context,
       isScrollControlled: true,
       backgroundColor: MXTheme.themeColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(15),
-        ),
-      ),
 
       builder: (context) {
        return ProviderScope(child: SizedBox(
          height: MediaQuery.of(context).size.height * 0.7,
+
          child:Container(
-           margin: EdgeInsets.only(top: 15),
+
            child: DebugPage(
              diskcachePath: diskcachePath,
              cryptKey: cryptKey,

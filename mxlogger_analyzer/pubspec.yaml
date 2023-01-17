@@ -37,7 +37,7 @@ dependencies:
 
   flutter_side_menu: ^0.1.0
   #用于测试 main_package的情况
-  flutter_mxlogger: 1.2.1
+  flutter_mxlogger: 1.2.2
   mxlogger_analyzer_lib:
     path: ./mxlogger_analyzer_lib
 

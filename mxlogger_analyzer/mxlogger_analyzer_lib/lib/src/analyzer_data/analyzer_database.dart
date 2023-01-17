@@ -10,7 +10,7 @@ class AnalyzerDatabase {
 
   static SQLite.Database get db => _db;
 
-  static Future<void> initDataBase(String path) async {
+  static void initDataBase(String path) {
     String mxloggerDatabase = path + "/mxlogger_analyzer.db";
     _db = SQLite.sqlite3.open(mxloggerDatabase);
     SQLite.sqlite3.version;
@@ -78,7 +78,7 @@ class AnalyzerDatabase {
     return number;
   }
 
-  static Future<void> deleteData() async {
+  static void deleteData() async {
     _db.execute("delete from mxlog");
     _db.execute("delete from sqlite_sequence where name='mxlog'");
   }

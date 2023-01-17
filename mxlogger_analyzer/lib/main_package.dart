@@ -60,6 +60,8 @@ class _MyAppState extends State<MyApp> {
                           _mxLogger.fatal("这是fatal信息");
                         },
                         child: Text("写入日志")),
+
+                    Text("这是一行文本"),
                     GestureDetector(
                       onTap: () {
                         MXAnalyzerLib_showDebug(context,

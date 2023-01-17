@@ -8,7 +8,7 @@ import Foundation
 import desktop_drop
 import file_selector_macos
 import path_provider_macos
-import shared_preferences_macos
+import shared_preferences_foundation
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   DesktopDropPlugin.register(with: registry.registrar(forPlugin: "DesktopDropPlugin"))
