@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(MyApp());
 
@@ -63,8 +66,10 @@ class _MyAppState extends State<MyApp> {
 
                     Text("这是一行文本"),
                     GestureDetector(
-                      onTap: () {
+                      onTap: () async{
+                        Directory directory =  await getApplicationDocumentsDirectory();
                         MXAnalyzerLib_showDebug(context,
+                            databasePath: directory.path,
                             diskcachePath: _mxLogger.diskcachePath,
                             cryptKey: _cryptKey,
                             iv: _iv);

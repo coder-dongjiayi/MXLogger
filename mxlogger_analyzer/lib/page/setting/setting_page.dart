@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 
+import '../../provider/mxlogger_provider.dart';
+import '../../storage/mxlogger_storage.dart';
+
 class SettingPage extends StatefulWidget {
   const SettingPage({Key? key}) : super(key: key);
 
@@ -88,9 +91,7 @@ class _SettingPageState extends State<SettingPage> {
               MXLoggerButton(
                   text: "确定修改",
                   onPressed: (ref) {
-                    ref.read(mxloggerRepository).saveAES(
-                        cryptKey: keyController.text.trim(),
-                        iv: ivController.text.trim());
+                    MXLoggerStorage.instance.saveAES(cryptKey: keyController.text.trim(), iv: ivController.text.trim());
                   }),
               const SizedBox(height: 10),
               Row(

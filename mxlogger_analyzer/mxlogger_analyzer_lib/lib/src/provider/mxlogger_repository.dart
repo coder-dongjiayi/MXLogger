@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../analyzer_data/analyzer_binary.dart';
 import '../analyzer_data/analyzer_database.dart';
 import '../page/lis_page/log_model.dart';
-import '../storage/mxlogger_storage.dart';
 
 final mxloggerRepository = Provider.autoDispose((ref) => MXLoggerRepository());
 
@@ -33,18 +32,17 @@ class MXLoggerRepository {
     return AnalyzerDatabase.count();
   }
 
-  Future<void> saveAES({String? cryptKey, String? iv}) async {
-    MXLoggerStorage.instance.saveAES(cryptKey: cryptKey, iv: iv);
-  }
 
   /// 导入二进制数据到数据库
   void importBytes(
       {required List<Uint8List> binaryData,
+        required String databasePath,
       required StreamController<Map<String, dynamic>?> streamController,
       String? cryptKey,
       String? cryptIv}) {
     AnalyzerBinary.loadBinaryData(
         binaryList: binaryData,
+        databasePath: databasePath,
         cryptKey: cryptKey,
         iv: cryptIv,
         onStartCallback: () {

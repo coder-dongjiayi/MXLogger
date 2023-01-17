@@ -1,14 +1,12 @@
-import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_repository.dart';
 
-import '../analyzer_data/analyzer_database.dart';
+
 import '../level/mx_level.dart';
-import '../storage/mxlogger_storage.dart';
+
 import 'level_list_state.dart';
 
 enum AnalyzerPlatform { desktop, mobile, package }
@@ -93,14 +91,7 @@ final emptyLogProvider = Provider.autoDispose<bool>((ref) {
   return count == 0;
 });
 
-/// 保存弹框提示的状态
-final cryptAlertProvider = StateProvider<bool?>((ref) {
-  ref.listenSelf((previous, next) {
-    /// 更新本地存储状态
-    MXLoggerStorage.instance.saveCryptAlert(next);
-  });
-  return MXLoggerStorage.instance.cryptAlert;
-});
+
 
 /// 等级状态
 final levelSearchProvider =

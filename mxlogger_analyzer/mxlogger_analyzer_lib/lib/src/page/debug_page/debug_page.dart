@@ -3,17 +3,18 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
-import 'package:mxlogger_analyzer_lib/src/component/mxlogger_text.dart';
+
 import 'dart:io';
 
 import 'debug_drawer.dart';
 
 class DebugPage extends ConsumerStatefulWidget {
-  DebugPage({Key? key, required this.diskcachePath, this.cryptKey, this.iv})
+  DebugPage({Key? key, required this.diskcachePath,required this.databasePath, this.cryptKey, this.iv})
       : super(key: key);
   final String diskcachePath;
+  final String databasePath;
   final String? cryptKey;
   final String? iv;
   @override
@@ -86,11 +87,11 @@ class DebugPageState extends ConsumerState<DebugPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CupertinoActivityIndicator(
+            const CupertinoActivityIndicator(
               color: Colors.white,
               radius: 20,
             ),
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
             MXLoggerText(text: message,style: TextStyle(color: MXTheme.text),)
           ],
         )
@@ -112,6 +113,7 @@ class DebugPageState extends ConsumerState<DebugPage> {
     });
     ref.read(mxloggerRepository).importBytes(
         binaryData: bytes,
+        databasePath: widget.databasePath,
         streamController: streamController,
         cryptIv: iv,
         cryptKey: cryptKey);

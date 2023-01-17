@@ -8,7 +8,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sqlite3/common.dart';
 
-import '../storage/mxlogger_storage.dart';
 import 'analyzer_database.dart';
 import 'log_serialize.dart';
 import 'package:mxlogger_analyzer_lib/src/aes_crypt/aes_crypt_null_safe.dart';
@@ -21,6 +20,7 @@ typedef AnalyValueChangedCallback = void Function(
 class AnalyzerBinary {
   static Future<void> loadBinaryData(
       {required List<Uint8List> binaryList,
+        required String databasePath,
       String? cryptKey,
       String? iv,
       VoidCallback? onStartCallback,
@@ -46,7 +46,7 @@ class AnalyzerBinary {
         if (finish == 1) {
           /// 加载完数据再重新连接数据库
            AnalyzerDatabase.initDataBase(
-              MXLoggerStorage.instance.databasePath);
+              databasePath);
           int number = result["number"];
           int error = result["errorNumber"];
           int repeatNumber = result["repeatNumber"];
@@ -67,7 +67,7 @@ class AnalyzerBinary {
           "binaryDataList": binaryList,
           "cryptKey": cryptKey,
           "iv": iv,
-          "path": MXLoggerStorage.instance.databasePath
+          "path": databasePath
         });
       }
     });

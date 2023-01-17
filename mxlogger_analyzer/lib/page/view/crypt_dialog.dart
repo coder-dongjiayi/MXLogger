@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:mxlogger_analyzer_lib/src/storage/mxlogger_storage.dart';
+import '../../storage/mxlogger_storage.dart';
+
 
 class CryptDialog extends StatefulWidget {
   const CryptDialog({Key? key}) : super(key: key);

@@ -7,13 +7,16 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:mxlogger_analyzer/page/desktop/desktop_page.dart';
+import 'package:mxlogger_analyzer/page/view/crypt_dialog.dart';
+import 'package:mxlogger_analyzer/storage/mxlogger_storage.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await MXAnalyzerLib_initialize();
-
+  await   MXLoggerStorage.instance.initialize();
+  MXAnalyzerLib_init(databasePath: MXLoggerStorage.instance.databasePath);
+  
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -61,6 +64,7 @@ class MyHomePage extends ConsumerWidget {
 
     ref.read(mxloggerRepository).importBytes(
         binaryData: [bytes],
+        databasePath: MXLoggerStorage.instance.databasePath,
         streamController: streamController,
         cryptKey: MXLoggerStorage.instance.cryptKey,
         cryptIv: MXLoggerStorage.instance.cryptIv);
