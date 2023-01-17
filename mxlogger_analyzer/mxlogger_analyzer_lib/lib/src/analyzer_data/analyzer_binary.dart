@@ -11,8 +11,7 @@ import 'package:sqlite3/common.dart';
 import '../storage/mxlogger_storage.dart';
 import 'analyzer_database.dart';
 import 'log_serialize.dart';
-
-import 'package:aes_crypt_null_safe/aes_crypt_null_safe.dart';
+import 'package:mxlogger_analyzer_lib/src/aes_crypt/aes_crypt_null_safe.dart';
 
 const int AES_LENGTH = 16;
 typedef AnalyzerProgressCallback = void Function(int total, int current,int index);

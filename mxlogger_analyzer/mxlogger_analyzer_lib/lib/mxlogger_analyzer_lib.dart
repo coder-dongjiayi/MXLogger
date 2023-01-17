@@ -17,7 +17,9 @@ export 'package:mxlogger_analyzer_lib/src/storage/mxlogger_storage.dart';
 export 'package:mxlogger_analyzer_lib/src/page/lis_page/log_list_page.dart';
 export 'package:mxlogger_analyzer_lib/src/page/error_page/error_page.dart';
 export 'package:mxlogger_analyzer_lib/src/page/detail_page/mxlogger_detail_page.dart';
-export 'package:mxlogger_analyzer_lib/src/page/setting/setting_page.dart';
+export 'package:mxlogger_analyzer_lib/src/component/mxlogger_text.dart';
+export 'package:mxlogger_analyzer_lib/src/component/mxlogger_button.dart';
+export 'package:mxlogger_analyzer_lib/src/component/mxlogger_textfield.dart';
 
 Future<void> MXAnalyzerLib_initialize() async {
   await MXLoggerStorage.instance.initialize();

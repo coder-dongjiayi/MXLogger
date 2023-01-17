@@ -1,17 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:mxlogger_analyzer_lib/src/storage/mxlogger_storage.dart';
-
-import '../../component/mxlogger_button.dart';
-import '../../component/mxlogger_text.dart';
-import '../../component/mxlogger_textfield.dart';
-
-import '../../provider/mxlogger_repository.dart';
-import '../../provider/mxlogger_provider.dart';
-import '../../theme/mx_theme.dart';
+import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({Key? key}) : super(key: key);

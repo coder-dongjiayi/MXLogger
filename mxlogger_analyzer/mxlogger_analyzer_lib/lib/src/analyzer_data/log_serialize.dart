@@ -2,7 +2,8 @@
 // ignore_for_file: unused_import, unused_field, unused_local_variable
 
 import 'dart:typed_data' show Uint8List;
-import 'package:flat_buffers/flat_buffers.dart' as fb;
+import 'package:mxlogger_analyzer_lib/src/flat_buffers/flat_buffers.dart' as fb;
+
 
 
 class LogSerialize {
