@@ -10,11 +10,11 @@ import 'package:sqlite3/common.dart';
 
 import 'analyzer_database.dart';
 import 'log_serialize.dart';
-import 'package:mxlogger_analyzer_lib/src/aes_crypt/aes_crypt_null_safe.dart';
+import 'package:mxlogger_analyzer_lib/src/dependencies/aes_crypt/aes_crypt_null_safe.dart';
 
 const int AES_LENGTH = 16;
 typedef AnalyzerProgressCallback = void Function(int total, int current,int index);
-typedef AnalyValueChangedCallback = void Function(
+typedef AnalyzerValueChangedCallback = void Function(
     int succsss, int repeat, int field);
 
 class AnalyzerBinary {
@@ -26,7 +26,7 @@ class AnalyzerBinary {
       VoidCallback? onStartCallback,
       ValueChanged<String>? onErrorCallback,
       AnalyzerProgressCallback? onProgressCallback,
-      AnalyValueChangedCallback? onEndCallback}) async {
+        AnalyzerValueChangedCallback? onEndCallback}) async {
     if(binaryList.isEmpty == true) return Future.value();
     /// 加载数据之前先关闭之前的数据库
     AnalyzerDatabase.db.dispose();

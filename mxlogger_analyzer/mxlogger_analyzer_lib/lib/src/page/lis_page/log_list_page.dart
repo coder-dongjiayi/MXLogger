@@ -62,7 +62,7 @@ class LogListPageState extends ConsumerState<LogListPage>
                         },
                         child: Container(
                           color: Colors.transparent,
-                          padding: EdgeInsets.only(left: 30,right: 10),
+                          padding: const EdgeInsets.only(left: 30,right: 10),
                           child: Icon(Icons.swap_vert_rounded,
                             color: sort == true
                                 ? MXTheme.subText
