@@ -10,13 +10,21 @@ import 'dart:io';
 
 import 'debug_drawer.dart';
 
+
+
 class DebugPage extends ConsumerStatefulWidget {
-  DebugPage({Key? key, required this.diskcachePath,required this.databasePath, this.cryptKey, this.iv})
+  const DebugPage(
+      {Key? key,
+      required this.diskcachePath,
+      required this.databasePath,
+      this.cryptKey,
+      this.iv})
       : super(key: key);
   final String diskcachePath;
   final String databasePath;
   final String? cryptKey;
   final String? iv;
+
   @override
   DebugPageState createState() => DebugPageState();
 }
@@ -33,7 +41,7 @@ class DebugPageState extends ConsumerState<DebugPage> {
     streamController.stream.listen((event) {
       ref.read(packageLoadStateProvider.notifier).state = event;
       int? status = event?["status"];
-      if(status == 2){
+      if (status == 2) {
         ref.invalidate(logPagesProvider);
       }
     });
@@ -47,7 +55,7 @@ class DebugPageState extends ConsumerState<DebugPage> {
       endDrawerEnableOpenDragGesture: false,
       drawerScrimColor: Colors.transparent,
       endDrawer: DebugDrawer(
-        refreshCallback: (){
+        refreshCallback: () {
           /// 刷新之前先清库
           ref.read(mxloggerRepository).deleteData();
           _loadData();
@@ -75,27 +83,30 @@ class DebugPageState extends ConsumerState<DebugPage> {
       final result = ref.watch(packageLoadStateProvider);
       int? status = result?["status"];
       String message = result?["message"] ?? "";
-      if(status == 2 || status == null) return SizedBox();
+      if (status == 2 || status == null) return const SizedBox();
       return Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Color.fromRGBO(0, 0, 0, 0.7),
-          borderRadius: BorderRadius.circular(10)
-        ),
-        width: 160,
-        height: 160,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CupertinoActivityIndicator(
-              color: Colors.white,
-              radius: 20,
-            ),
-            const SizedBox(height: 10,),
-            MXLoggerText(text: message,style: TextStyle(color: MXTheme.text),)
-          ],
-        )
-      );
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+              color: const Color.fromRGBO(0, 0, 0, 0.7),
+              borderRadius: BorderRadius.circular(10)),
+          width: 160,
+          height: 160,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CupertinoActivityIndicator(
+                color: Colors.white,
+                radius: 20,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              MXLoggerText(
+                text: message,
+                style: TextStyle(color: MXTheme.text),
+              )
+            ],
+          ));
     });
   }
 
@@ -107,7 +118,6 @@ class DebugPageState extends ConsumerState<DebugPage> {
     List<FileSystemEntity> fileList = directory.listSync();
     List<Uint8List> bytes = [];
     fileList.forEach((element) {
-
       Uint8List byte = File(element.path).readAsBytesSync();
       bytes.add(byte);
     });

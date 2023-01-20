@@ -19,9 +19,12 @@ export 'package:mxlogger_analyzer_lib/src/component/mxlogger_text.dart';
 export 'package:mxlogger_analyzer_lib/src/component/mxlogger_button.dart';
 export 'package:mxlogger_analyzer_lib/src/component/mxlogger_textfield.dart';
 export 'package:mxlogger_analyzer_lib/src/page/debug_page/debug_page.dart';
+export 'package:mxlogger_analyzer_lib/src/mxdebug_page.dart';
 void MXAnalyzerLib_init({required String databasePath}){
   AnalyzerDatabase.initDataBase(databasePath);
 }
+
+
 
 void MXAnalyzerLib_showDebug(BuildContext context,{required String diskcachePath, required String databasePath,String? cryptKey,String? iv}) async{
   AnalyzerDatabase.initDataBase(databasePath);
@@ -34,16 +37,11 @@ void MXAnalyzerLib_showDebug(BuildContext context,{required String diskcachePath
        return SizedBox(
          height: MediaQuery.of(context).size.height * 0.7,
 
-         child:Container(
-
-           child: ProviderScope(
-             child: DebugPage(
-               databasePath: databasePath,
-               diskcachePath: diskcachePath,
-               cryptKey: cryptKey,
-               iv: iv,
-             ),
-           ),
+         child:MXDebugPage(
+           databasePath: databasePath,
+           diskcachePath: diskcachePath,
+           cryptKey: cryptKey,
+           iv: iv,
          ),
        );
 
