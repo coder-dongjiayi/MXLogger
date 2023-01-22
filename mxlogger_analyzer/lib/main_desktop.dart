@@ -15,7 +15,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await   MXLoggerStorage.instance.initialize();
-  MXAnalyzerLib_init(databasePath: MXLoggerStorage.instance.databasePath);
+  MXAnalyzer.initialize(databasePath: MXLoggerStorage.instance.databasePath);
   
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -88,6 +88,7 @@ class MyHomePage extends ConsumerWidget {
                   duration: const Duration(seconds: 3));
             });
           } else {
+
             EasyLoading.showSuccess(message);
           }
 

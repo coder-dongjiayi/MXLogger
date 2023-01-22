@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import 'package:flutter/rendering.dart' as rendering;
@@ -34,6 +35,16 @@ class DebugDrawer extends ConsumerWidget {
           );
         });
   }
+  Future<void> _forceRepaint() {
+    late RenderObjectVisitor visitor;
+    visitor = (RenderObject child) {
+      child.markNeedsPaint();
+      child.visitChildren(visitor);
+    };
+
+    RendererBinding.instance.renderView.visitChildren(visitor);
+    return RendererBinding.instance.endOfFrame;
+  }
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
@@ -48,37 +59,36 @@ class DebugDrawer extends ConsumerWidget {
               refreshCallback?.call();
               Navigator.of(context).pop();
             }),
-            DrawerItem(iconData: Icons.cleaning_services_outlined,title: "清空日志数据",onTap: () async{
-             bool? flag =  await showAlert(context, ref);
-             if(flag == true) {
-               Navigator.of(context).pop();
-             }
+
+            DrawerItem(iconData: Icons.square_foot,title: "显示引导线",onTap: (){
+              rendering.debugPaintSizeEnabled = !rendering.debugPaintSizeEnabled;
+              _forceRepaint();
+            },),
+            DrawerItem(iconData: Icons.text_format,title: "显示基线",onTap: (){
+              rendering.debugPaintBaselinesEnabled = !rendering.debugPaintBaselinesEnabled;
+              _forceRepaint();
+            }),
+            DrawerItem(iconData: Icons.border_style,title: "显示边框",onTap: (){
+              rendering.debugPaintLayerBordersEnabled = !rendering.debugPaintLayerBordersEnabled;
+              _forceRepaint();
+            }),
+            DrawerItem(iconData: Icons.palette,title: "高亮重绘制内容",onTap: (){
+              rendering.debugRepaintRainbowEnabled = !rendering.debugRepaintRainbowEnabled;
+              _forceRepaint();
+            }),
+            DrawerItem(iconData: Icons.text_rotate_up,title: "开启文本背景色",onTap: (){
+              rendering.debugRepaintTextRainbowEnabled = !rendering.debugRepaintTextRainbowEnabled;
+              _forceRepaint();
+            }),
+            DrawerItem(iconData: Icons.circle_outlined,title: "禁用裁剪图层",onTap: (){
+              rendering.debugDisableClipLayers = !rendering.debugDisableClipLayers;
+              _forceRepaint();
+            }),
+            DrawerItem(iconData: Icons.rounded_corner,title: "禁用物理图层",onTap: (){
+              rendering.debugDisablePhysicalShapeLayers = !rendering.debugDisablePhysicalShapeLayers;
+              _forceRepaint();
             }),
 
-            DrawerItem(iconData: Icons.square_foot,title: "Show paint sizes",onTap: (){
-              rendering.debugPaintSizeEnabled = !rendering.debugPaintSizeEnabled;
-            },),
-            DrawerItem(iconData: Icons.text_format,title: "Show paint baselines",onTap: (){
-              rendering.debugPaintBaselinesEnabled = !rendering.debugPaintBaselinesEnabled;
-            }),
-            DrawerItem(iconData: Icons.border_style,title: "Show paint layer borders",onTap: (){
-              rendering.debugPaintLayerBordersEnabled = !rendering.debugPaintLayerBordersEnabled;
-            }),
-            DrawerItem(iconData: Icons.palette,title: "Show repaint rainbow",onTap: (){
-              rendering.debugRepaintRainbowEnabled = !rendering.debugRepaintRainbowEnabled;
-            }),
-            DrawerItem(iconData: Icons.text_rotate_up,title: "Show repaint text rainbow",onTap: (){
-              rendering.debugRepaintTextRainbowEnabled = !rendering.debugRepaintTextRainbowEnabled;
-            }),
-            DrawerItem(iconData: Icons.circle_outlined,title: "Disable clip layers",onTap: (){
-              rendering.debugDisableClipLayers = !rendering.debugDisableClipLayers;
-            }),
-            DrawerItem(iconData: Icons.rounded_corner,title: "Disable physical shape layers",onTap: (){
-              rendering.debugDisablePhysicalShapeLayers = !rendering.debugDisablePhysicalShapeLayers;
-            }),
-            DrawerItem(iconData: Icons.opacity,title: "Disable opacity layers",onTap: (){
-              rendering.debugDisableOpacityLayers = !rendering.debugDisableOpacityLayers;
-            }),
 
 
           ],

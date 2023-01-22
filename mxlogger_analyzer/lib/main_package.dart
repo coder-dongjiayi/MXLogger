@@ -14,6 +14,8 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+GlobalKey<NavigatorState> _navigatorStateKey = GlobalKey<NavigatorState>();
+
 class _MyAppState extends State<MyApp> {
   @override
   late MXLogger _mxLogger;
@@ -44,8 +46,10 @@ class _MyAppState extends State<MyApp> {
     print("loggerKey:${_mxLogger.loggerKey}");
   }
 
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorStateKey,
       home: Scaffold(
           backgroundColor: Colors.white,
           body: Builder(
@@ -64,21 +68,36 @@ class _MyAppState extends State<MyApp> {
                         },
                         child: Text("写入日志")),
                     Text("这是一行文本"),
-                    GestureDetector(
-                      onTap: () async{
-                        Directory directory =  await getApplicationDocumentsDirectory();
-                        MXAnalyzerLib_showDebug(context,
-                            databasePath: directory.path,
-                            diskcachePath: _mxLogger.diskcachePath,
-                            cryptKey: _cryptKey,
-                            iv: _iv);
-                      },
-                      child: Icon(
-                        Icons.bug_report,
-                        color: Colors.blue,
-                        size: 50,
-                      ),
-                    )
+                    ElevatedButton(
+                        onPressed: () async {
+                          Directory directory =
+                              await getApplicationDocumentsDirectory();
+                          MXAnalyzer.showDebug(
+                              _navigatorStateKey.currentState!.overlay!,
+                              diskcachePath: _mxLogger.diskcachePath,
+                              cryptKey: _mxLogger.cryptKey,
+                              iv: _mxLogger.iv,
+                              databasePath: directory.path);
+                        },
+                        child: Text("显示调试器")),
+                    ElevatedButton(onPressed: (){
+                      MXAnalyzer.dismiss();
+                    },child: Text("隐藏调试"),)
+                    // GestureDetector(
+                    //   onTap: () async{
+                    //     Directory directory =  await getApplicationDocumentsDirectory();
+                    //     MXAnalyzerLib_showDebug(context,
+                    //         databasePath: directory.path,
+                    //         diskcachePath: _mxLogger.diskcachePath,
+                    //         cryptKey: _cryptKey,
+                    //         iv: _iv);
+                    //   },
+                    //   child: Icon(
+                    //     Icons.bug_report,
+                    //     color: Colors.blue,
+                    //     size: 50,
+                    //   ),
+                    // )
                   ],
                 ),
               );
