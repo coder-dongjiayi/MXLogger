@@ -53,7 +53,7 @@ class LogAppBarState extends ConsumerState<LogAppBar> {
 
         return Container(
             padding: const EdgeInsets.only(left: 7, right: 7),
-            margin: EdgeInsets.only(right: 10, top: 10),
+            margin: const EdgeInsets.only(right: 10, top: 10),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),

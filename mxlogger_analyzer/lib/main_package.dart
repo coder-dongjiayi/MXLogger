@@ -50,13 +50,14 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: _navigatorStateKey,
+
       home: Scaffold(
           backgroundColor: Colors.white,
-          body: Builder(
+          body: SafeArea(child: Builder(
             builder: (context) {
               return Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     ElevatedButton(
                         onPressed: () {
@@ -71,7 +72,7 @@ class _MyAppState extends State<MyApp> {
                     ElevatedButton(
                         onPressed: () async {
                           Directory directory =
-                              await getApplicationDocumentsDirectory();
+                          await getApplicationDocumentsDirectory();
                           MXAnalyzer.showDebug(
                               _navigatorStateKey.currentState!.overlay!,
                               diskcachePath: _mxLogger.diskcachePath,
@@ -82,27 +83,38 @@ class _MyAppState extends State<MyApp> {
                         child: Text("显示调试器")),
                     ElevatedButton(onPressed: (){
                       MXAnalyzer.dismiss();
-                    },child: Text("隐藏调试"),)
-                    // GestureDetector(
-                    //   onTap: () async{
-                    //     Directory directory =  await getApplicationDocumentsDirectory();
-                    //     MXAnalyzerLib_showDebug(context,
-                    //         databasePath: directory.path,
-                    //         diskcachePath: _mxLogger.diskcachePath,
-                    //         cryptKey: _cryptKey,
-                    //         iv: _iv);
-                    //   },
-                    //   child: Icon(
-                    //     Icons.bug_report,
-                    //     color: Colors.blue,
-                    //     size: 50,
-                    //   ),
-                    // )
+                    },child: Text("隐藏调试"),),
+                    ElevatedButton(onPressed: (){
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context){
+                        return SecondPage();
+                      }));
+                    }, child: Text("进入二级页面"))
                   ],
                 ),
               );
             },
-          )),
+          ))),
     );
   }
 }
+
+class SecondPage extends StatefulWidget {
+  const SecondPage({Key? key}) : super(key: key);
+
+  @override
+  State<SecondPage> createState() => _SecondPageState();
+}
+
+class _SecondPageState extends State<SecondPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("second"),),
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Text("这是push进来的页面"),
+      ),
+    );
+  }
+}
+
