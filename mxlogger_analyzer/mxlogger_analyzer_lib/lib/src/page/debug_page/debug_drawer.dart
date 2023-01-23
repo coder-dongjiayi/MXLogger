@@ -5,36 +5,82 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import 'package:flutter/rendering.dart' as rendering;
 import 'package:mxlogger_analyzer_lib/src/component/mxlogger_text.dart';
-class DebugDrawer extends ConsumerWidget {
-  const DebugDrawer({Key? key,this.refreshCallback}) : super(key: key);
-  final VoidCallback? refreshCallback;
-  Future<bool?> showAlert(BuildContext context, WidgetRef ref) {
-  return   showDialog<bool>(
-        context: context,
-        builder: (_context) {
-          return CupertinoAlertDialog(
-            title: Text("提示"),
-            content: Text("你确定要清空数据库么"),
-            actions: [
-              CupertinoDialogAction(
-                child: Text("取消"),
-                onPressed: () {
-                  Navigator.of(_context).pop(false);
-                },
-              ),
-              CupertinoDialogAction(
-                child: Text("清空"),
-                onPressed: () {
-                   ref.read(mxloggerRepository).deleteData();
 
-                  ref.invalidate(logPagesProvider);
-                  Navigator.of(_context).pop(true);
-                },
-              )
-            ],
+import 'menu_list_state.dart';
+
+final menuListProvider =
+    StateNotifierProvider<DebugMenuListState, List<MenuItemModel>>((ref) {
+
+    bool paintSizeEnabled =   rendering.debugPaintSizeEnabled;
+    bool baselinesEnabled =  rendering.debugPaintBaselinesEnabled;
+    bool bordersEnabled = rendering.debugPaintLayerBordersEnabled;
+    bool rainbowEnabled = rendering.debugRepaintRainbowEnabled;
+    bool textRainbowEnabled = rendering.debugRepaintTextRainbowEnabled;
+    bool clipLayers = rendering.debugDisableClipLayers;
+    bool physicalShape =  rendering.debugDisablePhysicalShapeLayers;
+
+    return DebugMenuListState([
+    MenuItemModel(selected: paintSizeEnabled, title: "显示引导线", iconData: Icons.square_foot,onTapCallback: (){
+      rendering.debugPaintSizeEnabled = !rendering.debugPaintSizeEnabled;
+    }),
+    MenuItemModel(selected: baselinesEnabled, title: "显示基线", iconData: Icons.text_format,onTapCallback: (){
+      rendering.debugPaintBaselinesEnabled = !rendering.debugPaintBaselinesEnabled;
+    }),
+    MenuItemModel(selected: bordersEnabled, title: "显示边框", iconData: Icons.border_style,onTapCallback: (){
+      rendering.debugPaintLayerBordersEnabled = !rendering.debugPaintLayerBordersEnabled;
+    }),
+    MenuItemModel(selected: rainbowEnabled, title: "高亮重绘制内容", iconData: Icons.palette,onTapCallback: (){
+      rendering.debugRepaintRainbowEnabled = !rendering.debugRepaintRainbowEnabled;
+    }),
+    MenuItemModel(
+        selected: textRainbowEnabled, title: "开启文本背景色", iconData: Icons.text_rotate_up,onTapCallback: (){
+      rendering.debugRepaintTextRainbowEnabled = !rendering.debugRepaintTextRainbowEnabled;
+    }),
+    MenuItemModel(
+        selected: clipLayers, title: "禁用裁剪图层", iconData: Icons.circle_outlined,onTapCallback: (){
+      rendering.debugDisableClipLayers = !rendering.debugDisableClipLayers;
+    }),
+    MenuItemModel(
+        selected: physicalShape, title: "禁用物理图层", iconData: Icons.rounded_corner,onTapCallback: (){
+      rendering.debugDisablePhysicalShapeLayers = !rendering.debugDisablePhysicalShapeLayers;
+    })
+  ]);
+});
+
+class DebugDrawer extends ConsumerWidget {
+  const DebugDrawer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      width: 290,
+      height: MediaQuery.of(context).size.height,
+      color: MXTheme.sliderColor,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(top: 20),
+        child: Builder(builder: (context) {
+          List<MenuItemModel> list = ref.watch(menuListProvider);
+
+          return Column(
+            children: List.generate(list.length, (index) {
+              MenuItemModel model = list[index];
+              return DrawerItem(
+                  selected: model.selected,
+                  iconData: model.iconData,
+                  title: model.title,
+                  onTap: () {
+                          ref.read(menuListProvider.notifier).selected(index: index);
+                          model.onTapCallback.call();
+                             _forceRepaint();
+                  });
+            }),
           );
-        });
+        }),
+
+      ),
+    );
   }
+
   Future<void> _forceRepaint() {
     late RenderObjectVisitor visitor;
     visitor = (RenderObject child) {
@@ -45,86 +91,55 @@ class DebugDrawer extends ConsumerWidget {
     RendererBinding.instance.renderView.visitChildren(visitor);
     return RendererBinding.instance.endOfFrame;
   }
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      width: 290,
-      height: MediaQuery.of(context).size.height,
-      color: MXTheme.sliderColor,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.only(top: 20),
-        child: Column(
-          children: [
-            DrawerItem(iconData: Icons.refresh,title: "刷新日志数据",onTap: (){
-              refreshCallback?.call();
-              Navigator.of(context).pop();
-            }),
-
-            DrawerItem(iconData: Icons.square_foot,title: "显示引导线",onTap: (){
-              rendering.debugPaintSizeEnabled = !rendering.debugPaintSizeEnabled;
-              _forceRepaint();
-            },),
-            DrawerItem(iconData: Icons.text_format,title: "显示基线",onTap: (){
-              rendering.debugPaintBaselinesEnabled = !rendering.debugPaintBaselinesEnabled;
-              _forceRepaint();
-            }),
-            DrawerItem(iconData: Icons.border_style,title: "显示边框",onTap: (){
-              rendering.debugPaintLayerBordersEnabled = !rendering.debugPaintLayerBordersEnabled;
-              _forceRepaint();
-            }),
-            DrawerItem(iconData: Icons.palette,title: "高亮重绘制内容",onTap: (){
-              rendering.debugRepaintRainbowEnabled = !rendering.debugRepaintRainbowEnabled;
-              _forceRepaint();
-            }),
-            DrawerItem(iconData: Icons.text_rotate_up,title: "开启文本背景色",onTap: (){
-              rendering.debugRepaintTextRainbowEnabled = !rendering.debugRepaintTextRainbowEnabled;
-              _forceRepaint();
-            }),
-            DrawerItem(iconData: Icons.circle_outlined,title: "禁用裁剪图层",onTap: (){
-              rendering.debugDisableClipLayers = !rendering.debugDisableClipLayers;
-              _forceRepaint();
-            }),
-            DrawerItem(iconData: Icons.rounded_corner,title: "禁用物理图层",onTap: (){
-              rendering.debugDisablePhysicalShapeLayers = !rendering.debugDisablePhysicalShapeLayers;
-              _forceRepaint();
-            }),
-
-
-
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class DrawerItem extends StatelessWidget {
-  const DrawerItem({Key? key, required this.iconData, required this.title, required this.onTap}) : super(key: key);
+  const DrawerItem({
+    Key? key,
+    required this.iconData,
+    required this.title,
+    required this.onTap,
+    this.selected = false,
+  }) : super(key: key);
   final IconData iconData;
   final String title;
   final VoidCallback onTap;
+  final bool selected;
   @override
   Widget build(BuildContext context) {
-    return InkWell(onTap: (){
-      onTap.call();
-    }, child: Container(
-      margin: EdgeInsets.only(bottom: 20,left: 10),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(3),
-            decoration: BoxDecoration(
-                color: MXTheme.itemBackground,
-                borderRadius: BorderRadius.circular(8)
-            ),
+    return InkWell(
+        onTap: () {
+          onTap.call();
+        },
+        child: Container(
+          margin: EdgeInsets.only(bottom: 20, left: 10, right: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                    color: MXTheme.itemBackground,
+                    borderRadius: BorderRadius.circular(8)),
+                child: Icon(iconData, size: 35, color: MXTheme.white),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: MXLoggerText(
+                  text: title,
+                ),
+              ),
+              Checkbox(
+                  checkColor: MXTheme.themeColor,
 
-            child:  Icon(iconData,size: 35,color: MXTheme.white),
+                  fillColor:
+                      MaterialStateColor.resolveWith((states) => Colors.white),
+                  value: selected,
+                  onChanged: (value) {
+                    onTap.call();
+                  })
+            ],
           ),
-          SizedBox(width: 10),
-          MXLoggerText(text: title,)
-        ],
-      ),
-    ));
+        ));
   }
 }
-

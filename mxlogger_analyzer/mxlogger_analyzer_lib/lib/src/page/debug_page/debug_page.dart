@@ -54,12 +54,20 @@ class DebugPageState extends ConsumerState<DebugPage> {
       backgroundColor: MXTheme.themeColor,
       endDrawerEnableOpenDragGesture: false,
       drawerScrimColor: Colors.transparent,
-      endDrawer: DebugDrawer(
-        refreshCallback: () {
-          /// 刷新之前先清库
-          ref.read(mxloggerRepository).deleteData();
-          _loadData();
+      endDrawer: const DebugDrawer(),
+      floatingActionButton: GestureDetector(
+        onTap: (){
+          _refresh();
         },
+        child: Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: MXTheme.dropTargetColor,
+            borderRadius: BorderRadius.circular(25)
+          ),
+          child: Icon(Icons.refresh,color: MXTheme.white,size: 30,),
+        ),
       ),
       body: Stack(
         alignment: Alignment.center,
@@ -78,6 +86,10 @@ class DebugPageState extends ConsumerState<DebugPage> {
     );
   }
 
+  void _refresh(){
+    ref.read(mxloggerRepository).deleteData();
+    _loadData();
+  }
   Widget _loading() {
     return Consumer(builder: (context, ref, child) {
       final result = ref.watch(packageLoadStateProvider);

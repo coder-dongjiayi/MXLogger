@@ -1,5 +1,6 @@
 library mxlogger_analyzer_lib;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer_lib/src/analyzer_data/analyzer_database.dart';
 
@@ -48,6 +49,7 @@ class MXAnalyzer {
 
     await showModalBottomSheet(
         context: context,
+        enableDrag: false,
         isScrollControlled: true,
         backgroundColor: MXTheme.themeColor,
         builder: (context) {
@@ -69,7 +71,8 @@ class MXAnalyzer {
       required String databasePath,
       String? cryptKey,
       String? iv}) {
-    if (_analyzerOverlayEntry != null) return;
+
+    if (_analyzerOverlayEntry != null || kDebugMode == false) return;
     double screenWidth = MediaQuery.of(overlayState.context).size.width;
     double screenHeight = MediaQuery.of(overlayState.context).size.height;
 
