@@ -1,6 +1,6 @@
 name: mxlogger_analyzer_lib
-description: A new Flutter project.
-version: 0.0.1
+description: MXLogger debugger,You can easily view the log data.
+version: 1.0.0
 homepage:
 
 environment:
