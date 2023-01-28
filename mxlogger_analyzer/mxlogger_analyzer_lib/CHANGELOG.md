@@ -1,3 +1,6 @@
+## 1.0.1+1
+
+* Add sqlite3_flutter_libs dependencie.
 ## 1.0.1
 * Add isDebugMode arg.
 ## 1.0.0

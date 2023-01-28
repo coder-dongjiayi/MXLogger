@@ -1,5 +1,6 @@
 
 
+import 'package:flutter/cupertino.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 
 import '../storage/mxlogger_storage.dart';
@@ -11,4 +12,14 @@ final cryptAlertProvider = StateProvider<bool?>((ref) {
     MXLoggerStorage.instance.saveCryptAlert(next);
   });
   return MXLoggerStorage.instance.cryptAlert;
+});
+/// 首页选择index
+final selectedIndexProvider = StateProvider((ref) {
+  PageController controller = ref.read(pageControllerProvider);
+  ref.listenSelf((previous, next) {
+    if (previous != null) {
+      // controller.jumpToPage(next);
+    }
+  });
+  return 0;
 });

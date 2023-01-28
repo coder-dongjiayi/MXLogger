@@ -37,10 +37,11 @@ dependencies:
 
   device_info_plus: ^4.1.0
 
-  flutter_side_menu: ^0.1.0
   #用于测试 main_package的情况
   flutter_mxlogger: 1.2.2
 
+  auto_size_text: ^3.0.0
+  badges: ^2.0.3
   easy_refresh: ^3.0.4+2
   flutter_easyloading: ^3.0.5
   desktop_drop: ^0.3.3

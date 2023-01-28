@@ -45,16 +45,7 @@ final pageControllerProvider = Provider((ref) {
   return PageController(initialPage: 0);
 });
 
-/// 首页选择index
-final selectedIndexProvider = StateProvider((ref) {
-  PageController controller = ref.read(pageControllerProvider);
-  ref.listenSelf((previous, next) {
-    if (previous != null) {
-      controller.jumpToPage(next);
-    }
-  });
-  return 0;
-});
+
 
 final errorProvider = Provider<List<String>>((ref) {
   return [];

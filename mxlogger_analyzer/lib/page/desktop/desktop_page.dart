@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_side_menu/flutter_side_menu.dart';
+import 'package:mxlogger_analyzer/plug/flutter_side_menu/flutter_side_menu.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 
+import '../../provider/mxlogger_provider.dart';
 import '../setting/setting_page.dart';
 import './drop_target_view.dart';
 
