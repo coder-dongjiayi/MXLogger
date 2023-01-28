@@ -70,7 +70,9 @@ class _MyAppState extends State<MyApp> {
       "followRedirects": "true",
       "connectTimeout": "0",
       "receiveTimeout": "0",
-      "extra": {},
+      "extra": {
+        "name":"张三"
+      },
       "Request headers":
           "{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
       "Request data": "{mobile: 6666666666, logUrl: https://xxxx.txt}",

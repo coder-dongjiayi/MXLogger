@@ -46,11 +46,11 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
               );
             });
             },
-            child: Icon(Icons.info_outlined),
+            child: const Icon(Icons.info_outlined,color: Colors.white,),
           ),)
         ],
       ),
-      body: ListView(
+      body:  ListView(
         padding: const EdgeInsets.all(20),
         children: [
           Row(
@@ -63,7 +63,15 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
           thread(
               "${widget.logModel.threadId}", widget.logModel.isMainThread == 1),
           const SizedBox(height: 10),
-          time(widget.logModel.timestamp),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              time(widget.logModel.timestamp),
+              GestureDetector(onTap: (){
+                _copyClipboard(context, widget.logModel.msg);
+              },child: Icon(Icons.copy,color: MXTheme.subText,),)
+            ],
+          ),
           const SizedBox(height: 10),
           message((widget.logModel.msg))
         ],
@@ -72,6 +80,7 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
   }
 
   Widget name(String? name) {
+
     return Text("【$name】", style: TextStyle(color: MXTheme.text, fontSize: 18));
   }
 
@@ -131,23 +140,15 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
 
   Widget message(String? msg) {
     var jsonMap = _verifyJson(msg);
-    return GestureDetector(
-      onLongPress: (){
-        _copyClipboard(context, msg);
-      },
-      onDoubleTap: (){
-        _copyClipboard(context, msg);
-      },
-      child: Container(
-          width: MediaQuery.of(context).size.width,
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          color: MXTheme.itemBackground,
-          child: jsonMap != null
-              ? JsonViewer(jsonMap)
-              : Text(msg ?? "",
-              style: TextStyle(color: MXTheme.text, fontSize: 18))
-      )
-    );
+    return  SelectionArea(child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        color: MXTheme.itemBackground,
+        child: jsonMap != null
+            ? JsonViewer(jsonMap)
+            : Text(msg ?? "",
+            style: TextStyle(color: MXTheme.text, fontSize: 18))
+    ));
   }
 
   Map<String, dynamic>? _verifyJson(String? msg) {
