@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer_lib/src/analyzer_data/analyzer_database.dart';
 
 import 'mxlogger_analyzer_lib.dart';
-import 'package:mxlogger_analyzer_lib/src/page/debug_page/debug_page.dart';
-export 'package:riverpod/riverpod.dart';
 export 'package:flutter_riverpod/flutter_riverpod.dart';
 
 export 'package:mxlogger_analyzer_lib/src/provider/mxlogger_repository.dart';
@@ -69,10 +67,11 @@ class MXAnalyzer {
   static void showDebug(OverlayState overlayState,
       {required String diskcachePath,
       required String databasePath,
+      bool isDebugMode = kDebugMode,
       String? cryptKey,
       String? iv}) {
 
-    if (_analyzerOverlayEntry != null || kDebugMode == false) return;
+    if (_analyzerOverlayEntry != null || isDebugMode == false) return;
     double screenWidth = MediaQuery.of(overlayState.context).size.width;
     double screenHeight = MediaQuery.of(overlayState.context).size.height;
 
