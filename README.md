@@ -75,8 +75,12 @@ MXLogger | Logan
 * 日志查看
 
    为了解析产出的二进制数据，我写了一个配套的可以查看的解析工具[mxlogger_analyzer](./mxlogger_analyzer.dmg),他大概长下面这个样子。
-
-<img src="/Users/dongjiayi/Documents/github/MXLogger/icon/desktop.gif" alt="desktop" />
+   
+```HTML
+<video width="320" height="240" controls>
+    <source src="./icon/desktop.mp4" type="video/mp4">
+</video>
+```
 
 如果你使用的是Mac电脑你可以直接下载我写好的[客户端](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer.dmg)，把dmg里面的app拖到应用程序目录中就可以了。如果你使用的是windows系统，那么你可能需要自行配置Flutter环境，编译mxlogger_analyzer的源码打包出exe文件。因为个人精力有限，我可能只会关注mac端的适配情况。目前这个工具的功能还比较单一，但是满足了基本的分析查询功能，后期我会逐渐完善这个分析工具。如果你有特殊的需求分析，可以直接读取这个SQL数据库,通过操作sql进行自己的定制分析。
 
