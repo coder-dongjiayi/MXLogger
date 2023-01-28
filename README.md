@@ -85,7 +85,7 @@ https://user-images.githubusercontent.com/9606416/215237658-4f99fc51-4610-48c5-8
  如果你的工程是Flutter工程，你想在app内实时查看日志你可以在工程中依赖[mxlogger_analyzer_lib](https://pub.flutter-io.cn/packages/mxlogger_analyzer_lib)
  ```
  dependencies:
-   mxlogger_analyzer_lib:^1.0.1
+   mxlogger_analyzer_lib:^1.0.1+1
  ```
 使用方法
   ```dart
