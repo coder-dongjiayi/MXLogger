@@ -18,7 +18,8 @@ final selectedIndexProvider = StateProvider((ref) {
   PageController controller = ref.read(pageControllerProvider);
   ref.listenSelf((previous, next) {
     if (previous != null) {
-      // controller.jumpToPage(next);
+        int _next = next as int;
+       controller.jumpToPage(_next);
     }
   });
   return 0;
