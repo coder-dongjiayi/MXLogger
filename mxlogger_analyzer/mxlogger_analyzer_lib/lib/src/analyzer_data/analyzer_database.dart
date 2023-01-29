@@ -22,7 +22,7 @@ class AnalyzerDatabase {
         "level INTEGER,"
         "threadId INTEGER,"
         "isMainThread INTEGER, "
-        "timestamp INTEGER UNIQUE," // 日志创建时间戳
+        "timestamp INTEGER ," // 日志创建时间戳
         "fileHeader TEXT, " // 文件头
         "dateTime TEXT," // 日志创建时间
         "createDateTime TEXT" // 日志写入到数据库的时间

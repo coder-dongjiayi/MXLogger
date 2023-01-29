@@ -7,7 +7,7 @@ import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 import 'package:path_provider/path_provider.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(ProviderScope(child: MyApp()));
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -70,9 +70,7 @@ class _MyAppState extends State<MyApp> {
       "followRedirects": "true",
       "connectTimeout": "0",
       "receiveTimeout": "0",
-      "extra": {
-        "name":"张三"
-      },
+      "extra": {"name": "张三"},
       "Request headers":
           "{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
       "Request data": "{mobile: 6666666666, logUrl: https://xxxx.txt}",
