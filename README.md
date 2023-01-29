@@ -4,9 +4,11 @@
 <p align="center" >
 <img src="./icon/logo_400.png" alt="MXLogger"  title="MXLogger" style="zoom:20%;" />
 </p>
-[中文说明](./README_CN.md)
+
 # MXLogger
 MXLogger is a multi-platform collect logs library base on mmap. Support ios Android and Flutter。The core code use c/c++. Use the ffi call on the Flutter,Performance is almost identical to native. Data serialization uses Google's open source flat_buffers implementation, which is efficient and stable.
+
+中文版本请参看[这里](./README_CN.md)
 
 ###  Structure
 <img src="./icon/jiegoutu.jpg" alt="jiegoutu" style="zoom:30%;" />
