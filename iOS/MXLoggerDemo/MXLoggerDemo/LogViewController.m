@@ -89,10 +89,8 @@
     NSTimeInterval start =[dateStart timeIntervalSince1970];
 
     for (NSInteger i = 0; i < 100000; i++) {
-
-     //  [self.logger info:@"name" msg:@"This is mxlogger log" tag:@"net"];
-       
-        [self.logger info:@"name" msg:@"This is mxlogger log" tag:@"net"];
+        // 单条数据序列化之后的大小为136个字节 可以debug mmap_sink.cpp 中的第63行获取size的大小
+        [self.logger info:@"name" msg:@"This is test looooooooooooooooooooooooooooooooog" tag:@"net"];
 
     }
     NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
