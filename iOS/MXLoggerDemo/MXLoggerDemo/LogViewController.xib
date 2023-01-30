@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -22,7 +22,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="24k-KL-dE9">
-                    <rect key="frame" x="168.5" y="144" width="77" height="31"/>
+                    <rect key="frame" x="163.5" y="148" width="87" height="34.5"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="写入Log"/>
                     <connections>
@@ -30,7 +30,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OwV-wh-DRA">
-                    <rect key="frame" x="144.5" y="225" width="125" height="31"/>
+                    <rect key="frame" x="134" y="232.5" width="146" height="34.5"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="写入10万条数据"/>
                     <connections>
@@ -38,13 +38,13 @@
                     </connections>
                 </button>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="当前日志大小:0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Od2-7s-RmQ">
-                    <rect key="frame" x="147.5" y="87" width="119" height="21"/>
+                    <rect key="frame" x="147.5" y="91" width="119" height="21"/>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Do9-En-cis">
-                    <rect key="frame" x="109" y="286" width="196" height="31"/>
+                    <rect key="frame" x="91" y="297" width="232" height="34.5"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="获取当前磁盘日志文件列表"/>
                     <connections>
@@ -52,13 +52,13 @@
                     </connections>
                 </button>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AA0-8y-29r">
-                    <rect key="frame" x="10" y="337" width="394" height="0.0"/>
+                    <rect key="frame" x="10" y="351.5" width="394" height="0.0"/>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tKQ-v3-ckt">
-                    <rect key="frame" x="152" y="347" width="110" height="31"/>
+                    <rect key="frame" x="143" y="361.5" width="128" height="34.5"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="删除过期文件"/>
                     <connections>
@@ -66,7 +66,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FNL-vj-O9e">
-                    <rect key="frame" x="137.5" y="413" width="139" height="31"/>
+                    <rect key="frame" x="125.5" y="431" width="163" height="34.5"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="删除所有日志文件"/>
                     <connections>
@@ -74,11 +74,19 @@
                     </connections>
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gbD-Ze-Mh3">
-                    <rect key="frame" x="152" y="48" width="110" height="31"/>
+                    <rect key="frame" x="143" y="48.5" width="128" height="34.5"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="查看日志数据"/>
                     <connections>
                         <action selector="lookButtonAction:" destination="-1" eventType="touchUpInside" id="dEg-9A-0UQ"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K7h-9i-Hec">
+                    <rect key="frame" x="134" y="189" width="146" height="35"/>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="多线程并发测试"/>
+                    <connections>
+                        <action selector="threadTestButtonAction:" destination="-1" eventType="touchUpInside" id="KPh-fP-c7z"/>
                     </connections>
                 </button>
             </subviews>
@@ -101,6 +109,8 @@
                 <constraint firstItem="FNL-vj-O9e" firstAttribute="top" secondItem="tKQ-v3-ckt" secondAttribute="bottom" constant="35" id="kXq-bc-fc6"/>
                 <constraint firstItem="tKQ-v3-ckt" firstAttribute="centerX" secondItem="Q5M-cg-NOt" secondAttribute="centerX" id="mxy-pM-lZ7"/>
                 <constraint firstItem="tKQ-v3-ckt" firstAttribute="top" secondItem="AA0-8y-29r" secondAttribute="bottom" constant="10" id="oJN-Uh-CEV"/>
+                <constraint firstItem="K7h-9i-Hec" firstAttribute="centerX" secondItem="24k-KL-dE9" secondAttribute="centerX" id="ouK-Mj-zM8"/>
+                <constraint firstItem="K7h-9i-Hec" firstAttribute="top" secondItem="24k-KL-dE9" secondAttribute="bottom" constant="6.5" id="rNG-ij-7Rb"/>
                 <constraint firstItem="24k-KL-dE9" firstAttribute="top" secondItem="Q5M-cg-NOt" secondAttribute="top" constant="100" id="wZk-z6-XMo"/>
             </constraints>
             <point key="canvasLocation" x="132" y="131"/>

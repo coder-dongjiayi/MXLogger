@@ -101,6 +101,39 @@
     NSLog(@"时间:%f",end - start);
     [self updateSize];
 }
+- (IBAction)threadTestButtonAction:(id)sender {
+    
+    dispatch_queue_t queue = dispatch_queue_create("queue", DISPATCH_QUEUE_CONCURRENT);
+    
+    dispatch_async(queue, ^{
+        for (int i=0; i<10; i++) {
+            
+            [self.logger info:NULL msg:[NSString stringWithFormat:@"queue1 index=%ld",i] tag:@"queue1"];
+            NSLog(@"%@",[NSString stringWithFormat:@"queue1 index=%ld",i]);
+        }
+        
+    });
+    
+    dispatch_async(queue, ^{
+        for (int i=0; i<8; i++) {
+            
+            [self.logger info:NULL msg:[NSString stringWithFormat:@"queue2 index=%ld",i] tag:@"queue2"];
+            NSLog(@"%@",[NSString stringWithFormat:@"queue2 index=%ld",i]);
+        }
+        
+    });
+    dispatch_async(queue, ^{
+        for (int i=0; i<12; i++) {
+            
+            [self.logger info:NULL msg:[NSString stringWithFormat:@"queue3 index=%ld",i] tag:@"queue3"];
+            NSLog(@"%@",[NSString stringWithFormat:@"queue3 index=%ld",i]);
+        }
+    });
+
+    
+}
+
+
 - (IBAction)logFileButtonAction:(id)sender {
     NSMutableArray<NSString*> * filesArray = [NSMutableArray array];
     
