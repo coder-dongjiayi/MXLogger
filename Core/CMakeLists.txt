@@ -98,6 +98,8 @@ add_library(MXLoggerCore
         flatbuffers/stl_emulation.h
         md5/md5.h
         md5/md5.c
+        json/cJSON.h
+        json/cJSON.c
         sink/sink.hpp
         sink/sink.cpp
         sink/base_file_sink.cpp
