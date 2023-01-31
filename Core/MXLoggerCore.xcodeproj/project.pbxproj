@@ -24,6 +24,7 @@
 		BDE79FA82855DF7A00204C02 /* openssl_aesv8-armx.S in Sources */ = {isa = PBXBuildFile; fileRef = BD228FE42855DAC100794145 /* openssl_aesv8-armx.S */; };
 		BDE79FA92855DF7A00204C02 /* openssl_aes-armv4.S in Sources */ = {isa = PBXBuildFile; fileRef = BD228FE72855DAC100794145 /* openssl_aes-armv4.S */; };
 		BDE7A7B8285C857400B135FB /* debug_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDE7A7B6285C857300B135FB /* debug_log.cpp */; };
+		BDFD83BA2988BF6E00D197F1 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = BDFD83B82988BF6E00D197F1 /* cJSON.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -78,6 +79,8 @@
 		BDDD0C1E295AD39300AAE08B /* windows_sink.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = windows_sink.hpp; sourceTree = "<group>"; };
 		BDE7A7B6285C857300B135FB /* debug_log.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = debug_log.cpp; sourceTree = "<group>"; };
 		BDE7A7B7285C857300B135FB /* debug_log.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug_log.hpp; sourceTree = "<group>"; };
+		BDFD83B82988BF6E00D197F1 /* cJSON.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON.c; sourceTree = "<group>"; };
+		BDFD83B92988BF6E00D197F1 /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +126,7 @@
 		BD406D8E27F19C76002C76D5 = {
 			isa = PBXGroup;
 			children = (
+				BDFD83AC2987D2F100D197F1 /* json */,
 				BDE7A7B6285C857300B135FB /* debug_log.cpp */,
 				BDE7A7B7285C857300B135FB /* debug_log.hpp */,
 				BDABC1952852F52600A5FF1C /* log_msg.cpp */,
@@ -180,6 +184,15 @@
 				BDABC18F2851F7BF00A5FF1C /* aes_crypt.hpp */,
 			);
 			path = aes;
+			sourceTree = "<group>";
+		};
+		BDFD83AC2987D2F100D197F1 /* json */ = {
+			isa = PBXGroup;
+			children = (
+				BDFD83B82988BF6E00D197F1 /* cJSON.c */,
+				BDFD83B92988BF6E00D197F1 /* cJSON.h */,
+			);
+			path = json;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -253,6 +266,7 @@
 				BD7BA73F28082EA600EDA6AC /* sink.cpp in Sources */,
 				BDABC1872850A5F600A5FF1C /* base_file_sink.cpp in Sources */,
 				BDABC1972852F52600A5FF1C /* log_msg.cpp in Sources */,
+				BDFD83BA2988BF6E00D197F1 /* cJSON.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

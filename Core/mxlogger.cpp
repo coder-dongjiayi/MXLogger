@@ -19,6 +19,7 @@
 #include "mxlogger_helper.hpp"
 #include "log_msg.hpp"
 #include "debug_log.hpp"
+#include "cJSON.h"
 namespace mxlogger{
 
 std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::unordered_map<std::string, mxlogger *>;
@@ -230,7 +231,15 @@ void mxlogger::log(int level,const char* name, const char* msg,const char* tag,b
     if (enable_console_) {
 
         std::string time = mxlogger_helper::micros_time(log_msg.now_time);
-        std::string log = "[" + std::string{name} + "] " + time + "【"+std::string{level_names[level]} + "】" + (tag != nullptr ? "<" + std::string{tag} + ">" : "") + std::string{msg};
+        std::string string_msg = {msg};
+        cJSON * jsonItem = cJSON_Parse(msg);
+        if(jsonItem != nullptr){
+            string_msg = cJSON_Print(jsonItem);
+        }
+        cJSON_free(jsonItem);
+
+        std::string log = "[" + std::string{name} + "] " + time + "【"+std::string{level_names[level]} + "】" + (tag != nullptr ? "<" + std::string{tag} + ">" : "") + string_msg;
+        
 #ifdef __ANDROID__
         android_LogPriority priority;
         switch (lvl) {
@@ -257,6 +266,7 @@ void mxlogger::log(int level,const char* name, const char* msg,const char* tag,b
         log.append("\0");
         __android_log_write(priority,  log_msg.tag, log.c_str());
 #elif __APPLE__
+        
         printf("%s\n",log.data());
 #endif
 

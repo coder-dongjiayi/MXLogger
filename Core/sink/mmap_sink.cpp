@@ -58,16 +58,18 @@ void mmap_sink::log_(const details::log_msg& msg){
     auto root =  Createlog_serializeDirect(builder,msg.name,msg.tag,msg.msg,msg.level,(uint32_t)msg.thread_id,msg.is_main_thread,msg.time_stamp);
    
     builder.Finish(root);
+     auto buffer =  builder.Release();
     
-    uint8_t* point = builder.GetBufferPointer();
-    uint32_t size = builder.GetSize();
+    uint8_t* point = buffer.data();
+    uint32_t size = (uint32_t)buffer.size();
     
-
+    
     if (should_encrypt()) {
         cfb128_encrypt(point, point, size);
     }
     
     write_data_(point, size);
+ 
 }
 
 bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){
@@ -112,19 +114,17 @@ size_t mmap_sink::get_actual_size_(){
     
     return actual_size;
 }
+//扩容
 bool mmap_sink::truncate_(size_t size){
    
-    if(size <= 0 || size % page_size_ != 0 || size == file_size_){
-        size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
+    size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
 
-        
-        if(ftruncate(capacity_size) == false){
-            return false;
-        }
-        munmap_();
-        
-        file_size_ = capacity_size;
+    if(ftruncate(capacity_size) == false){
+        return false;
     }
+    munmap_();
+    
+    file_size_ = capacity_size;
     
     
     return mmap_ptr_ == nullptr ? mmap_() : true;

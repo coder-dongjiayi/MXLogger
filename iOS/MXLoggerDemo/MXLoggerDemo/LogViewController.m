@@ -65,7 +65,6 @@
     NSLog(@"MXLogger: %@",lg);
     
     NSLog(@"目录:%@",self.logger.diskCachePath);
-   
     
   
 }
@@ -73,6 +72,7 @@
 
 - (IBAction)writeLogButtonAction:(id)sender {
   
+    
     [self.logger debug:NULL msg:@"这是debug信息" tag:@"net"];
     [self.logger debug:@"mxlogger" msg:@"这是debug信息" tag:@"response"];
     [self.logger info:@"mxlogger" msg:@"这是info信息" tag:@"request"];
@@ -85,11 +85,14 @@
 
 - (IBAction)onehundredthousandButtonAction:(id)sender {
     
+   
+    
     NSDate * dateStart=   [NSDate dateWithTimeIntervalSinceNow:0];
     NSTimeInterval start =[dateStart timeIntervalSince1970];
 
     for (NSInteger i = 0; i < 100000; i++) {
         // 单条数据序列化之后的大小为136个字节 可以debug mmap_sink.cpp 中的第63行获取size的大小
+
         [self.logger info:@"name" msg:@"This is test looooooooooooooooooooooooooooooooog" tag:@"net"];
 
     }
