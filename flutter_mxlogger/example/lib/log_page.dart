@@ -30,20 +30,19 @@ class _LogPageState extends State<LogPage> {
 
     Directory directory = await  getApplicationDocumentsDirectory();
 
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+
 
     _mxLogger = await MXLogger.initialize(
         nameSpace: "flutter.mxlogger",
         directory: directory.path,
         storagePolicy: MXStoragePolicyType.yyyy_MM_dd_HH,
-        fileHeader: jsonEncode(iosInfo.toMap()),
+        fileHeader: "version 1.2.3",
         cryptKey: _cryptKey,
         iv: _iv);
 
     _mxLogger.setMaxDiskAge(60*60*24*7);
     _mxLogger.setMaxDiskSize(1024*1024*10);
-    _mxLogger.setConsoleEnable(false);
+    _mxLogger.setConsoleEnable(true);
     _mxLogger.setFileLevel(0);
     updateSize();
 

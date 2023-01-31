@@ -1,6 +1,6 @@
 name: flutter_mxlogger
 description: MXLogger is based on MMAP memory mapping mechanism, support iOS Android Flutter and AES CFB 128-bit encryption.The core code is implemented in C/C++, with the Flutter side called through ffi, performing almost as native. The underlying serialization uses Google's open source flat_buffers implementation, which is efficient and stable.
-version: 1.2.2
+version: 1.2.3
 homepage: https://github.com/coder-dongjiayi/MXLogger
 
 environment:
