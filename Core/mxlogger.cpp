@@ -19,7 +19,7 @@
 #include "mxlogger_helper.hpp"
 #include "log_msg.hpp"
 #include "debug_log.hpp"
-#include "cJSON.h"
+#include "json/cJSON.h"
 namespace mxlogger{
 
 std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::unordered_map<std::string, mxlogger *>;

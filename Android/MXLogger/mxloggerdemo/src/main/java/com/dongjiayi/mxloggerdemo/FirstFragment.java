@@ -34,6 +34,7 @@ public class FirstFragment extends Fragment {
                 "abnijuioijkolojh",
                 "abnijuioijkolccc");
         logger.setConsoleEnable(false);
+        logger.debug("s","s","{\"kev\":\"value\"}");
         logger.debug("request","mxlogger","this is debug");
         logger.info("request","mxlogger","this is info");
         logger.warn("request","mxlogger","this is warn");
