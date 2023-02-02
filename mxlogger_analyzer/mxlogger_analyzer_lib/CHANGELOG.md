@@ -1,4 +1,6 @@
 
+## 1.0.3
+* Fix bug.
 ## 1.0.2
 * Use SelectionArea.
 ## 1.0.1+1

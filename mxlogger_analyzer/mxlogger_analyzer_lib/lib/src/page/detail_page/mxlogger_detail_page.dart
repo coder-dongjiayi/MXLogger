@@ -56,7 +56,7 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
           Row(
             children: [
               level(widget.logModel.level),
-              name(widget.logModel.name),
+              Expanded(child: name(widget.logModel.name)),
             ],
           ),
           tags(widget.logModel.tag),

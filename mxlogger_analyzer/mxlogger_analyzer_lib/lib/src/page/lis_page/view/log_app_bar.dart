@@ -20,11 +20,11 @@ class LogAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget{
 class LogAppBarState extends ConsumerState<LogAppBar> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SafeArea(child: Container(
         padding: const EdgeInsets.only(top: 10, left: 10),
         child: Column(
           children: [_search(), _level()],
-        ));
+        )));
   }
 
   Widget _level() {

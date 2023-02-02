@@ -35,58 +35,60 @@ class LogListPageState extends ConsumerState<LogListPage>
     return Scaffold(
       backgroundColor: MXTheme.themeColor,
       appBar:  LogAppBar(menuCallback: widget.menuCallback,),
-      body: Consumer(builder: (context, ref, _) {
-        var config = ref.watch(logPagesProvider);
-        bool sort = ref.read(sortTimeProvider);
-        return config.whenExtension(
-          empty: (list) {
-            return list.isEmpty ? _empty() : null;
-          },
-          data: (list) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(top: 10, left: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      MXLoggerText(
-                          text: "共产生${list.length}条数据",
-                          style:
-                              TextStyle(color: MXTheme.subText, fontSize: 13)),
+      body: SafeArea(
+        child: Consumer(builder: (context, ref, _) {
+          var config = ref.watch(logPagesProvider);
+          bool sort = ref.read(sortTimeProvider);
+          return config.whenExtension(
+            empty: (list) {
+              return list.isEmpty ? _empty() : null;
+            },
+            data: (list) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(top: 10, left: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        MXLoggerText(
+                            text: "共产生${list.length}条数据",
+                            style:
+                            TextStyle(color: MXTheme.subText, fontSize: 13)),
 
-                      GestureDetector(
-                        onTap: () {
-                          ref.read(sortTimeProvider.notifier).state = !sort;
-                        },
-                        child: Container(
-                          color: Colors.transparent,
-                          padding: const EdgeInsets.only(left: 30,right: 10),
-                          child: Icon(Icons.swap_vert_rounded,
-                            color: sort == true
-                                ? MXTheme.subText
-                                : MXTheme.buttonColor,size: 15,),
-                        ),
-                      )
-                    ],
+                        GestureDetector(
+                          onTap: () {
+                            ref.read(sortTimeProvider.notifier).state = !sort;
+                          },
+                          child: Container(
+                            color: Colors.transparent,
+                            padding: const EdgeInsets.only(left: 30,right: 10),
+                            child: Icon(Icons.swap_vert_rounded,
+                              color: sort == true
+                                  ? MXTheme.subText
+                                  : MXTheme.buttonColor,size: 15,),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-                Expanded(
-                    child: LogListView(
-                  dataSource: list,
-                  callback: (index) {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) {
-                      return MXLoggerDetailPage(logModel: list[index]);
-                    }));
-                  },
-                ))
-              ],
-            );
-          },
-        );
-      }),
+                  Expanded(
+                      child: LogListView(
+                        dataSource: list,
+                        callback: (index) {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) {
+                            return MXLoggerDetailPage(logModel: list[index]);
+                          }));
+                        },
+                      ))
+                ],
+              );
+            },
+          );
+        }),
+      ),
     );
   }
 
