@@ -59,17 +59,17 @@ https://user-images.githubusercontent.com/9606416/215238043-e7199344-ba26-42a6-b
 
 ## iOS
 
-``` pod 'MXLogger', '~> 1.2.2'```
+``` pod 'MXLogger', '~> 1.2.3'```
 
 ## Android
 
-``` implementation 'io.github.coder-dongjiayi:mxlogger:1.2.2'```
+``` implementation 'io.github.coder-dongjiayi:mxlogger:1.2.3'```
 
 ### Flutter
 
 ```
 dependencies:
-  flutter_mxlogger: ^1.2.2
+  flutter_mxlogger: ^last
 ```
 
 ### notice
