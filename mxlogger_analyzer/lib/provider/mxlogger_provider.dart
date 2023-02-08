@@ -13,6 +13,11 @@ final cryptAlertProvider = StateProvider<bool?>((ref) {
   });
   return MXLoggerStorage.instance.cryptAlert;
 });
+
+final pageControllerProvider = Provider((ref) {
+  return PageController(initialPage: 0);
+});
+
 /// 首页选择index
 final selectedIndexProvider = StateProvider((ref) {
   PageController controller = ref.read(pageControllerProvider);

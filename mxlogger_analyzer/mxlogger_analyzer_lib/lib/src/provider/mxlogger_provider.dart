@@ -41,9 +41,7 @@ final logPagesProvider = FutureProvider.autoDispose((ref) {
   return logResponse;
 });
 
-final pageControllerProvider = Provider((ref) {
-  return PageController(initialPage: 0);
-});
+
 
 
 
