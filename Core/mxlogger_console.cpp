@@ -62,7 +62,7 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
     
     char sep = '-';
     
-    std::string string_msg = {msg.msg};
+    std::string string_msg = msg.msg != nullptr ?  msg.msg : "";
     cJSON * jsonItem = cJSON_Parse(msg.msg);
     if(jsonItem != nullptr){
         string_msg = cJSON_Print(jsonItem);
