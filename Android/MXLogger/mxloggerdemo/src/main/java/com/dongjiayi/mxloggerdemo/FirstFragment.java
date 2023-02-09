@@ -33,7 +33,7 @@ public class FirstFragment extends Fragment {
                 "这是MXLogger头信息",
                 "abnijuioijkolojh",
                 "abnijuioijkolccc");
-        logger.setConsoleEnable(false);
+        logger.setConsoleEnable(true);
         logger.debug("s","s","{\"kev\":\"value\"}");
         logger.debug("request","mxlogger","this is debug");
         logger.info("request","mxlogger","this is info");

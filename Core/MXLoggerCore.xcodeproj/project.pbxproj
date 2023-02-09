@@ -24,6 +24,7 @@
 		BDE79FA82855DF7A00204C02 /* openssl_aesv8-armx.S in Sources */ = {isa = PBXBuildFile; fileRef = BD228FE42855DAC100794145 /* openssl_aesv8-armx.S */; };
 		BDE79FA92855DF7A00204C02 /* openssl_aes-armv4.S in Sources */ = {isa = PBXBuildFile; fileRef = BD228FE72855DAC100794145 /* openssl_aes-armv4.S */; };
 		BDE7A7B8285C857400B135FB /* debug_log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDE7A7B6285C857300B135FB /* debug_log.cpp */; };
+		BDEC445729948B8500C525DC /* mxlogger_console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDEC445529948B8500C525DC /* mxlogger_console.cpp */; };
 		BDFD83BA2988BF6E00D197F1 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = BDFD83B82988BF6E00D197F1 /* cJSON.c */; };
 /* End PBXBuildFile section */
 
@@ -79,6 +80,8 @@
 		BDDD0C1E295AD39300AAE08B /* windows_sink.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = windows_sink.hpp; sourceTree = "<group>"; };
 		BDE7A7B6285C857300B135FB /* debug_log.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = debug_log.cpp; sourceTree = "<group>"; };
 		BDE7A7B7285C857300B135FB /* debug_log.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug_log.hpp; sourceTree = "<group>"; };
+		BDEC445529948B8500C525DC /* mxlogger_console.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mxlogger_console.cpp; sourceTree = "<group>"; };
+		BDEC445629948B8500C525DC /* mxlogger_console.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mxlogger_console.hpp; sourceTree = "<group>"; };
 		BDFD83B82988BF6E00D197F1 /* cJSON.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON.c; sourceTree = "<group>"; };
 		BDFD83B92988BF6E00D197F1 /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -126,6 +129,8 @@
 		BD406D8E27F19C76002C76D5 = {
 			isa = PBXGroup;
 			children = (
+				BDEC445529948B8500C525DC /* mxlogger_console.cpp */,
+				BDEC445629948B8500C525DC /* mxlogger_console.hpp */,
 				BDFD83AC2987D2F100D197F1 /* json */,
 				BDE7A7B6285C857300B135FB /* debug_log.cpp */,
 				BDE7A7B7285C857300B135FB /* debug_log.hpp */,
@@ -251,6 +256,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BDEC445729948B8500C525DC /* mxlogger_console.cpp in Sources */,
 				BDE7A7B8285C857400B135FB /* debug_log.cpp in Sources */,
 				BDE79FA62855DF7A00204C02 /* openssl_cfb128.cpp in Sources */,
 				BDE79FA72855DF7A00204C02 /* openssl_aes_core.cpp in Sources */,

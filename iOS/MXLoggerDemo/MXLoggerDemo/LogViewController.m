@@ -56,7 +56,7 @@
 
     self.logger.shouldRemoveExpiredDataWhenTerminate = YES;
 
-    self.logger.consoleEnable = NO;
+    self.logger.consoleEnable = YES;
     
     self.logger.fileLevel = 0;
 
@@ -72,14 +72,28 @@
 
 - (IBAction)writeLogButtonAction:(id)sender {
   
+    NSDictionary * dict = @{
+        @"uri":@"https://192.168.1.1/test",
+        @"method":@"POST",
+        @"responseType":@"ResponseType.json",
+        @"followRedirects":@"true",
+        @"connectTimeout":@"0",
+        @"receiveTimeout":@"0",
+        @"Request headers":@"{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
+        @"Request data":@"{mobile: 6666666666, logUrl: https://xxxx.txt}",
+        @"statusCode":@"200",
+        @"Response Text":@"{\"code\":0,\"msg\":\"操作成功\"}"
+    };
+   NSData * data =  [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:NULL];
+  NSString * jsonString =   [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
-    [self.logger debug:NULL msg:@"这是debug信息" tag:@"net"];
-    [self.logger debug:@"mxlogger" msg:@"这是debug信息" tag:@"response"];
-    [self.logger info:@"mxlogger" msg:@"这是info信息" tag:@"request"];
-    [self.logger warn:@"mxlogger" msg:@"这是warn信息" tag:@"step"];
-    [self.logger error:@"mxlogger" msg:@"这是error信息" tag:NULL];
-    [self.logger fatal:@"mxlogger" msg:@"这是fatal信息" tag:NULL];
-    [self updateSize];
+    [self.logger debug:NULL msg:@"MXLogger is a multi-platform collect logs library base on mmap. Support ios Android and Flutter。The core code use c/c++. Use the ffi call on the Flutter,Performance is almost identical to native. Data serialization uses Google's open source flat_buffers implementation, which is efficient and stable" tag:@"net"];
+    [self.logger debug:@"mxlogger" msg:jsonString tag:@"response,request,other"];
+    [self.logger info:@"mxlogger" msg:@"MXLogger 是基于mmap内存映射机制的跨平台日志库，支持AES CFB 128位加密，支持iOS Android Flutter。核心代码使用C/C++实现， Flutter端通过ffi调用，性能几乎与原生一致。 底层序列化使用Google开源的flat_buffers实现，高效稳定" tag:@"request"];
+    [self.logger warn:NULL msg:@"这是warn信息" tag:@"step"];
+    [self.logger error:@"app" msg:@"这是error信息" tag:NULL];
+//    [self.logger fatal:@"mxlogger" msg:@"这是fatal信息" tag:NULL];
+//    [self updateSize];
 }
 
 

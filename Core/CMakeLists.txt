@@ -81,6 +81,8 @@ add_library(MXLoggerCore
         mxlogger_helper.hpp
         mxlogger_util.cpp
         mxlogger_util.hpp
+        mxlogger_console.cpp
+        mxlogger_console.hpp
         mxlogger.cpp
         mxlogger.hpp
         aes/aes_crypt.hpp
