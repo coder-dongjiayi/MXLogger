@@ -54,12 +54,13 @@ void mxlogger_console::print(const details::log_msg& msg){
 std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
     
     
-    constexpr auto width = 80U;
+    constexpr auto width = 100U;
     
     std::string time = mxlogger_helper::micros_datetime(msg.now_time);
     
     std::basic_ostringstream<char> stream;
     
+    char sep = '-';
     
     std::string string_msg = {msg.msg};
     cJSON * jsonItem = cJSON_Parse(msg.msg);
@@ -82,30 +83,30 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
             stream << "MXLogger";
         }
             
-        stream << "-";
+        stream << sep;
     }
     
     stream << std::endl;
     
     // center
 
-    stream << "time : " << time <<" [" + thread + "]" << endl;
+    stream << " time : " << time <<" [" + thread + "]" << endl;
     
-    stream << "level: " + level  << std::endl;
+    stream << " level: " + level  << std::endl;
     
-    stream << "name : " + std::string{msg.name} <<std::endl;
+    stream << " name : " + std::string{msg.name} <<std::endl;
    
     if(msg.tag != nullptr){
-        stream << "tags : " + std::string{msg.tag} << std::endl;
+        stream << " tags : " + std::string{msg.tag} << std::endl;
     }
    
-    stream  << "msg  : " <<string_msg << std::endl;
+    stream  << " msg  : " <<string_msg << std::endl;
    
     
     // bottom
     for (size_t i = 0; i != (width + 8); ++i)
     {
-        stream << "-";
+        stream << sep;
     }
     stream << std::endl;
     return stream.str();

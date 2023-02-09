@@ -14,15 +14,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../../Core/mxlogger_console.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../Core/mxlogger_console.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/MXLoggerCore.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/MXLoggerCore.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/LogViewController.m" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/LogViewController.m" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
