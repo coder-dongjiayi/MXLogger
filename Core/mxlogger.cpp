@@ -228,49 +228,9 @@ void mxlogger::log(int level,const char* name, const char* msg,const char* tag,b
     
     mmap_sink_ -> log(log_msg);
    
-    if (enable_console_) {
+    if (enable_console_ == true) {
         
         mxlogger_console::print(log_msg);
-        
-//        std::string time = mxlogger_helper::micros_time(log_msg.now_time);
-//        std::string string_msg = {msg};
-//        cJSON * jsonItem = cJSON_Parse(msg);
-//        if(jsonItem != nullptr){
-//            string_msg = cJSON_Print(jsonItem);
-//        }
-//        cJSON_free(jsonItem);
-//
-//        std::string log = "[" + std::string{name} + "] " + time + "【"+std::string{level_names[level]} + "】" + (tag != nullptr ? "<" + std::string{tag} + ">" : "") + string_msg;
-//
-//#ifdef __ANDROID__
-//        android_LogPriority priority;
-//        switch (lvl) {
-//            case level::level_enum::debug:
-//                priority = ANDROID_LOG_DEBUG;
-//                break;
-//            case level::level_enum::info:
-//                priority = ANDROID_LOG_INFO;
-//                break;
-//            case level::level_enum::warn:
-//                priority = ANDROID_LOG_WARN;
-//                break;
-//            case level::level_enum::error:
-//                priority = ANDROID_LOG_ERROR;
-//                break;
-//            case level::level_enum::fatal:
-//                priority = ANDROID_LOG_FATAL;
-//                break;
-//            default:
-//                priority = ANDROID_LOG_DEBUG;
-//                break;
-//
-//        }
-//        log.append("\0");
-//        __android_log_write(priority,  log_msg.tag, log.c_str());
-//#elif __APPLE__
-//
-//        printf("%s\n",log.data());
-//#endif
 
     }
 
