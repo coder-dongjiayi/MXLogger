@@ -67,8 +67,10 @@ MXLogger | Xlog | Logan
 
 https://user-images.githubusercontent.com/9606416/215237658-4f99fc51-4610-48c5-8803-daaf86400bf3.mp4
 
-
-如果你使用的是Mac电脑你可以直接下载我写好的[客户端](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer.dmg)，把dmg里面的app拖到应用程序目录中就可以了。如果你使用的是windows系统，那么你可能需要自行配置Flutter环境，编译mxlogger_analyzer的源码打包出exe文件。因为个人精力有限，我可能只会关注mac端的适配情况。如果你有特殊的需求分析，可以直接读取这个SQL数据库,通过操作sql进行自己的定制分析。
+* 控制台输出
+如果设置console = YES. 那么在控制台下可以可以看到下面这样的输出信息。
+ <img src="./icon/20230210103021.jpg" alt="jiegoutu" style="zoom:30%;" />
+如果你使用的是Mac电脑你可以直接下载我写好的 [客户端](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer.dmg)，把dmg里面的app拖到应用程序目录中就可以了。如果你使用的是windows系统，那么你可能需要自行配置Flutter环境，编译mxlogger_analyzer的源码打包出exe文件。因为个人精力有限，我可能只会关注mac端的适配情况。如果你有特殊的需求分析，可以直接读取这个SQL数据库,通过操作sql进行自己的定制分析。
 
  如果你的工程是Flutter工程，你想在app内实时查看日志你可以在工程中依赖[mxlogger_analyzer_lib](https://pub.flutter-io.cn/packages/mxlogger_analyzer_lib)
  ```
@@ -198,7 +200,6 @@ dependencies:
 # 后续版本迭代安排
 
 1. 日志文件压缩 
-2. 强化控制台日志输出
 
 
 # 参考代码
