@@ -67,11 +67,10 @@ class MXAnalyzer {
   static void showDebug(OverlayState overlayState,
       {required String diskcachePath,
       required String databasePath,
-      bool isDebugMode = kDebugMode,
       String? cryptKey,
       String? iv}) {
 
-    if (_analyzerOverlayEntry != null || isDebugMode == false) return;
+    if (_analyzerOverlayEntry != null) return;
     double screenWidth = MediaQuery.of(overlayState.context).size.width;
     double screenHeight = MediaQuery.of(overlayState.context).size.height;
 

@@ -1,4 +1,6 @@
 
+## 1.0.4
+* Remove isDebug arg.
 ## 1.0.3
 * Fix bug.
 ## 1.0.2
