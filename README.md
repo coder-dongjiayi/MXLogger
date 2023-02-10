@@ -31,6 +31,9 @@ Currently, the MXLogger mainly solves log writing and log analysis problems.The 
  # Log viewing
    * To parse the generated binary data, I wrote an accompanying parsing tool that you can view[mxlogger_analyzer](./mxlogger_analyzer.dmg),It looks something like this。
    [video link](https://user-images.githubusercontent.com/9606416/215237658-4f99fc51-4610-48c5-8803-daaf86400bf3.mp4)
+   
+ # Conolse 
+ <img src="./icon/20230210103021.jpg" alt="jiegoutu" style="zoom:30%;" />
 
 https://user-images.githubusercontent.com/9606416/215237658-4f99fc51-4610-48c5-8803-daaf86400bf3.mp4
  * If you're using a Mac you can just download the [client](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer.dmg)。If you are using windows, you may need to configure the Flutter environment yourself, compile the source code for mxlogger_analyzer and package the exe file。
