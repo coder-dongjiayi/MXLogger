@@ -59,11 +59,11 @@ https://user-images.githubusercontent.com/9606416/215238043-e7199344-ba26-42a6-b
 
 ## iOS
 
-``` pod 'MXLogger', '~> 1.2.3'```
+``` pod 'MXLogger'```
 
 ## Android
 
-``` implementation 'io.github.coder-dongjiayi:mxlogger:1.2.3'```
+``` implementation 'io.github.coder-dongjiayi:mxlogger:latest.release'```
 
 ### Flutter
 
