@@ -9,8 +9,8 @@
 #define log_enum_h
 
 
-static const char *level_names[]{"DEBUG","INFO ","WARN ","ERROR","FATAL"};
-
+static const char *level_names[]{"DEBUG","INFO","WARN","ERROR","FATAL"};
+static const char * level_icons[]{"🟩","🟦","🟨","🟥","❌"};
 namespace policy {
 enum storage_policy: int {
     yyyy_MM = 0,

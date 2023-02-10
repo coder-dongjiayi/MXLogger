@@ -92,7 +92,7 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
 
     stream << " time : " << time <<" [" + thread + "]" << endl;
     
-    stream << " level: " + level  << std::endl;
+    stream << " level: " + level << " " << level_icons[msg.level] << std::endl;
     
     stream << " name : " + std::string{msg.name} <<std::endl;
    
