@@ -1,6 +1,9 @@
 
 # MXLogger for Flutter Change Log
 
+# v1.2.4/2023-02-10
+* Keep up with MXLogger native lib v1.2.4.
+* Use "🟩","🟦","🟨","🟥","❌ emoji for 'DEBUG','INFO','WARN','ERROR','FATAL' on console.
 # v1.2.3/2023-01-31
 * Keep up with MXLogger native lib v1.2.3.
 * fix bug

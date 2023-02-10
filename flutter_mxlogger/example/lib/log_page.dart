@@ -57,7 +57,7 @@ class _LogPageState extends State<LogPage> {
 
     _mxLogger.debug("这是条debug状态下的调试信息", tag: "login,service");
 
-    _mxLogger.debug("这是条debug状态下的调试信息", tag: "register");
+    _mxLogger.info("这是条Info状态下的调试信息", tag: "register");
 
     Map<String,dynamic> json1 = {
       "uri":"https://192.168.1.1/test",
@@ -117,7 +117,7 @@ When the exception was thrown, this was the stack:
 #289    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:4977:11)
     """;
     _mxLogger.error(flutterError,tag: "flutter,crash");
-
+    _mxLogger.fatal("这是条fatal状态下的调试信息", tag: "crash");
   }
   @override
   void dispose() {
