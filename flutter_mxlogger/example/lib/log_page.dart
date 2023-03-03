@@ -176,6 +176,13 @@ When the exception was thrown, this was the stack:
               ),
               ElevatedButton(
                 onPressed: () {
+                  _mxLogger.removeBeforeAllData();
+                  updateSize();
+                },
+                child: Text("清理除当前写入的所有日志文件"),
+              ),
+              ElevatedButton(
+                onPressed: () {
                   MXLogger.logLoggerKey(loggerKey, 0, "这是map写入的数据 debug",tag: "loggerKey",name: "mxlogger_loggerKey");
                   MXLogger.logLoggerKey(loggerKey, 1, "这是map写入的数据 info",tag: "loggerKey",name: "mxlogger_loggerKey");
                   MXLogger.logLoggerKey(loggerKey, 2, "这是map写入的数据 warn",tag: "loggerKey",name: "mxlogger_loggerKey");

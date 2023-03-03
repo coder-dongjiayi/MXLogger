@@ -1,22 +1,46 @@
 PODS:
-  - MXLogger (1.2.4):
-    - MXLoggerCore (= 1.2.4)
-  - MXLoggerCore (1.2.4)
+  - device_info_plus (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_mxlogger (0.0.1):
+    - Flutter
+    - MXLogger (= 1.2.5)
+  - MXLogger (1.2.5):
+    - MXLoggerCore (= 1.2.5)
+  - MXLoggerCore (1.2.5)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
-  - MXLogger (from `/Users/dongjiayi/Documents/github/MXLogger`)
-  - MXLoggerCore (from `/Users/dongjiayi/Documents/github/MXLogger`)
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_mxlogger (from `.symlinks/plugins/flutter_mxlogger/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/ios`)
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - MXLogger
+    - MXLoggerCore
 
 EXTERNAL SOURCES:
-  MXLogger:
-    :path: "/Users/dongjiayi/Documents/github/MXLogger"
-  MXLoggerCore:
-    :path: "/Users/dongjiayi/Documents/github/MXLogger"
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
+  Flutter:
+    :path: Flutter
+  flutter_mxlogger:
+    :path: ".symlinks/plugins/flutter_mxlogger/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/ios"
 
 SPEC CHECKSUMS:
-  MXLogger: 51a3fef54946d29c2cae14b3aa7d0f47720abb01
-  MXLoggerCore: a411899aa9e469b5800ebd7c78f135134456bd19
+  device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  flutter_mxlogger: 77e81891f0b0cf394aa512b0e3260778f0eb0c79
+  MXLogger: dfb2200493abbad1bab08e200bed73f4a30f2fa6
+  MXLoggerCore: 31d90b8f080d5769f982b9a4fc8c21267fb07a97
+  path_provider_foundation: c68054786f1b4f3343858c1e1d0caaded73f0be9
 
-PODFILE CHECKSUM: 5daada334cbe6725bef94cc30b6f20d2e3f1c4c7
+PODFILE CHECKSUM: ab5dcc0987b8a50f8ca8ed59b7a6fed86ee7fa0a
 
 COCOAPODS: 1.11.2

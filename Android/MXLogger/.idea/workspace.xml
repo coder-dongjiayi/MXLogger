@@ -15,22 +15,14 @@
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/sink/base_file_sink.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/sink/base_file_sink.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Core/sink/base_file_sink.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/sink/base_file_sink.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxlogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../MXLogger.podspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../MXLogger.podspec" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/lib/flutter_mxlogger.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/lib/flutter_mxlogger.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.mm" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLogger/MXLogger/MXLogger.mm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/log_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/log_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/flutter-bridge.mm" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/flutter-bridge.mm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/ios/flutter_mxlogger.podspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/ios/flutter_mxlogger.podspec" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/LogViewController.m" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/LogViewController.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/LogViewController.xib" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/LogViewController.xib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../mxlogger_analyzer/mxlogger_analyzer_lib/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

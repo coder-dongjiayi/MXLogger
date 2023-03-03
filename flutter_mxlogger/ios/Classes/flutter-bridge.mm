@@ -234,6 +234,12 @@ MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_diskcache_path)(const void *handl
     return logger.diskCachePath.UTF8String;
 }
 
+
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_before_all_data)(const void *handle){
+    MXLogger *logger = (__bridge MXLogger *) handle;
+    [logger removeBeforeAllData];
+}
+
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_expire_data)(const void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
     [logger removeExpireData];
