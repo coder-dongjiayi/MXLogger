@@ -285,6 +285,11 @@ class MXLogger with WidgetsBindingObserver {
     if (enable == false) return;
     _removeExpireData(_handle);
   }
+  /// 删除除当前正在写入的所有日志文件
+  void removeBeforeAllData(){
+    if (enable == false) return;
+    _removeBeforeAllData(_handle);
+  }
 
   /// 删除所有日志文件
   void removeAll() {
@@ -565,6 +570,11 @@ final void Function(Pointer<Void>, int) _setMaxdiskSize = _nativeLib
 final void Function(Pointer<Void>) _removeExpireData = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
         _mxlogger_function("remove_expire_data"))
+    .asFunction();
+
+final void Function(Pointer<Void>) _removeBeforeAllData = _nativeLib
+    .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
+    _mxlogger_function("remove_before_all_data"))
     .asFunction();
 
 final int Function(Pointer<Void>, Pointer<Pointer<Pointer<Pointer<Utf8>>>>,

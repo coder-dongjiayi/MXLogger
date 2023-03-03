@@ -190,21 +190,35 @@ void base_file_sink::remove_expire_data(){
 }
 
 
-// 删除所有日志文件
-void base_file_sink::remove_all(){
+int base_file_sink::remove_all_(bool skip_current){
     std::vector<std::map<std::string, std::string>> destination;
     
     mxlogger::get_files(&destination, dir_path_.c_str());
     
-    
+    int count_ = 0;
     for (int i = 0; i < destination.size(); i++) {
         std::map<std::string, std::string> map = destination[i];
         std::string file_name  = map["name"];
         char subdir[256];
+        /// 不删除当前正在写入日志的文件
+        if(skip_current == true && file_name == filename_){
+            continue;
+        }
+        count_ ++;
         sprintf(subdir, "%s%s", dir_path_.c_str(), file_name.c_str());
         remove(subdir);
     }
-    MXLoggerInfo("delete all log files");
+    return count_;
+   
+}
+// 删除所有日志文件
+void base_file_sink::remove_all(){
+   int files =  remove_all_(false);
+    MXLoggerInfo("remove_all  files:(%ld)",files);
+}
+void base_file_sink::remove_before_all(){
+     int files = remove_all_(true);
+    MXLoggerInfo("remove_before_all  files:(%ld)",files);
 }
 
 void base_file_sink::handle_date_(policy::storage_policy policy){

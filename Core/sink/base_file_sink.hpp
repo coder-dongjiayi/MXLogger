@@ -29,6 +29,8 @@ private:
     policy::storage_policy policy_;
     
     void handle_date_(policy::storage_policy policy);
+    
+    int remove_all_(bool skip_current);
 protected:
     
    
@@ -74,6 +76,9 @@ public:
     
     // 删除所有日志文件
     void remove_all();
+    
+    // 删除 除当前正在写入文件之前的所有文件
+    void remove_before_all();
     
 };
 }

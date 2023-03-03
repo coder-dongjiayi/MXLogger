@@ -106,10 +106,15 @@ public class MXLogger {
 
     }
 
+    /// 删除过期文件
    public void  removeExpireData(){
        native_removeExpireData(nativeHandle);
    }
-
+   /// 删除除当前正在写入的所有日志文件
+   public  void removeBeforeAllData(){
+       native_removeBeforeAll(nativeHandle);
+   }
+   /// 删除所有日志文件
   public  void  removeAll(){
       native_removeAll(nativeHandle);
   }
@@ -274,6 +279,7 @@ public class MXLogger {
     private  static  native String native_diskcache_path(long nativeHandle);
     private  static  native void native_removeExpireData(long nativeHandle);
     private static  native  void  native_removeAll(long nativeHandle);
+    private static  native  void  native_removeBeforeAll(long nativeHandle);
     private static native  String native_loggerKey(long nativeHandle);
     private  static native  void native_destroy(String nameSpace,String diskCacheDirectory);
     private static native void native_destroy_loggerKey(String loggerKey);

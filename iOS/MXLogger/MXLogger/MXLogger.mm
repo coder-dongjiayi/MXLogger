@@ -234,6 +234,9 @@ static NSString * _defaultDiskCacheDirectory;
     _logger -> remove_expire_data();
 }
 
+-(void)removeBeforeAllData{
+    _logger -> remove_before_all();
+}
 -(void)removeAllData{
     _logger -> remove_all();
 }

@@ -141,6 +141,8 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// 清理全部日志文件
 -(void)removeAllData;
 
+// 删除除当前正在写入日志文件外的所有日志文件
+-(void)removeBeforeAllData;
 
 /// 输出日志
 /// @param level 等级

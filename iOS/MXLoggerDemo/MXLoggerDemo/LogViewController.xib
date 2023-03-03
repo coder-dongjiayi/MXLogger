@@ -89,6 +89,14 @@
                         <action selector="threadTestButtonAction:" destination="-1" eventType="touchUpInside" id="KPh-fP-c7z"/>
                     </connections>
                 </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nlO-9A-lmd">
+                    <rect key="frame" x="56" y="497" width="302" height="35"/>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="删除除当前写入文件的所有日志文件"/>
+                    <connections>
+                        <action selector="removeBeforeAllButtonAction:" destination="-1" eventType="touchUpInside" id="gB4-4S-BZ4"/>
+                    </connections>
+                </button>
             </subviews>
             <viewLayoutGuide key="safeArea" id="Q5M-cg-NOt"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -97,8 +105,10 @@
                 <constraint firstItem="24k-KL-dE9" firstAttribute="top" secondItem="Od2-7s-RmQ" secondAttribute="bottom" constant="36" id="51t-oB-Bvh"/>
                 <constraint firstItem="Q5M-cg-NOt" firstAttribute="trailing" secondItem="AA0-8y-29r" secondAttribute="trailing" constant="10" id="6vB-Th-1P3"/>
                 <constraint firstItem="24k-KL-dE9" firstAttribute="centerX" secondItem="Q5M-cg-NOt" secondAttribute="centerX" id="GcJ-5j-e02"/>
+                <constraint firstItem="nlO-9A-lmd" firstAttribute="top" secondItem="FNL-vj-O9e" secondAttribute="bottom" constant="31.5" id="Gsw-f8-sTe"/>
                 <constraint firstItem="Od2-7s-RmQ" firstAttribute="top" secondItem="gbD-Ze-Mh3" secondAttribute="bottom" constant="8" symbolic="YES" id="Hqb-1f-mGu"/>
                 <constraint firstItem="AA0-8y-29r" firstAttribute="leading" secondItem="Q5M-cg-NOt" secondAttribute="leading" constant="10" id="NZA-UV-BbB"/>
+                <constraint firstItem="nlO-9A-lmd" firstAttribute="centerX" secondItem="Q5M-cg-NOt" secondAttribute="centerX" id="O8O-pY-plC"/>
                 <constraint firstItem="AA0-8y-29r" firstAttribute="top" secondItem="Do9-En-cis" secondAttribute="bottom" constant="20" id="UJ7-rl-i2I"/>
                 <constraint firstItem="Do9-En-cis" firstAttribute="centerX" secondItem="OwV-wh-DRA" secondAttribute="centerX" id="Yxc-64-uJA"/>
                 <constraint firstItem="gbD-Ze-Mh3" firstAttribute="centerX" secondItem="Od2-7s-RmQ" secondAttribute="centerX" id="Ze6-5y-ejm"/>

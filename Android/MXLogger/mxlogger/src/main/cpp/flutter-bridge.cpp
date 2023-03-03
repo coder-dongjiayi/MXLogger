@@ -170,6 +170,10 @@ MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_diskcache_path)(void *handle){
     return logger->diskcache_path();
 }
 
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_before_all_data)(void *handle){
+    mx_logger *logger = static_cast<mx_logger*>(handle);
+    logger->remove_before_all();
+}
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_expire_data)(void *handle){
     mx_logger *logger = static_cast<mx_logger*>(handle);
 

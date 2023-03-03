@@ -168,6 +168,9 @@
     }
    
 }
+- (IBAction)removeBeforeAllButtonAction:(id)sender {
+    [self.logger removeBeforeAllData];
+}
 
 
 - (IBAction)removeExpireDataButtonAction:(id)sender {
@@ -200,7 +203,7 @@
 
 - (void)dealloc{
     
-    [MXLogger destroyWithNamespace:@"com.dongjiayi.mxlogger"];
+    [MXLogger destroyWithNamespace:@"com.djy.mxlogger"];
 }
 
 @end

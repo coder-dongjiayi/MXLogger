@@ -192,6 +192,11 @@ void mxlogger::remove_all(){
     std::lock_guard<std::mutex> lock(logger_mutex);
     mmap_sink_ -> remove_all();
 }
+// 删除除当前写入文件之外的所有日志文件
+void mxlogger::remove_before_all(){
+    std::lock_guard<std::mutex> lock(logger_mutex);
+    mmap_sink_ -> remove_before_all();
+}
 
 // 缓存日志文件大小(byte)
 long  mxlogger::dir_size(){

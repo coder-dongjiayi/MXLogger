@@ -89,6 +89,9 @@ public:
     //删除所有日志文件
     void remove_all();
     
+    // 删除除当前写入文件之外的所有日志文件
+    void remove_before_all();
+    
     // 缓存日志文件大小(byte)
     long  dir_size();
     

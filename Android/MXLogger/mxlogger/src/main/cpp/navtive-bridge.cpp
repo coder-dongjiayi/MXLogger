@@ -214,6 +214,10 @@ namespace mxlogger{
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger -> remove_all();
     }
+    MXLOGGER_JNI void native_removeBeforeAll(JNIEnv *env, jobject obj,jlong handle){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger -> remove_before_all();
+    }
 
 }
 static JNINativeMethod g_methods[] = {
@@ -227,6 +231,7 @@ static JNINativeMethod g_methods[] = {
         {"native_diskcache_path","(J)Ljava/lang/String;",(void *)mxlogger::native_diskcache_path},
         {"native_removeExpireData","(J)V",(void *)mxlogger::native_removeExpireData},
         {"native_removeAll","(J)V",(void *)mxlogger::native_removeAll},
+        {"native_removeBeforeAll","(J)V",(void *)mxlogger::native_removeBeforeAll},
         {"native_loggerKey","(J)Ljava/lang/String;",(void *)mxlogger::native_loggerKey},
         {"native_log","(JLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
         {"native_log_loggerKey","(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log_loggerKey},
