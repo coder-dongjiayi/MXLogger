@@ -1,6 +1,8 @@
 
 # MXLogger for Flutter Change Log
-
+# v1.2.5/2023-03-06
+* Keep up with MXLogger native lib v1.2.5.
+* Add removeBeforeAllData() method.
 # v1.2.4/2023-02-10
 * Keep up with MXLogger native lib v1.2.4.
 * Use "🟩","🟦","🟨","🟥","❌ emoji for 'DEBUG','INFO','WARN','ERROR','FATAL' on console.
