@@ -48,14 +48,13 @@ class AnalyzerDatabase {
       }else{
         List<String> keyWords = keyWord?.trim().split(" ") ?? [];
         List<String> conditions = [];
-        keyWords.forEach((element) {
+        for (var element in keyWords) {
           if (element.isNotEmpty == true) {
             conditions.add("$condition like'%$element%'");
           }
-        });
+        }
         where = conditions.join(" or ");
       }
-
 
     }
     if (levels?.isEmpty == false) {

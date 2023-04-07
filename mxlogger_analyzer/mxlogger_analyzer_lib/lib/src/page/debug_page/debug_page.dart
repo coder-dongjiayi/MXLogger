@@ -10,8 +10,6 @@ import 'dart:io';
 
 import 'debug_drawer.dart';
 
-
-
 class DebugPage extends ConsumerStatefulWidget {
   const DebugPage(
       {Key? key,
@@ -56,40 +54,50 @@ class DebugPageState extends ConsumerState<DebugPage> {
       drawerScrimColor: Colors.transparent,
       endDrawer: const DebugDrawer(),
       floatingActionButton: GestureDetector(
-        onTap: (){
+        onTap: () {
           _refresh();
         },
         child: Container(
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: MXTheme.dropTargetColor,
-            borderRadius: BorderRadius.circular(25)
+              color: MXTheme.dropTargetColor,
+              borderRadius: BorderRadius.circular(25)),
+          child: Icon(
+            Icons.refresh,
+            color: MXTheme.white,
+            size: 30,
           ),
-          child: Icon(Icons.refresh,color: MXTheme.white,size: 30,),
         ),
       ),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          LogListPage(
-            menuCallback: () {
-              _scaffoldKey.currentState!.openEndDrawer();
-            },
-            refreshCallback: () {
-              _loadData();
-            },
-          ),
-          _loading()
-        ],
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            LogListPage(
+              menuCallback: () {
+                _scaffoldKey.currentState!.openEndDrawer();
+              },
+              refreshCallback: () {
+                _loadData();
+              },
+            ),
+            _loading()
+          ],
+        ),
       ),
     );
   }
 
-  void _refresh(){
+  void _refresh() {
     ref.read(mxloggerRepository).deleteData();
     _loadData();
   }
+
   Widget _loading() {
     return Consumer(builder: (context, ref, child) {
       final result = ref.watch(packageLoadStateProvider);
