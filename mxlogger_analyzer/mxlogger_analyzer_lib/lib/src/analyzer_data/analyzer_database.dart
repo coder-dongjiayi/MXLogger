@@ -31,28 +31,42 @@ class AnalyzerDatabase {
 
   static Future<List<Map<String, Object?>>> selectData(
       {required int page,
+       String? condition,
       int pageSize = 20,
       String? keyWord,
       String? order,
-
       List<int>? levels}) async {
     List<Map<String, Object?>> _result = [];
     int start = (page - 1) * pageSize;
 
     String where = "1=1";
 
-    if (keyWord != null) {
-      where = "(msg like'%$keyWord%')";
+    if (keyWord?.isNotEmpty == true) {
+
+      if(condition == null){
+        where = "msg like '%$keyWord%' or tag like '%$keyWord%' or name like '%$keyWord%'";
+      }else{
+        List<String> keyWords = keyWord?.trim().split(" ") ?? [];
+        List<String> conditions = [];
+        keyWords.forEach((element) {
+          if (element.isNotEmpty == true) {
+            conditions.add("$condition like'%$element%'");
+          }
+        });
+        where = conditions.join(" or ");
+      }
+
+
     }
     if (levels?.isEmpty == false) {
       List<String> _levelSqls = [];
       levels?.forEach((element) {
         _levelSqls.add("level=$element");
       });
-      where = where + " and " + "${_levelSqls.join(" or ")}";
+      where = "$where and ${_levelSqls.join(" or ")}";
     }
-    SQLite.ResultSet resultSet =
-        _db.select("select * from mxlog where $where order by timestamp ${order ?? "desc"}");
+    SQLite.ResultSet resultSet = _db.select(
+        "select * from mxlog where $where order by timestamp ${order ?? "desc"}");
     resultSet.forEach((element) {
       Map<String, Object?> map = {
         "name": element["name"],
@@ -62,7 +76,7 @@ class AnalyzerDatabase {
         "threadId": element["threadId"],
         "isMainThread": element["isMainThread"],
         "timestamp": element["timestamp"],
-        "fileHeader":element["fileHeader"],
+        "fileHeader": element["fileHeader"],
         "dateTime": element["dateTime"],
         "createDateTime": element["createDateTime"]
       };

@@ -13,15 +13,20 @@ enum AnalyzerPlatform { desktop, mobile, package }
 
 AnalyzerPlatform analyzerPlatform = AnalyzerPlatform.desktop;
 
+
 ///  查询所有日志数据
 final logPagesProvider = FutureProvider.autoDispose((ref) {
   final repository = ref.watch(mxloggerRepository);
 
-  final kw = ref.watch(keywordSearchProvider);
+  String? kw = ref.watch(keywordSearchProvider);
 
   final list = ref.watch(levelSearchProvider);
 
   final sort = ref.watch(sortTimeProvider);
+
+  final condition = ref.watch(propertySearchProvider);
+
+  String searchCondition = (condition ?? "msg").replaceAll(":", "");
 
   List<int> _level = [];
   for (var element in list) {
@@ -34,6 +39,7 @@ final logPagesProvider = FutureProvider.autoDispose((ref) {
   }
   final logResponse = repository.fetchLogs(
       page: null,
+      condition: condition == null ? null : searchCondition,
       keyWord: kw,
       order: sort == true ? "desc" : "asc",
       levels: _level);
@@ -42,8 +48,48 @@ final logPagesProvider = FutureProvider.autoDispose((ref) {
 });
 
 
+final textEditingControllerProvider = Provider<TextEditingController>((ref){
+  TextEditingController controller = TextEditingController();
+
+  return controller;
+});
 
 
+
+final  conditionProvider= StateProvider.autoDispose<String?>((ref){
+  ref.listenSelf((previous, next) {
+    if(next != null){
+      ref.read(textEditingControllerProvider).text = "";
+    }
+  });
+  String? search =  ref.watch(searchTextChangeProvider);
+  if(search == "tag:") return "tag:";
+  if(search == "name:") return "name:";
+  if(search == "msg:") return "msg:";
+  return  null;
+});
+
+final searchHitTextProvider = Provider.autoDispose<String>((ref){
+  String? condition  = ref.watch(conditionProvider);
+
+  bool desktop  = analyzerPlatform == AnalyzerPlatform.desktop;
+  if(condition == "tag:"){
+    return "搜索多个tag，可使用空格进行分割${desktop == true? "，再按一次退格键还原" : ""}";
+  }
+  if(condition == "name:"){
+    return "搜索name属性${desktop == true? "，再按一次退格键还原" : ""}";
+  }
+  if(condition == "msg:"){
+    return "搜索msg内容${desktop == true? "，再按一次退格键还原" : ""}";
+  }
+  if(desktop){
+    return  "搜索关键词 回车确定";
+  }
+  return "搜索关键词";
+});
+
+/// 搜索框文本变化的状态
+final searchTextChangeProvider = StateProvider<String?>((ref) => null);
 
 final errorProvider = Provider<List<String>>((ref) {
   return [];
@@ -54,8 +100,13 @@ final errorListProvider = StateProvider<List<String>>((ref) {
   return [];
 });
 
+
 /// 搜索状态
 final keywordSearchProvider = StateProvider<String?>((ref) {
+  return null;
+});
+/// 搜索属性(tag name msg)
+final propertySearchProvider = StateProvider<String?>((ref) {
   return null;
 });
 
