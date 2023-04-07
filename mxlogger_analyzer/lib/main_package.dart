@@ -7,7 +7,7 @@ import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 import 'package:path_provider/path_provider.dart';
 
-void main() => runApp(ProviderScope(child: MyApp()));
+void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
