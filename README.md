@@ -30,8 +30,9 @@ Currently, the MXLogger mainly solves log writing and log analysis problems.The 
 
  # Log viewing
    * To parse the generated binary data, I wrote an accompanying parsing tool that you can view[mxlogger_analyzer](./mxlogger_analyzer.dmg),It looks something like this。
-   [video link](https://user-images.githubusercontent.com/9606416/215237658-4f99fc51-4610-48c5-8803-daaf86400bf3.mp4)
-   
+      [video link](https://user-images.githubusercontent.com/9606416/215237658-4f99fc51-4610-48c5-8803-daaf86400bf3.mp4)
+   * you can input tag where search box for search tag attribute。name msg in a similar way。
+
  # Conolse 
  <img src="./icon/20230210103021.jpg" alt="jiegoutu" style="zoom:30%;" />
 

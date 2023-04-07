@@ -67,6 +67,8 @@ MXLogger | Xlog | Logan
 
 https://user-images.githubusercontent.com/9606416/215237658-4f99fc51-4610-48c5-8803-daaf86400bf3.mp4
 
+* 你可以在搜索框输入``tag:`` 用于单独搜索tag属性。``name`` ``msg`` 同理。
+
 * 控制台输出
 如果设置console = YES. 那么在控制台下可以可以看到下面这样的输出信息。
  <img src="./icon/20230210103021.jpg" alt="jiegoutu" style="zoom:30%;" />
