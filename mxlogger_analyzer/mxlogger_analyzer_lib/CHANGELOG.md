@@ -1,4 +1,6 @@
 
+## 1.0.5
+* Add switch 'tag','name','msg'
 ## 1.0.4
 * Remove isDebug arg.
 ## 1.0.3

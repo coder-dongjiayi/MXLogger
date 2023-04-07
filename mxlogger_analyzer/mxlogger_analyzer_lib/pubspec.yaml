@@ -1,6 +1,6 @@
 name: mxlogger_analyzer_lib
 description: MXLogger debugger,You can easily view the log data.
-version: 1.0.4+1
+version: 1.0.5
 homepage: https://github.com/coder-dongjiayi/MXLogger
 repository: https://github.com/coder-dongjiayi/MXLogger
 
