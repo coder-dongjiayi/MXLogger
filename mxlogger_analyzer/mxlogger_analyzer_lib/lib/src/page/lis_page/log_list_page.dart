@@ -39,6 +39,7 @@ class LogListPageState extends ConsumerState<LogListPage>
         child: Consumer(builder: (context, ref, _) {
           var config = ref.watch(logPagesProvider);
           bool sort = ref.read(sortTimeProvider);
+          
           return config.whenExtension(
             empty: (list) {
               return list.isEmpty ? _empty() : null;
