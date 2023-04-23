@@ -1,4 +1,6 @@
 
+## 1.0.6
+* Add hidden future when on double tap.
 ## 1.0.5
 * Add switch 'tag','name','msg'
 ## 1.0.4

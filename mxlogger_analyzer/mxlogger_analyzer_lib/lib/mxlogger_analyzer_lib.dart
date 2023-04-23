@@ -89,7 +89,11 @@ class MXAnalyzer {
               ) {
                 offset += details.delta;
                 _analyzerOverlayEntry?.markNeedsBuild();
+
               }
+            },
+            onDoubleTap: (){
+              dismiss();
             },
             onTap: () async {
               _visible = false;

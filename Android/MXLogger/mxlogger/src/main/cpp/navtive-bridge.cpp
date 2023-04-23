@@ -10,7 +10,7 @@
 #include <vector>
 #include <map>
 static jclass g_cls = nullptr;
-
+static jfieldID g_fileID = nullptr;
 static int registerNativeMethods(JNIEnv *env, jclass cls);
 
 extern "C" JNIEXPORT JNICALL jint  JNI_OnLoad(JavaVM *vm, void *reserved) {
@@ -38,12 +38,16 @@ extern "C" JNIEXPORT JNICALL jint  JNI_OnLoad(JavaVM *vm, void *reserved) {
 
         return -4;
     }
-
+    g_fileID = env->GetFieldID(g_cls, "nativeHandle", "J");
+    if(!g_fileID){
+        return -5;
+    }
     return JNI_VERSION_1_6;
 }
 
 #define MXLOGGER_JNI static
 namespace mxlogger{
+
 
 
     static jstring string2jstring(JNIEnv *env, const std::string &str) {
@@ -60,6 +64,8 @@ namespace mxlogger{
         }
         return "";
     }
+
+
 
 
     MXLOGGER_JNI jstring native_diskcache_path(JNIEnv *env, jobject obj,jlong handle){
@@ -169,12 +175,16 @@ namespace mxlogger{
     MXLOGGER_JNI void native_destroy_loggerKey(JNIEnv *env, jobject obj,jstring loggerKey){
         std::string loggerKeyStr =jstring2string(env,loggerKey);
         mx_logger::delete_namespace(loggerKeyStr.data());
+        jlong  value = 0;
+        env->SetLongField(obj, g_fileID, value);
     }
 
     MXLOGGER_JNI void native_destroy(JNIEnv *env, jobject obj,jstring ns,jstring directory){
         std::string nsStr =jstring2string(env,ns);
         std::string directoryStr =jstring2string(env,directory);
         mx_logger::delete_namespace(nsStr.data(),directoryStr.data());
+        jlong  value = 0;
+        env->SetLongField(obj, g_fileID, value);
     }
 
 

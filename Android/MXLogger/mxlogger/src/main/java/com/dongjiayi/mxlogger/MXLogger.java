@@ -225,7 +225,7 @@ public class MXLogger {
 
 
 
-    private  long nativeHandle;
+    private final long nativeHandle;
     private  static  String defaultDiskCacheDirectory(@NonNull Context context){
 
         return userCacheDirectory(context) + "/com.mxlog.LoggerCache";

@@ -11,7 +11,7 @@ android {
         targetSdk 31
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        consumerProguardFiles "proguard-rules.pro"
         externalNativeBuild {
             cmake {
                 cppFlags ""
@@ -78,6 +78,6 @@ dependencies {
 ext {
     PUBLISH_ARTIFACT_ID = "mxlogger"
     PUBLISH_GROUP_ID = 'io.github.coder-dongjiayi'
-    PUBLISH_VERSION = '1.2.5'
+    PUBLISH_VERSION = '1.2.5.2'
 }
 apply from: '../publish.gradle'

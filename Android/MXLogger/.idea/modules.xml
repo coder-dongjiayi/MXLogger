@@ -8,7 +8,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/mxlogger/mxloggerdemo.mxlogger.main.iml" filepath="$PROJECT_DIR$/.idea/modules/mxlogger/mxloggerdemo.mxlogger.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/mxlogger/mxloggerdemo.mxlogger.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/mxlogger/mxloggerdemo.mxlogger.unitTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/mxloggerdemo.mxloggerdemo.iml" filepath="$PROJECT_DIR$/.idea/modules/app/mxloggerdemo.mxloggerdemo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mxloggerdemo/mxloggerdemo.mxloggerdemo.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/mxloggerdemo/mxloggerdemo.mxloggerdemo.androidTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/mxloggerdemo/mxloggerdemo.mxloggerdemo.main.iml" filepath="$PROJECT_DIR$/.idea/modules/mxloggerdemo/mxloggerdemo.mxloggerdemo.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/mxloggerdemo/mxloggerdemo.mxloggerdemo.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/mxloggerdemo/mxloggerdemo.mxloggerdemo.unitTest.iml" />
     </modules>
