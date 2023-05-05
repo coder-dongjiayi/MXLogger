@@ -206,7 +206,7 @@ class MXLogger with WidgetsBindingObserver {
     Pointer<Utf8> tagPtr = tag != null ? tag.toNativeUtf8() : nullptr;
     Pointer<Utf8> msgPtr = msg.toNativeUtf8();
 
-    _log_loggerKey(loggerKeyPtr, namePtr, lvl, msgPtr, tagPtr);
+    _logLoggerKey(loggerKeyPtr, namePtr, lvl, msgPtr, tagPtr);
 
     calloc.free(loggerKeyPtr);
     calloc.free(namePtr);
@@ -367,36 +367,36 @@ class MXLogger with WidgetsBindingObserver {
     final count = _getLogfiles(_handle, arrayPtr, sizeArrayPtr);
     List<MXFileEntity> _mxFileList = [];
     if (count > 0) {
-      final array_array = arrayPtr[0];
-      final sizeArray_array = sizeArrayPtr[0];
+      final arrayArray = arrayPtr[0];
+      final sizeArrayArray = sizeArrayPtr[0];
       for (int i = 0; i < count; i++) {
-        final charArray = array_array[i];
+        final charArray = arrayArray[i];
 
-        final sizeArray = sizeArray_array[i];
+        final sizeArray = sizeArrayArray[i];
 
-        final point_name = charArray[0];
-        final point_size = charArray[1];
-        final point_last_timestamp = charArray[2];
-        final point_create_timestamp = charArray[3];
+        final pointName = charArray[0];
+        final pointSize = charArray[1];
+        final pointLastTimestamp = charArray[2];
+        final pointCreateTimestamp = charArray[3];
 
-        final point_name_size = sizeArray[0];
-        final point_size_size = sizeArray[1];
-        final point_last_timestamp_size = sizeArray[2];
-        final point_create_timestamp_size = sizeArray[3];
+        final pointNameSize = sizeArray[0];
+        final pointSizeSize = sizeArray[1];
+        final pointLastTimestampSize = sizeArray[2];
+        final pointCreateTimestampSize = sizeArray[3];
 
-        String? name = _buffer2String(point_name.cast(), point_name_size);
-        String? size = _buffer2String(point_size.cast(), point_size_size);
-        String? last_timestamp = _buffer2String(
-            point_last_timestamp.cast(), point_last_timestamp_size);
+        String? name = _buffer2String(pointName.cast(), pointNameSize);
+        String? size = _buffer2String(pointSize.cast(), pointSizeSize);
+        String? lastTimestamp = _buffer2String(
+            pointLastTimestamp.cast(), pointLastTimestampSize);
 
-        String? create_timestamp = _buffer2String(
-            point_create_timestamp.cast(), point_create_timestamp_size);
+        String? createTimestamp = _buffer2String(
+            pointCreateTimestamp.cast(), pointCreateTimestampSize);
 
         MXFileEntity entity =  MXFileEntity(
             name: name,
             size: int.parse(size ?? "0"),
-            createTimeStamp: int.parse(create_timestamp ?? "0"),
-            lastTimeStamp: int.parse(last_timestamp ?? "0"));
+            createTimeStamp: int.parse(createTimestamp ?? "0"),
+            lastTimeStamp: int.parse(lastTimestamp ?? "0"));
         _mxFileList.add(entity);
 
         calloc.free(charArray[0]);
@@ -408,8 +408,8 @@ class MXLogger with WidgetsBindingObserver {
         calloc.free(sizeArray);
 
       }
-      calloc.free(array_array);
-      calloc.free(sizeArray_array);
+      calloc.free(arrayArray);
+      calloc.free(sizeArrayArray);
 
     }
 
@@ -428,7 +428,7 @@ class MXLogger with WidgetsBindingObserver {
     Pointer<Utf8> dirPtr = directory.toNativeUtf8();
     final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
     final sizeArrayPtr = calloc<Pointer<Uint32>>();
-    final count = _select_logfiles(dirPtr, arrayPtr, sizeArrayPtr);
+    final count = _selectLogfiles(dirPtr, arrayPtr, sizeArrayPtr);
     if (count > 0) {
       final array = arrayPtr[0];
       final sizeArray = sizeArrayPtr[0];
@@ -479,7 +479,7 @@ final DynamicLibrary _nativeLib = Platform.isAndroid
     ? DynamicLibrary.open("libmxlogger.so")
     : DynamicLibrary.process();
 
-String _mxlogger_function(String funcName) {
+String _mxloggerFunction(String funcName) {
   return "flutter_mxlogger_" + funcName;
 }
 
@@ -496,19 +496,19 @@ final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>,
                     Pointer<Utf8>,
                     Pointer<Utf8>,
                     Pointer<Utf8>,
-                    Pointer<Utf8>)>>(_mxlogger_function("initialize"))
+                    Pointer<Utf8>)>>(_mxloggerFunction("initialize"))
         .asFunction();
 
 final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>) _destroy = _nativeLib
     .lookup<
         NativeFunction<
             Pointer<Void> Function(
-                Pointer<Utf8>, Pointer<Utf8>)>>(_mxlogger_function("destroy"))
+                Pointer<Utf8>, Pointer<Utf8>)>>(_mxloggerFunction("destroy"))
     .asFunction();
 
 final Pointer<Void> Function(Pointer<Utf8>) _destroyWithLoggerKey = _nativeLib
     .lookup<NativeFunction<Pointer<Void> Function(Pointer<Utf8>)>>(
-        _mxlogger_function("destroyWithLoggerKey"))
+    _mxloggerFunction("destroyWithLoggerKey"))
     .asFunction();
 
 final void Function(
@@ -517,12 +517,12 @@ final void Function(
         .lookup<
             NativeFunction<
                 Void Function(Pointer<Void>, Pointer<Utf8>, Int32,
-                    Pointer<Utf8>, Pointer<Utf8>)>>(_mxlogger_function("log"))
+                    Pointer<Utf8>, Pointer<Utf8>)>>(_mxloggerFunction("log"))
         .asFunction();
 
 final void Function(
         Pointer<Utf8>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Utf8>)
-    _log_loggerKey = _nativeLib
+    _logLoggerKey = _nativeLib
         .lookup<
             NativeFunction<
                 Void Function(
@@ -530,51 +530,51 @@ final void Function(
                     Pointer<Utf8>,
                     Int32,
                     Pointer<Utf8>,
-                    Pointer<Utf8>)>>(_mxlogger_function("log_loggerKey"))
+                    Pointer<Utf8>)>>(_mxloggerFunction("log_loggerKey"))
         .asFunction();
 
 final void Function(Pointer<Void>, int) _setFileLevel = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-        _mxlogger_function("set_file_level"))
+    _mxloggerFunction("set_file_level"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setEnable = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-        _mxlogger_function("set_enable"))
+    _mxloggerFunction("set_enable"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setConsoleEnable = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-        _mxlogger_function("set_console_enable"))
+    _mxloggerFunction("set_console_enable"))
     .asFunction();
 
 final Pointer<Int8> Function(Pointer<Void>) _getDiskcachePath = _nativeLib
     .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(
-        _mxlogger_function("get_diskcache_path"))
+    _mxloggerFunction("get_diskcache_path"))
     .asFunction();
 final Pointer<Int8> Function(Pointer<Void>) _getLoggerKey = _nativeLib
     .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(
-        _mxlogger_function("get_loggerKey"))
+    _mxloggerFunction("get_loggerKey"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setMaxdiskAge = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-        _mxlogger_function("set_max_disk_age"))
+    _mxloggerFunction("set_max_disk_age"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setMaxdiskSize = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Uint64)>>(
-        _mxlogger_function("set_max_disk_size"))
+    _mxloggerFunction("set_max_disk_size"))
     .asFunction();
 
 final void Function(Pointer<Void>) _removeExpireData = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
-        _mxlogger_function("remove_expire_data"))
+    _mxloggerFunction("remove_expire_data"))
     .asFunction();
 
 final void Function(Pointer<Void>) _removeBeforeAllData = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
-    _mxlogger_function("remove_before_all_data"))
+    _mxloggerFunction("remove_before_all_data"))
     .asFunction();
 
 final int Function(Pointer<Void>, Pointer<Pointer<Pointer<Pointer<Utf8>>>>,
@@ -586,11 +586,11 @@ final int Function(Pointer<Void>, Pointer<Pointer<Pointer<Pointer<Utf8>>>>,
                         Pointer<Void>,
                         Pointer<Pointer<Pointer<Pointer<Utf8>>>>,
                         Pointer<Pointer<Pointer<Uint32>>>)>>(
-            _mxlogger_function("get_logfiles"))
+        _mxloggerFunction("get_logfiles"))
         .asFunction();
 
 final int Function(Pointer<Utf8>, Pointer<Pointer<Pointer<Utf8>>>,
-        Pointer<Pointer<Uint32>>) _select_logfiles =
+        Pointer<Pointer<Uint32>>) _selectLogfiles =
     _nativeLib
         .lookup<
                 NativeFunction<
@@ -598,30 +598,30 @@ final int Function(Pointer<Utf8>, Pointer<Pointer<Pointer<Utf8>>>,
                         Pointer<Utf8>,
                         Pointer<Pointer<Pointer<Utf8>>>,
                         Pointer<Pointer<Uint32>>)>>(
-            _mxlogger_function("select_logfiles"))
+        _mxloggerFunction("select_logfiles"))
         .asFunction();
 
-final int Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Int32>,
-        Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>)
-    _select_logmsg = _nativeLib
-        .lookup<
-                NativeFunction<
-                    Uint64 Function(
-                        Pointer<Utf8>,
-                        Pointer<Utf8>,
-                        Pointer<Utf8>,
-                        Pointer<Int32>,
-                        Pointer<Pointer<Pointer<Utf8>>>,
-                        Pointer<Pointer<Uint32>>)>>(
-            _mxlogger_function("select_logmsg"))
-        .asFunction();
+// final int Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Int32>,
+//         Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>)
+//     _select_logmsg = _nativeLib
+//         .lookup<
+//                 NativeFunction<
+//                     Uint64 Function(
+//                         Pointer<Utf8>,
+//                         Pointer<Utf8>,
+//                         Pointer<Utf8>,
+//                         Pointer<Int32>,
+//                         Pointer<Pointer<Pointer<Utf8>>>,
+//                         Pointer<Pointer<Uint32>>)>>(
+//     _mxloggerFunction("select_logmsg"))
+//         .asFunction();
 
 final void Function(Pointer<Void>) _removeAll = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
-        _mxlogger_function("remove_all"))
+    _mxloggerFunction("remove_all"))
     .asFunction();
 
 final int Function(Pointer<Void>) _getLogSize = _nativeLib
     .lookup<NativeFunction<Uint64 Function(Pointer<Void>)>>(
-        _mxlogger_function("get_log_size"))
+    _mxloggerFunction("get_log_size"))
     .asFunction();

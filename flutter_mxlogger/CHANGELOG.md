@@ -1,5 +1,7 @@
 
 # MXLogger for Flutter Change Log
+# v1.2.5+5/2023-05-05
+* Format
 # v1.2.5+4/2023-05-05
 * Resolve the problem of using class methods in plug-ins that are not valid on Android
 # v1.2.5+3/2023-05-05
