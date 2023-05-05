@@ -1,7 +1,7 @@
 
 # MXLogger for Flutter Change Log
 # v1.2.5+4/2023-05-05
-* Delete log method on Android plugin. use MXLogger.log(xxxx) install.
+* Resolve the problem of using class methods in plug-ins that are not valid on Android
 # v1.2.5+3/2023-05-05
 * Keep up with MXLogger native lib v1.2.5.3 on Android
 * Fix crash on native Android.

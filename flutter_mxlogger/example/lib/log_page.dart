@@ -36,7 +36,7 @@ class _LogPageState extends State<LogPage> {
         nameSpace: "flutter.mxlogger",
         directory: directory.path,
         storagePolicy: MXStoragePolicyType.yyyy_MM_dd_HH,
-        fileHeader: "version 1.2.3",
+        fileHeader: "version 1.2.5",
         cryptKey: _cryptKey,
         iv: _iv);
 
