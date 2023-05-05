@@ -6,9 +6,13 @@
 #include <string>
 #include <cstdint>
 #include "mxlogger.hpp"
+#include "debug_log.hpp"
 #include "mxlogger_util.hpp"
 #include <vector>
 #include <map>
+#ifdef  __ANDROID__
+#include <android/log.h>
+#endif
 static jclass g_cls = nullptr;
 static jfieldID g_fileID = nullptr;
 static int registerNativeMethods(JNIEnv *env, jclass cls);
@@ -53,18 +57,6 @@ namespace mxlogger{
     static jstring string2jstring(JNIEnv *env, const std::string &str) {
         return env->NewStringUTF(str.c_str());
     }
-    static std::string jstring2string(JNIEnv *env, jstring str) {
-        if (str) {
-            const char *kstr = env->GetStringUTFChars(str, nullptr);
-            if (kstr) {
-                std:: string result(kstr);
-                env->ReleaseStringUTFChars(str, kstr);
-                return result;
-            }
-        }
-        return "";
-    }
-
 
 
 
@@ -83,24 +75,27 @@ namespace mxlogger{
 
     MXLOGGER_JNI void native_log(JNIEnv *env, jobject obj,jlong handle,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
 
-        const char  * log_msg = msg == NULL ? nullptr :jstring2string(env,msg).c_str();
+        const char  * log_tag = tag == NULL ? nullptr :  env->GetStringUTFChars(tag, nullptr);
 
-        const char  * log_tag = tag == NULL ? nullptr : jstring2string(env,tag).c_str();
+        const char  * log_name = name == NULL ? nullptr :env->GetStringUTFChars(name, nullptr);
 
-        const char  * log_name = name == NULL ? nullptr : jstring2string(env,name).c_str();
+        const char  * log_msg = msg == NULL ? nullptr : env->GetStringUTFChars(msg, nullptr);
+
+
+
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger ->log(level,log_name,log_msg,log_tag,mainThread);
 
     }
 
     MXLOGGER_JNI void native_log_loggerKey(JNIEnv *env, jobject obj,jstring loggerKey,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
-        const char  * log_msg = msg == NULL ? nullptr :jstring2string(env,msg).c_str();
+        const char  * log_msg = msg == NULL ? nullptr : env->GetStringUTFChars(msg, nullptr);
 
-        const char  * log_tag = tag == NULL ? nullptr : jstring2string(env,tag).c_str();
+        const char  * log_tag = tag == NULL ? nullptr : env->GetStringUTFChars(tag, nullptr);
 
-        const char  * log_name = name == NULL ? nullptr : jstring2string(env,name).c_str();
+        const char  * log_name = name == NULL ? nullptr : env->GetStringUTFChars(name, nullptr);
 
-        const char  * logger_key = jstring2string(env,loggerKey).c_str();
+        const char  * logger_key = env->GetStringUTFChars(loggerKey, nullptr);
 
         mx_logger *logger = mx_logger ::global_for_loggerKey(logger_key);
         if(logger != nullptr){
@@ -119,19 +114,26 @@ namespace mxlogger{
                                      jstring cryptKey,
                                      jstring  iv
                                      ){
+
+
         if (ns == nullptr || directory == nullptr) return 0;
 
-        std::string nsStr = jstring2string(env,ns);
-        std::string directoryStr = jstring2string(env,directory);
 
-        const char * store_policy = storagePolicy== nullptr ? nullptr :  jstring2string(env,storagePolicy).data();
-        const char * file_name = fileName == nullptr ? nullptr : jstring2string(env,fileName).data();
-        const char  * crypt_key = cryptKey == nullptr ? nullptr : jstring2string(env,cryptKey).data();
-        const char  * iv_ = iv == nullptr ? nullptr : jstring2string(env,iv).data();
-        const char * file_header = fileHeader == nullptr ? nullptr : jstring2string(env,fileHeader).data();
-        mxlogger * logger =   mx_logger ::initialize_namespace(nsStr.data(),directoryStr.data(),store_policy,file_name,file_header,crypt_key,iv_);
-        return jlong (logger);
 
+
+        const char * nsStr = env->GetStringUTFChars(ns, nullptr);
+        const char * directoryStr = env->GetStringUTFChars(directory, nullptr);
+        const char * store_policy = storagePolicy== nullptr ? nullptr :  env->GetStringUTFChars(storagePolicy, nullptr);
+        const char * file_name = fileName == nullptr ? nullptr : env->GetStringUTFChars(fileName, nullptr);
+        const char  * crypt_key_ = cryptKey == nullptr ? nullptr : env->GetStringUTFChars(cryptKey, nullptr);
+        const char  * iv_ = iv == nullptr ? nullptr : env->GetStringUTFChars(iv, nullptr);
+        const char * file_header = fileHeader == nullptr ? nullptr : env->GetStringUTFChars(fileHeader, nullptr);
+
+
+       mxlogger * logger =   mx_logger ::initialize_namespace(nsStr,directoryStr,store_policy,file_name,file_header,crypt_key_,iv_);
+
+
+       return jlong (logger);
 
 
     }
@@ -173,16 +175,19 @@ namespace mxlogger{
 
     }
     MXLOGGER_JNI void native_destroy_loggerKey(JNIEnv *env, jobject obj,jstring loggerKey){
-        std::string loggerKeyStr =jstring2string(env,loggerKey);
-        mx_logger::delete_namespace(loggerKeyStr.data());
+        const char  * loggerKeyStr =env->GetStringUTFChars(loggerKey, nullptr);
+        mx_logger::delete_namespace(loggerKeyStr);
         jlong  value = 0;
         env->SetLongField(obj, g_fileID, value);
     }
 
     MXLOGGER_JNI void native_destroy(JNIEnv *env, jobject obj,jstring ns,jstring directory){
-        std::string nsStr =jstring2string(env,ns);
-        std::string directoryStr =jstring2string(env,directory);
-        mx_logger::delete_namespace(nsStr.data(),directoryStr.data());
+
+
+        const char  * nsStr = env->GetStringUTFChars(ns, nullptr);
+
+        const char  * directoryStr = env->GetStringUTFChars(directory, nullptr);
+        mx_logger::delete_namespace(nsStr,directoryStr);
         jlong  value = 0;
         env->SetLongField(obj, g_fileID, value);
     }

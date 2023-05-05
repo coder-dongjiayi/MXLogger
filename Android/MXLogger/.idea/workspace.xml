@@ -14,14 +14,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mxloggerdemo/src/libs/mxlogger-DefaultCpp-release.aar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/proguard-rules.pro" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/proguard-rules.pro" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mxloggerdemo/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,6 +70,13 @@
                 <item name="mxloggerdemo" type="f1a62948:ProjectNode" />
                 <item name="mxlogger" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="mxloggerdemo" type="f1a62948:ProjectNode" />
+                <item name="mxlogger" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="publishing" type="c8890929:TasksNode$1" />
               </path>
               <path>
@@ -114,12 +117,11 @@
     </file-type-list>
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/mxlogger/CMakeLists.txt" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/publish.gradle" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Core/mxlogger.hpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Core/mxlogger.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/publish.gradle" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectId" id="27SVOpTu5IGy4IfbPsq1PU8YH3O" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -140,7 +142,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="cidr.known.project.marker" value="true" />
     <property name="dart.analysis.tool.window.visible" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/mxlogger" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/mxloggerdemo/src/libs" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -155,6 +157,8 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/mxloggerdemo/src/libs" />
+      <recent name="$PROJECT_DIR$/mxlogger/src/main/cpp" />
       <recent name="$PROJECT_DIR$/mxlogger" />
       <recent name="$PROJECT_DIR$/mxloggerdemo" />
       <recent name="$PROJECT_DIR$/mxlogger/src" />
@@ -329,11 +333,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.MXLogger:mxlogger [assembleRelease]" />
         <item itemvalue="Gradle.MXLogger:mxlogger [publishReleasePublicationToMavencentralRepository]" />
         <item itemvalue="Gradle.MXLogger:mxlogger [assemble]" />
         <item itemvalue="Gradle.MXLogger [dependencies]" />
         <item itemvalue="Gradle.MX [assemble]" />
-        <item itemvalue="Gradle.MXLogger:mxlogger [assembleRelease]" />
       </list>
     </recent_temporary>
   </component>
