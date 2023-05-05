@@ -1,5 +1,8 @@
 
 # MXLogger for Flutter Change Log
+# v1.2.5+3/2023-05-05
+* Keep up with MXLogger native lib v1.2.5.3 on Android
+* Fix crash on native Android.
 # v1.2.5/2023-03-06
 * Keep up with MXLogger native lib v1.2.5.
 * Add removeBeforeAllData() method.
