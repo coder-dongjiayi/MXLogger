@@ -3,6 +3,7 @@ package com.dongjiayi.mxlogger;
 
 import android.content.Context;
 import android.os.Looper;
+import android.provider.Settings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +21,12 @@ enum MXStoragePolicyType{
     /** 按月存储 对应文件名: 2023-01_filename.mx*/
     YYYY_MM
 }
+
 public class MXLogger {
 
+    static {
+        System.loadLibrary("mxlogger");
+    }
     /**
   * 是否开启控制台打印，默认不开启, 开始控制台打印会影响 写入效率 ，建议发布模式禁用 consoleEnable
   * */
@@ -85,7 +90,7 @@ public class MXLogger {
         if(diskCacheDirectory == null){
             diskCacheDirectory = defaultDiskCacheDirectory(context);
         }
-        System.loadLibrary("mxlogger");
+
         String policy = "yyyy_MM_dd";
         switch (storagePolicy){
             case YYYY_MM:
