@@ -14,17 +14,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/mxloggerdemo/src/libs/mxlogger-DefaultCpp-release.aar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxlogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mxloggerdemo/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[CLB0219309002436]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -122,6 +122,7 @@
     <setting file="file://$PROJECT_DIR$/../../Core/mxlogger.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/publish.gradle" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectId" id="27SVOpTu5IGy4IfbPsq1PU8YH3O" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -168,7 +169,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Android App.app">
+  <component name="RunManager" selected="Gradle.MXLogger:mxlogger [publishReleasePublicationToMavencentralRepository]">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="mxloggerdemo.mxloggerdemo" />
       <option name="DEPLOY" value="true" />
@@ -333,9 +334,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.MXLogger:mxlogger [assembleRelease]" />
         <item itemvalue="Gradle.MXLogger:mxlogger [publishReleasePublicationToMavencentralRepository]" />
         <item itemvalue="Gradle.MXLogger:mxlogger [assemble]" />
+        <item itemvalue="Gradle.MXLogger:mxlogger [assembleRelease]" />
         <item itemvalue="Gradle.MXLogger [dependencies]" />
         <item itemvalue="Gradle.MX [assemble]" />
       </list>
