@@ -42,12 +42,6 @@ class MXFileEntity {
   }
 }
 
-typedef LoggerFunction = Void Function(
-    Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
-
-typedef FlutterLogFunction = void Function(
-    Pointer<Int8>, Pointer<Int8>, Pointer<Int8>);
-
 class MXLogger with WidgetsBindingObserver {
   Pointer<Void> _handle = nullptr;
 
