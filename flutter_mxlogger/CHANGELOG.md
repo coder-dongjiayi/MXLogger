@@ -1,5 +1,7 @@
 
 # MXLogger for Flutter Change Log
+# v1.2.5+6/2023-05-06
+* Update Flutter dependencies, set Flutter >=3.3.0 and Dart to >=2.18.0 <4.0.0
 # v1.2.5+5/2023-05-05
 * Format
 # v1.2.5+4/2023-05-05
