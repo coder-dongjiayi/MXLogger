@@ -162,6 +162,7 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
   }
 
   void _copyClipboard(BuildContext context, String? msg) {
+    if(msg == null) return;
     Clipboard.setData(ClipboardData(text: msg));
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       backgroundColor: MXTheme.warn,

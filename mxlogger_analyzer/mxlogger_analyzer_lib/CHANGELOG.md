@@ -1,4 +1,6 @@
 
+## 1.0.7
+* Adaptation flutter 3.10.0.
 ## 1.0.6
 * Add hidden future when on double tap.
 ## 1.0.5
