@@ -1,4 +1,6 @@
 
+## 1.0.8
+* Update Flutter dependencies, set Flutter >=3.3.0 and Dart to >=2.18.0 <4.0.0
 ## 1.0.7
 * Adaptation flutter 3.10.0.
 ## 1.0.6
