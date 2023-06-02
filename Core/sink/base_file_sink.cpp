@@ -149,7 +149,7 @@ void base_file_sink::remove_expire_data(){
              std::string name = delete_urls[i];
              
              sprintf(delete_path, "%s%s", dir_path_.c_str(), name.c_str());
-             MXLoggerInfo("expire file name:%s",name.c_str());
+             MXLoggerInfo("expire file : %s",name.c_str());
              if (remove(delete_path) != 0) {
                  
                  MXLoggerInfo("delete delete_path field!!!",name.c_str());
@@ -161,6 +161,8 @@ void base_file_sink::remove_expire_data(){
     
    // step2 清理大于目标size的文件
      if (max_disk_size_ > 0 && current_cache_size > max_disk_size_) {
+         int removeCount = 0;
+         
          MXLoggerInfo("start over limit data...");
          for (int i = 0; i < final_dir.size(); i++) {
              std::map<std::string, std::string> map = final_dir[i];
@@ -172,13 +174,15 @@ void base_file_sink::remove_expire_data(){
             
              // 如果需要清理的文件是当前正在写入的文件 则不进行清理
              if( file_name.compare(filename_) == 0){
+                 MXLoggerInfo("%s is currently being mapped and will not be deleted",file_name.c_str());
                  continue;
              }
              if (remove(delete_path) == 0) {
                  current_cache_size = current_cache_size - file_size;
-                 MXLoggerInfo("over limit size file :%s(%lld byte)",file_name.c_str(),file_size);
+                 MXLoggerInfo("over limit size file : %s(%lld byte)",file_name.c_str(),file_size);
+                 removeCount = removeCount + 1;
                  if (max_disk_size_ >= current_cache_size) {
-                     MXLoggerInfo("over limit data(%ls files)...",i+1);
+                     MXLoggerInfo("over limit data(%d files)...",removeCount);
                      break;
                  }
              }

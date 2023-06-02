@@ -56,7 +56,7 @@
 
     self.logger.shouldRemoveExpiredDataWhenTerminate = YES;
 
-    self.logger.consoleEnable = YES;
+    self.logger.consoleEnable = NO;
     
     self.logger.fileLevel = 0;
 
