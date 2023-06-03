@@ -152,7 +152,7 @@ void base_file_sink::remove_expire_data(){
              MXLoggerInfo("expire file : %s",name.c_str());
              if (remove(delete_path) != 0) {
                  
-                 MXLoggerInfo("delete delete_path field!!!",name.c_str());
+                 MXLoggerError("delete delete_path field!!!",name.c_str());
              }
              
          }
