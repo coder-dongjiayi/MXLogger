@@ -1,5 +1,7 @@
 
 # MXLogger for Flutter Change Log
+# v1.2.7/2023-06-20
+* Adapter armv7 on Android. Add  annotation on iOS. Keep up with MXLogger  native lib v1.2.7
 # v1.2.6/2023-06-03
 * fix bug. maybe crash when Clean up expired files . Keep up with MXLogger  native lib v1.2.6
 # v1.2.5+6/2023-05-06

@@ -120,7 +120,8 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(get_logfiles)(void *handle,char ****array_ptr
         size_array[i] = item_size_array;
         array[i] = itemArray;
     }
-    return (int)destination.size();
+   int count =  (int)destination.size();
+    return count;
 }
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroy)(const char* ns,const char* directory){
     mx_logger ::delete_namespace(ns,directory);

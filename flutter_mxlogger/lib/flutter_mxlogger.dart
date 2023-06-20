@@ -273,7 +273,6 @@ class MXLogger with WidgetsBindingObserver {
   /// 设置日志文件存储最大字节数(byte) 默认为0 不限制 1024 * 1024 * 10; 即10M
   void setMaxDiskSize(int size) {
     if (enable == false) return;
-    print("setMaxDiskSize:$size");
     _setMaxDiskSize(_handle, size);
   }
 

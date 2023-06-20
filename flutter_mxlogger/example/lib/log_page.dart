@@ -142,7 +142,7 @@ When the exception was thrown, this was the stack:
               ElevatedButton(
                 onPressed: (){
                   _mxLogger.getLogFiles().forEach((element) {
-                    print("${element.toString()}");
+                    print("日志文件:${element.toString()}");
                   });
                 },
                 child: Text("获取日志文件"),
