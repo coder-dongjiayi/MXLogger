@@ -34,6 +34,7 @@ public class FirstFragment extends Fragment {
                 "abnijuioijkolojh",
                 "abnijuioijkolccc");
         logger.setConsoleEnable(true);
+        logger.setMaxDiskSize(1024*1024*10);
         logger.debug("s","s","{\"kev\":\"value\"}");
         logger.debug("request","mxlogger","this is debug");
         logger.info("request","mxlogger","this is info");

@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 export 'flutter_mxlogger.dart';
 
+
 ///日志文件存储策略
 enum MXStoragePolicyType {
   yyyy_MM_dd,
@@ -265,13 +266,15 @@ class MXLogger with WidgetsBindingObserver {
   /// 设置日志文件存储最大时长(s) 默认为0 不限制   60 * 60 *24 *7； 即一个星期
   void setMaxDiskAge(int age) {
     if (enable == false) return;
-    _setMaxdiskAge(_handle, age);
+
+    _setMaxDiskAge(_handle, age);
   }
 
   /// 设置日志文件存储最大字节数(byte) 默认为0 不限制 1024 * 1024 * 10; 即10M
   void setMaxDiskSize(int size) {
     if (enable == false) return;
-    _setMaxdiskSize(_handle, size);
+    print("setMaxDiskSize:$size");
+    _setMaxDiskSize(_handle, size);
   }
 
   /// 删除过期文件
@@ -551,13 +554,13 @@ final Pointer<Int8> Function(Pointer<Void>) _getLoggerKey = _nativeLib
     _mxloggerFunction("get_loggerKey"))
     .asFunction();
 
-final void Function(Pointer<Void>, int) _setMaxdiskAge = _nativeLib
+final void Function(Pointer<Void>, int) _setMaxDiskAge = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
     _mxloggerFunction("set_max_disk_age"))
     .asFunction();
 
-final void Function(Pointer<Void>, int) _setMaxdiskSize = _nativeLib
-    .lookup<NativeFunction<Void Function(Pointer<Void>, Uint64)>>(
+final void Function(Pointer<Void>, int) _setMaxDiskSize = _nativeLib
+    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
     _mxloggerFunction("set_max_disk_size"))
     .asFunction();
 
@@ -616,6 +619,6 @@ final void Function(Pointer<Void>) _removeAll = _nativeLib
     .asFunction();
 
 final int Function(Pointer<Void>) _getLogSize = _nativeLib
-    .lookup<NativeFunction<Uint64 Function(Pointer<Void>)>>(
+    .lookup<NativeFunction<Int Function(Pointer<Void>)>>(
     _mxloggerFunction("get_log_size"))
     .asFunction();

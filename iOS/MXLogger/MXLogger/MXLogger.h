@@ -36,7 +36,6 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(MXStoragePolicyType)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
 
-
 /// 释放对象的方法
 
 ///通过  loggerKey 释放
@@ -104,8 +103,9 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 @property (nonatomic,assign,readonly)NSUInteger logSize;
 
 
-
 /// 设置写入文件日志等级
+///  0:debug 1:info 2:warn 3:error 4:fatal
+///  比如 fileLevel = 1 那么小于1等级的日志 将不会被写入文件(如果设置了consoleEnable=YES,只会输出到控制台) 以此类推。
 @property (nonatomic,assign)NSInteger fileLevel;
 
 /// nameSpace+diskCacheDirectory 做一次md5的值，对应一个logger对象，可以通过这个操作logger对象。

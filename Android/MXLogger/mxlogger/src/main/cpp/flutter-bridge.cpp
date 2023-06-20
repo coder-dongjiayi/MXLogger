@@ -4,6 +4,7 @@
 //
 #include "mxlogger.hpp"
 #include "mxlogger_util.hpp"
+#include "debug_log.hpp"
 using namespace mxlogger;
 using namespace std;
 #define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
@@ -142,14 +143,16 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_enable)(void *handle,int enable){
 
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_age)(void *handle,int max_age){
     mx_logger *logger = static_cast<mx_logger*>(handle);
+
     logger->set_file_max_age(max_age);
 
 }
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_size)( void *handle,uint max_size){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_size)( void *handle,long max_size){
+
     mx_logger *logger = static_cast<mx_logger*>(handle);
     logger->set_file_max_size(max_size);
 }
-MXLOGGER_EXPORT unsigned long MXLOGGERR_FUNC(get_log_size)(void *handle){
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(get_log_size)(void *handle){
     mx_logger *logger = static_cast<mx_logger*>(handle);
     return logger->dir_size();
 }
