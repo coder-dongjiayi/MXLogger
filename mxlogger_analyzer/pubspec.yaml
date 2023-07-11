@@ -35,10 +35,10 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
 
-  device_info_plus: ^4.1.0
+  device_info_plus: ^9.0.2
 
   #用于测试 main_package的情况
-  flutter_mxlogger: 1.2.2
+  flutter_mxlogger: ^1.2.7+1
 
   auto_size_text: ^3.0.0
   badges: ^2.0.3

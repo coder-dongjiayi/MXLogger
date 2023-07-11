@@ -4,44 +4,30 @@ PODS:
   - Flutter (1.0.0)
   - flutter_mxlogger (0.0.1):
     - Flutter
-    - MXLogger (= 1.2.2)
-  - MXLogger (1.2.2):
-    - MXLoggerCore (= 1.2.2)
-  - MXLoggerCore (1.2.2)
+    - MXLogger (= 1.2.7)
+  - MXLogger (1.2.7):
+    - MXLoggerCore (= 1.2.7)
+  - MXLoggerCore (1.2.7)
   - path_provider_ios (0.0.1):
+    - Flutter
+  - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - sqlite3 (3.40.0):
-    - sqlite3/common (= 3.40.0)
-  - sqlite3/common (3.40.0)
-  - sqlite3/fts5 (3.40.0):
-    - sqlite3/common
-  - sqlite3/perf-threadsafe (3.40.0):
-    - sqlite3/common
-  - sqlite3/rtree (3.40.0):
-    - sqlite3/common
-  - sqlite3_flutter_libs (0.0.1):
-    - Flutter
-    - sqlite3 (~> 3.40.0)
-    - sqlite3/fts5
-    - sqlite3/perf-threadsafe
-    - sqlite3/rtree
 
 DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - flutter_mxlogger (from `.symlinks/plugins/flutter_mxlogger/ios`)
   - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
 
 SPEC REPOS:
   trunk:
     - MXLogger
     - MXLoggerCore
-    - sqlite3
 
 EXTERNAL SOURCES:
   device_info_plus:
@@ -52,22 +38,21 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_mxlogger/ios"
   path_provider_ios:
     :path: ".symlinks/plugins/path_provider_ios/ios"
+  share_plus:
+    :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
-  sqlite3_flutter_libs:
-    :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
 
 SPEC CHECKSUMS:
-  device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
+  device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_mxlogger: 31c094dcf33e8a2546f6cdb5a5e48b47ad978d6f
-  MXLogger: 555685ff66b583fa9f95f8740f579ff856ec51f8
-  MXLoggerCore: dfee105e44dd425883c607ec764ae403cdb95cf6
+  flutter_mxlogger: a1be659bd37f9c5a8252daee0fdbdde580cd2000
+  MXLogger: d5a5451bf9dcf93f9b888fe11826c39c8aab63e8
+  MXLoggerCore: 10389c3760bf37be591f293daf859e8d131ba17f
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
-  shared_preferences_foundation: e2dae3258e06f44cc55f49d42024fd8dd03c590c
-  sqlite3: 88dd99ef4ac3945f5a15facdd752933c52fd93bf
-  sqlite3_flutter_libs: c00751e981228acb63595236703da79d31282b63
+  share_plus: 599aa54e4ea31d4b4c0e9c911bcc26c55e791028
+  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.12.1

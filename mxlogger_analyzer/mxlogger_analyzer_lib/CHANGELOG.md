@@ -1,4 +1,5 @@
-
+## 1.0.9
+* Add system share. Delete sqlite3_flutter_libs.
 ## 1.0.8
 * Update Flutter dependencies, set Flutter >=3.3.0 and Dart to >=2.18.0 <4.0.0
 ## 1.0.7

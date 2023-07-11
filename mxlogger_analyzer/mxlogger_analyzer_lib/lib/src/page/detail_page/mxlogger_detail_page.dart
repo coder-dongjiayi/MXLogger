@@ -1,10 +1,11 @@
 import 'dart:convert' as JSON;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 
 import 'package:mxlogger_analyzer_lib/src/page/detail_page/view/flutter_json_viewer.dart';
 import 'package:mxlogger_analyzer_lib/src/page/lis_page/log_model.dart';
-
+import 'package:share_plus/share_plus.dart';
 import '../../level/mx_level.dart';
 import '../../theme/mx_theme.dart';
 
@@ -31,26 +32,9 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
           },
           child: Icon(Icons.arrow_back, color: MXTheme.white),
         ),
-        actions: widget.logModel.fileHeader == null ? [] : [
-          Padding(padding: EdgeInsets.only(right: 20),child: GestureDetector(
-            onTap: (){
-            showModalBottomSheet(context: context, builder: (context){
-              return Container(
-                color: MXTheme.themeColor,
-                padding: EdgeInsets.all(20),
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height *0.7,
-                child: SingleChildScrollView(
-                  child: message(widget.logModel.fileHeader),
-                ),
-              );
-            });
-            },
-            child: const Icon(Icons.info_outlined,color: Colors.white,),
-          ),)
-        ],
+        actions: _actionList(),
       ),
-      body:  ListView(
+      body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           Row(
@@ -67,9 +51,15 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               time(widget.logModel.timestamp),
-              GestureDetector(onTap: (){
-                _copyClipboard(context, widget.logModel.msg);
-              },child: Icon(Icons.copy,color: MXTheme.subText,),)
+              GestureDetector(
+                onTap: () {
+                  _copyClipboard(context, widget.logModel.msg);
+                },
+                child: Icon(
+                  Icons.copy,
+                  color: MXTheme.subText,
+                ),
+              )
             ],
           ),
           const SizedBox(height: 10),
@@ -79,8 +69,49 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
     );
   }
 
-  Widget name(String? name) {
+  List<Widget> _actionList() {
+    List<Widget> source = [];
+    if(analyzerPlatform != AnalyzerPlatform.desktop){
+      source.add(  Padding(
+          padding: const EdgeInsets.only(right: 20),
+          child: GestureDetector(
+            onTap: () {
+              Share.share(widget.logModel.toString());
+            },
+            child: const Icon(Icons.ios_share, color: Colors.white),
+          )));
+    }
+    if (widget.logModel.fileHeader != null) {
+      source.add(Padding(
+        padding: const EdgeInsets.only(right: 20),
+        child: GestureDetector(
+          onTap: () {
+            showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return Container(
+                    color: MXTheme.themeColor,
+                    padding: const EdgeInsets.all(20),
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 0.7,
+                    child: SingleChildScrollView(
+                      child: message(widget.logModel.fileHeader),
+                    ),
+                  );
+                });
+          },
+          child: const Icon(
+            Icons.info_outlined,
+            color: Colors.white,
+          ),
+        ),
+      ));
+    }
 
+    return source;
+  }
+
+  Widget name(String? name) {
     return Text("【$name】", style: TextStyle(color: MXTheme.text, fontSize: 18));
   }
 
@@ -140,15 +171,15 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
 
   Widget message(String? msg) {
     var jsonMap = _verifyJson(msg);
-    return  SelectionArea(child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-        color: MXTheme.itemBackground,
-        child: jsonMap != null
-            ? JsonViewer(jsonMap)
-            : Text(msg ?? "",
-            style: TextStyle(color: MXTheme.text, fontSize: 18))
-    ));
+    return SelectionArea(
+        child: Container(
+            width: MediaQuery.of(context).size.width,
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+            color: MXTheme.itemBackground,
+            child: jsonMap != null
+                ? JsonViewer(jsonMap)
+                : Text(msg ?? "",
+                    style: TextStyle(color: MXTheme.text, fontSize: 18))));
   }
 
   Map<String, dynamic>? _verifyJson(String? msg) {
@@ -162,7 +193,7 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
   }
 
   void _copyClipboard(BuildContext context, String? msg) {
-    if(msg == null) return;
+    if (msg == null) return;
     Clipboard.setData(ClipboardData(text: msg));
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       backgroundColor: MXTheme.warn,
