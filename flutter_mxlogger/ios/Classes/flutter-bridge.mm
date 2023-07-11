@@ -270,7 +270,6 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(log)(const void *handle,const char* name, in
     NSString * _msg = msg == nullptr ? NULL : [NSString stringWithUTF8String:msg];
     NSString * _tag = tag == nullptr ? NULL : [NSString stringWithUTF8String:tag];
     
-   
     [logger log:lvl name:_name msg: _msg tag:_tag];
 
 }
