@@ -1,5 +1,10 @@
 
 # MXLogger for Flutter Change Log
+
+# v1.2.8/2023-08-14
+*  Keep up with MXLogger  native lib v1.2.8.
+* Remove shouldRemoveExpiredDataWhenTerminate on ios native.
+* Replace fileLevel with the level field.
 # v1.2.7+1/2023-06-21
 * Fix bug
 # v1.2.7/2023-06-20

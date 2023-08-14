@@ -79,7 +79,7 @@
    
     MXLogger * logger =  [MXLogger valueForLoggerKey:loggerKey];
     
-    [logger log:level name:name msg:msg tag:tag];
+    [logger logWithLevel:level name:name msg:msg tag:tag];
 }
 
 +(BOOL)isNull:(NSString*) object{

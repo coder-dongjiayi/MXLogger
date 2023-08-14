@@ -246,9 +246,9 @@ class MXLogger with WidgetsBindingObserver {
   ///     2:warn
   ///     3:error
   ///     4:fatal
-  void setFileLevel(int lvl) {
+  void setLevel(int lvl) {
     if (enable == false) return;
-    _setFileLevel(_handle, lvl);
+    _setLevel(_handle, lvl);
   }
 
   /// 设置是否禁用日志写入功能
@@ -529,9 +529,9 @@ final void Function(
                     Pointer<Utf8>)>>(_mxloggerFunction("log_loggerKey"))
         .asFunction();
 
-final void Function(Pointer<Void>, int) _setFileLevel = _nativeLib
+final void Function(Pointer<Void>, int) _setLevel = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-    _mxloggerFunction("set_file_level"))
+    _mxloggerFunction("set_level"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setEnable = _nativeLib

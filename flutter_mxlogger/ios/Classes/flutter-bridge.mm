@@ -39,7 +39,6 @@ MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* di
     MXLogger * logger = [MXLogger initializeWithNamespace:_ns diskCacheDirectory:_directory storagePolicy:policyType fileName:_fileName fileHeader:_fileHeader  cryptKey:_cryptKey iv:_iv];
         
   
-    logger.shouldRemoveExpiredDataWhenTerminate = NO;
     logger.shouldRemoveExpiredDataWhenEnterBackground = NO;
     
     return (int64_t)logger;
@@ -204,9 +203,9 @@ MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logfiles)(const char * directory,
 }
 
 
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_level)(const void *handle,int file_level){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_level)(const void *handle,int level){
     MXLogger *logger = (__bridge MXLogger *) handle;
-    logger.fileLevel = [NSNumber numberWithInt:file_level].integerValue;
+    logger.level = [NSNumber numberWithInt:level].integerValue;
 }
 
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_age)(const void *handle,int max_age){
@@ -258,7 +257,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const 
     NSString * _msg = msg == nullptr ? NULL : [NSString stringWithUTF8String:msg];
     NSString * _tag = tag == nullptr ? NULL : [NSString stringWithUTF8String:tag];
     
-    [logger log:lvl name:_name msg: _msg tag:_tag];
+    [logger logWithLevel:lvl name:_name msg: _msg tag:_tag];
     
 }
 
@@ -270,7 +269,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(log)(const void *handle,const char* name, in
     NSString * _msg = msg == nullptr ? NULL : [NSString stringWithUTF8String:msg];
     NSString * _tag = tag == nullptr ? NULL : [NSString stringWithUTF8String:tag];
     
-    [logger log:lvl name:_name msg: _msg tag:_tag];
+    [logger logWithLevel:lvl name:_name msg: _msg tag:_tag];
 
 }
 
