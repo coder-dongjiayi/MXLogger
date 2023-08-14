@@ -49,7 +49,7 @@ public class MXLogger {
     /**
    * 设置写入文件日志等级 低于这个等级的日志不会被写入到文件，只可能被输出到控制台
    * */
-    private int fileLevel;
+    private int level;
 
     /**
      * 获取磁盘缓存目录
@@ -185,13 +185,13 @@ public class MXLogger {
     }
 
 
-    public int getFileLevel() {
-        return fileLevel;
+    public int getLevel() {
+        return level;
     }
 
-    public void setFileLevel(int fileLevel) {
-        this.fileLevel = fileLevel;
-        native_fileLevel(nativeHandle,fileLevel);
+    public void setLevel(int level) {
+        this.level = level;
+        native_level(nativeHandle,level);
     }
 
     public boolean isEnable() {
@@ -276,7 +276,7 @@ public class MXLogger {
     private  static  native void native_log(long nativeHandle,String name,int level,String msg,String tag,boolean mainThread);
     private  static  native void native_log_loggerKey(String loggerKey,String name,int level,String msg,String tag,boolean mainThread);
 
-    private  static  native  void  native_fileLevel(long nativeHandle,int fileLevel);
+    private  static  native  void  native_level(long nativeHandle,int level);
     private  static  native  void  native_consoleEnable(long nativeHandle,boolean enable);
     private  static  native  void  native_maxDiskAge(long nativeHandle,long maxDiskAge);
     private  static  native  void  native_maxDiskSize(long nativeHandle,long maxDiskSize);

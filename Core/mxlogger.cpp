@@ -205,7 +205,7 @@ long  mxlogger::dir_size(){
 }
 
 
-void mxlogger::set_file_level(int level){
+void mxlogger::set_log_level(int level){
     mmap_sink_ -> set_level(mxlogger_helper::level_(level));
 }
 

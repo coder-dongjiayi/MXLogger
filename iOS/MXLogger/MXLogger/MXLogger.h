@@ -76,14 +76,10 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory storagePolicy:(MXStoragePolicyType)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
 
 
-
-/// 程序结束的时候是否清理过期文件 默认YES
-@property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenTerminate;
-
 /// 程序进入后台的时候是否清理过期文件 默认YES
 @property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenEnterBackground;
 
-/// 是否开启控制台打印，默认不开启, 开始控制台打印会影响 写入效率 ，建议发布模式禁用 consoleEnable
+/// 是否开启控制台打印，默认不开启, 开启控制台打印会影响 写入效率 ，建议发布模式禁用 consoleEnable
 /// 如果要做性能测试 要设置 consoleEnable = NO;
 @property (nonatomic,assign)BOOL consoleEnable;
 
@@ -103,10 +99,11 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 @property (nonatomic,assign,readonly)NSUInteger logSize;
 
 
-/// 设置写入文件日志等级
+/// 设置写入文件的日志等级
 ///  0:debug 1:info 2:warn 3:error 4:fatal
-///  比如 fileLevel = 1 那么小于1等级的日志 将不会被写入文件(如果设置了consoleEnable=YES,只会输出到控制台) 以此类推。
-@property (nonatomic,assign)NSInteger fileLevel;
+///  比如 level = 1 那么小于1等级的日志 将不会被写入文件(如果设置了consoleEnable=YES,只会输出到控制台) 以此类推。
+///  如果开启了consoleEnable = YES ,控制台会输出所有的日志，这个字段只针对磁盘文件写入有效
+@property (nonatomic,assign)NSInteger level;
 
 /// nameSpace+diskCacheDirectory 做一次md5的值，对应一个logger对象，可以通过这个操作logger对象。
  /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
@@ -149,18 +146,18 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// @param name name
 /// @param tag tag
 /// @param msg msg
--(void)log:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(void)logWithLevel:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
 
 
--(void)debug:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(void)debugWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
 
--(void)info:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(void)infoWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
 
--(void)warn:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(void)warnWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
 
--(void)error:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(void)errorWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
 
--(void)fatal:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(void)fatalWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
 
 
 // 类方法 使用已存在的loggerKey写入日志

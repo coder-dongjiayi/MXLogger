@@ -69,8 +69,6 @@ public:
     
     /// 释放全部的logger
     static void destroy();
-    
-
 
     // 是否开启日志
     void set_enable(bool enable);
@@ -96,7 +94,7 @@ public:
     long  dir_size();
     
     // 设置日志存储等级
-    void set_file_level(int level);
+    void set_log_level(int level);
     
     // 基本不需要调用flush
     void flush();

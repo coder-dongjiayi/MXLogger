@@ -29,11 +29,11 @@ public class FirstFragment extends Fragment {
 
         logger = new MXLogger(this.getContext(),
                 "com.djy.mxlogger",
-
                 "这是MXLogger头信息",
                 "abnijuioijkolojh",
                 "abnijuioijkolccc");
         logger.setConsoleEnable(true);
+        logger.setLevel(1);
         logger.setMaxDiskSize(1024*1024*10);
         logger.debug("s","s","{\"kev\":\"value\"}");
         logger.debug("request","mxlogger","this is debug");

@@ -54,11 +54,12 @@
 
     self.logger.shouldRemoveExpiredDataWhenEnterBackground = YES;
 
-    self.logger.shouldRemoveExpiredDataWhenTerminate = YES;
 
     self.logger.consoleEnable = NO;
     
-    self.logger.fileLevel = 0;
+    self.logger.level = 0;
+    
+    
 
     MXLogger * lg = [MXLogger valueForLoggerKey:self.logger.loggerKey];
     NSLog(@"self.logger:%@",self.logger);
@@ -89,11 +90,11 @@
     
     
 //    [self.logger debug:@"mxlogger" msg:jsonString tag:@"response,request,other"];
-    [self.logger debug:@"mxlogger" msg:@"这是debug信息" tag:NULL];
-    [self.logger info:@"mxlogger" msg:@"MXLogger 是基于mmap内存映射机制的跨平台日志库，支持AES CFB 128位加密，支持iOS Android Flutter。核心代码使用C/C++实现， Flutter端通过ffi调用，性能几乎与原生一致。 底层序列化使用Google开源的flat_buffers实现，高效稳定" tag:@"request"];
-    [self.logger warn:NULL msg:@"这是warn信息" tag:@"step"];
-    [self.logger error:@"app" msg:@"这是error信息" tag:NULL];
-    [self.logger fatal:@"mxlogger" msg:@"这是fatal信息" tag:NULL];
+    [self.logger debugWithName:@"mxlogger" msg:@"这是debug信息" tag:NULL];
+    [self.logger infoWithName:@"mxlogger" msg:@"MXLogger 是基于mmap内存映射机制的跨平台日志库，支持AES CFB 128位加密，支持iOS Android Flutter。核心代码使用C/C++实现， Flutter端通过ffi调用，性能几乎与原生一致。 底层序列化使用Google开源的flat_buffers实现，高效稳定" tag:@"request"];
+    [self.logger warnWithName:NULL msg:@"这是warn信息" tag:@"step"];
+    [self.logger errorWithName:@"app" msg:@"这是error信息" tag:NULL];
+    [self.logger fatalWithName:@"mxlogger" msg:@"这是fatal信息" tag:NULL];
     [self updateSize];
 }
 
@@ -108,7 +109,7 @@
     for (NSInteger i = 0; i < 100000; i++) {
         // 单条数据序列化之后的大小为136个字节 可以debug mmap_sink.cpp 中的第63行获取size的大小
 
-        [self.logger info:@"name" msg:@"This is test looooooooooooooooooooooooooooooooog" tag:@"net"];
+        [self.logger infoWithName:@"name" msg:@"This is test looooooooooooooooooooooooooooooooog" tag:@"net"];
 
     }
     NSDate * dateEnd=   [NSDate dateWithTimeIntervalSinceNow:0];
@@ -126,7 +127,7 @@
     dispatch_async(queue, ^{
         for (int i=0; i<10; i++) {
             
-            [self.logger info:NULL msg:[NSString stringWithFormat:@"queue1 index=%ld",i] tag:@"queue1"];
+            [self.logger infoWithName:NULL msg:[NSString stringWithFormat:@"queue1 index=%ld",i] tag:@"queue1"];
             NSLog(@"%@",[NSString stringWithFormat:@"queue1 index=%ld",i]);
         }
         
@@ -135,7 +136,7 @@
     dispatch_async(queue, ^{
         for (int i=0; i<8; i++) {
             
-            [self.logger info:NULL msg:[NSString stringWithFormat:@"queue2 index=%ld",i] tag:@"queue2"];
+            [self.logger infoWithName:NULL msg:[NSString stringWithFormat:@"queue2 index=%ld",i] tag:@"queue2"];
             NSLog(@"%@",[NSString stringWithFormat:@"queue2 index=%ld",i]);
         }
         
@@ -143,7 +144,7 @@
     dispatch_async(queue, ^{
         for (int i=0; i<12; i++) {
             
-            [self.logger info:NULL msg:[NSString stringWithFormat:@"queue3 index=%ld",i] tag:@"queue3"];
+            [self.logger infoWithName:NULL msg:[NSString stringWithFormat:@"queue3 index=%ld",i] tag:@"queue3"];
             NSLog(@"%@",[NSString stringWithFormat:@"queue3 index=%ld",i]);
         }
     });

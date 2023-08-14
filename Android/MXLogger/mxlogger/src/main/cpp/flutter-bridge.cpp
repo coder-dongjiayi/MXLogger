@@ -158,9 +158,9 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(get_log_size)(void *handle){
     return logger->dir_size();
 }
 
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_file_level)(void *handle,int file_level){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_level)(void *handle,int level){
     mx_logger *logger = static_cast<mx_logger*>(handle);
-    logger->set_file_level(file_level);
+    logger->set_log_level(level);
 
 }
 

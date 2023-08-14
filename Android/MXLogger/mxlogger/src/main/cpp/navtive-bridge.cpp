@@ -200,9 +200,9 @@ namespace mxlogger{
 
 
 
-    MXLOGGER_JNI void native_fileLevel(JNIEnv *env, jobject obj,jlong handle,jint level){
+    MXLOGGER_JNI void native_level(JNIEnv *env, jobject obj,jlong handle,jint level){
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
-        logger -> set_file_level(level);
+        logger -> set_log_level(level);
     }
 
     MXLOGGER_JNI void native_maxDiskAge(JNIEnv *env, jobject obj,jlong handle,jlong maxAge){
@@ -238,7 +238,7 @@ namespace mxlogger{
 static JNINativeMethod g_methods[] = {
 
         {"jniInitialize","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::jniInitialize},
-        {"native_fileLevel","(JI)V",(void *)mxlogger::native_fileLevel},
+        {"native_level","(JI)V",(void *)mxlogger::native_level},
         {"native_consoleEnable","(JZ)V",(void *)mxlogger::native_consoleEnable},
         {"native_maxDiskAge","(JJ)V",(void *)mxlogger::native_maxDiskAge},
         {"native_maxDiskSize","(JJ)V",(void *)mxlogger::native_maxDiskSize},

@@ -140,11 +140,6 @@ static NSString * _defaultDiskCacheDirectory;
         
         self.loggerKey = [NSString stringWithUTF8String:_logger->logger_key()];
         
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(applicationWillTerminate:)
-                                                     name:UIApplicationWillTerminateNotification
-                                                   object:nil];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationDidEnterBackground:)
@@ -155,7 +150,7 @@ static NSString * _defaultDiskCacheDirectory;
                                                  selector:@selector(applicationDidEnterrForeground:)
                                                      name:UIApplicationWillEnterForegroundNotification
                                                    object:nil];
-        _shouldRemoveExpiredDataWhenTerminate = YES;
+   
         _shouldRemoveExpiredDataWhenEnterBackground = YES;
       
        
@@ -172,16 +167,7 @@ static NSString * _defaultDiskCacheDirectory;
     mx_logger::delete_namespace(_nameSpace.UTF8String, _directory.UTF8String);
     
 }
-/// 程序终止
-- (void)applicationWillTerminate:(NSNotification *)notification {
-   
-    if (!self.shouldRemoveExpiredDataWhenTerminate) {
-        return;
-    }
-  
-    [self removeExpireData];
-    mx_logger::destroy();
-}
+
 -(void)applicationDidEnterrForeground:(NSNotification *)notification{
 
 }
@@ -245,33 +231,33 @@ static NSString * _defaultDiskCacheDirectory;
    long size =  _logger -> dir_size();
     return [[NSNumber numberWithLong:size] unsignedIntegerValue];
 }
-- (void)setFileLevel:(NSInteger)fileLevel{
-    _fileLevel = fileLevel;
-    _logger -> set_file_level([NSNumber numberWithInteger:fileLevel].intValue);
+-(void)setLevel:(NSInteger)level{
+    _level = level;
+    _logger -> set_log_level([NSNumber numberWithInteger:level].intValue);
 }
 
 
 
--(void)debug:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    [self log:0 name:name msg:msg tag:tag];
+-(void)debugWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    [self logWithLevel:0 name:name msg:msg tag:tag];
 }
--(void)info:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    [self log:1 name:name msg:msg tag:tag];
-}
-
--(void)warn:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    [self log:2 name:name msg:msg tag:tag];
+-(void)infoWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    [self logWithLevel:1 name:name msg:msg tag:tag];
 }
 
--(void)error:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    [self log:3 name:name msg:msg tag:tag];
+-(void)warnWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    [self logWithLevel:2 name:name msg:msg tag:tag];
 }
 
--(void)fatal:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    [self log:4 name:name msg:msg tag:tag];
+-(void)errorWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    [self logWithLevel:3 name:name msg:msg tag:tag];
 }
 
--(void)log:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
+-(void)fatalWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    [self logWithLevel:4 name:name msg:msg tag:tag];
+}
+
+-(void)logWithLevel:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
     [self innerLogWithLevel:level name:name msg:msg tag:tag];
 }
 
@@ -308,34 +294,34 @@ static NSString * _defaultDiskCacheDirectory;
     
     MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
   
-    [logger debug:name msg:msg tag:tag];
+    [logger debugWithName:name msg:msg tag:tag];
 }
 
 +(void)infoWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
     MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
   
-    [logger info:name msg:msg tag:tag];
+    [logger infoWithName:name msg:msg tag:tag];
 }
 
 
 +(void)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
     MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
   
-    [logger warn:name msg:msg tag:tag];
+    [logger warnWithName:name msg:msg tag:tag];
 }
 
 +(void)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
   
     MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
   
-    [logger error:name msg:msg tag:tag];
+    [logger errorWithName:name msg:msg tag:tag];
 }
 
 +(void)fatalWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
     
     MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
   
-    [logger fatal:name msg:msg tag:tag];
+    [logger fatalWithName:name msg:msg tag:tag];
 }
 
 
