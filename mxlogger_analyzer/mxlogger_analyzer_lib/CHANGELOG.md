@@ -1,3 +1,5 @@
+## 1.1.0
+* Upgrading sqlite
 ## 1.0.9
 * Add system share. Delete sqlite3_flutter_libs.
 ## 1.0.8
