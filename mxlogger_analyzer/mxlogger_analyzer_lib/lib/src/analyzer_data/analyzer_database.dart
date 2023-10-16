@@ -11,6 +11,7 @@ class AnalyzerDatabase {
   static SQLite.Database get db => _db;
 
   static void initDataBase(String path) {
+
     String mxloggerDatabase = path + "/mxlogger_analyzer.db";
     _db = SQLite.sqlite3.open(mxloggerDatabase);
     SQLite.sqlite3.version;

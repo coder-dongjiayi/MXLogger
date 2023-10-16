@@ -4,10 +4,10 @@ PODS:
   - Flutter (1.0.0)
   - flutter_mxlogger (0.0.1):
     - Flutter
-    - MXLogger (= 1.2.7)
-  - MXLogger (1.2.7):
-    - MXLoggerCore (= 1.2.7)
-  - MXLoggerCore (1.2.7)
+    - MXLogger (= 1.2.8)
+  - MXLogger (1.2.8):
+    - MXLoggerCore (= 1.2.8)
+  - MXLoggerCore (1.2.8)
   - path_provider_ios (0.0.1):
     - Flutter
   - share_plus (0.0.1):
@@ -15,6 +15,8 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - sqlite3_flutter_libs (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
@@ -23,6 +25,7 @@ DEPENDENCIES:
   - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
 
 SPEC REPOS:
   trunk:
@@ -42,16 +45,19 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  sqlite3_flutter_libs:
+    :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
 
 SPEC CHECKSUMS:
-  device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
+  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_mxlogger: a1be659bd37f9c5a8252daee0fdbdde580cd2000
-  MXLogger: d5a5451bf9dcf93f9b888fe11826c39c8aab63e8
-  MXLoggerCore: 10389c3760bf37be591f293daf859e8d131ba17f
+  flutter_mxlogger: 09c765ca6dee4c1294bfe8693e5c4adcd583eaa9
+  MXLogger: 3faeff5e06ff7af0c7d90ce9cdd868ebe8876cdb
+  MXLoggerCore: 8ec85ade559f68d408618a05f42163cd686ac68d
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
   share_plus: 599aa54e4ea31d4b4c0e9c911bcc26c55e791028
   shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
+  sqlite3_flutter_libs: 5c888903cbdb29e69ecd26210edb5921ee4d88e7
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
 

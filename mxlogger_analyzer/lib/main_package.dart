@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
     _mxLogger.setMaxDiskAge(60 * 60 * 24 * 7);
     _mxLogger.setMaxDiskSize(1024 * 1024 * 10);
     _mxLogger.setConsoleEnable(true);
-    _mxLogger.setFileLevel(0);
+    _mxLogger.setLevel(0);
 
     print("path:${_mxLogger.diskcachePath}");
     print("loggerKey:${_mxLogger.loggerKey}");
