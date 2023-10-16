@@ -302,7 +302,7 @@ packages:
       path: mxlogger_analyzer_lib
       relative: true
     source: path
-    version: "1.1.0"
+    version: "1.1.1"
   path:
     dependency: transitive
     description:
@@ -503,7 +503,7 @@ packages:
   sqlite3_flutter_libs:
     dependency: transitive
     description:
-      path: sqlite3_flutter_libs
+      path: "mxlogger_analyzer_lib/sqlite3_flutter_libs"
       relative: true
     source: path
     version: "0.5.17"
