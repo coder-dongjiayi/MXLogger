@@ -1,3 +1,5 @@
+## 1.1.1
+* Support Android
 ## 1.1.0
 * Upgrading sqlite
 ## 1.0.9
