@@ -501,11 +501,13 @@ packages:
     source: hosted
     version: "2.1.0"
   sqlite3_flutter_libs:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      path: "mxlogger_analyzer_lib/sqlite3_flutter_libs"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "2a410b01904271f9afc389b0921ace13b44687f1"
+      url: "http://gs.blingabc.com/flutter/sqlite3_flutter_libs.git"
+    source: git
     version: "0.5.17"
   stack_trace:
     dependency: transitive
