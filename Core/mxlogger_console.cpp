@@ -64,10 +64,16 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
     
     std::string string_msg = msg.msg != nullptr ?  msg.msg : "";
     cJSON * jsonItem = cJSON_Parse(msg.msg);
+    char* jsonStr = nullptr;
+    
     if(jsonItem != nullptr){
-        string_msg = cJSON_Print(jsonItem);
+        jsonStr = cJSON_Print(jsonItem);
     }
-    cJSON_free(jsonItem);
+    cJSON_Delete(jsonItem);
+    if(jsonStr != nullptr){
+        string_msg = jsonStr;
+    }
+    delete jsonStr;
     
     std::string thread =  std::to_string(msg.thread_id)  + ":"+ (msg.is_main_thread == true ? "main" : "child");
     
@@ -109,8 +115,10 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
         stream << sep;
     }
     stream << std::endl;
+    
     return stream.str();
 }
 
 
 }
+

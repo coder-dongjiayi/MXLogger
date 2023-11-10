@@ -55,7 +55,7 @@
     self.logger.shouldRemoveExpiredDataWhenEnterBackground = YES;
 
 
-    self.logger.consoleEnable = NO;
+    self.logger.consoleEnable = YES;
     
     self.logger.level = 0;
     
