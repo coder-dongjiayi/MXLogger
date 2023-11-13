@@ -1,6 +1,8 @@
 
 # MXLogger for Flutter Change Log
-
+# v1.2.9/2023-11-13
+* Keep up with MXLogger  native lib v1.2.9.
+* Fix memory leak When setting setConsoleEnable is ture.
 # v1.2.8/2023-08-14
 *  Keep up with MXLogger  native lib v1.2.8.
 * Remove shouldRemoveExpiredDataWhenTerminate on ios native.
