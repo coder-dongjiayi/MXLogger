@@ -1,5 +1,8 @@
 
 # MXLogger for Flutter Change Log
+# v1.2.10/2023-12-02
+* Keep up with MXLogger  native lib v1.2.10.
+* Remove logger_key field in console
 # v1.2.9/2023-11-13
 * Keep up with MXLogger  native lib v1.2.9.
 * Fix memory leak When setting setConsoleEnable is ture.
