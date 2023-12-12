@@ -257,7 +257,9 @@ class MXLogger with WidgetsBindingObserver {
     _setEnable(_handle, enable == true ? 1 : 0);
   }
 
-  /// 设置是否禁用控制台输出功能
+  /// 设置是否禁用控制台输出功能，
+  /// 注意:1.这个方法只是禁用了控制台的输出和打印，并不影响日志的文件的写入
+  ///     2.在测试环境或者debug状态的时候可以开启console,但是app上线建议关掉。生产环境这种性能损耗毫无意义。
   void setConsoleEnable(bool e) {
     if (enable == false) return;
     _setConsoleEnable(_handle, e == true ? 1 : 0);
