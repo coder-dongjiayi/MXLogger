@@ -246,6 +246,10 @@ class MXLogger with WidgetsBindingObserver {
   ///     2:warn
   ///     3:error
   ///     4:fatal
+  ///    lvl=0 >=0 的等级会被写入日志
+  ///    lvl=1 >=1 的等级会被写入日志
+  ///    lvl=2 >=2 的等级被毁写入日志
+  ///    .......
   void setLevel(int lvl) {
     if (enable == false) return;
     _setLevel(_handle, lvl);

@@ -139,6 +139,14 @@ dependencies:
   yyyy_ww                 按周存储
   yyyy_MM_dd_HH     		  按小时存储
 ```
+> 设置控制台输出```setConsoleEnable ```
+
+* 这个方法用于开启/关闭控制台输出，对于日志写入磁盘没有影响
+* debug情况下可以设置为true,方便开发者直接在控制台查看日志，但是app发布到线上，强烈建议设置为false.
+
+> 关于``` setLevel``` 
+
+* 用于设置日志文件写入等级，只写入>= 这个等级的日志。比如设置 level=2,那么 ``` debug``` 和 ``` info``` 的日志会被抛弃，只会写入``` wran``` ``` error```  和``` fatal``` 的数据 
 
 > 初始化，以及基本使用
 
@@ -148,7 +156,7 @@ dependencies:
   MXLogger * logger =  [MXLogger initializeWithNamespace:@"com.youdomain.logger.space",storagePolicy:MXStoragePolicyYYYYMMDD];
   logger.maxDiskAge = 60*60*24*7; // 一个星期
   logger.maxDiskSize = 1024 * 1024 * 10; // 10M
-  logger.fileLevel = 0;// 设置文件写入等级 小于这个等级的日志 不写入文件
+  logger.level = 0;// 设置文件写入等级 小于这个等级的日志 不写入文件
   
   [logger debug:@"mxlogger" msg:@"这是debug信息" tag:@"network,action"]; //多个tag可以使用,分割
   [logger info:@"mxlogger" msg:@"这是info信息" tag:@"request"];
@@ -184,7 +192,7 @@ dependencies:
   
    logger.setMaxDiskAge(60*60*24*7);
    logger.setMaxDiskSize(1024*1024*10);
-   logger.setFileLevel(0);
+   logger.setLevel(0);
   
    logger.debug("这是debug数据", name: "mxlogger", tag: "tag1,tag2,tag3");
    logger.info("这是info数据", name: "mxlogger", tag: "w");
