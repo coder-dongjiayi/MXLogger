@@ -10,7 +10,8 @@ using namespace std;
 #define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #define MXLOGGERR_FUNC(func) flutter_mxlogger_ ## func
 
-MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,
+MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(
+        const char* ns,
         const char* directory,
         const char* storage_policy,
         const char* file_name,

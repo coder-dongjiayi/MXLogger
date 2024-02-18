@@ -238,7 +238,7 @@ void mxlogger::log(int level,const char* name, const char* msg,const char* tag,b
         mxlogger_console::print(log_msg);
 
     }
-
+    
    
 }
 
