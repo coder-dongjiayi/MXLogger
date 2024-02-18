@@ -1,6 +1,8 @@
 
 # MXLogger for Flutter Change Log
 
+# v1.2.10+2/2024-02-18
+* Compatible Gradle 8.0 on Android. AndroidMaaifest.xml add package.
 # v1.2.10+1/2024-02-18
 * Compatible Gradle 8.0 on Android.
 # v1.2.10/2023-12-02
