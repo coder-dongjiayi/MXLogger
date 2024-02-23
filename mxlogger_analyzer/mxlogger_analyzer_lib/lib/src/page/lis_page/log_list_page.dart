@@ -49,7 +49,7 @@ class LogListPageState extends ConsumerState<LogListPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    margin: EdgeInsets.only(top: 10, left: 10),
+                    margin: const EdgeInsets.only(top: 10, left: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
