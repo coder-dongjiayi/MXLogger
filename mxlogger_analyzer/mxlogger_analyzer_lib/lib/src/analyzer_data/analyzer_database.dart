@@ -59,11 +59,11 @@ class AnalyzerDatabase {
 
     }
     if (levels?.isEmpty == false) {
-      List<String> _levelSqls = [];
+      List<String> levelSqls = [];
       levels?.forEach((element) {
-        _levelSqls.add("level=$element");
+        levelSqls.add("level=$element");
       });
-      where = "$where and ${_levelSqls.join(" or ")}";
+      where = "($where) and ${levelSqls.join(" or ")}";
     }
     SQLite.ResultSet resultSet = _db.select(
         "select * from mxlog where $where order by timestamp ${order ?? "desc"}");

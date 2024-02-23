@@ -20,11 +20,6 @@ String levelName(int level){
 
 final List<Map<String,dynamic>> MXLevels = [
   {
-    "level":"ALL",
-    "color":MXTheme.white,
-    "number":-1,
-  },
-  {
     "level":"DEBUG",
     "color":MXTheme.debug,
     "number":0,

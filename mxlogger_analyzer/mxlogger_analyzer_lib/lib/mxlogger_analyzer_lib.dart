@@ -8,7 +8,7 @@ import 'mxlogger_analyzer_lib.dart';
 export 'package:flutter_riverpod/flutter_riverpod.dart';
 
 export 'package:mxlogger_analyzer_lib/src/provider/mxlogger_repository.dart';
-export 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider.dart';
+export 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider_2.dart';
 export 'package:mxlogger_analyzer_lib/src/theme/mx_theme.dart';
 
 export 'package:mxlogger_analyzer_lib/src/page/lis_page/log_list_page.dart';

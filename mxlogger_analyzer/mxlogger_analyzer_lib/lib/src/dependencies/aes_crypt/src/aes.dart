@@ -1201,6 +1201,8 @@ class _Aes {
           block16 = Uint8List.fromList(t);
         }
         break;
+      case null:
+        // TODO: Handle this case.
     }
     return encData;
   }
@@ -1272,6 +1274,8 @@ class _Aes {
       case AesMode.ofb:
         decData = aesEncrypt(data);
         break;
+      case null:
+        // TODO: Handle this case.
     }
     return decData;
   }

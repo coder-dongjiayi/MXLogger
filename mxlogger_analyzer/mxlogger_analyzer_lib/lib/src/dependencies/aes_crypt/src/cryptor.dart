@@ -1358,6 +1358,8 @@ class _Cryptor {
         }
         //File(destFilePath).deleteSync();
         break;
+      case null:
+        // TODO: Handle this case.
     }
 
     return destFilePath;
@@ -1390,6 +1392,8 @@ class _Cryptor {
         }
         //await File(destFilePath).delete();
         break;
+      case null:
+        // TODO: Handle this case.
     }
 
     return destFilePath;

@@ -16,20 +16,12 @@ class LevelListState extends StateNotifier<List<LevelModel>> {
   LevelListState(List<LevelModel>? initialLevels) : super(initialLevels ?? []);
 
   void selected({required int level}){
-
-   if(level == -1){
-    state = state.map((e){
-       e.selected = false;
-         return e;
-    }).toList();
-   }else{
     state =  state.map((e){
-     if(e.level == level){
-      e.selected = !e.selected;
-     }
-     return e;
+      if(e.level == level){
+        e.selected = !e.selected;
+      }
+      return e;
     }).toList();
-   }
 
   }
 }

@@ -30,7 +30,7 @@ class JsonObjectViewer extends StatefulWidget {
   final Map<String, dynamic> jsonObj;
   final bool notRoot;
 
-  JsonObjectViewer(this.jsonObj, {this.notRoot: false});
+  JsonObjectViewer(this.jsonObj, {this.notRoot = false});
 
   @override
   JsonObjectViewerState createState() => new JsonObjectViewerState();
@@ -227,7 +227,7 @@ class JsonArrayViewer extends StatefulWidget {
 
   final bool notRoot;
 
-  JsonArrayViewer(this.jsonArray, {this.notRoot: false});
+  JsonArrayViewer(this.jsonArray, {this.notRoot = false});
 
   @override
   _JsonArrayViewerState createState() => new _JsonArrayViewerState();

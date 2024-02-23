@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mxlogger_analyzer_lib/src/provider/level_list_state.dart';
-import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider.dart';
+import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider_2.dart';
 
+import '../../../provider/mxlogger_provider.dart';
 import '../../../theme/mx_theme.dart';
 
 class LogAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {
@@ -107,7 +108,7 @@ class LogAppBarState extends ConsumerState<LogAppBar> {
                 _nextCondition();
               },
               child: Container(
-                margin: EdgeInsets.only(left: 10, right: 10),
+                margin: const EdgeInsets.only(left: 10, right: 10),
                 child: Text(
                   "$condition",
                   style: TextStyle(color: MXTheme.info, fontSize: 16,fontWeight: FontWeight.bold),

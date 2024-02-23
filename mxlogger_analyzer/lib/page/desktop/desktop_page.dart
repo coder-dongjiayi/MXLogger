@@ -5,7 +5,7 @@ import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import '../../provider/mxlogger_provider.dart';
 import '../setting/setting_page.dart';
 import './drop_target_view.dart';
-
+import 'package:mxlogger_analyzer_lib/src/screen/home_screen/home_screen.dart';
 
 /// 显示遮罩状态
 final dropTargetProvider = StateProvider((ref) => false);
@@ -13,7 +13,7 @@ final dropTargetProvider = StateProvider((ref) => false);
 class DesktopPage extends ConsumerWidget {
   DesktopPage({Key? key}) : super(key: key);
   final List<Widget> _dataSource = [
-    const LogListPage(),
+    const HomeScreen(),
     const ErrorPage(),
     const SettingPage()
   ];

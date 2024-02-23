@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:mxlogger_analyzer_lib/src/component/mxlogger_text.dart';
-import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider.dart';
+import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider_2.dart';
 
 import '../../theme/mx_theme.dart';
 
