@@ -46,7 +46,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                 return _empty(isSearch: false);
               }
 
-              String? timeRang;
+              String timeRang = "";
               if (result.dataSource.isNotEmpty) {
                 int first = result.dataSource.first.timestamp;
                 int last = result.dataSource.last.timestamp;
