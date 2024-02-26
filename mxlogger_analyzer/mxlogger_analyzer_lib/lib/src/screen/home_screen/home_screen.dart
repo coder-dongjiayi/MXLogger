@@ -29,7 +29,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
         },
         onSearch: () {
           showSearchDialog(context,
-              margin: const EdgeInsets.only(left: 50, right: 50),
+              margin: const EdgeInsets.only(left: 70, right: 70),
               onCondition: (result) {
             ref
                 .read(mxLogDataSourceProvider.notifier)

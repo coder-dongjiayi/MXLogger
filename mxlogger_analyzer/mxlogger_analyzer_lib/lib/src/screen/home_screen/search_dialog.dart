@@ -18,7 +18,7 @@ Future<void> showSearchDialog(BuildContext context,
                 Navigator.of(context).pop();
               },
               child: Material(
-                color: Colors.transparent,
+                color: Colors.black.withOpacity(0.5),
                 child: Container(
                   margin: margin,
                   child: SearchDialog(
