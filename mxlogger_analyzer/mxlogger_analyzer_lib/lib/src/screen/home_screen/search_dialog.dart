@@ -46,7 +46,7 @@ extension _SearchStateHit on _SearchState {
   String hintText() {
     bool desktop = analyzerPlatform == AnalyzerPlatform.desktop;
     if (index == 0) {
-      return desktop == false ? "搜索关键词" : "搜索关键词 回车确定";
+      return "搜索关键词(输入tag: name: msg: 用于分别精准匹配数据)";
     }
     if (index == 1) {
       return "搜索多个tag，可使用,进行分割${desktop == true ? "，再按一次退格键还原" : ""}";
