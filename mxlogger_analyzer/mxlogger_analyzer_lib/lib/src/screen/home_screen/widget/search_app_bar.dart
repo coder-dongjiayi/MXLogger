@@ -7,11 +7,13 @@ import 'package:mxlogger_analyzer_lib/src/theme/mx_theme.dart';
 
 class SearchAppBar extends ConsumerStatefulWidget
     implements PreferredSizeWidget {
-  const SearchAppBar({Key? key, this.onLevelCallback,this.onSearch}) : super(key: key);
+  const SearchAppBar(
+      {Key? key, this.onLevelCallback, this.onSearch, this.menuCallback})
+      : super(key: key);
   final ValueChanged<List<int>>? onLevelCallback;
   final VoidCallback? onSearch;
-
-  Size get preferredSize => const Size.fromHeight(50);
+  final VoidCallback? menuCallback;
+  Size get preferredSize => const Size.fromHeight(60);
   @override
   SearchAppBarState createState() => SearchAppBarState();
 }
@@ -19,25 +21,26 @@ class SearchAppBar extends ConsumerStatefulWidget
 class SearchAppBarState extends ConsumerState<SearchAppBar> {
   @override
   Widget build(BuildContext context) {
-
     return Consumer(builder: (context, ref, _) {
       List<LevelModel> levelList = ref.watch(levelSearchProvider);
       return Container(
-        margin: const EdgeInsets.only(top: 20),
-        child: Row(
+        margin: const EdgeInsets.only(top: 10,bottom: 10),
+        child:  Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(width: 10),
-            GestureDetector(
+            analyzerPlatform == AnalyzerPlatform.desktop
+                ? GestureDetector(
               onTap: () {
-               widget.onSearch?.call();
+                widget.onSearch?.call();
               },
               child: SizedBox(
                 height: 30,
+                width: 30,
                 child: Icon(Icons.search, size: 20, color: MXTheme.subText),
               ),
-            ),
-            const SizedBox(width: 15),
+            )
+                : SizedBox(),
             Expanded(
                 child: ListView(
                     scrollDirection: Axis.horizontal,
@@ -77,10 +80,29 @@ class SearchAppBarState extends ConsumerState<SearchAppBar> {
                           },
                         ),
                       );
-                    })))
+                    }))),
+            _rightIcon()
           ],
         ),
       );
     });
+  }
+
+  Widget _rightIcon() {
+    if (analyzerPlatform == AnalyzerPlatform.package) {
+      return GestureDetector(
+        onTap: () {
+          widget.menuCallback?.call();
+        },
+        child: Container(
+          color: Colors.transparent,
+          padding:
+              const EdgeInsets.only(left: 20, right: 15, top: 5, bottom: 5),
+          child: Icon(Icons.menu, color: MXTheme.subText),
+        ),
+      );
+    }
+
+    return const SizedBox();
   }
 }

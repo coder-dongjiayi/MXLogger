@@ -5,10 +5,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
+import 'package:mxlogger_analyzer_lib/src/screen/home_screen/home_screen.dart';
+import 'package:mxlogger_analyzer_lib/src/screen/home_screen/search_dialog.dart';
+import 'package:mxlogger_analyzer_lib/src/screen/home_screen/widget/home_log_list_view.dart';
 
 import 'dart:io';
 
+import '../../provider/mxlogger_provider.dart';
 import 'debug_drawer.dart';
+
+final packageLoadStateProvider =
+    StateProvider.autoDispose<Map<String, dynamic>?>((ref) {
+  return null;
+});
 
 class DebugPage extends ConsumerStatefulWidget {
   const DebugPage(
@@ -40,7 +49,7 @@ class DebugPageState extends ConsumerState<DebugPage> {
       ref.read(packageLoadStateProvider.notifier).state = event;
       int? status = event?["status"];
       if (status == 2) {
-        ref.invalidate(logPagesProvider);
+        ref.invalidate(mxLogDataSourceProvider);
       }
     });
   }
@@ -53,22 +62,52 @@ class DebugPageState extends ConsumerState<DebugPage> {
       endDrawerEnableOpenDragGesture: false,
       drawerScrimColor: Colors.transparent,
       endDrawer: const DebugDrawer(),
-      floatingActionButton: GestureDetector(
-        onTap: () {
-          _refresh();
-        },
-        child: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-              color: MXTheme.dropTargetColor,
-              borderRadius: BorderRadius.circular(25)),
-          child: Icon(
-            Icons.refresh,
-            color: MXTheme.white,
-            size: 30,
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          GestureDetector(
+            onTap: () {
+              showSearchDialog(context,
+                  margin: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.3),
+                  onCondition: (result) {
+                ref
+                    .read(mxLogDataSourceProvider.notifier)
+                    .search(searchState: result.key, value: result.value);
+              });
+            },
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  color: MXTheme.dropTargetColor,
+                  borderRadius: BorderRadius.circular(25)),
+              child: Icon(
+                Icons.search_sharp,
+                color: MXTheme.white,
+                size: 30,
+              ),
+            ),
           ),
-        ),
+          const SizedBox(height: 20),
+          GestureDetector(
+            onTap: () {
+              _refresh();
+            },
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  color: MXTheme.dropTargetColor,
+                  borderRadius: BorderRadius.circular(25)),
+              child: Icon(
+                Icons.refresh,
+                color: MXTheme.white,
+                size: 30,
+              ),
+            ),
+          )
+        ],
       ),
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -78,7 +117,7 @@ class DebugPageState extends ConsumerState<DebugPage> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            LogListPage(
+            HomeScreen(
               menuCallback: () {
                 _scaffoldKey.currentState!.openEndDrawer();
               },

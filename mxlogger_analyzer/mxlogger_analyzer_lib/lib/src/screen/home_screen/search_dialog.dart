@@ -1,17 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider_2.dart';
+import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider.dart';
+
 import 'package:mxlogger_analyzer_lib/src/theme/mx_theme.dart';
 
 Future<void> showSearchDialog(BuildContext context,
-    {ValueChanged<({String key, String? value})>? onCondition}) {
+    {ValueChanged<({String key, String? value})>? onCondition,EdgeInsetsGeometry? margin}) {
   return showDialog(
       context: context,
-      builder: (context) {
-        return SearchDialog(
-          onCondition: onCondition,
-        );
+      barrierDismissible: false,
+      builder: (_) {
+        return ProviderScope(
+            parent: ProviderScope.containerOf(context),
+            child: GestureDetector(
+              onTap: (){
+                Navigator.of(context).pop();
+              },
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  margin: margin,
+                  child: SearchDialog(
+                    onCondition: onCondition,
+                  ),
+                ),
+              ),
+            ));
       });
 }
 
@@ -34,7 +49,7 @@ extension _SearchStateHit on _SearchState {
       return desktop == false ? "搜索关键词" : "搜索关键词 回车确定";
     }
     if (index == 1) {
-      return "搜索多个tag，可使用空格进行分割${desktop == true ? "，再按一次退格键还原" : ""}";
+      return "搜索多个tag，可使用,进行分割${desktop == true ? "，再按一次退格键还原" : ""}";
     }
     if (index == 2) {
       return "搜索name属性${desktop == true ? "，再按一次退格键还原" : ""}";
@@ -69,7 +84,6 @@ class SearchDialogState extends ConsumerState<SearchDialog> {
       },
       child: Container(
         alignment: Alignment.topCenter,
-        color: Colors.black.withOpacity(0.6),
         margin: const EdgeInsets.only(top: 100),
         child: _search(),
       ),
@@ -78,12 +92,13 @@ class SearchDialogState extends ConsumerState<SearchDialog> {
 
   Widget _search() {
     return Container(
-      margin: const EdgeInsets.only(left: 50, right: 50),
       decoration: BoxDecoration(
           color: MXTheme.themeColor,
-          borderRadius: const BorderRadius.all(Radius.circular(20))),
-      height: 80,
+          borderRadius: const BorderRadius.all(Radius.circular(30))),
+      height: 50,
+      alignment: Alignment.center,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _leftIcon(),
           Expanded(child: Consumer(
@@ -106,11 +121,9 @@ class SearchDialogState extends ConsumerState<SearchDialog> {
                   },
                   focusNode: FocusNode(),
                   child: TextField(
-                    autofocus: analyzerPlatform == AnalyzerPlatform.desktop
-                        ? true
-                        : false,
+                    autofocus: true,
                     controller: ref.read(_textEditingControllerProvider),
-                    style: TextStyle(fontSize: 25, color: MXTheme.white),
+                    style: TextStyle(fontSize: 18, color: MXTheme.white),
                     onChanged: (String? keyword) {
                       if (keyword == "tag:") {
                         ref.read(_searchStateProvider.notifier).state =
@@ -133,13 +146,12 @@ class SearchDialogState extends ConsumerState<SearchDialog> {
                     decoration: InputDecoration(
                       isCollapsed: true,
                       hintText: state.hintText(),
-                      hintStyle: TextStyle(color: MXTheme.text, fontSize: 25),
+                      hintStyle: TextStyle(color: MXTheme.text, fontSize: 18),
                       border: InputBorder.none,
                     ),
                   ));
             },
           )),
-          _rightIcon()
         ],
       ),
     );
@@ -151,8 +163,7 @@ class SearchDialogState extends ConsumerState<SearchDialog> {
       return _tagIcon("${state.name}:");
     }
     return Container(
-      height: 50,
-      padding: const EdgeInsets.only(left: 20, right: 20),
+      margin: const EdgeInsets.only(left: 20,right: 20),
       child: Icon(Icons.search, size: 30, color: MXTheme.subText),
     );
   }
@@ -163,24 +174,9 @@ class SearchDialogState extends ConsumerState<SearchDialog> {
       child: Text(
         tag,
         style: TextStyle(
-            color: MXTheme.info, fontSize: 25, fontWeight: FontWeight.bold),
+            color: MXTheme.info, fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
   }
 
-  Widget _rightIcon() {
-    if (analyzerPlatform == AnalyzerPlatform.package) {
-      return GestureDetector(
-        onTap: () {},
-        child: Container(
-          color: Colors.transparent,
-          padding:
-              const EdgeInsets.only(left: 20, right: 15, top: 5, bottom: 5),
-          child: Icon(Icons.menu, color: MXTheme.subText),
-        ),
-      );
-    }
-
-    return const SizedBox();
-  }
 }

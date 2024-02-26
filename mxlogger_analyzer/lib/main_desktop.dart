@@ -10,7 +10,7 @@ import 'package:mxlogger_analyzer/page/desktop/desktop_page.dart';
 import 'package:mxlogger_analyzer/page/view/crypt_dialog.dart';
 import 'package:mxlogger_analyzer/storage/mxlogger_storage.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
-
+import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -96,16 +96,14 @@ class MyHomePage extends ConsumerWidget {
           streamController.close();
 
           /// 刷新数据
-          ref.invalidate(logPagesProvider);
+          ref.invalidate(mxLogDataSourceProvider);
           break;
         case 3:
           EasyLoading.showInfo(message);
-          ref.invalidate(logPagesProvider);
+          ref.invalidate(mxLogDataSourceProvider);
           break;
         case 4:
-          ref.read(errorProvider).add(message);
-          ref.read(errorListProvider.notifier).state =
-              List.of(ref.read(errorProvider)).toList();
+
           break;
       }
     });

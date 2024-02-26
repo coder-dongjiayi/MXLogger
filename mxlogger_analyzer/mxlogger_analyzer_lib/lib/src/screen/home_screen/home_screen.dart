@@ -2,15 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
-import 'package:mxlogger_analyzer_lib/src/page/lis_page/log_model.dart';
 import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/search_dialog.dart';
+import 'package:mxlogger_analyzer_lib/src/screen/home_screen/widget/home_log_list_view.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/widget/search_app_bar.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/widget/search_result_wrap.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
-
+  const HomeScreen({Key? key, this.menuCallback, this.refreshCallback})
+      : super(key: key);
+  final VoidCallback? menuCallback;
+  final VoidCallback? refreshCallback;
   @override
   HomeScreenState createState() => HomeScreenState();
 }
@@ -21,28 +23,41 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: MXTheme.themeColor,
       appBar: SearchAppBar(
+        menuCallback: widget.menuCallback,
         onLevelCallback: (list) {
           ref.read(mxLogDataSourceProvider.notifier).levelSearch(levels: list);
         },
         onSearch: () {
-          showSearchDialog(context, onCondition: (result) {
+          showSearchDialog(context,
+              margin: const EdgeInsets.only(left: 50, right: 50),
+              onCondition: (result) {
             ref
                 .read(mxLogDataSourceProvider.notifier)
-                .conditionSearch(searchState: result.key, value: result.value);
+                .search(searchState: result.key, value: result.value);
           });
         },
       ),
       body: Consumer(builder: (context, ref, child) {
         final asyncData = ref.watch(mxLogDataSourceProvider);
         return asyncData.when(
-            data: (list) {
-
+            data: (result) {
+              if (result.isSearch == false &&
+                  result.dataSource.isEmpty == true) {
+                return _empty(isSearch: false);
+              }
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    margin: EdgeInsets.only(left: 10,top: 10),
+                    margin: const EdgeInsets.only(
+                      left: 10,
+                    ),
                     child: SearchResultWrap(
+                      onChange: (searchState) {
+                        ref
+                            .read(mxLogDataSourceProvider.notifier)
+                            .deleteSearch(searchState: searchState);
+                      },
                     ),
                   ),
                   Container(
@@ -52,7 +67,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         MXLoggerText(
-                            text: "共产生${list.length}条数据",
+                            text: "共产生${result.dataSource.length}条数据",
                             style: TextStyle(
                                 color: MXTheme.subText, fontSize: 13)),
                         GestureDetector(
@@ -80,35 +95,12 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                       ],
                     ),
                   ),
-                  Expanded(
-                      child: ListView.builder(
-                          itemCount: list.length,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            LogModel log = list[index];
-                            DateTime time = DateTime.fromMicrosecondsSinceEpoch(
-                                log.timestamp);
-                            return GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                      MaterialPageRoute(builder: (context) {
-                                    return MXLoggerDetailPage(logModel: log);
-                                  }));
-                                },
-                                child: Container(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                  color: index % 2 == 0
-                                      ? MXTheme.themeColor
-                                      : MXTheme.itemBackground,
-                                  child: _item(
-                                      name: log.name ?? "",
-                                      msg: log.msg ?? "",
-                                      level: log.level,
-                                      time: time.toString(),
-                                      tag: log.tag),
-                                ));
-                          }))
+                  result.dataSource.isEmpty == true
+                      ? Expanded(child: _empty(isSearch: true))
+                      : Expanded(
+                          child: HomeLogListView(
+                          dataSource: result.dataSource,
+                        ))
                 ],
               );
             },
@@ -121,83 +113,42 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _item(
-      {required String name,
-      required String msg,
-      required int level,
-      required String time,
-      String? tag}) {
-    List<String>? tagList = tag?.split(",");
-
-    return Stack(
-      children: [
-        Container(
-            margin: const EdgeInsets.only(left: 20),
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(time,
-                        style: TextStyle(color: MXTheme.subText, fontSize: 13)),
-                    Expanded(
-                        child: Text("【$name】",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                color: MXTheme.subText, fontSize: 13)))
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  children: List.generate(tagList?.length ?? 0, (index) {
-                    return _tag(tagList?[index]);
-                  }),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  msg,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: MXTheme.text, fontSize: 16),
-                ),
-              ],
-            )),
-        Positioned(
-            top: 0,
-            left: 0,
-            child: Container(
-              width: 10,
-              height: 10,
-              margin: const EdgeInsets.only(top: 3),
-              decoration: BoxDecoration(
-                  color: MXTheme.colorLevel(level),
-                  borderRadius: const BorderRadius.all(Radius.circular(5))),
-            )),
-        Positioned(
-            left: 4,
-            top: 10 + 3,
-            bottom: 0,
-            width: 2,
-            child: Container(
-              decoration: BoxDecoration(
-                  color: MXTheme.itemBackground,
-                  borderRadius: const BorderRadius.all(Radius.circular(3))),
-            ))
-      ],
+  Widget _empty({bool? isSearch}) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          InkWell(
+            onTap: () {
+              widget.refreshCallback?.call();
+            },
+            child: Icon(
+              isSearch == true ? Icons.hourglass_empty : _initIconData(),
+              size: 40,
+              color: MXTheme.buttonColor,
+            ),
+          ),
+          const SizedBox(height: 15),
+          Text(
+            isSearch == true ? "没有搜索到任何数据" : _initText(),
+            style: TextStyle(color: MXTheme.subText),
+          )
+        ],
+      ),
     );
   }
 
-  Widget _tag(String? tag) {
-    if (tag == null || tag == "") return SizedBox();
-    return Container(
-      decoration: BoxDecoration(
-          color: MXTheme.tag,
-          borderRadius: BorderRadius.all(Radius.circular(5))),
-      margin: EdgeInsets.only(right: 10),
-      padding: EdgeInsets.fromLTRB(5, 2, 5, 4),
-      child: Text(tag, style: TextStyle(color: MXTheme.text, fontSize: 12)),
-    );
+  IconData _initIconData() {
+    if (analyzerPlatform == AnalyzerPlatform.desktop) {
+      return Icons.file_copy_sharp;
+    }
+    return Icons.refresh;
+  }
+
+  String _initText() {
+    if (analyzerPlatform == AnalyzerPlatform.desktop) {
+      return "拖拽日志文件到窗口";
+    }
+    return "点击以导入日志数据";
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
-
+import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider.dart';
 import '../../provider/mxlogger_provider.dart';
 import '../../storage/mxlogger_storage.dart';
 
@@ -160,7 +160,8 @@ class _SettingPageState extends State<SettingPage> {
 
                   ref.read(selectedIndexProvider.notifier).state = 0;
 
-                  ref.invalidate(logPagesProvider);
+
+                  ref.invalidate(mxLogDataSourceProvider);
 
                   Navigator.of(_context).pop();
                 },

@@ -4,8 +4,8 @@ import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider.dart';
 
 class SearchResultWrap extends ConsumerWidget {
-  const SearchResultWrap({Key? key}) : super(key: key);
-
+  const SearchResultWrap({Key? key,this.onChange}) : super(key: key);
+  final ValueChanged<String>? onChange;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchResult = ref.watch(searchResultProvider);
@@ -22,9 +22,7 @@ class SearchResultWrap extends ConsumerWidget {
   Widget _item(WidgetRef ref, {required String searchState, String? value}) {
     return GestureDetector(
       onDoubleTap: (){
-        final map = ref.read(searchResultProvider);
-        map.remove(searchState);
-        ref.read(searchResultProvider.notifier).state = Map.of(map);
+        onChange?.call(searchState);
       },
       child: Container(
         decoration: BoxDecoration(

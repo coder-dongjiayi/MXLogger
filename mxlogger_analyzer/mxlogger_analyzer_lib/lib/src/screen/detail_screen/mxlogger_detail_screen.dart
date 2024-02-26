@@ -2,22 +2,24 @@ import 'dart:convert' as JSON;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
+import 'package:mxlogger_analyzer_lib/src/screen/detail_screen/view/flutter_json_viewer.dart';
 
-import 'package:mxlogger_analyzer_lib/src/page/detail_page/view/flutter_json_viewer.dart';
-import 'package:mxlogger_analyzer_lib/src/page/lis_page/log_model.dart';
+
+import 'package:mxlogger_analyzer_lib/src/screen/home_screen/log_model.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../level/mx_level.dart';
+import '../../provider/mxlogger_provider.dart';
 import '../../theme/mx_theme.dart';
 
-class MXLoggerDetailPage extends StatefulWidget {
-  const MXLoggerDetailPage({Key? key, required this.logModel})
+class MXLoggerDetailScreen extends StatefulWidget {
+  const MXLoggerDetailScreen({Key? key, required this.logModel})
       : super(key: key);
   final LogModel logModel;
   @override
-  _MXLoggerDetailPageState createState() => _MXLoggerDetailPageState();
+  _MXLoggerDetailScreenState createState() => _MXLoggerDetailScreenState();
 }
 
-class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
+class _MXLoggerDetailScreenState extends State<MXLoggerDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -170,6 +172,7 @@ class _MXLoggerDetailPageState extends State<MXLoggerDetailPage> {
   }
 
   Widget message(String? msg) {
+
     var jsonMap = _verifyJson(msg);
     return SelectionArea(
         child: Container(

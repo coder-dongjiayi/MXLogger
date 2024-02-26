@@ -35,6 +35,7 @@ class AnalyzerDatabase {
        String? condition,
       int pageSize = 20,
       String? keyWord,
+      String? searchCondition,
       String? order,
       List<int>? levels}) async {
     List<Map<String, Object?>> _result = [];
@@ -43,20 +44,23 @@ class AnalyzerDatabase {
     String where = "1=1";
 
     if (keyWord?.isNotEmpty == true) {
+      where = "msg like '%$keyWord%' or tag like '%$keyWord%' or name like '%$keyWord%'";
+      // if(condition == null){
+      //
+      // }else{
+      //   List<String> keyWords = keyWord?.trim().split(" ") ?? [];
+      //   List<String> conditions = [];
+      //   for (var element in keyWords) {
+      //     if (element.isNotEmpty == true) {
+      //       conditions.add("$condition like'%$element%'");
+      //     }
+      //   }
+      //   where = conditions.join(" or ");
+      // }
 
-      if(condition == null){
-        where = "msg like '%$keyWord%' or tag like '%$keyWord%' or name like '%$keyWord%'";
-      }else{
-        List<String> keyWords = keyWord?.trim().split(" ") ?? [];
-        List<String> conditions = [];
-        for (var element in keyWords) {
-          if (element.isNotEmpty == true) {
-            conditions.add("$condition like'%$element%'");
-          }
-        }
-        where = conditions.join(" or ");
-      }
-
+    }
+    if(searchCondition != null){
+      where = searchCondition;
     }
     if (levels?.isEmpty == false) {
       List<String> levelSqls = [];

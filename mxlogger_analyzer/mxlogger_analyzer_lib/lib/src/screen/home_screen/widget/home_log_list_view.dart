@@ -1,58 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mxlogger_analyzer_lib/src/screen/detail_screen/mxlogger_detail_screen.dart';
+import 'package:mxlogger_analyzer_lib/src/screen/home_screen/log_model.dart';
 import 'package:mxlogger_analyzer_lib/src/theme/mx_theme.dart';
 
-import '../log_model.dart';
-
-typedef LogItemTapCallback = void Function(int index);
-
-class LogListView extends StatefulWidget {
-  LogListView({Key? key, required this.dataSource, this.callback})
-      : super(key: key);
-  List<LogModel> dataSource;
-  LogItemTapCallback? callback;
-
+class HomeLogListView extends ConsumerStatefulWidget {
+  const HomeLogListView({Key? key, this.dataSource = const []}) : super(key: key);
+  final List<LogModel> dataSource;
   @override
-  _LogListViewState createState() => _LogListViewState();
+  HomeLogListViewState createState() => HomeLogListViewState();
 }
 
-class _LogListViewState extends State<LogListView> {
+class HomeLogListViewState extends ConsumerState<HomeLogListView> {
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 10),
-      child: ListView.builder(
-          itemCount: widget.dataSource.length,
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            LogModel log = widget.dataSource[index];
-            DateTime time = DateTime.fromMicrosecondsSinceEpoch(log.timestamp);
 
-            return GestureDetector(
-                onTap: () {
-                  widget.callback?.call(index);
-                },
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  color: index % 2 == 0
-                      ? MXTheme.themeColor
-                      : MXTheme.itemBackground,
-                  child: _item(
-                      name: log.name ?? "",
-                      msg: log.msg ?? "",
-                      level: log.level,
-                      time: "${time.toString()}",
-                      tag: log.tag),
-                ));
-          }),
-    );
+    return ListView.builder(
+        itemCount: widget.dataSource.length,
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          LogModel log = widget.dataSource[index];
+          DateTime time = DateTime.fromMicrosecondsSinceEpoch(
+              log.timestamp);
+          return GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) {
+
+                      return MXLoggerDetailScreen(logModel: log);
+                    }));
+              },
+              child: Container(
+                padding:
+                const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                color: index % 2 == 0
+                    ? MXTheme.themeColor
+                    : MXTheme.itemBackground,
+                child: _item(
+                    name: log.name ?? "",
+                    msg: log.msg ?? "",
+                    level: log.level,
+                    time: time.toString(),
+                    tag: log.tag),
+              ));
+        });
   }
-
   Widget _item(
       {required String name,
-      required String msg,
-      required int level,
-      required String time,
-      String? tag}) {
+        required String msg,
+        required int level,
+        required String time,
+        String? tag}) {
     List<String>? tagList = tag?.split(",");
 
     return Stack(
@@ -114,15 +113,16 @@ class _LogListViewState extends State<LogListView> {
       ],
     );
   }
-}
 
-Widget _tag(String? tag) {
-  if (tag == null || tag == "") return SizedBox();
-  return Container(
-    decoration: BoxDecoration(
-        color: MXTheme.tag, borderRadius: BorderRadius.all(Radius.circular(5))),
-    margin: EdgeInsets.only(right: 10),
-    padding: EdgeInsets.fromLTRB(5, 2, 5, 4),
-    child: Text(tag, style: TextStyle(color: MXTheme.text, fontSize: 12)),
-  );
+  Widget _tag(String? tag) {
+    if (tag == null || tag == "") return SizedBox();
+    return Container(
+      decoration: BoxDecoration(
+          color: MXTheme.tag,
+          borderRadius: BorderRadius.all(Radius.circular(5))),
+      margin: EdgeInsets.only(right: 10),
+      padding: EdgeInsets.fromLTRB(5, 2, 5, 4),
+      child: Text(tag, style: TextStyle(color: MXTheme.text, fontSize: 12)),
+    );
+  }
 }

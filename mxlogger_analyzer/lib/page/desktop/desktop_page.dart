@@ -6,7 +6,7 @@ import '../../provider/mxlogger_provider.dart';
 import '../setting/setting_page.dart';
 import './drop_target_view.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/home_screen.dart';
-
+import 'package:mxlogger_analyzer_lib/src/screen/change_log_screen/change_log_screen.dart';
 /// 显示遮罩状态
 final dropTargetProvider = StateProvider((ref) => false);
 
@@ -14,7 +14,7 @@ class DesktopPage extends ConsumerWidget {
   DesktopPage({Key? key}) : super(key: key);
   final List<Widget> _dataSource = [
     const HomeScreen(),
-    const ErrorPage(),
+    const ChangeLogScreen(),
     const SettingPage()
   ];
   @override
@@ -84,7 +84,7 @@ class DesktopPage extends ConsumerWidget {
                         builder: (context, ref, _) {
                           int index = ref.watch(selectedIndexProvider);
                           return Icon(
-                            Icons.error_outline_sharp,
+                            Icons.library_books,
                             color: index == 1 ? MXTheme.white : MXTheme.subText,
                           );
                         },

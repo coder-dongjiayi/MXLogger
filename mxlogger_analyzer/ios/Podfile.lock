@@ -4,10 +4,10 @@ PODS:
   - Flutter (1.0.0)
   - flutter_mxlogger (0.0.1):
     - Flutter
-    - MXLogger (= 1.2.8)
-  - MXLogger (1.2.8):
-    - MXLoggerCore (= 1.2.8)
-  - MXLoggerCore (1.2.8)
+    - MXLogger (= 1.2.10)
+  - MXLogger (1.2.10):
+    - MXLoggerCore (= 1.2.10)
+  - MXLoggerCore (1.2.10)
   - path_provider_ios (0.0.1):
     - Flutter
   - share_plus (0.0.1):
@@ -15,8 +15,21 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - sqlite3 (3.45.1):
+    - sqlite3/common (= 3.45.1)
+  - sqlite3/common (3.45.1)
+  - sqlite3/fts5 (3.45.1):
+    - sqlite3/common
+  - sqlite3/perf-threadsafe (3.45.1):
+    - sqlite3/common
+  - sqlite3/rtree (3.45.1):
+    - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
+    - sqlite3 (~> 3.45.1)
+    - sqlite3/fts5
+    - sqlite3/perf-threadsafe
+    - sqlite3/rtree
 
 DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
@@ -31,6 +44,7 @@ SPEC REPOS:
   trunk:
     - MXLogger
     - MXLoggerCore
+    - sqlite3
 
 EXTERNAL SOURCES:
   device_info_plus:
@@ -51,14 +65,15 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_mxlogger: 09c765ca6dee4c1294bfe8693e5c4adcd583eaa9
-  MXLogger: 3faeff5e06ff7af0c7d90ce9cdd868ebe8876cdb
-  MXLoggerCore: 8ec85ade559f68d408618a05f42163cd686ac68d
+  flutter_mxlogger: 0e6f83ef93542fd50b1a128432186c0fd9880c82
+  MXLogger: 15df4a50f1c94175ad1b1d8ae4e6e3c6f8de0735
+  MXLoggerCore: 925f8e1a32b900046310381b79c6edee469f175c
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
   share_plus: 599aa54e4ea31d4b4c0e9c911bcc26c55e791028
-  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
-  sqlite3_flutter_libs: 5c888903cbdb29e69ecd26210edb5921ee4d88e7
+  shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
+  sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
+  sqlite3_flutter_libs: af0e8fe9bce48abddd1ffdbbf839db0302d72d80
 
-PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
+PODFILE CHECKSUM: cc1f88378b4bfcf93a6ce00d2c587857c6008d3b
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.14.3

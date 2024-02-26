@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../analyzer_data/analyzer_binary.dart';
 import '../analyzer_data/analyzer_database.dart';
-import '../page/lis_page/log_model.dart';
+import '../screen/home_screen/log_model.dart';
 
 final mxloggerRepository = Provider.autoDispose((ref) => MXLoggerRepository());
 
@@ -15,9 +15,9 @@ class MXLoggerRepository {
   /// keyWord 搜索关键词
   /// levels 需要过滤的日志等级
   Future<List<LogModel>> fetchLogs(
-      {String? condition, int? page, String? keyWord, String? order, List<int>? levels}) async {
+      {String? condition, String? searchCondition, int? page, String? keyWord, String? order, List<int>? levels}) async {
     List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(
-        page: page ?? 1, order: order, condition: condition, keyWord: keyWord, levels: levels);
+        page: page ?? 1, order: order, searchCondition: searchCondition, keyWord: keyWord, levels: levels);
     List<LogModel> source = _transformLogModel(list);
     return source;
   }
