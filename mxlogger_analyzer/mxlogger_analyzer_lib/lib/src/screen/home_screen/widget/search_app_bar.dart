@@ -13,7 +13,7 @@ class SearchAppBar extends ConsumerStatefulWidget
   final ValueChanged<List<int>>? onLevelCallback;
   final VoidCallback? onSearch;
   final VoidCallback? menuCallback;
-  Size get preferredSize => const Size.fromHeight(60);
+  Size get preferredSize => const Size.fromHeight(30);
   @override
   SearchAppBarState createState() => SearchAppBarState();
 }
@@ -24,7 +24,8 @@ class SearchAppBarState extends ConsumerState<SearchAppBar> {
     return Consumer(builder: (context, ref, _) {
       List<LevelModel> levelList = ref.watch(levelSearchProvider);
       return Container(
-        margin: const EdgeInsets.only(top: 10,bottom: 10),
+        margin: const EdgeInsets.only(top: 10),
+        height: 30,
         child:  Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

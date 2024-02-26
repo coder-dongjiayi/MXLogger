@@ -15,7 +15,7 @@ class MXLoggerRepository {
   /// keyWord 搜索关键词
   /// levels 需要过滤的日志等级
   Future<List<LogModel>> fetchLogs(
-      {String? condition, String? searchCondition, int? page, String? keyWord, String? order, List<int>? levels}) async {
+      {String? searchCondition, int? page, String? keyWord, String? order, List<int>? levels}) async {
     List<Map<String, Object?>> list = await AnalyzerDatabase.selectData(
         page: page ?? 1, order: order, searchCondition: searchCondition, keyWord: keyWord, levels: levels);
     List<LogModel> source = _transformLogModel(list);

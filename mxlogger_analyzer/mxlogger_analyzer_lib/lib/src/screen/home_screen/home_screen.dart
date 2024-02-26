@@ -45,6 +45,20 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                   result.dataSource.isEmpty == true) {
                 return _empty(isSearch: false);
               }
+
+              String? timeRang;
+              if (result.dataSource.isNotEmpty) {
+                int first = result.dataSource.first.timestamp;
+                int last = result.dataSource.last.timestamp;
+                int f = first < last ? first : last;
+                int l = last > first ? last : first;
+
+                DateTime firstTime = DateTime.fromMicrosecondsSinceEpoch(f);
+                DateTime lastTime = DateTime.fromMicrosecondsSinceEpoch(l);
+                String firstString = firstTime.toString().split(".").first;
+                String lastString = lastTime.toString().split(".").first;
+                timeRang = " $firstString 至 $lastString";
+              }
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -66,10 +80,10 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        MXLoggerText(
-                            text: "共产生${result.dataSource.length}条数据",
+                        Expanded(child: MXLoggerText(
+                            text: "共产生${result.dataSource.length}条数据 $timeRang",
                             style: TextStyle(
-                                color: MXTheme.subText, fontSize: 13)),
+                                color: MXTheme.subText, fontSize: 13))),
                         GestureDetector(
                           onTap: () {
                             ref
