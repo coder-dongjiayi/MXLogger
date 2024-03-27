@@ -158,6 +158,9 @@ const char* mxlogger::diskcache_path() const{
 const char*  mxlogger::logger_key() const{
     return logger_key_.c_str();
 }
+const char* mxlogger:: error_desc() const{
+    return  mmap_sink_ ->error_record.c_str();
+}
 void mxlogger::set_enable(bool enable){
     
     enable_ = enable;
@@ -213,7 +216,6 @@ void mxlogger::flush(){
     std::lock_guard<std::mutex> lock(logger_mutex);
     mmap_sink_ -> flush();
 }
-
 
 int mxlogger::log(int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
     if (enable_ == false) {

@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <mutex>
 
+
+
 namespace mxlogger{
 namespace sinks {
 
@@ -40,7 +42,6 @@ private:
     
     std::string logger_key_;
     
-
     
         
 public:
@@ -69,6 +70,7 @@ public:
     
     /// 释放全部的logger
     static void destroy();
+
 
     // 是否开启日志
     void set_enable(bool enable);
@@ -99,6 +101,8 @@ public:
     // 基本不需要调用flush
     void flush();
     
+    
+    const char* error_desc() const;
     // 返回日志的磁盘路径
     const char* diskcache_path() const;
     

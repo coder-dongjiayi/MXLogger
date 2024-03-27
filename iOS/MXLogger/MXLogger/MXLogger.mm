@@ -138,6 +138,8 @@ static NSString * _defaultDiskCacheDirectory;
         
         _logger =  mx_logger::initialize_namespace(nameSpace.UTF8String, directory.UTF8String,storage_policy,file_name,file_heder,crypt_key,iv_);
         
+      
+        
         self.loggerKey = [NSString stringWithUTF8String:_logger->logger_key()];
         
 
@@ -288,6 +290,9 @@ static NSString * _defaultDiskCacheDirectory;
     return [NSString stringWithUTF8String:_logger->diskcache_path()];
 }
 
+-(NSString*)errorDesc{
+    return   [NSString stringWithUTF8String:_logger->error_desc()];
+}
 
 
 +(NSInteger)debugWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{

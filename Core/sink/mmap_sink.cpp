@@ -28,7 +28,7 @@ mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,po
         mmap_();
     }
 
-    actual_size_ = get_actual_size_();
+//    actual_size_ = get_actual_size_();
     
     
 }
@@ -148,10 +148,12 @@ bool mmap_sink::munmap_(){
     if(mmap_ptr_ != nullptr){
         if (munmap(mmap_ptr_, file_size_) != 0) {
         
-            MXLoggerError("munmap_ error:%s",strerror(errno));
-                          
+            error_record = MXLoggerError("munmap_ error:%s",strerror(errno));
+           
+    
             return false;
         }
+        error_record = "";
         mmap_ptr_ = nullptr;
     }
     return true;
@@ -165,11 +167,13 @@ bool mmap_sink::mmap_(){
     if (mmap_ptr_ == MAP_FAILED) {
         mmap_ptr_ = nullptr;
        
-        MXLoggerError("[mxlogger_error]start_mmap error:%s\n",strerror(errno));
+        error_record = MXLoggerError("[mxlogger_error]start_mmap error:%s\n",strerror(errno));
+       
         close();
         
         return  false;
     }
+    error_record = "";
     
     return  true;
 }
@@ -180,9 +184,11 @@ void mmap_sink::flush() {
 bool mmap_sink::msync_(int flag){
     if (msync(mmap_ptr_, get_file_size(), flag) != 0) {
         
-        MXLoggerError("[mxlogger_error]msync_ error:%s\n",strerror(errno));
+        error_record =  MXLoggerError("[mxlogger_error]msync_ error:%s\n",strerror(errno));
+       
         return false;
     }
+    error_record = "";
     return true;
    
 }

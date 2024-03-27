@@ -16,7 +16,7 @@ namespace sinks{
 base_file_sink::base_file_sink(const std::string &dir_path, const std::string &filename, policy::storage_policy policy):dir_path_(dir_path), filename_(filename), policy_(policy){
     
     if (mxlogger::create_dir(dir_path) == false) {
-        MXLoggerError("base_file_sink error:%s\n",strerror(errno));
+       error_record =  MXLoggerError("base_file_sink error:%s\n",strerror(errno));
     }
 
     handle_date_(policy);
@@ -37,9 +37,11 @@ void base_file_sink::close(){
 bool base_file_sink::ftruncate(size_t capacity_size){
     
     if (::ftruncate(file_ident, static_cast<off_t>(capacity_size)) != 0) {
-        MXLoggerError("truncate_ error:%s\n",strerror(errno));
-    
+        error_record =  MXLoggerError("truncate_ error:%s\n",strerror(errno));
+         
         return  false;
+    }else{
+        error_record = "";
     }
     
     return true;
@@ -64,10 +66,10 @@ bool base_file_sink::open(){
     /// 打开文件，如果文件不存在则创建文件
     file_ident =  ::open(log_disk_path_.c_str(), O_RDWR|O_CLOEXEC|O_CREAT,S_IRWXU);
     if (file_ident < 0) {
-        MXLoggerError("ope_file_ error:%s\n",strerror(errno));
-       
+        error_record =  MXLoggerError("ope_file_ error:%s\n",strerror(errno));
         return  false;
     }
+    error_record = "";
  
     return true;
 }
@@ -152,7 +154,7 @@ void base_file_sink::remove_expire_data(){
              MXLoggerInfo("expire file : %s",name.c_str());
              if (remove(delete_path) != 0) {
                  
-                 MXLoggerError("delete delete_path field!!!",name.c_str());
+                 error_record =  MXLoggerError("delete delete_path field!!!",name.c_str());
              }
              
          }

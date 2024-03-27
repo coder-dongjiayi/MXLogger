@@ -90,7 +90,9 @@
     
 
    NSInteger result =  [self.logger debugWithName:@"mxlogger" msg:@"这是debug信息" tag:NULL];
-
+    if(result != 0){
+        NSLog(@"errorDesc:%@",[self.logger errorDesc]);
+    }
     NSLog(@"result:%ld",(long)result);
     
     [self.logger infoWithName:@"mxlogger" msg:@"MXLogger 是基于mmap内存映射机制的跨平台日志库，支持AES CFB 128位加密，支持iOS Android Flutter。核心代码使用C/C++实现， Flutter端通过ffi调用，性能几乎与原生一致。 底层序列化使用Google开源的flat_buffers实现，高效稳定" tag:@"request"];

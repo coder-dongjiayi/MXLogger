@@ -129,6 +129,9 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 -(NSArray<NSDictionary<NSString*,NSString*>*>*)logFiles;
 
 
+/// 错误信息
+-(NSString*)errorDesc;
+
 /// 通过mapKey  返回logger对象，如果不存在返回null
 +(MXLogger*)valueForLoggerKey:(NSString*)loggerKey;
 
@@ -141,7 +144,7 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 // 删除除当前正在写入日志文件外的所有日志文件
 -(void)removeBeforeAllData;
 
-/// @return 0 成功  -1 扩容失败 -2 解除映射失败 -3 映射失败
+/// @return 0 成功  (-1 扩容失败 -2 解除映射失败 -3 映射失败  调用【errorDesc】方法查看错误信息)
 /// 输出日志
 /// @param level 等级
 /// @param name name

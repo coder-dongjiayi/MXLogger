@@ -10,7 +10,7 @@
 #ifdef  __ANDROID__
 #include <android/log.h>
 #endif
-void _debug_log(int level, const char *filename, const char *func, int line, const char *format, ...){
+std::string _debug_log(int level, const char *filename, const char *func, int line, const char *format, ...){
  
     
     std::string message;
@@ -38,5 +38,6 @@ void _debug_log(int level, const char *filename, const char *func, int line, con
     printf("%s %s\n",info_str.c_str(), message.c_str());
 #endif
 
+    return info_str + message;
 }
 

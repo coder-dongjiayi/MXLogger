@@ -9,8 +9,8 @@
 #define debug_log_hpp
 
 #include <stdio.h>
-
-extern  void _debug_log(int level,const char *filename, const char *func, int line, const char *format, ...);
+#include <string>
+extern  std::string _debug_log(int level,const char *filename, const char *func, int line, const char *format, ...);
 
 #   define MXLoggerError(format, ...)                                                                                     \
 _debug_log(1,__FILE_NAME__, __func__, __LINE__, format,         \

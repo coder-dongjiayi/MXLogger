@@ -41,6 +41,8 @@ public:
     
     virtual int log(const details::log_msg& msg) = 0;
     
+    std::string error_record;
+    
     // 刷新
     virtual void flush() = 0;
     // 设置日志等级
