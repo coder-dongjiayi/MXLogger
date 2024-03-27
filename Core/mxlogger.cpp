@@ -215,9 +215,9 @@ void mxlogger::flush(){
 }
 
 
-void mxlogger::log(int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
+int mxlogger::log(int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
     if (enable_ == false) {
-        return;
+        return 0;
     }
     
     std::lock_guard<std::mutex> lock(logger_mutex);
@@ -231,13 +231,14 @@ void mxlogger::log(int level,const char* name, const char* msg,const char* tag,b
     details::log_msg log_msg(lvl,name,tag,msg,is_main_thread);
     
     
-    mmap_sink_ -> log(log_msg);
+    int result =  mmap_sink_ -> log(log_msg);
    
     if (enable_console_ == true) {
         
         mxlogger_console::print(log_msg);
 
     }
+    return  result;
     
    
 }

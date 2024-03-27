@@ -21,7 +21,8 @@ public:
     mmap_sink(const std::string &dir_path,const std::string &filename, policy::storage_policy policy);
     
     ~mmap_sink();
-    void log(const details::log_msg& msg) override;
+    int log(const details::log_msg& msg) override;
+    
     
     void add_file_heder(const char* msg);
     
@@ -42,9 +43,9 @@ private:
     // 映射内存首地址
     uint8_t* mmap_ptr_ = nullptr;
     
-    bool write_data_(const void* buffer, size_t buffer_size);
+    int write_data_(const void* buffer, size_t buffer_size);
     
-    bool truncate_(size_t size);
+    int truncate_(size_t size);
     
     bool mmap_();
     bool munmap_();
@@ -52,7 +53,7 @@ private:
     size_t get_actual_size_();
     
     void write_actual_size_(size_t size);
-    void log_(const details::log_msg& msg);
+    int log_(const details::log_msg& msg);
    
     bool msync_(int flag);
      bool sync_();

@@ -107,12 +107,14 @@ public:
    
     /// 记录日志
   
+    /// @return 0 成功  -1 扩容失败 -2 解除映射失败 -3 映射失败
+    
     /// @param level 0 debug 1 info 2warn 3 error 4 fatal
     /// @param name 默认值  mxlogger
     /// @param msg 日志信息
     /// @param tag 标记
     /// @param is_main_thread 是否在主线程
-    void log(int level,const char* name, const char* msg,const char* tag,bool is_main_thread);
+    int log(int level,const char* name, const char* msg,const char* tag,bool is_main_thread);
     
     
    

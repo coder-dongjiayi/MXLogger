@@ -238,30 +238,30 @@ static NSString * _defaultDiskCacheDirectory;
 
 
 
--(void)debugWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    [self logWithLevel:0 name:name msg:msg tag:tag];
+-(NSInteger)debugWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    return  [self logWithLevel:0 name:name msg:msg tag:tag];
 }
--(void)infoWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    [self logWithLevel:1 name:name msg:msg tag:tag];
-}
-
--(void)warnWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    [self logWithLevel:2 name:name msg:msg tag:tag];
+-(NSInteger)infoWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    return [self logWithLevel:1 name:name msg:msg tag:tag];
 }
 
--(void)errorWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    [self logWithLevel:3 name:name msg:msg tag:tag];
+-(NSInteger)warnWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    return [self logWithLevel:2 name:name msg:msg tag:tag];
 }
 
--(void)fatalWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    [self logWithLevel:4 name:name msg:msg tag:tag];
+-(NSInteger)errorWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    return [self logWithLevel:3 name:name msg:msg tag:tag];
 }
 
--(void)logWithLevel:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
-    [self innerLogWithLevel:level name:name msg:msg tag:tag];
+-(NSInteger)fatalWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    return [self logWithLevel:4 name:name msg:msg tag:tag];
 }
 
--(void)innerLogWithLevel:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
+-(NSInteger)logWithLevel:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
+    return  [self innerLogWithLevel:level name:name msg:msg tag:tag];
+}
+
+-(NSInteger)innerLogWithLevel:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
     BOOL isMainThread = [NSThread isMainThread];
   
     int level_ = [NSNumber numberWithInteger:level].intValue;
@@ -270,7 +270,8 @@ static NSString * _defaultDiskCacheDirectory;
     const char* tag_ = [self isNull:tag] == YES ? nullptr : tag.UTF8String;
     const char* msg_ = [self isNull:msg] == YES ? nullptr : msg.UTF8String;
     
-    _logger -> log(level_,name_, msg_, tag_, isMainThread);
+    int result =  _logger -> log(level_,name_, msg_, tag_, isMainThread);
+    return result;
 }
 
 -(BOOL)isNull:(NSString*) object{
@@ -289,39 +290,38 @@ static NSString * _defaultDiskCacheDirectory;
 
 
 
-
-+(void)debugWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
++(NSInteger)debugWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
     
     MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
   
-    [logger debugWithName:name msg:msg tag:tag];
+    return  [logger debugWithName:name msg:msg tag:tag];
 }
 
-+(void)infoWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
++(NSInteger)infoWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
     MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
   
-    [logger infoWithName:name msg:msg tag:tag];
+    return  [logger infoWithName:name msg:msg tag:tag];
 }
 
 
-+(void)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
++(NSInteger)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
     MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
   
-    [logger warnWithName:name msg:msg tag:tag];
+    return [logger warnWithName:name msg:msg tag:tag];
 }
 
-+(void)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
++(NSInteger)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
   
     MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
   
-    [logger errorWithName:name msg:msg tag:tag];
+    return [logger errorWithName:name msg:msg tag:tag];
 }
 
-+(void)fatalWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
++(NSInteger)fatalWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
     
     MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
   
-    [logger fatalWithName:name msg:msg tag:tag];
+    return  [logger fatalWithName:name msg:msg tag:tag];
 }
 
 

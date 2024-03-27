@@ -36,12 +36,12 @@ mmap_sink::~mmap_sink(){
     munmap_();
     MXLoggerInfo("mmap_sink delloc");
 }
-void mmap_sink::log(const details::log_msg& msg){
+int mmap_sink::log(const details::log_msg& msg){
     if (should_log(msg.level) == false) {
-        return;
+        return 0;
     }
     
-    log_(msg);
+    return  log_(msg);
 }
 
 void mmap_sink::add_file_heder(const char* msg){
@@ -52,7 +52,7 @@ void mmap_sink::add_file_heder(const char* msg){
 }
 
 
-void mmap_sink::log_(const details::log_msg& msg){
+int mmap_sink::log_(const details::log_msg& msg){
     flatbuffers::FlatBufferBuilder builder;
     
     auto root =  Createlog_serializeDirect(builder,msg.name,msg.tag,msg.msg,msg.level,(uint32_t)msg.thread_id,msg.is_main_thread,msg.time_stamp);
@@ -68,11 +68,11 @@ void mmap_sink::log_(const details::log_msg& msg){
         cfb128_encrypt(point, point, size);
     }
     
-    write_data_(point, size);
+    return  write_data_(point, size);
  
 }
 
-bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){
+int mmap_sink::write_data_(const void* buffer, size_t buffer_size){
     
     
     ///1.、需要写入字节总大小 = 当前文件真实长度 + 需要写入buffer的长度 + offset_length
@@ -81,10 +81,15 @@ bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){
     
     /// 2、 如果写入长度大于文件长度进行扩容
     if (total >=file_size_) {
-        truncate_(total);
+        /// 扩容逻辑失败 就不往下进行了
+       int r =  truncate_(total);
+        if(r != 0){
+            return r;
+        }
     }
     
     uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
+    
     
     ///3.、先写入buffer 长度
     memcpy(write_ptr, &buffer_size, offset_length);
@@ -97,7 +102,7 @@ bool mmap_sink::write_data_(const void* buffer, size_t buffer_size){
     ///5、更新文件真实大小
     write_actual_size_(total);
 
-    return true;
+    return 0;
 }
 
 void mmap_sink::write_actual_size_(size_t size){
@@ -115,19 +120,27 @@ size_t mmap_sink::get_actual_size_(){
     return actual_size;
 }
 //扩容
-bool mmap_sink::truncate_(size_t size){
+/// 0 成功  -1 扩容失败 -2 解除映射失败 -3 映射失败
+int mmap_sink::truncate_(size_t size){
    
     size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
 
     if(ftruncate(capacity_size) == false){
-        return false;
+        return -1;
     }
-    munmap_();
+    if(munmap_() == false){
+        return -2;
+    }
     
     file_size_ = capacity_size;
     
-    
-    return mmap_ptr_ == nullptr ? mmap_() : true;
+    if(mmap_ptr_ != nullptr){
+        return 0;
+    }
+    if(mmap_() == false){
+        return -3;
+    }
+    return 0;
    
 }
 // 解除映射

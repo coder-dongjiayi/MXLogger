@@ -39,7 +39,7 @@ public:
     virtual ~sink() = default;
            
     
-    virtual void log(const details::log_msg& msg) = 0;
+    virtual int log(const details::log_msg& msg) = 0;
     
     // 刷新
     virtual void flush() = 0;

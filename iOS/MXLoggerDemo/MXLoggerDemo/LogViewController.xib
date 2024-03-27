@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -22,7 +22,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="24k-KL-dE9">
-                    <rect key="frame" x="163.5" y="148" width="87" height="34.5"/>
+                    <rect key="frame" x="162.5" y="148" width="89.5" height="34.5"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="写入Log"/>
                     <connections>
@@ -30,7 +30,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OwV-wh-DRA">
-                    <rect key="frame" x="134" y="232.5" width="146" height="34.5"/>
+                    <rect key="frame" x="132" y="232.5" width="150" height="34.5"/>
                     <state key="normal" title="Button"/>
                     <buttonConfiguration key="configuration" style="plain" title="写入10万条数据"/>
                     <connections>
@@ -97,6 +97,14 @@
                         <action selector="removeBeforeAllButtonAction:" destination="-1" eventType="touchUpInside" id="gB4-4S-BZ4"/>
                     </connections>
                 </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6Sx-tI-M7M">
+                    <rect key="frame" x="143" y="591" width="128" height="35"/>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="抛出一个异常"/>
+                    <connections>
+                        <action selector="errorButtonAction:" destination="-1" eventType="touchUpInside" id="jcv-5s-0T8"/>
+                    </connections>
+                </button>
             </subviews>
             <viewLayoutGuide key="safeArea" id="Q5M-cg-NOt"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -112,6 +120,7 @@
                 <constraint firstItem="AA0-8y-29r" firstAttribute="top" secondItem="Do9-En-cis" secondAttribute="bottom" constant="20" id="UJ7-rl-i2I"/>
                 <constraint firstItem="Do9-En-cis" firstAttribute="centerX" secondItem="OwV-wh-DRA" secondAttribute="centerX" id="Yxc-64-uJA"/>
                 <constraint firstItem="gbD-Ze-Mh3" firstAttribute="centerX" secondItem="Od2-7s-RmQ" secondAttribute="centerX" id="Ze6-5y-ejm"/>
+                <constraint firstItem="6Sx-tI-M7M" firstAttribute="centerX" secondItem="Q5M-cg-NOt" secondAttribute="centerX" id="aHL-hY-e58"/>
                 <constraint firstItem="OwV-wh-DRA" firstAttribute="centerX" secondItem="Q5M-cg-NOt" secondAttribute="centerX" id="ahJ-MX-zQh"/>
                 <constraint firstItem="Od2-7s-RmQ" firstAttribute="centerX" secondItem="24k-KL-dE9" secondAttribute="centerX" id="bvV-pl-SqH"/>
                 <constraint firstItem="FNL-vj-O9e" firstAttribute="centerX" secondItem="tKQ-v3-ckt" secondAttribute="centerX" id="cpF-tj-y8V"/>
@@ -122,6 +131,7 @@
                 <constraint firstItem="K7h-9i-Hec" firstAttribute="centerX" secondItem="24k-KL-dE9" secondAttribute="centerX" id="ouK-Mj-zM8"/>
                 <constraint firstItem="K7h-9i-Hec" firstAttribute="top" secondItem="24k-KL-dE9" secondAttribute="bottom" constant="6.5" id="rNG-ij-7Rb"/>
                 <constraint firstItem="24k-KL-dE9" firstAttribute="top" secondItem="Q5M-cg-NOt" secondAttribute="top" constant="100" id="wZk-z6-XMo"/>
+                <constraint firstItem="6Sx-tI-M7M" firstAttribute="top" secondItem="nlO-9A-lmd" secondAttribute="bottom" constant="59" id="xnT-qV-k8b"/>
             </constraints>
             <point key="canvasLocation" x="132" y="131"/>
         </view>

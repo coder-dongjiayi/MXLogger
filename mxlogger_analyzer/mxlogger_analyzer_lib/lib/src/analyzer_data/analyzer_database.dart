@@ -14,7 +14,7 @@ class AnalyzerDatabase {
 
     String mxloggerDatabase = path + "/mxlogger_analyzer.db";
     _db = SQLite.sqlite3.open(mxloggerDatabase);
-    SQLite.sqlite3.version;
+
     _db.execute(
         "CREATE TABLE if not exists  mxlog(id INTEGER PRIMARY KEY AUTOINCREMENT, "
         "name TEXT, "

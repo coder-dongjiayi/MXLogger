@@ -52,6 +52,10 @@ class _LogPageState extends State<LogPage> {
 
   }
 
+  void testRecursive(){
+    _mxLogger.info("这是递归数据");
+    testRecursive();
+  }
   void writeLog() async {
 
     _mxLogger.debug("这是条debug状态下的调试信息", tag: "login,service");
@@ -146,6 +150,13 @@ When the exception was thrown, this was the stack:
                 },
                 child: Text("获取日志文件"),
               ),
+              ElevatedButton(
+                onPressed: (){
+                  testRecursive();
+                },
+                child: Text("递归Error"),
+              ),
+
 
               ElevatedButton(
                   onPressed: () {
