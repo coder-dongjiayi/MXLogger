@@ -232,6 +232,10 @@ MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_diskcache_path)(const void *handl
     MXLogger *logger = (__bridge MXLogger *) handle;
     return logger.diskCachePath.UTF8String;
 }
+MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_error_desc)(const void *handle){
+    MXLogger *logger = (__bridge MXLogger *) handle;
+    return [logger errorDesc].UTF8String;
+}
 
 
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_before_all_data)(const void *handle){
@@ -248,8 +252,8 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(const void *handle){
     [logger removeAllData];
 }
  
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const char* name, int lvl,const char* msg,const char* tag){
-    if(logger_key == nullptr) return;
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const char* name, int lvl,const char* msg,const char* tag){
+    if(logger_key == nullptr) return 0;
     
     MXLogger *logger = [MXLogger valueForLoggerKey:[NSString stringWithUTF8String:logger_key]];
     
@@ -257,19 +261,20 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const 
     NSString * _msg = msg == nullptr ? NULL : [NSString stringWithUTF8String:msg];
     NSString * _tag = tag == nullptr ? NULL : [NSString stringWithUTF8String:tag];
     
-    [logger logWithLevel:lvl name:_name msg: _msg tag:_tag];
+    return  [logger logWithLevel:lvl name:_name msg: _msg tag:_tag];
     
 }
 
 
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(log)(const void *handle,const char* name, int lvl,const char* msg,const char* tag){
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(log)(const void *handle,const char* name, int lvl,const char* msg,const char* tag){
     MXLogger *logger = (__bridge MXLogger *) handle;
    
     NSString * _name = name == nullptr ? NULL : [NSString stringWithUTF8String:name];
     NSString * _msg = msg == nullptr ? NULL : [NSString stringWithUTF8String:msg];
     NSString * _tag = tag == nullptr ? NULL : [NSString stringWithUTF8String:tag];
     
-    [logger logWithLevel:lvl name:_name msg: _msg tag:_tag];
+    return  [logger logWithLevel:lvl name:_name msg: _msg tag:_tag];
+
 
 }
 

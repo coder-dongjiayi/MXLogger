@@ -52,14 +52,13 @@ class _LogPageState extends State<LogPage> {
 
   }
 
-  void testRecursive(){
-    _mxLogger.info("这是递归数据");
-    testRecursive();
-  }
+
   void writeLog() async {
 
-    _mxLogger.debug("这是条debug状态下的调试信息", tag: "login,service");
+    int result = _mxLogger.debug("这是条debug状态下的调试信息", tag: "login,service");
 
+    print("result:$result");
+    print("error:${_mxLogger.errorDesc}");
     _mxLogger.info("这是条Info状态下的调试信息", tag: "register");
 
     Map<String,dynamic> json1 = {
@@ -150,13 +149,6 @@ When the exception was thrown, this was the stack:
                 },
                 child: Text("获取日志文件"),
               ),
-              ElevatedButton(
-                onPressed: (){
-                  testRecursive();
-                },
-                child: Text("递归Error"),
-              ),
-
 
               ElevatedButton(
                   onPressed: () {

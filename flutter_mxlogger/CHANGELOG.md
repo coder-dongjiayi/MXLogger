@@ -1,6 +1,10 @@
 
 # MXLogger for Flutter Change Log
 
+# v1.2.11/2024-3-27
+* Log write Add return value。0 success,otherwise field.
+* Add `errorDesc` get log error.
+* Keep up with MXLogger  native lib v1.2.11.
 # v1.2.10+3/2024-02-18
 * Compatible Gradle 8.0 on Android. AndroidManifest.xml add package. fix package is com.coderdjy.mxlogger.
 * 

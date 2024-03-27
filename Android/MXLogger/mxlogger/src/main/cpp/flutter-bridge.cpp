@@ -175,6 +175,11 @@ MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_diskcache_path)(void *handle){
     return logger->diskcache_path();
 }
 
+MXLOGGER_EXPORT const char * MXLOGGERR_FUNC(get_error_desc)(void *handle){
+    mx_logger *logger = static_cast<mx_logger*>(handle);
+    return  logger->error_desc();
+}
+
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_before_all_data)(void *handle){
     mx_logger *logger = static_cast<mx_logger*>(handle);
     logger->remove_before_all();
@@ -190,18 +195,18 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(void *handle){
     logger->remove_all();
 }
 
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const char* name, int lvl,const char* msg,const char* tag){
-    if(logger_key == nullptr) return;
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const char* name, int lvl,const char* msg,const char* tag){
+    if(logger_key == nullptr) return 0;
 
     mx_logger *logger = mx_logger::global_for_loggerKey(logger_key);
 
-    logger->log(lvl,name,msg,tag,true);
+   return logger->log(lvl,name,msg,tag,true);
 
 }
 
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(log)(void *handle,const char* name, int lvl,const char* msg,const char* tag){
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(log)(void *handle,const char* name, int lvl,const char* msg,const char* tag){
     mx_logger *logger = static_cast<mx_logger*>(handle);
 
-    logger->log(lvl,name,msg,tag,true);
+   return logger->log(lvl,name,msg,tag,true);
 
 }

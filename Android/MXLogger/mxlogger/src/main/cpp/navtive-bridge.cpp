@@ -72,8 +72,13 @@ namespace mxlogger{
         return string2jstring(env,logger ->logger_key());
     }
 
+    MXLOGGER_JNI jstring  native_errorDesc(JNIEnv *env, jobject obj,jlong handle){
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        return string2jstring(env,logger ->error_desc());
+    }
 
-    MXLOGGER_JNI void native_log(JNIEnv *env, jobject obj,jlong handle,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
+
+    MXLOGGER_JNI jint native_log(JNIEnv *env, jobject obj,jlong handle,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
 
         const char  * log_tag = tag == NULL ? nullptr :  env->GetStringUTFChars(tag, nullptr);
 
@@ -84,11 +89,12 @@ namespace mxlogger{
 
 
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
-        logger ->log(level,log_name,log_msg,log_tag,mainThread);
+
+       return logger ->log(level,log_name,log_msg,log_tag,mainThread);
 
     }
 
-    MXLOGGER_JNI void native_log_loggerKey(JNIEnv *env, jobject obj,jstring loggerKey,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
+    MXLOGGER_JNI jint native_log_loggerKey(JNIEnv *env, jobject obj,jstring loggerKey,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
         const char  * log_msg = msg == NULL ? nullptr : env->GetStringUTFChars(msg, nullptr);
 
         const char  * log_tag = tag == NULL ? nullptr : env->GetStringUTFChars(tag, nullptr);
@@ -99,9 +105,9 @@ namespace mxlogger{
 
         mx_logger *logger = mx_logger ::global_for_loggerKey(logger_key);
         if(logger != nullptr){
-            logger ->log(level,log_name,log_msg,log_tag,mainThread);
+           return logger ->log(level,log_name,log_msg,log_tag,mainThread);
         }
-
+        return  0;
     }
 
     MXLOGGER_JNI jlong jniInitialize(JNIEnv *env,
@@ -243,13 +249,14 @@ static JNINativeMethod g_methods[] = {
         {"native_maxDiskAge","(JJ)V",(void *)mxlogger::native_maxDiskAge},
         {"native_maxDiskSize","(JJ)V",(void *)mxlogger::native_maxDiskSize},
         {"native_logSize","(J)J",(void *)mxlogger::native_logSize},
+        {"native_errorDesc","(J)J",(void*)mxlogger::native_errorDesc},
         {"native_diskcache_path","(J)Ljava/lang/String;",(void *)mxlogger::native_diskcache_path},
         {"native_removeExpireData","(J)V",(void *)mxlogger::native_removeExpireData},
         {"native_removeAll","(J)V",(void *)mxlogger::native_removeAll},
         {"native_removeBeforeAll","(J)V",(void *)mxlogger::native_removeBeforeAll},
         {"native_loggerKey","(J)Ljava/lang/String;",(void *)mxlogger::native_loggerKey},
-        {"native_log","(JLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log},
-        {"native_log_loggerKey","(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)V",(void *)mxlogger::native_log_loggerKey},
+        {"native_log","(JLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)I",(void *)mxlogger::native_log},
+        {"native_log_loggerKey","(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)I",(void *)mxlogger::native_log_loggerKey},
         {"native_destroy","(Ljava/lang/String;Ljava/lang/String;)V",(void *)mxlogger::native_destroy},
         {"native_destroy_loggerKey","(Ljava/lang/String;)V",(void *)mxlogger::native_destroy_loggerKey},
 //        {"native_logFiles","(J)Ljava/lang/String;",(void*)mxlogger::native_logFiles}

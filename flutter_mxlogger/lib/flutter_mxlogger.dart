@@ -52,6 +52,9 @@ class MXLogger with WidgetsBindingObserver {
   bool get enable => _enable;
 
 
+  /// 获取写入日志的错误数据 当[log]方法 !=0 的时候。
+  String? get errorDesc => _errorDesc();
+
   /// 获取日志文件夹的磁盘路径(directory+nameSpace)
   String get diskcachePath => getDiskcachePath();
 
@@ -313,6 +316,14 @@ class MXLogger with WidgetsBindingObserver {
     String path = result.cast<Utf8>().toDartString();
     return path;
   }
+  String? _errorDesc(){
+    if (enable == false) return null;
+    Pointer<Int8> result = _getErrorDesc(_handle);
+    String error = result.cast<Utf8>().toDartString();
+    if(error.isEmpty == true) return null;
+    return error;
+  }
+
 
   /// 获取日志底层的唯一标识 可以通过这个key操作日志对象
   /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
@@ -328,38 +339,39 @@ class MXLogger with WidgetsBindingObserver {
     return null;
   }
 
-  void debug(String msg, {String? name, String? tag}) {
-    log(0, msg, name: name, tag: tag);
+  int debug(String msg, {String? name, String? tag}) {
+    return log(0, msg, name: name, tag: tag);
   }
 
-  void info(String msg, {String? name, String? tag}) {
-    log(1, msg, name: name, tag: tag);
+  int info(String msg, {String? name, String? tag}) {
+    return log(1, msg, name: name, tag: tag);
   }
 
-  void warn(String msg, {String? name, String? tag}) {
-    log(2, msg, name: name, tag: tag);
+  int warn(String msg, {String? name, String? tag}) {
+    return log(2, msg, name: name, tag: tag);
   }
 
-  void error(String msg, {String? name, String? tag}) {
-    log(3, msg, name: name, tag: tag);
+  int error(String msg, {String? name, String? tag}) {
+    return log(3, msg, name: name, tag: tag);
   }
 
-  void fatal(String msg, {String? name, String? tag}) {
-    log(4, msg, name: name, tag: tag);
+  int fatal(String msg, {String? name, String? tag}) {
+    return log(4, msg, name: name, tag: tag);
   }
 
-  void log(int lvl, String msg, {String? name, String? tag}) {
-    if (enable == false) return;
+  int log(int lvl, String msg, {String? name, String? tag}) {
+    if (enable == false) return 0;
 
     Pointer<Utf8> namePtr = name != null ? name.toNativeUtf8() : nullptr;
     Pointer<Utf8> tagPtr = tag != null ? tag.toNativeUtf8() : nullptr;
     Pointer<Utf8> msgPtr = msg.toNativeUtf8();
 
-    _log(_handle, namePtr, lvl, msgPtr, tagPtr);
+   int result =  _log(_handle, namePtr, lvl, msgPtr, tagPtr);
 
     calloc.free(namePtr);
     calloc.free(tagPtr);
     calloc.free(msgPtr);
+    return result;
   }
 
 
@@ -513,21 +525,21 @@ final Pointer<Void> Function(Pointer<Utf8>) _destroyWithLoggerKey = _nativeLib
     _mxloggerFunction("destroyWithLoggerKey"))
     .asFunction();
 
-final void Function(
+final int Function(
         Pointer<Void>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Utf8>) _log =
     _nativeLib
         .lookup<
             NativeFunction<
-                Void Function(Pointer<Void>, Pointer<Utf8>, Int32,
+                Uint64 Function(Pointer<Void>, Pointer<Utf8>, Int32,
                     Pointer<Utf8>, Pointer<Utf8>)>>(_mxloggerFunction("log"))
         .asFunction();
 
-final void Function(
+final int Function(
         Pointer<Utf8>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Utf8>)
     _logLoggerKey = _nativeLib
         .lookup<
             NativeFunction<
-                Void Function(
+                Uint64 Function(
                     Pointer<Utf8>,
                     Pointer<Utf8>,
                     Int32,
@@ -557,6 +569,12 @@ final Pointer<Int8> Function(Pointer<Void>) _getDiskcachePath = _nativeLib
 final Pointer<Int8> Function(Pointer<Void>) _getLoggerKey = _nativeLib
     .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(
     _mxloggerFunction("get_loggerKey"))
+    .asFunction();
+
+
+final Pointer<Int8> Function(Pointer<Void>) _getErrorDesc = _nativeLib
+    .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(
+    _mxloggerFunction("get_error_desc"))
     .asFunction();
 
 final void Function(Pointer<Void>, int) _setMaxDiskAge = _nativeLib

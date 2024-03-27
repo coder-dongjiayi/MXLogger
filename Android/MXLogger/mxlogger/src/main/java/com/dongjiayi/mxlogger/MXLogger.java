@@ -123,20 +123,20 @@ public class MXLogger {
   public  void  removeAll(){
       native_removeAll(nativeHandle);
   }
-    public  void debug(@Nullable String tag, @Nullable String name, @Nullable String msg){
-        log(tag,0,name,msg);
+    public  int debug(@Nullable String tag, @Nullable String name, @Nullable String msg){
+        return log(tag,0,name,msg);
     }
-    public  void info(@Nullable String tag,@Nullable String name,@Nullable String msg){
-        log(tag,1,name,msg);
+    public  int info(@Nullable String tag,@Nullable String name,@Nullable String msg){
+       return log(tag,1,name,msg);
     }
-    public  void warn(@Nullable String tag,@Nullable String name,@Nullable String msg){
-        log(tag,2,name,msg);
+    public  int warn(@Nullable String tag,@Nullable String name,@Nullable String msg){
+        return log(tag,2,name,msg);
     }
-    public  void error(@Nullable String tag,@Nullable String name,@Nullable String msg){
-        log(tag,3,name,msg);
+    public  int error(@Nullable String tag,@Nullable String name,@Nullable String msg){
+       return log(tag,3,name,msg);
     }
-    public  void fatal(@Nullable String tag,@Nullable String name,@Nullable String msg){
-        log(tag,4,name,msg);
+    public  int fatal(@Nullable String tag,@Nullable String name,@Nullable String msg){
+       return log(tag,4,name,msg);
     }
     /**
      * tag 标记
@@ -144,14 +144,14 @@ public class MXLogger {
      * name name
      * msg 日志信息
     * */
-    public  void log(@Nullable String tag,@Nullable int level,@Nullable String name,@Nullable String msg){
+    public  int log(@Nullable String tag,@Nullable int level,@Nullable String name,@Nullable String msg){
 
-        innerLog(tag,level,msg,name);
+       return innerLog(tag,level,msg,name);
     }
-    private  void innerLog(@Nullable String tag,@Nullable int level,@Nullable String msg,@Nullable String name){
-        if(enable) return;
+    private  int innerLog(@Nullable String tag,@Nullable int level,@Nullable String msg,@Nullable String name){
+        if(enable) return 0;
        boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
-        native_log(nativeHandle,name,level,msg,tag,isMainThread);
+       return native_log(nativeHandle,name,level,msg,tag,isMainThread);
     }
 
     public MXLogger(@NonNull Context context,@NonNull String nameSpace,@Nullable String fileHeader) {
@@ -229,6 +229,10 @@ public class MXLogger {
     }
 
 
+    /**
+     * 获取错误信息
+     * */
+    public  String getErrorDesc(){return  native_errorDesc(nativeHandle);}
 
     private final long nativeHandle;
     private  static  String defaultDiskCacheDirectory(@NonNull Context context){
@@ -266,15 +270,15 @@ public class MXLogger {
      * 根据mapKey 获取已初始化的logger对象 然后进行日志写入操作
      * 如果没有获取到logger对象 则没有调用这个方法没有任何反应 也不会报错
      * */
-    public static void log(@NonNull String loggerKey, @Nullable String tag,@NonNull int level,@Nullable String name,@Nullable String msg){
+    public static int log(@NonNull String loggerKey, @Nullable String tag,@NonNull int level,@Nullable String name,@Nullable String msg){
         boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
-        native_log_loggerKey(loggerKey,name,level,msg,tag,isMainThread);
+       return native_log_loggerKey(loggerKey,name,level,msg,tag,isMainThread);
     }
 
     private static native long jniInitialize(String nameSpace,String diskCacheDirectory,String storagePolicy,String fileName, String fileHeader, String cryptKey,String iv);
 
-    private  static  native void native_log(long nativeHandle,String name,int level,String msg,String tag,boolean mainThread);
-    private  static  native void native_log_loggerKey(String loggerKey,String name,int level,String msg,String tag,boolean mainThread);
+    private  static  native int native_log(long nativeHandle,String name,int level,String msg,String tag,boolean mainThread);
+    private  static  native int native_log_loggerKey(String loggerKey,String name,int level,String msg,String tag,boolean mainThread);
 
     private  static  native  void  native_level(long nativeHandle,int level);
     private  static  native  void  native_consoleEnable(long nativeHandle,boolean enable);
@@ -282,6 +286,7 @@ public class MXLogger {
     private  static  native  void  native_maxDiskSize(long nativeHandle,long maxDiskSize);
     private static   native  long  native_logSize(long nativeHandle);
     private  static  native String native_diskcache_path(long nativeHandle);
+    private  static  native  String native_errorDesc(long nativeHandle);
     private  static  native void native_removeExpireData(long nativeHandle);
     private static  native  void  native_removeAll(long nativeHandle);
     private static  native  void  native_removeBeforeAll(long nativeHandle);
