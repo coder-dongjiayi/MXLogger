@@ -302,7 +302,7 @@ packages:
       path: mxlogger_analyzer_lib
       relative: true
     source: path
-    version: "1.1.1"
+    version: "1.2.0"
   path:
     dependency: transitive
     description:

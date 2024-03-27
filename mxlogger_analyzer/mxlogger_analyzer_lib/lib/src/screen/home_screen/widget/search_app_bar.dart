@@ -35,9 +35,9 @@ class SearchAppBarState extends ConsumerState<SearchAppBar> {
               onTap: () {
                 widget.onSearch?.call();
               },
-              child: Icon(Icons.search, size: 30, color: MXTheme.subText),
+              child: Icon(Icons.search, size: 20, color: MXTheme.subText),
             )
-                : SizedBox(),
+                : const SizedBox(),
             Expanded(
                 child: ListView(
                     scrollDirection: Axis.horizontal,
