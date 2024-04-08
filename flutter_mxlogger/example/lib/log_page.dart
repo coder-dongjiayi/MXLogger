@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
 import 'package:path_provider/path_provider.dart';
+
 class LogPage extends StatefulWidget {
   const LogPage({Key? key}) : super(key: key);
 
@@ -27,9 +28,7 @@ class _LogPageState extends State<LogPage> {
   }
 
   Future<void> init() async {
-
-    Directory directory = await  getApplicationDocumentsDirectory();
-
+    Directory directory = await getApplicationDocumentsDirectory();
 
     _mxLogger = await MXLogger.initialize(
         nameSpace: "flutter.mxlogger",
@@ -39,56 +38,55 @@ class _LogPageState extends State<LogPage> {
         cryptKey: _cryptKey,
         iv: _iv);
 
-    _mxLogger.setMaxDiskAge(60*60*24*7);
-    _mxLogger.setMaxDiskSize(1024*1024*10);
+    _mxLogger.setMaxDiskAge(60 * 60 * 24 * 7);
+    _mxLogger.setMaxDiskSize(1024 * 1024 * 10);
     _mxLogger.setConsoleEnable(true);
     _mxLogger.setLevel(0);
-     updateSize();
+    updateSize();
 
     print("path:${_mxLogger.diskcachePath}");
     print("loggerKey:${_mxLogger.loggerKey}");
 
     loggerKey = _mxLogger.getLoggerKey();
-
   }
 
-
   void writeLog() async {
-
     int result = _mxLogger.debug("这是条debug状态下的调试信息", tag: "login,service");
 
     print("result:$result");
     print("error:${_mxLogger.errorDesc}");
     _mxLogger.info("这是条Info状态下的调试信息", tag: "register");
 
-    Map<String,dynamic> json1 = {
-      "uri":"https://192.168.1.1/test",
-      "method":"POST",
-      "responseType":"ResponseType.json",
-      "followRedirects":"true",
-      "connectTimeout":"0",
-      "receiveTimeout":"0",
-      "extra":{},
-      "Request headers":"{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
-      "Request data":"{mobile: 6666666666, logUrl: https://xxxx.txt}",
-      "statusCode":200,
-      "Response Text":"{\"code\":0,\"msg\":\"操作成功\"}"
+    Map<String, dynamic> json1 = {
+      "uri": "https://192.168.1.1/test",
+      "method": "POST",
+      "responseType": "ResponseType.json",
+      "followRedirects": "true",
+      "connectTimeout": "0",
+      "receiveTimeout": "0",
+      "extra": {},
+      "Request headers":
+          "{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
+      "Request data": "{mobile: 6666666666, logUrl: https://xxxx.txt}",
+      "statusCode": 200,
+      "Response Text": "{\"code\":0,\"msg\":\"操作成功\"}"
     };
 
     _mxLogger.info(jsonEncode(json1), tag: "network,POST,200");
 
-    Map<String,dynamic> json2 = {
-      "uri":"https://192.168.1.1/test",
-      "method":"POST",
-      "responseType":"ResponseType.json",
-      "followRedirects":"true",
-      "connectTimeout":"0",
-      "receiveTimeout":"0",
-      "extra":{},
-      "Request headers":"{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
-      "Request data":"{mobile: 6666666666, logUrl: https://xxxx.txt}",
-      "statusCode":404,
-      "Response Text":"{\"code\":0,\"msg\":\"操作成功\"}"
+    Map<String, dynamic> json2 = {
+      "uri": "https://192.168.1.1/test",
+      "method": "POST",
+      "responseType": "ResponseType.json",
+      "followRedirects": "true",
+      "connectTimeout": "0",
+      "receiveTimeout": "0",
+      "extra": {},
+      "Request headers":
+          "{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
+      "Request data": "{mobile: 6666666666, logUrl: https://xxxx.txt}",
+      "statusCode": 404,
+      "Response Text": "{\"code\":0,\"msg\":\"操作成功\"}"
     };
 
     _mxLogger.warn(jsonEncode(json2), tag: "network,GET,404");
@@ -118,13 +116,15 @@ When the exception was thrown, this was the stack:
 #288    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:4832:16)
 #289    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:4977:11)
     """;
-    _mxLogger.error(flutterError,tag: "flutter,crash");
+    _mxLogger.error(flutterError, tag: "flutter,crash");
     _mxLogger.fatal("这是条fatal状态下的调试信息", tag: "crash");
   }
+
   @override
   void dispose() {
     // TODO: implement dispose
 
+    _mxLogger.closeFailFile();
     MXLogger.destroyWithLoggerKey(loggerKey!);
 
     super.dispose();
@@ -135,21 +135,26 @@ When the exception was thrown, this was the stack:
     String mb = (_size / 1024 / 1024).toStringAsFixed(2);
 
     return Scaffold(
-
         appBar: AppBar(title: Text("mxlogger")),
         body: Center(
           child: Column(
             children: [
               Text("当前日志大小:${mb}MB"),
               ElevatedButton(
-                onPressed: (){
+                onPressed: () {
                   _mxLogger.getLogFiles().forEach((element) {
                     print("日志文件:${element.toString()}");
                   });
                 },
                 child: Text("获取日志文件"),
               ),
-
+              ElevatedButton(
+                onPressed: () {
+                  _mxLogger.writeFail(
+                      code: -3, errorDesc: "这是错误原因", other: "这是一条写入失败的数据");
+                },
+                child: Text("当log返回非0数据的时候 写入error.txt"),
+              ),
               ElevatedButton(
                   onPressed: () {
                     writeLog();
@@ -185,11 +190,16 @@ When the exception was thrown, this was the stack:
               ),
               ElevatedButton(
                 onPressed: () {
-                  MXLogger.logLoggerKey(loggerKey, 0, "这是map写入的数据 debug",tag: "loggerKey",name: "mxlogger_loggerKey");
-                  MXLogger.logLoggerKey(loggerKey, 1, "这是map写入的数据 info",tag: "loggerKey",name: "mxlogger_loggerKey");
-                  MXLogger.logLoggerKey(loggerKey, 2, "这是map写入的数据 warn",tag: "loggerKey",name: "mxlogger_loggerKey");
-                  MXLogger.logLoggerKey(loggerKey, 3, "这是map写入的数据 error",tag: "loggerKey",name: "mxlogger_loggerKey");
-                  MXLogger.logLoggerKey(loggerKey, 4, "这是map写入的数据 fatal",tag: "loggerKey",name: "mxlogger_loggerKey");
+                  MXLogger.logLoggerKey(loggerKey, 0, "这是map写入的数据 debug",
+                      tag: "loggerKey", name: "mxlogger_loggerKey");
+                  MXLogger.logLoggerKey(loggerKey, 1, "这是map写入的数据 info",
+                      tag: "loggerKey", name: "mxlogger_loggerKey");
+                  MXLogger.logLoggerKey(loggerKey, 2, "这是map写入的数据 warn",
+                      tag: "loggerKey", name: "mxlogger_loggerKey");
+                  MXLogger.logLoggerKey(loggerKey, 3, "这是map写入的数据 error",
+                      tag: "loggerKey", name: "mxlogger_loggerKey");
+                  MXLogger.logLoggerKey(loggerKey, 4, "这是map写入的数据 fatal",
+                      tag: "loggerKey", name: "mxlogger_loggerKey");
                 },
                 child: Text("mapKey写入日志"),
               ),

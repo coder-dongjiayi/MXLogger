@@ -41,7 +41,7 @@ private:
     std::string diskcache_path_;
     
     std::string logger_key_;
-    
+
     
         
 public:

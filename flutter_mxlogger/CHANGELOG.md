@@ -1,6 +1,9 @@
 
 # MXLogger for Flutter Change Log
-
+# v1.2.11/2024-04-08
+* Add `writeFail` method.
+* You can write fail info when `log` return value not 0.
+* `mxlogger.diskcacheErrorPath` is error path. You can use this path to manipulate file information
 # v1.2.11/2024-3-27
 * Log write Add return value。0 success,otherwise field.
 * Add `errorDesc` get log error.

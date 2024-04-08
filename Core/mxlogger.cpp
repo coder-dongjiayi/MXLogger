@@ -141,7 +141,6 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     enable_ = true;
     enable_console_ = false;
   
-   
     
 }
 
