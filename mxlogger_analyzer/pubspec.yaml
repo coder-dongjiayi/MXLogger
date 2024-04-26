@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.0.0 <=4.0.0"
+  sdk: ">=3.3.0 <=4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -48,7 +48,7 @@ dependencies:
   flutter_easyloading: ^3.0.5
   desktop_drop: ^0.3.3
   file_selector: ^0.8.4+3
-  path_provider: 2.0.11
+  path_provider: ^2.1.2
 
   shared_preferences: ^2.0.15
 

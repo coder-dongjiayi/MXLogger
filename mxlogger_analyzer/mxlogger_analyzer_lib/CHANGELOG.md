@@ -1,4 +1,6 @@
 
+## 1.2.1
+* update `share_plus` `share_plus` `sqlite3`， support flutter 3.19.5 dart 3.3.0.
 ## 1.2.0
 * 重构搜索框,使用dialog弹出。
 * 支持同时搜索多个条件(tag,name,msg)。默认情况下会对关键词进行模糊匹配，在输入框输入tag: 可以单独搜索tag(name msg同理)。

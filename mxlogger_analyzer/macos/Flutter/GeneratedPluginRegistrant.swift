@@ -8,7 +8,7 @@ import Foundation
 import desktop_drop
 import device_info_plus
 import file_selector_macos
-import path_provider_macos
+import path_provider_foundation
 import share_plus
 import shared_preferences_foundation
 import sqlite3_flutter_libs

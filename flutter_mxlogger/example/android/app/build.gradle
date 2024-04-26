@@ -35,7 +35,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.flutter_mxlogger_example"
-        minSdkVersion 16
+        minSdkVersion flutter.minSdkVersion
         multiDexEnabled true
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()

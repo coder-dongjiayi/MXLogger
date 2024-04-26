@@ -1,6 +1,9 @@
 
 # MXLogger for Flutter Change Log
-# v1.2.11/2024-04-08
+# v1.2.12/2024-04-26
+* Keep up with MXLogger  native lib v1.2.12 on Android.
+* Fix jin error.
+# v1.2.11+1/2024-04-08
 * Add `writeFail` method.
 * You can write fail info when `log` return value not 0.
 * `mxlogger.diskcacheErrorPath` is error path. You can use this path to manipulate file information
