@@ -1,5 +1,9 @@
 
 # MXLogger for Flutter Change Log
+
+# v1.2.13/2024-05-21
+* Add `flutter_mxlogger_web.dart`. Only the method name is not implemented.
+* Compatible with web side compilation
 # v1.2.12/2024-04-26
 * Keep up with MXLogger  native lib v1.2.12 on Android.
 * Fix jin error.
