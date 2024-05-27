@@ -14,10 +14,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/aar/mxlogger-DefaultCpp-release.aar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/aar/mxlogger-SharedCpp-release.aar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/aar/mxlogger-StaticCpp-release.aar" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

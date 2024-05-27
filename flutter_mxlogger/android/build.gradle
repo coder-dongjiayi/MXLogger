@@ -20,9 +20,9 @@ rootProject.allprojects {
         google()
         mavenCentral()
         mavenLocal()
-        flatDir {
+//        flatDir {
 //            dirs "/Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/mxlogger/build/outputs/aar"
-        }
+//        }
     }
 }
 
