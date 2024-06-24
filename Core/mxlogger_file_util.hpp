@@ -32,6 +32,7 @@ inline bool path_exists(const char*  path){
     return (::stat(path, &buffer) == 0);
 }
 
+//使用0777 作为文件夹权限，用于日志文件导出。
 inline bool makedir(const char* path){
     
     return ::mkdir(path,mode_t(0777)) == 0;
