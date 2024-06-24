@@ -34,7 +34,7 @@ inline bool path_exists(const char*  path){
 
 inline bool makedir(const char* path){
     
-    return ::mkdir(path,mode_t(0755)) == 0;
+    return ::mkdir(path,mode_t(0777)) == 0;
 }
 
 

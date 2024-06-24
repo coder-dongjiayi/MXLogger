@@ -1,6 +1,6 @@
 
 # MXLogger for Flutter Change Log
-# v1.2.13/2024-05-27
+# v1.2.13+1/2024-05-27
 * Fix bug. 
 * Annotation flatDir。In order to fix the android side of the compilation error
 
