@@ -43,7 +43,7 @@ android {
     }
     dependencies {
 
-     implementation 'io.github.coder-dongjiayi:mxlogger:1.2.12'
+     implementation 'io.github.coder-dongjiayi:mxlogger:1.2.13'
 
     //   implementation (name:"mxlogger-DefaultCpp-release",ext:"aar")
 

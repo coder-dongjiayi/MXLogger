@@ -1,9 +1,10 @@
 
 # MXLogger for Flutter Change Log
+# v1.2.13+2/2024-07-10
+* Change the folder permission to 0777 for local export.
 # v1.2.13+1/2024-05-27
 * Fix bug. 
 * Annotation flatDir。In order to fix the android side of the compilation error
-
 # v1.2.13/2024-05-21
 * Add `flutter_mxlogger_web.dart`. Only the method name is not implemented.
 * Compatible with web side compilation
