@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.dongjiayi.mxlogger.MXLogger;
+import com.dongjiayi.mxlogger.MXStoragePolicyType;
 import com.dongjiayi.mxloggerdemo.databinding.FragmentFirstBinding;
 
 import java.util.Arrays;
@@ -27,10 +28,13 @@ public class FirstFragment extends Fragment {
             Bundle savedInstanceState
     ) {
 
+
+
         logger = new MXLogger(this.getContext(),
                 "com.djy.mxlogger",
                 "这是MXLogger头信息",
                 "abnijuioijkolojh",
+
                 "abnijuioijkolccc");
         logger.setConsoleEnable(true);
         logger.setLevel(1);
