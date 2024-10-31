@@ -1,5 +1,7 @@
 
 # MXLogger for Flutter Change Log
+# v1.2.14/2024-10-31
+* Fix Fixed a bug where files were overwritten。 native lib v1.2.14.
 # v1.2.13+2/2024-07-10
 * Change the folder permission to 0777 for local export.
 # v1.2.13+1/2024-05-27

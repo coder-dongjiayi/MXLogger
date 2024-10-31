@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 # pod lib lint --allow-warnings --verbose --skip-import-validation
   s.name         = "MXLogger"
-  s.version      = "1.2.13"
+  s.version      = "1.2.14"
   s.summary      = "MXLogger 客户端夸平台日志收集"
 
   s.description  = <<-DESC
@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
 
    s.framework    = "CoreFoundation"
 
-   s.dependency 'MXLoggerCore', "1.2.13"
+   s.dependency 'MXLoggerCore', "1.2.14"
    s.libraries    = "z", "c++"
    
   s.pod_target_xcconfig = {
