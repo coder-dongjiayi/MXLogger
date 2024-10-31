@@ -28,7 +28,7 @@ mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,po
         mmap_();
     }
 
-//    actual_size_ = get_actual_size_();
+    actual_size_ = get_actual_size_();
     
     
 }

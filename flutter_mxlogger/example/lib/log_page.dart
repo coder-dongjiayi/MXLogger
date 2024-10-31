@@ -33,8 +33,8 @@ class _LogPageState extends State<LogPage> {
     _mxLogger = await MXLogger.initialize(
         nameSpace: "flutter.mxlogger",
         directory: directory.path,
-        storagePolicy: MXStoragePolicyType.yyyy_MM_dd_HH,
-        fileHeader: "version 1.2.8",
+        storagePolicy: MXStoragePolicyType.yyyy_MM_dd,
+        fileHeader: "version 1.2.9",
         cryptKey: _cryptKey,
         iv: _iv);
 
