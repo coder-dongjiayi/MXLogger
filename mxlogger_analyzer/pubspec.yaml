@@ -38,9 +38,9 @@ dependencies:
   device_info_plus: ^9.0.2
 
   #用于测试 main_package的情况
-  flutter_mxlogger: ^1.2.7+1
+  flutter_mxlogger: ^1.2.11
   #支持android ios  在m1设置上可以能pod 失败，可以去掉这个库里面的ios依赖
-  sqlite3_flutter_libs: ^0.5.17
+#  sqlite3_flutter_libs: ^0.5.32
 
   auto_size_text: ^3.0.0
   badges: ^2.0.3

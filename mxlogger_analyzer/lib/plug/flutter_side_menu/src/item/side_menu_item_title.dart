@@ -21,7 +21,7 @@ class SideMenuItemTitle extends StatelessWidget {
     required BuildContext context,
   }) {
     final TextStyle? titleStyle =
-        data.titleStyle ?? Theme.of(context).textTheme.bodyText1;
+        data.titleStyle ?? Theme.of(context).textTheme.bodyLarge;
     return AutoSizeText(
       data.title,
       style: titleStyle,

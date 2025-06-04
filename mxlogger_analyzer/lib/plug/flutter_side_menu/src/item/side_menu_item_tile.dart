@@ -123,7 +123,7 @@ class _SideMenuItemTileState extends State<SideMenuItemTile> {
   Widget _title({
     required BuildContext context,
   }) {
-    final TextStyle? titleStyle = widget.data.titleStyle ?? Theme.of(context).textTheme.bodyText1;
+    final TextStyle? titleStyle = widget.data.titleStyle ?? Theme.of(context).textTheme.bodyLarge;
     return AutoSizeText(
       widget.data.title!,
       style: titleStyle?.copyWith(
