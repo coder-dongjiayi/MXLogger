@@ -1,4 +1,6 @@
 
+## 1.2.2
+* update `share_plus`-> ^11.0.0
 ## 1.2.1
 * update `share_plus` `share_plus` `sqlite3`， support flutter 3.19.5 dart 3.3.0.
 ## 1.2.0
