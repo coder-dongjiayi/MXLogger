@@ -328,7 +328,8 @@ typedef uintmax_t largest_scalar_t;
 #define FLATBUFFERS_MAX_BUFFER_SIZE ((1ULL << (sizeof(::flatbuffers::soffset_t) * 8 - 1)) - 1)
 
 // We support aligning the contents of buffers up to this size.
-#define FLATBUFFERS_MAX_ALIGNMENT 16
+// Changed from 16 to 65536 (64KB) to support Android 64K page sizes
+#define FLATBUFFERS_MAX_ALIGNMENT 65536
 
 inline bool VerifyAlignmentRequirements(size_t align, size_t min_align = 1) {
   return (min_align <= align) && (align <= (FLATBUFFERS_MAX_ALIGNMENT)) &&
