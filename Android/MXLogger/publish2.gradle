@@ -2,7 +2,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 task androidSourcesJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier androidSourcesJar
     from sourceSets.main.allSource
 }
 artifacts {

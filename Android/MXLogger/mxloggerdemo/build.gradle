@@ -3,6 +3,7 @@ plugins {
 }
 
 android {
+    namespace "com.dongjiayi.mxloggerdemo"
     compileSdk 33
 
     defaultConfig {

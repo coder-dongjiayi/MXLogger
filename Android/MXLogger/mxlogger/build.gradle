@@ -3,17 +3,26 @@ plugins {
 }
 
 android {
+    namespace  "com.dongjiayi.mxlogger"
     defaultPublishConfig "DefaultCppRelease"
+
     compileSdk 31
 
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
+
     defaultConfig {
-        minSdk 16
+        minSdk 21
         targetSdk 31
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "proguard-rules.pro"
         externalNativeBuild {
             cmake {
                 cppFlags ""
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
             }
         }
     }
@@ -58,6 +67,6 @@ dependencies {
 ext {
     PUBLISH_ARTIFACT_ID = "mxlogger"
     PUBLISH_GROUP_ID = 'io.github.coder-dongjiayi'
-    PUBLISH_VERSION = '1.2.14'
+    PUBLISH_VERSION = '1.2.15'
 }
 apply from: '../publish.gradle'

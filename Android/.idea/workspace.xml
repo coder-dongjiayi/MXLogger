@@ -1,32 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="3ed04831-8d1a-43f4-a8d8-d389d65064ac" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../MXLogger.podspec" beforeDir="false" afterPath="$PROJECT_DIR$/../MXLogger.podspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MXLoggerCore.podspec" beforeDir="false" afterPath="$PROJECT_DIR$/../MXLoggerCore.podspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MXLogger/.idea/runConfigurations.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MXLogger/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/MXLogger/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MXLogger/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MXLogger/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/MXLogger/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MXLogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/MXLogger/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MXLogger/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/MXLogger/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MXLogger/mxlogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/MXLogger/mxlogger/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MXLogger/mxloggerdemo/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/MXLogger/mxloggerdemo/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MXLogger/publish.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/MXLogger/publish.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MXLogger/publish2.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/MXLogger/publish2.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/android/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/.metadata" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/.metadata" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/analysis_options.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/analysis_options.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/android/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/debug/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/debug/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/main/java/com/example/flutter_mxlogger_example/MainActivity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/main/res/values-night/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/main/res/values-night/styles.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/main/res/values/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/main/res/values/styles.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/profile/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/android/app/src/profile/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/android/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/android/settings.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Podfile" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Podfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Podfile.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner.xcworkspace/contents.xcworkspacedata" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner.xcworkspace/contents.xcworkspacedata" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/AppDelegate.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/AppDelegate.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/Info.plist" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/ios/Runner/main.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/lib/log_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/lib/log_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../flutter_mxlogger/example/test/widget_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../flutter_mxlogger/example/test/widget_test.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
   <component name="ProjectId" id="2oBaX52yJ8BS0si9rDAHchFklFC" />
   <component name="ProjectViewState">
     <option name="autoscrollFromSource" value="true" />
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "cidr.known.project.marker": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "settings.editor.selected.configurable": "configurable.group.appearance"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.appearance&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

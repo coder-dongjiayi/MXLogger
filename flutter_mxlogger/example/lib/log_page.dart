@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:device_info_plus/device_info_plus.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
@@ -66,7 +66,7 @@ class _LogPageState extends State<LogPage> {
       "receiveTimeout": "0",
       "extra": {},
       "Request headers":
-          "{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
+      "{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
       "Request data": "{mobile: 6666666666, logUrl: https://xxxx.txt}",
       "statusCode": 200,
       "Response Text": "{\"code\":0,\"msg\":\"操作成功\"}"
@@ -83,7 +83,7 @@ class _LogPageState extends State<LogPage> {
       "receiveTimeout": "0",
       "extra": {},
       "Request headers":
-          "{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
+      "{\"content-type\":\"application/json; charset=utf-8\",\"accept-language\":\"zh\",\"service-name\":\"app\",\"token\":\"eyJhbGciOnIiwiYXVkIjoiY2xpmNvZGUiOiI3MTM0OTIxNCIsImV4cCI6MTY2NTYzMjc0MCwiaWF0IjoxNjYzNzMxOTQwfQ.xLzCwqvmMbePZgryLvlJ-AqAMcAZ32_JzucfKTLncFqA\",\"version\":\"2.2.0\",\"content-length\":\"97\"}",
       "Request data": "{mobile: 6666666666, logUrl: https://xxxx.txt}",
       "statusCode": 404,
       "Response Text": "{\"code\":0,\"msg\":\"操作成功\"}"

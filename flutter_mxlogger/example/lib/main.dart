@@ -29,27 +29,27 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
 
     return MaterialApp(
-      navigatorKey: navkey,
-      home: Builder(builder: (context){
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Plugin example app'),
-          ),
-          body: Center(
-              child:Column(
-                children: [
-                  ElevatedButton(onPressed: (){
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) {
-                      return LogPage();
-                    }));
-                  },child: Text("进入日志页面")),
+        navigatorKey: navkey,
+        home: Builder(builder: (context){
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Plugin example app'),
+            ),
+            body: Center(
+                child:Column(
+                  children: [
+                    ElevatedButton(onPressed: (){
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (context) {
+                        return LogPage();
+                      }));
+                    },child: Text("进入日志页面")),
 
-                ],
-              )
-          ),
-        );
-      })
+                  ],
+                )
+            ),
+          );
+        })
     );
   }
 }
