@@ -14,62 +14,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mxlogger/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/publish.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/publish.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/publish2.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/publish2.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/publish2.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/CHANGELOG.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/.metadata" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/.metadata" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/analysis_options.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/analysis_options.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/build.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/debug/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/debug/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/java/com/example/flutter_mxlogger_example/MainActivity.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/values-night/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/values-night/styles.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/values/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/values/styles.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/profile/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/profile/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/build.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/gradle.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/settings.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Podfile.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner.xcworkspace/contents.xcworkspacedata" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner.xcworkspace/contents.xcworkspacedata" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/AppDelegate.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/AppDelegate.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/main.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/log_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/log_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/test/widget_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/test/widget_test.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +76,7 @@
                 <item name="mxloggerdemo" type="f1a62948:ProjectNode" />
                 <item name="mxlogger" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="build" type="c8890929:TasksNode$1" />
+                <item name="publishing" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -177,26 +132,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle./Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/publish.gradle [androidSourcesJar].executor": "Run",
-    "Gradle.MXLogger [assemble].executor": "Run",
-    "Gradle.MXLogger:mxlogger [assemble].executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger",
-    "settings.editor.selected.configurable": "AndroidSdkUpdater",
-    "show.do.not.copy.http.proxy.settings.to.gradle": "true",
-    "show.migrate.to.gradle.popup": "false"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle./Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/publish.gradle [androidSourcesJar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [assembleRelease].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [publishReleasePublicationToMavenLocal].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [publishReleasePublicationToMavencentralRepository].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [publish].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/mxlogger&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;AndroidSdkUpdater&quot;,
+    &quot;show.do.not.copy.http.proxy.settings.to.gradle&quot;: &quot;true&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
   }
-}]]></component>
+}</component>
   <component name="PsdUISettings">
     <option name="MODULE_TAB" value="Signing Configs" />
     <option name="LAST_EDITED_SIGNING_CONFIG" value="debug" />
@@ -204,10 +164,10 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/mxlogger" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/mxloggerdemo/src/libs" />
       <recent name="$PROJECT_DIR$/mxlogger/src/main/cpp" />
-      <recent name="$PROJECT_DIR$/mxlogger" />
       <recent name="$PROJECT_DIR$/mxloggerdemo" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -215,7 +175,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.MXLogger:mxlogger [assemble]">
+  <component name="RunManager" selected="Gradle.MXLogger:mxlogger [publishReleasePublicationToMavencentralRepository]">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="mxloggerdemo.mxloggerdemo" />
       <option name="DEPLOY" value="true" />
@@ -352,10 +312,10 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MXLogger [androidSourcesJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="MXLogger:mxlogger [assembleRelease]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/mxlogger" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -363,29 +323,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value="androidSourcesJar" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="MXLogger [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="assemble" />
+            <option value="assembleRelease" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -418,6 +356,28 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
+    <configuration name="MXLogger:mxlogger [publishReleasePublicationToMavenLocal]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/mxlogger" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="publishReleasePublicationToMavenLocal" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
     <configuration name="MXLogger:mxlogger [publishReleasePublicationToMavencentralRepository]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -440,10 +400,10 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="/Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/publish.gradle [androidSourcesJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="MXLogger:mxlogger [publish]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/publish.gradle" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/mxlogger" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -451,7 +411,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value="androidSourcesJar" />
+            <option value="publish" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -477,11 +437,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.MXLogger:mxlogger [assemble]" />
-        <item itemvalue="Gradle.MXLogger [assemble]" />
-        <item itemvalue="Gradle./Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/publish.gradle [androidSourcesJar]" />
         <item itemvalue="Gradle.MXLogger:mxlogger [publishReleasePublicationToMavencentralRepository]" />
-        <item itemvalue="Gradle.MXLogger [androidSourcesJar]" />
+        <item itemvalue="Gradle.MXLogger:mxlogger [assembleRelease]" />
+        <item itemvalue="Gradle.MXLogger:mxlogger [assemble]" />
+        <item itemvalue="Gradle.MXLogger:mxlogger [publish]" />
+        <item itemvalue="Gradle.MXLogger:mxlogger [publishReleasePublicationToMavenLocal]" />
       </list>
     </recent_temporary>
   </component>
@@ -495,6 +455,16 @@
       <updated>1649313444954</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+      </list>
+    </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">

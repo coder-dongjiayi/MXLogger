@@ -64,9 +64,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.1'
 
 }
-ext {
-    PUBLISH_ARTIFACT_ID = "mxlogger"
-    PUBLISH_GROUP_ID = 'io.github.coder-dongjiayi'
-    PUBLISH_VERSION = '1.2.15'
-}
+//ext {
+//    PUBLISH_ARTIFACT_ID = "mxlogger"
+//    PUBLISH_GROUP_ID = 'io.github.coder-dongjiayi'
+//    PUBLISH_VERSION = '1.2.15'
+//}
 apply from: '../publish.gradle'

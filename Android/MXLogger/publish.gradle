@@ -1,101 +1,65 @@
+apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 
-task androidSourcesJar(type: Jar) {
-    archiveClassifier = 'sources'
 
-    from android.sourceSets.main.java.source
-}
 
-File secretPropsFile = project.rootProject.file('local.properties')
-if (secretPropsFile.exists()) {
-    println "Found secret props file, loading props"
-    Properties p = new Properties()
-    p.load(new FileInputStream(secretPropsFile))
-    p.each { name, value ->
-        ext[name] = value
-    }
-} else {
-    println "No props file, loading env vars"
-}
-publishing {
-    publications {
-        release(MavenPublication) {
-            // The coordinates of the library, being set from variables that
-            // we'll set up in a moment
-            groupId PUBLISH_GROUP_ID
-            artifactId PUBLISH_ARTIFACT_ID
-            version PUBLISH_VERSION
+// 指定你的 AAR 文件路径
+def aarFile = file("$buildDir/outputs/aar/mxlogger-DefaultCpp-release.aar")
 
-            // Two artifacts, the `aar` and the sources
-            artifact("$buildDir/outputs/aar/${project.getName()}-DefaultCpp-release.aar")
-            artifact androidSourcesJar
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                artifactId = 'mxlogger'
+                artifact(aarFile)
+                groupId "io.github.coder-dongjiayi"
+                version  "1.2.15"
+                ///io.github.coder-dongjiayi:mxlogger:1.2.15
+                // ./gradlew publishReleasePublicationToOssrh-staging-apiRepository
+                pom {
+                    name.set('mxlogger')
+                    description.set('Your Android library description')
+                    url.set('https://github.com/coder-dongjiayi/MXLogger')
 
-            // Self-explanatory metadata for the most part
-            pom {
-                name = PUBLISH_ARTIFACT_ID
-                description = 'mxlogger 跨平台logger'
-                // If your project has a dedicated site, use its URL here
-                url = 'https://github.com/coder-dongjiayi/MXLogger.git'
-                licenses {
-                    license {
-                        //协议类型，一般默认Apache License2.0的话不用改：
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    licenses {
+                        license {
+                            name.set('The Apache License, Version 2.0')
+                            url.set('http://www.apache.org/licenses/LICENSE-2.0.txt')
+                        }
                     }
-                }
-                developers {
-                    developer {
-                        id = 'dongjiayi'
-                        name = 'dongjiayi'
-                        email = '575801327@qq.com'
-                    }
-                }
-                // Version control info, if you're using GitHub, follow the format as seen here
-                scm {
-                    //修改成你的Git地址：
-                    connection = 'scm:git:github.com/coder-dongjiayi/MXLogger.git'
-                    developerConnection = 'scm:git:ssh://github.com/coder-dongjiayi/MXLogger.git'
-                    //分支地址：
-                    url = 'https://github.com/coder-dongjiayi/MXLogger/tree/master'
-                }
-                // A slightly hacky fix so that your POM will include any transitive dependencies
-                // that your library builds upon
-                withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
 
-                    project.configurations.implementation.allDependencies.each {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
+                    developers {
+                        developer {
+                            id.set('dongjiayi')
+                            name.set('Dong Jiayi')
+                            email.set('your.email@example.com')
+                        }
+                    }
+
+                    scm {
+                        connection.set('scm:git:git://github.com/coder-dongjiayi/MXLogger.git')
+                        developerConnection.set('scm:git:ssh://github.com/coder-dongjiayi/MXLogger.git')
+                        url.set('https://github.com/coder-dongjiayi/MXLogger')
                     }
                 }
             }
         }
-    }
-    repositories {
-        // The repository to publish to, Sonatype/MavenCentral
-        maven {
-            // This is an arbitrary name, you may also use "mavencentral" or
-            // any other name that's descriptive for you
-            name = "mavencentral"
+        repositories {
 
-            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            // You only need this if you want to publish snapshots, otherwise just set the URL
-            // to the release repo directly
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-
-            // The username and password we've fetched earlier
-            credentials {
-                username ossrhUsername
-                password ossrhPassword
+            maven {
+                name = "ossrh-staging-api"
+                url = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
+                credentials {
+                    username = ""
+                    password = ""
+                }
             }
         }
     }
-}
-signing {
-    sign publishing.publications
+
+    signing {
+        sign publishing.publications.release
+    }
 }
