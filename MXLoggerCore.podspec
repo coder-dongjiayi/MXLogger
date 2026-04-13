@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
 
   s.homepage     = "https://github.com/coder-dongjiayi/MXLogger"
   s.license      = { :type => "BSD 3-Clause", :file => "LICENSE.TXT"}
-  s.author       = { "dongjiayi" => "dongjiayi1@xdf.cn" }
+  s.author       = { "dongjiayi" => "dongjiayi" }
 
   s.ios.deployment_target = "9.0"
 
