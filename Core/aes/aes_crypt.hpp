@@ -33,6 +33,10 @@ public:
 
     ~aes_crypt();
 
+    /// m_aesKey为裸指针，拷贝会导致double-free
+    aes_crypt(const aes_crypt&) = delete;
+    aes_crypt& operator=(const aes_crypt&) = delete;
+
     void set_crypt_key(const void *key, size_t keyLength,  void *iv , size_t ivLength );
     
     void encrypt(const void *input, void *output, size_t length);

@@ -73,7 +73,8 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
     if(jsonStr != nullptr){
         string_msg = jsonStr;
     }
-    delete jsonStr;
+    /// cJSON_Print返回的是malloc分配的内存，不能用delete释放
+    cJSON_free(jsonStr);
     
     std::string thread =  std::to_string(msg.thread_id)  + ":"+ (msg.is_main_thread == true ? "main" : "child");
     

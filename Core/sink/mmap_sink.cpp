@@ -73,12 +73,12 @@ int mmap_sink::log_(const details::log_msg& msg){
 }
 
 int mmap_sink::write_data_(const void* buffer, size_t buffer_size){
-    
-    
+
+
     ///1.、需要写入字节总大小 = 当前文件真实长度 + 需要写入buffer的长度 + offset_length
-    
+
     size_t total = actual_size_ + buffer_size + offset_length;
-    
+
     /// 2、 如果写入长度大于文件长度进行扩容
     if (total >=file_size_) {
         /// 扩容逻辑失败 就不往下进行了
@@ -87,7 +87,12 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size){
             return r;
         }
     }
-    
+
+    /// 之前映射失败(如磁盘满、权限异常)会导致mmap_ptr_为空，重新尝试映射，仍失败则放弃本次写入
+    if (mmap_ptr_ == nullptr && mmap_() == false) {
+        return -3;
+    }
+
     uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
     
     
@@ -113,10 +118,14 @@ void mmap_sink::write_actual_size_(size_t size){
 }
 
 size_t mmap_sink::get_actual_size_(){
+    /// 构造时映射失败mmap_ptr_可能为空
+    if (mmap_ptr_ == nullptr) {
+        return 0;
+    }
     uint32_t actual_size;
-    
+
     memcpy(&actual_size, mmap_ptr_, offset_length);
-    
+
     return actual_size;
 }
 //扩容
@@ -182,6 +191,9 @@ void mmap_sink::flush() {
     async_();
 }
 bool mmap_sink::msync_(int flag){
+    if (mmap_ptr_ == nullptr) {
+        return false;
+    }
     if (msync(mmap_ptr_, get_file_size(), flag) != 0) {
         
         error_record =  MXLoggerError("[mxlogger_error]msync_ error:%s\n",strerror(errno));

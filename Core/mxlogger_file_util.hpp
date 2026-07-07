@@ -17,9 +17,12 @@
 #include <dirent.h>
 #include <sys/file.h>
 #include <unistd.h>
+#include <cerrno>
+#include <cstring>
 #include "log_serialize.h"
 #include "mxlogger_helper.hpp"
 #include "aes/aes_crypt.hpp"
+#include "debug_log.hpp"
 namespace mxlogger{
 inline size_t file_size(const char* path){
     struct stat statbuf;
@@ -75,10 +78,11 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
     
    
     if (path_exists(path) == false) {
-        printf("文件路径不存在\n");
+        MXLoggerError("select_form_path: file not exists %s",path);
         return  -1;
     }
 
+    bool is_crypt = crypt_key != nullptr && strlen(crypt_key) > 0;
 
     aes_crypt  crypt;
     // iv补零到16字节，与写入端对齐；每条记录解密后必须用完整16字节恢复向量
@@ -87,47 +91,59 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
     if (iv_length > 0) {
         memcpy(iv_, iv, iv_length > AES_KEY_LEN ? AES_KEY_LEN : iv_length);
     }
-    if (crypt_key != nullptr) {
+    if (is_crypt) {
 
         crypt.set_crypt_key(crypt_key, strlen(crypt_key), iv_length > 0 ? (void*)iv_ : nullptr, iv_length > 0 ? AES_KEY_LEN : 0);
     }
 
+    /// 只读解析，不应创建/写入文件
+    int fd =  open(path, O_RDONLY|O_CLOEXEC);
+    if (fd < 0) {
+        MXLoggerError("select_form_path: open failed %s",strerror(errno));
+        return -1;
+    }
 
-    int fd =  open(path, O_RDWR|O_CLOEXEC|O_CREAT,S_IRWXU);
+    /// 以磁盘真实大小为边界，防止损坏的size字段导致越界读取
+    size_t disk_size = file_size(path);
 
-    uint32_t size;
-    read(fd, &size, sizeof(uint32_t));
+    uint32_t size = 0;
+    if (read(fd, &size, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) {
+        close(fd);
+        return -1;
+    }
 
     size_t begin = sizeof(uint32_t);
-    while (begin <= size) {
+    while (begin <= size && begin + sizeof(uint32_t) <= disk_size) {
 
-        uint32_t  item_size;
+        uint32_t  item_size = 0;
 
-        read(fd, &item_size, sizeof(uint32_t));
-            
-       
-        uint8_t * buffer = (uint8_t*)malloc(item_size);
+        if (read(fd, &item_size, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) break;
 
-        read(fd, buffer , item_size);
+        /// 记录头损坏(长度为0或超出文件边界)，终止解析
+        if (item_size == 0 || begin + sizeof(uint32_t) + item_size > disk_size) break;
 
-        if (crypt_key != nullptr) {
+        std::vector<uint8_t> buffer(item_size);
 
-            crypt.decrypt(buffer, buffer, item_size);
+        if (read(fd, buffer.data(), item_size) != (ssize_t)item_size) break;
+
+        if (is_crypt) {
+
+            crypt.decrypt(buffer.data(), buffer.data(), item_size);
 
             crypt.reset_iv(iv_length > 0 ? iv_ : nullptr, iv_length > 0 ? AES_KEY_LEN : 0);
         }
-        
-        flatbuffers::Verifier verifier(buffer,item_size);
+
+        flatbuffers::Verifier verifier(buffer.data(),item_size);
 
         bool isBuffer =  Verifylog_serializeBuffer(verifier);
         std::map<std::string, std::string> map;
-        
+
         if(isBuffer == true){
-            auto logger =  Getlog_serialize(buffer);
+            auto logger =  Getlog_serialize(buffer.data());
             map["error_code"] = "0";
             map["msg"] = logger->msg() == nullptr ? "" : logger->msg()->str();
             map["tag"] = logger->tag() == nullptr ? "" : logger->tag()->str();
-            map["name"] = logger->name()->c_str();
+            map["name"] = logger->name() == nullptr ? "" : logger->name()->str();
             map["timestamp"] = std::to_string(logger->timestamp());
             map["level"] = std::to_string(logger->level());
             map["is_main_thread"] =std::to_string(logger->is_main_thread());
@@ -136,17 +152,15 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
             map["error_code"] = "1";
             map["msg"] = "数据异常,可能原因(加密用的key 和 iv 不一致)";
         }
-    
+
         vector->push_back(map);
 
         begin = begin + sizeof(uint32_t) + item_size;
 
-        free(buffer);
-
     }
 
     close(fd);
-    
+
     return 0;
 }
 
@@ -170,10 +184,9 @@ inline int get_files(std::vector<std::map<std::string, std::string>> *destinatio
         if (strcmp(".DS_Store", entry->d_name) == 0 || strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0) {
             continue;
         }
-        char subdir[256];
-        sprintf(subdir, "%s%s", dir_, entry->d_name);
-       
-        lstat(subdir, &statbuf);
+        std::string subdir = std::string(dir_) + entry->d_name;
+
+        lstat(subdir.c_str(), &statbuf);
         
         long last_time = (long)statbuf.st_mtime;
         long st_size =  (long)statbuf.st_size;

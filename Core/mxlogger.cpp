@@ -23,6 +23,9 @@ namespace mxlogger{
 
 std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::unordered_map<std::string, mxlogger *>;
 
+/// 保护global_instanceDic_，logger_mutex是实例级的，护不住并发初始化/释放
+static std::mutex global_instance_mutex_;
+
 
  std::string mxlogger::md5(const char* ns,const char* directory){
      
@@ -53,6 +56,7 @@ mxlogger *mxlogger::global_for_loggerKey(const char* logger_key){
 
     if(logger_key == nullptr) return nullptr;
 
+    std::lock_guard<std::mutex> lock(global_instance_mutex_);
     auto itr = global_instanceDic_ -> find(logger_key);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
@@ -75,13 +79,15 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,
     }
     
     std::string logger_key =  mxlogger_helper::mx_md5(diskcache_path);
-    
+
+    /// find和insert必须在同一把锁内，防止并发初始化同一namespace时创建出两个实例
+    std::lock_guard<std::mutex> lock(global_instance_mutex_);
     auto itr = global_instanceDic_ -> find(logger_key);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
         return logger;
     }
-    
+
     auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,file_header,cryptKey,iv);
     logger -> logger_key_ = logger_key;
     (*global_instanceDic_)[logger_key] = logger;
@@ -107,6 +113,7 @@ void mxlogger::delete_namespace(const char* ns,const char* directory){
 
 //释放指定的logger对象
 void mxlogger::delete_namespace_(const char* logger_key){
+    std::lock_guard<std::mutex> lock(global_instance_mutex_);
     auto itr = global_instanceDic_ -> find(logger_key);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
@@ -115,7 +122,7 @@ void mxlogger::delete_namespace_(const char* logger_key){
     }
 }
 void mxlogger::destroy(){
-    
+    std::lock_guard<std::mutex> lock(global_instance_mutex_);
     for (auto &pair : *global_instanceDic_) {
         mxlogger *logger = pair.second;
         delete logger;

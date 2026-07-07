@@ -26,6 +26,8 @@ void aes_crypt::set_crypt_key(const void *key, size_t keyLength,  void *iv , siz
 
         reset_iv(iv, ivLength);
 
+        /// 重复调用时释放旧的key，避免泄漏
+        delete m_aesKey;
         m_aesKey = new AES_KEY;
         memset(m_aesKey, 0, sizeof(AES_KEY));
         int ret = AES_set_encrypt_key(m_key, AES_KEY_BITSET_LEN, m_aesKey);
