@@ -180,22 +180,23 @@ namespace mxlogger{
         return nullptr;
 
     }
-    MXLOGGER_JNI void native_destroy_loggerKey(JNIEnv *env, jobject obj,jstring loggerKey){
+    /// 注意: Java侧是static native方法, JNI第二个参数实际是jclass而非实例对象,
+    /// 不能对其SetLongField实例字段(CheckJNI下会直接abort), 句柄失效由Java侧自行约束
+    MXLOGGER_JNI void native_destroy_loggerKey(JNIEnv *env, jclass cls,jstring loggerKey){
         const char  * loggerKeyStr =env->GetStringUTFChars(loggerKey, nullptr);
         mx_logger::delete_namespace(loggerKeyStr);
-        jlong  value = 0;
-        env->SetLongField(obj, g_fileID, value);
+        env->ReleaseStringUTFChars(loggerKey, loggerKeyStr);
     }
 
-    MXLOGGER_JNI void native_destroy(JNIEnv *env, jobject obj,jstring ns,jstring directory){
+    MXLOGGER_JNI void native_destroy(JNIEnv *env, jclass cls,jstring ns,jstring directory){
 
 
         const char  * nsStr = env->GetStringUTFChars(ns, nullptr);
 
         const char  * directoryStr = env->GetStringUTFChars(directory, nullptr);
         mx_logger::delete_namespace(nsStr,directoryStr);
-        jlong  value = 0;
-        env->SetLongField(obj, g_fileID, value);
+        env->ReleaseStringUTFChars(ns, nsStr);
+        env->ReleaseStringUTFChars(directory, directoryStr);
     }
 
 

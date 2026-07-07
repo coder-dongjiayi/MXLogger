@@ -522,6 +522,7 @@ class MXLogger with WidgetsBindingObserver {
   /// cryptKey iv: 写入该文件时使用的加密参数 未加密不填
   /// 返回的每一项包含 name/tag/msg/level/timestamp/thread_id/is_main_thread/error_code
   /// error_code为"1"表示该条数据解析失败(可能是cryptKey或iv不正确)
+  /// 返回顺序为时间倒序(最新的记录在前) 与iOS端selectWithDiskCacheFilePath一致
   static List<Map<String, dynamic>> selectLogmsg(
       {required String diskcacheFilePath, String? cryptKey, String? iv}) {
     List<Map<String, dynamic>> logList = [];

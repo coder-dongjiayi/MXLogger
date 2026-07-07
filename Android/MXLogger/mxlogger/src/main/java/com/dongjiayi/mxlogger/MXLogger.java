@@ -18,9 +18,9 @@ public class MXLogger {
   private boolean consoleEnable;
 
     /**
-  * 禁用日志 默认false;
+  * 是否启用日志写入 默认true 与iOS/Flutter/C++核心的默认行为对齐
   * */
-  private boolean enable;
+  private boolean enable = true;
 
     /**
    * 日志文件最大字节数 默认0 无限制

@@ -48,8 +48,9 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_pa
         return -1;
     }
     for(int i = 0;i<count;i++){
+        // 与iOS端selectWithDiskCacheFilePath行为对齐: 返回倒序(最新的记录在前)
         cJSON *item = cJSON_CreateObject();
-        for(const auto &entry : destination[i]){
+        for(const auto &entry : destination[count - 1 - i]){
             cJSON_AddStringToObject(item, entry.first.c_str(), entry.second.c_str());
         }
         // cJSON默认分配器就是malloc 返回的串由free_logmsg配对释放
