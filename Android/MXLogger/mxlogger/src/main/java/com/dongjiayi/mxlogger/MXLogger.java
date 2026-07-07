@@ -134,7 +134,7 @@ public class MXLogger {
        return innerLog(tag,level,msg,name);
     }
     private  int innerLog(@Nullable String tag,@Nullable int level,@Nullable String msg,@Nullable String name){
-        if(enable) return 0;
+        if(enable==false) return 0;
        boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
        return native_log(nativeHandle,name,level,msg,tag,isMainThread);
     }

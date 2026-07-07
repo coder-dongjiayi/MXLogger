@@ -5,6 +5,7 @@
 #include "mxlogger.hpp"
 #include "mxlogger_util.hpp"
 #include "debug_log.hpp"
+#include "json/cJSON.h"
 using namespace mxlogger;
 using namespace std;
 #define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
@@ -26,6 +27,7 @@ MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(
 
 }
 MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_path, const char* crypt_key, const char* iv,int* number, char ***array_ptr,uint32_t **size_array_ptr){
+    *number = 0;
     if(diskcache_file_path == nullptr){
         return -1;
     }
@@ -36,34 +38,47 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_pa
 
 
     int count = (int)destination.size();
+    if(count <= 0) return 0;
 
+    auto array = (char**)malloc(count * sizeof(char *));
+    auto size_array = (uint32_t *) malloc(count * sizeof(uint32_t));
+    if(array == nullptr || size_array == nullptr){
+        free(array);
+        free(size_array);
+        return -1;
+    }
+    for(int i = 0;i<count;i++){
+        cJSON *item = cJSON_CreateObject();
+        for(const auto &entry : destination[i]){
+            cJSON_AddStringToObject(item, entry.first.c_str(), entry.second.c_str());
+        }
+        // cJSON默认分配器就是malloc 返回的串由free_logmsg配对释放
+        char *json = cJSON_PrintUnformatted(item);
+        cJSON_Delete(item);
+        if(json == nullptr){
+            for(int j = 0;j<i;j++) free(array[j]);
+            free(array);
+            free(size_array);
+            return -1;
+        }
+        array[i] = json;
+        size_array[i] = static_cast<uint32_t>(strlen(json));
+    }
+
+    *array_ptr = array;
+    *size_array_ptr = size_array;
     *number = count;
-
-//    if(count > 0){
-//        auto array = (char**)malloc(count * sizeof(void *));
-//        auto size_array = (uint32_t *) malloc(count * sizeof(uint32_t *));
-//        if(!array){
-//            free(array);
-//            free(size_array);
-//            return -1;
-//        }
-//        *array_ptr = array;
-//        *size_array_ptr = size_array;
-//        for(int i = 0;i<count;i++){
-//            std::map<std::string, std::string>  logdictionary = destination[i];
-//
-//            NSData *logData = [NSJSONSerialization dataWithJSONObject:logdictionary
-//            options:NSJSONWritingPrettyPrinted
-//            error:NULL];
-//            NSUInteger length = logData.length;
-//            size_array[i] = static_cast<uint32_t>(length);
-//
-//            array[i] = (char*)logData.bytes;
-//        }
-//    }
-
     return 0;
 
+}
+
+/// 释放select_logmsg返回的内存 必须与select_logmsg成对调用
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_logmsg)(int number, char **array, uint32_t *size_array){
+    if(array != nullptr){
+        for(int i = 0;i<number;i++) free(array[i]);
+        free(array);
+    }
+    free(size_array);
 }
 /// 获取日志文件列表
 MXLOGGER_EXPORT int MXLOGGERR_FUNC(get_logfiles)(void *handle,char ****array_ptr,uint32_t ***size_array_ptr){
@@ -165,19 +180,29 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_level)(void *handle,int level){
 
 }
 
-MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_loggerKey)(void *handle){
-    mx_logger *logger = static_cast<mx_logger*>(handle);
-    return logger ->logger_key();
+/// 拷贝到堆上返回 由free_string配对释放 (与iOS端行为对齐 Dart侧统一释放)
+static char * mx_copy_string_(const char *str){
+    return str == nullptr ? nullptr : strdup(str);
 }
 
-MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_diskcache_path)(void *handle){
+MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerKey)(void *handle){
     mx_logger *logger = static_cast<mx_logger*>(handle);
-    return logger->diskcache_path();
+    return mx_copy_string_(logger->logger_key());
 }
 
-MXLOGGER_EXPORT const char * MXLOGGERR_FUNC(get_error_desc)(void *handle){
+MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_diskcache_path)(void *handle){
     mx_logger *logger = static_cast<mx_logger*>(handle);
-    return  logger->error_desc();
+    return mx_copy_string_(logger->diskcache_path());
+}
+
+MXLOGGER_EXPORT char * MXLOGGERR_FUNC(get_error_desc)(void *handle){
+    mx_logger *logger = static_cast<mx_logger*>(handle);
+    return mx_copy_string_(logger->error_desc());
+}
+
+/// 释放get_loggerKey/get_diskcache_path/get_error_desc返回的字符串
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_string)(char *str){
+    free(str);
 }
 
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_before_all_data)(void *handle){

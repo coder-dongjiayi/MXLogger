@@ -71,42 +71,57 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_enable)(const void *handle,int enable){
 
 
 MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_path, const char* crypt_key, const char* iv,int* number, char ***array_ptr,uint32_t **size_array_ptr){
+    *number = 0;
     if(diskcache_file_path == nullptr){
         return -1;
     }
-    
-    
+
+
     NSArray<NSDictionary*> * resultArray =   [MXLogger selectWithDiskCacheFilePath:[NSString stringWithUTF8String:diskcache_file_path] cryptKey:crypt_key == nullptr ? NULL : [NSString stringWithUTF8String:crypt_key] iv:iv == nullptr ? NULL : [NSString stringWithUTF8String:iv]];
-    
+
     int count = (int)resultArray.count;
-    
-    *number = count;
-    
-    if(count > 0){
-        auto array = (char**)malloc(count * sizeof(void *));
-        auto size_array = (uint32_t *) malloc(count * sizeof(uint32_t *));
-        if(!array){
+    if(count <= 0) return 0;
+
+    auto array = (char**)malloc(count * sizeof(char *));
+    auto size_array = (uint32_t *) malloc(count * sizeof(uint32_t));
+    if(array == nullptr || size_array == nullptr){
+        free(array);
+        free(size_array);
+        return -1;
+    }
+    for(int i = 0;i<count;i++){
+        NSData *logData = [NSJSONSerialization dataWithJSONObject:resultArray[i]
+                                                          options:NSJSONWritingPrettyPrinted
+                                                            error:NULL];
+        NSUInteger length = logData.length;
+        // NSData由ARC管理 函数返回后即失效 必须拷贝到native堆 由free_logmsg配对释放
+        char *buffer = (char *)malloc(length > 0 ? length : 1);
+        if(buffer == nullptr || logData == nil){
+            for(int j = 0;j<i;j++) free(array[j]);
+            free(buffer);
             free(array);
             free(size_array);
             return -1;
         }
-        *array_ptr = array;
-        *size_array_ptr = size_array;
-        for(int i = 0;i<count;i++){
-            NSDictionary * logdictionary = resultArray[i];
-            
-            NSData *logData = [NSJSONSerialization dataWithJSONObject:logdictionary
-                                                               options:NSJSONWritingPrettyPrinted
-                                                                 error:NULL];
-            NSUInteger length = logData.length;
-            size_array[i] = static_cast<uint32_t>(length);
-    
-            array[i] = (char*)logData.bytes;
-        }
+        memcpy(buffer, logData.bytes, length);
+        array[i] = buffer;
+        size_array[i] = static_cast<uint32_t>(length);
     }
-    
+
+    *array_ptr = array;
+    *size_array_ptr = size_array;
+    *number = count;
     return 0;
-    
+
+}
+
+/// 释放select_logmsg返回的内存 必须与select_logmsg成对调用
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_logmsg)(int number, char **array, uint32_t *size_array){
+    if(array != nullptr){
+        for(int i = 0;i<number;i++) free(array[i]);
+        free(array);
+    }
+    free(size_array);
 }
 /// 获取日志文件列表
 MXLOGGER_EXPORT int MXLOGGERR_FUNC(get_logfiles)(const void *handle,char ****array_ptr,uint32_t ***size_array_ptr){
@@ -172,34 +187,9 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(get_logfiles)(const void *handle,char ****arr
     return (int)fileArray.count;
 }
 
+/// 未实现 保留导出仅为兼容Dart侧的符号绑定
 MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logfiles)(const char * directory, char ***array_ptr,uint32_t **size_array_ptr){
-    if(directory == nullptr) return 0;
-    
-    
-//    NSArray<NSDictionary<NSString*,NSString*>*>* list =  [MXLogger selectLogfilesWithDirectory:[NSString stringWithUTF8String:directory]];
-//    if(list.count > 0){
-//        auto array = (char**)malloc(list.count * sizeof(void *));
-//        auto size_array = (uint32_t *) malloc(list.count * sizeof(uint32_t *));
-//        if(!array){
-//            free(array);
-//            free(size_array);
-//            return 0;
-//        }
-//        *array_ptr = array;
-//        *size_array_ptr = size_array;
-//
-//        for(int i =0;i < list.count;i++){
-//            NSDictionary<NSString*,NSString*>* map = list[i];
-//            NSString * info = [NSString  stringWithFormat:@"%@,%@,%@",map[@"name"],map[@"size"],map[@"timestamp"]];
-//            auto infoData = [info dataUsingEncoding:NSUTF8StringEncoding];
-//            size_array[i] = static_cast<uint32_t>(infoData.length);
-//            array[i] = (char*)infoData.bytes;
-//        }
-//        return static_cast<uint32_t>(list.count);
-//    }
-    
     return 0;
-    
 }
 
 
@@ -222,19 +212,31 @@ MXLOGGER_EXPORT unsigned long MXLOGGERR_FUNC(get_log_size)(const void *handle){
     return logger.logSize;
 }
 
-MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_loggerKey)(const void *handle){
+/// UTF8String挂在autorelease pool上 不能直接跨FFI边界返回 必须拷贝到堆上 由free_string配对释放
+static char * mx_copy_string_(NSString *str){
+    if(str == nil) return nullptr;
+    const char *utf8 = str.UTF8String;
+    return utf8 == nullptr ? nullptr : strdup(utf8);
+}
+
+MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerKey)(const void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
-    return logger.loggerKey.UTF8String;
+    return mx_copy_string_(logger.loggerKey);
 }
 
 
-MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_diskcache_path)(const void *handle){
+MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_diskcache_path)(const void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
-    return logger.diskCachePath.UTF8String;
+    return mx_copy_string_(logger.diskCachePath);
 }
-MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(get_error_desc)(const void *handle){
+MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_error_desc)(const void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
-    return [logger errorDesc].UTF8String;
+    return mx_copy_string_([logger errorDesc]);
+}
+
+/// 释放get_loggerKey/get_diskcache_path/get_error_desc返回的字符串
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_string)(char *str){
+    free(str);
 }
 
 

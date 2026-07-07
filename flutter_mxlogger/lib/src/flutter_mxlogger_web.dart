@@ -326,6 +326,12 @@ class MXLogger {
     return [];
   }
 
+  /// 解析日志文件 web端空实现
+  static List<Map<String, dynamic>> selectLogmsg(
+      {required String diskcacheFilePath, String? cryptKey, String? iv}) {
+    return [];
+  }
+
 
 
   String? _cryptKey;

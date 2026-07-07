@@ -326,15 +326,20 @@ class MXLogger with WidgetsBindingObserver {
   String getDiskcachePath() {
     if (enable == false) return "";
     Pointer<Int8> result = _getDiskcachePath(_handle);
-
+    if (result == nullptr) return "";
     String path = result.cast<Utf8>().toDartString();
+
+    /// native侧strdup的内存必须由native侧释放
+    _freeString(result);
     return path;
   }
 
   String? _errorDesc() {
     if (enable == false) return null;
     Pointer<Int8> result = _getErrorDesc(_handle);
+    if (result == nullptr) return null;
     String error = result.cast<Utf8>().toDartString();
+    _freeString(result);
     if (error.isEmpty == true) return null;
     return error;
   }
@@ -345,12 +350,10 @@ class MXLogger with WidgetsBindingObserver {
   /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
   String? getLoggerKey() {
     Pointer<Int8> result = _getLoggerKey(_handle);
-    Pointer<Utf8> mapPoint = result.cast<Utf8>();
-    if (mapPoint != nullptr) {
-      String loggerKey = mapPoint.toDartString();
-      return loggerKey;
-    }
-    return null;
+    if (result == nullptr) return null;
+    String loggerKey = result.cast<Utf8>().toDartString();
+    _freeString(result);
+    return loggerKey;
   }
 
   int debug(String msg, {String? name, String? tag}) {
@@ -514,6 +517,55 @@ class MXLogger with WidgetsBindingObserver {
     return logFiles;
   }
 
+  /// 解析日志文件 返回日志内容列表
+  /// diskcacheFilePath: 日志文件的完整路径
+  /// cryptKey iv: 写入该文件时使用的加密参数 未加密不填
+  /// 返回的每一项包含 name/tag/msg/level/timestamp/thread_id/is_main_thread/error_code
+  /// error_code为"1"表示该条数据解析失败(可能是cryptKey或iv不正确)
+  static List<Map<String, dynamic>> selectLogmsg(
+      {required String diskcacheFilePath, String? cryptKey, String? iv}) {
+    List<Map<String, dynamic>> logList = [];
+
+    Pointer<Utf8> pathPtr = diskcacheFilePath.toNativeUtf8();
+    Pointer<Utf8> cryptKeyPtr =
+        cryptKey == null ? nullptr : cryptKey.toNativeUtf8();
+    Pointer<Utf8> ivPtr = iv == null ? nullptr : iv.toNativeUtf8();
+
+    final numberPtr = calloc<Int32>();
+    final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
+    final sizeArrayPtr = calloc<Pointer<Uint32>>();
+
+    final result = _selectLogmsg(
+        pathPtr, cryptKeyPtr, ivPtr, numberPtr, arrayPtr, sizeArrayPtr);
+    final count = numberPtr.value;
+    if (result == 0 && count > 0) {
+      final array = arrayPtr[0];
+      final sizeArray = sizeArrayPtr[0];
+      for (int i = 0; i < count; i++) {
+        String? json = _buffer2String(array[i].cast(), sizeArray[i]);
+        if (json == null) continue;
+        try {
+          logList.add(Map<String, dynamic>.from(jsonDecode(json)));
+        } catch (_) {}
+      }
+
+      /// native侧malloc的内存必须由native侧释放
+      _freeLogmsg(count, array, sizeArray);
+    }
+
+    calloc.free(pathPtr);
+    if (cryptKeyPtr != nullptr) {
+      calloc.free(cryptKeyPtr);
+    }
+    if (ivPtr != nullptr) {
+      calloc.free(ivPtr);
+    }
+    calloc.free(numberPtr);
+    calloc.free(arrayPtr);
+    calloc.free(sizeArrayPtr);
+    return logList;
+  }
+
   static String? _buffer2String(Pointer<Uint8>? ptr, int length) {
     if (ptr != null && ptr != nullptr) {
       var listView = ptr.asTypedList(length);
@@ -615,6 +667,12 @@ final Pointer<Int8> Function(Pointer<Void>) _getErrorDesc = _nativeLib
         _mxloggerFunction("get_error_desc"))
     .asFunction();
 
+/// 释放get_loggerKey/get_diskcache_path/get_error_desc返回的native字符串
+final void Function(Pointer<Int8>) _freeString = _nativeLib
+    .lookup<NativeFunction<Void Function(Pointer<Int8>)>>(
+        _mxloggerFunction("free_string"))
+    .asFunction();
+
 final void Function(Pointer<Void>, int) _setMaxDiskAge = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
         _mxloggerFunction("set_max_disk_age"))
@@ -659,20 +717,30 @@ final int Function(Pointer<Utf8>, Pointer<Pointer<Pointer<Utf8>>>,
             _mxloggerFunction("select_logfiles"))
         .asFunction();
 
-// final int Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Int32>,
-//         Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>)
-//     _select_logmsg = _nativeLib
-//         .lookup<
-//                 NativeFunction<
-//                     Uint64 Function(
-//                         Pointer<Utf8>,
-//                         Pointer<Utf8>,
-//                         Pointer<Utf8>,
-//                         Pointer<Int32>,
-//                         Pointer<Pointer<Pointer<Utf8>>>,
-//                         Pointer<Pointer<Uint32>>)>>(
-//     _mxloggerFunction("select_logmsg"))
-//         .asFunction();
+/// 解析日志文件
+final int Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Int32>,
+        Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>)
+    _selectLogmsg = _nativeLib
+        .lookup<
+                NativeFunction<
+                    Int32 Function(
+                        Pointer<Utf8>,
+                        Pointer<Utf8>,
+                        Pointer<Utf8>,
+                        Pointer<Int32>,
+                        Pointer<Pointer<Pointer<Utf8>>>,
+                        Pointer<Pointer<Uint32>>)>>(
+            _mxloggerFunction("select_logmsg"))
+        .asFunction();
+
+/// 释放select_logmsg返回的native内存
+final void Function(int, Pointer<Pointer<Utf8>>, Pointer<Uint32>) _freeLogmsg =
+    _nativeLib
+        .lookup<
+            NativeFunction<
+                Void Function(Int32, Pointer<Pointer<Utf8>>,
+                    Pointer<Uint32>)>>(_mxloggerFunction("free_logmsg"))
+        .asFunction();
 
 final void Function(Pointer<Void>) _removeAll = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
