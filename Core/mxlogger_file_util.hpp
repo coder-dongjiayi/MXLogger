@@ -81,10 +81,15 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
 
 
     aes_crypt  crypt;
-    const char* iv_ = iv;
+    // iv补零到16字节，与写入端对齐；每条记录解密后必须用完整16字节恢复向量
+    size_t iv_length = iv == nullptr ? 0 : strlen(iv);
+    uint8_t iv_[AES_KEY_LEN] = {};
+    if (iv_length > 0) {
+        memcpy(iv_, iv, iv_length > AES_KEY_LEN ? AES_KEY_LEN : iv_length);
+    }
     if (crypt_key != nullptr) {
 
-        crypt.set_crypt_key(crypt_key, strlen(crypt_key), (void*)iv_, strlen(iv_));
+        crypt.set_crypt_key(crypt_key, strlen(crypt_key), iv_length > 0 ? (void*)iv_ : nullptr, iv_length > 0 ? AES_KEY_LEN : 0);
     }
 
 
@@ -109,7 +114,7 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
 
             crypt.decrypt(buffer, buffer, item_size);
 
-            crypt.reset_iv(iv_,strlen(iv_));
+            crypt.reset_iv(iv_length > 0 ? iv_ : nullptr, iv_length > 0 ? AES_KEY_LEN : 0);
         }
         
         flatbuffers::Verifier verifier(buffer,item_size);

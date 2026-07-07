@@ -22,9 +22,12 @@ private:
   
    
     aes_crypt crypt_;
-    
+
     uint8_t iv_[AES_KEY_LEN] = {};
-    
+
+    /// 初始化时是否传入了iv，未传入时重置向量回退为key
+    bool has_iv_ = false;
+
     bool is_aes = false;
     
     
