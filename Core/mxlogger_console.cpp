@@ -44,8 +44,9 @@ void mxlogger_console::print(const details::log_msg& msg){
             }
         console.append("\0");
             __android_log_write(priority,  msg.tag, console.c_str());
-    #elif __APPLE__
-    
+    #else
+
+    /// Apple/Linux/Windows 统一走标准输出
     printf("%s", console.data());
     #endif
    

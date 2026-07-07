@@ -32,20 +32,28 @@ size_t base_file_sink::get_file_size(){
 }
 void base_file_sink::close(){
     if (file_ident >= 0) {
+#ifdef _WIN32
+        ::_close(file_ident);
+#else
         ::close(file_ident);
+#endif
     }
     file_ident = -1;
 }
 bool base_file_sink::ftruncate(size_t capacity_size){
-    
+
+#ifdef _WIN32
+    if (::_chsize_s(file_ident, (long long)capacity_size) != 0) {
+#else
     if (::ftruncate(file_ident, static_cast<off_t>(capacity_size)) != 0) {
+#endif
         error_record =  MXLoggerError("truncate_ error:%s\n",strerror(errno));
-         
+
         return  false;
     }else{
         error_record = "";
     }
-    
+
     return true;
 }
 bool base_file_sink::is_exit_path(){
@@ -64,9 +72,14 @@ bool base_file_sink::open(){
     }
         
     log_disk_path_ = file_path;
-    
+
     /// 打开文件，如果文件不存在则创建文件
+#ifdef _WIN32
+    file_ident =  ::_wopen(mxlogger::utf8_to_wide(log_disk_path_.c_str()).c_str(),
+                           _O_RDWR | _O_CREAT | _O_BINARY | _O_NOINHERIT, _S_IREAD | _S_IWRITE);
+#else
     file_ident =  ::open(log_disk_path_.c_str(), O_RDWR|O_CLOEXEC|O_CREAT,S_IRWXU);
+#endif
     if (file_ident < 0) {
         error_record =  MXLoggerError("ope_file_ error:%s\n",strerror(errno));
         return  false;

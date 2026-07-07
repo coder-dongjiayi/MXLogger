@@ -16,21 +16,26 @@ CORE=..
 BUILD=build
 mkdir -p "$BUILD"
 
+# Linux等无clang的环境自动回退gcc；也可通过 CC/CXX 环境变量指定
+CC="${CC:-$(command -v clang || command -v gcc)}"
+CXX="${CXX:-$(command -v clang++ || command -v g++)}"
+echo ">> compiler: $CXX"
+
 SAN_FLAG=""
 if [ -n "$SAN" ]; then
     SAN_FLAG="-fsanitize=$SAN -g"
     echo ">> sanitizer: $SAN"
 fi
 
-CXXFLAGS="-std=c++17 -DFORCE_POSIX $SAN_FLAG -I$CORE -I."
+CXXFLAGS="-std=c++17 -DFORCE_POSIX -pthread $SAN_FLAG -I$CORE -I."
 CFLAGS="$SAN_FLAG"
 
 echo ">> compiling C dependencies..."
-clang $CFLAGS -w -c "$CORE/md5/md5.c"    -o "$BUILD/md5.o"
-clang $CFLAGS -w -c "$CORE/json/cJSON.c" -o "$BUILD/cJSON.o"
+"$CC" $CFLAGS -w -c "$CORE/md5/md5.c"    -o "$BUILD/md5.o"
+"$CC" $CFLAGS -w -c "$CORE/json/cJSON.c" -o "$BUILD/cJSON.o"
 
 echo ">> compiling core + tests..."
-clang++ $CXXFLAGS \
+"$CXX" $CXXFLAGS \
     test_main.cpp \
     test_helper.cpp \
     test_aes_crypt.cpp \

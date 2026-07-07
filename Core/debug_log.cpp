@@ -34,7 +34,8 @@ std::string _debug_log(int level, const char *filename, const char *func, int li
     std::string info_str = level == 0 ? "[mxlogger_info]" : "[mxlogger_error]";
 #ifdef __ANDROID__
     __android_log_write(level ==0 ? ANDROID_LOG_DEBUG : ANDROID_LOG_ERROR,  info_str.data(), message.c_str());
-#elif __APPLE__
+#else
+    /// Apple/Linux/Windows 统一走标准输出
     printf("%s %s\n",info_str.c_str(), message.c_str());
 #endif
 

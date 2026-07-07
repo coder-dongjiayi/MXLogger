@@ -6,17 +6,34 @@
 //
 
 #include "mmap_sink.hpp"
+#ifdef _WIN32
+#include <windows.h>
+#include <io.h>
+#else
 #include <sys/mman.h>
+#include <unistd.h>
+#endif
 #include <cerrno>
 #include "../log_serialize.h"
 
 
 static const size_t offset_length = sizeof(uint32_t);
 
+/// 系统内存页大小，映射文件按页对齐扩容
+static size_t os_page_size(){
+#ifdef _WIN32
+    SYSTEM_INFO info;
+    GetSystemInfo(&info);
+    return static_cast<size_t>(info.dwPageSize);
+#else
+    return static_cast<size_t>(getpagesize());
+#endif
+}
+
 
 namespace mxlogger{
 namespace sinks{
-mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,policy::storage_policy policy):base_file_sink(dir_path,filename,policy),page_size_(static_cast<size_t>(getpagesize())){
+mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,policy::storage_policy policy):base_file_sink(dir_path,filename,policy),page_size_(os_page_size()){
 
     
     open();
@@ -131,87 +148,140 @@ size_t mmap_sink::get_actual_size_(){
 //扩容
 /// 0 成功  -1 扩容失败 -2 解除映射失败 -3 映射失败
 int mmap_sink::truncate_(size_t size){
-   
+
     size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
 
-    if(ftruncate(capacity_size) == false){
-        return -1;
-    }
+    /// Windows下文件被映射时无法调整大小，统一先解除映射再扩容(POSIX下此顺序同样安全)
     if(munmap_() == false){
         return -2;
     }
-    
-    file_size_ = capacity_size;
-    
-    if(mmap_ptr_ != nullptr){
-        return 0;
+    if(ftruncate(capacity_size) == false){
+        return -1;
     }
+
+    file_size_ = capacity_size;
+
     if(mmap_() == false){
         return -3;
     }
     return 0;
-   
+
 }
 // 解除映射
 bool mmap_sink::munmap_(){
     if(mmap_ptr_ != nullptr){
-        if (munmap(mmap_ptr_, file_size_) != 0) {
-        
-            error_record = MXLoggerError("munmap_ error:%s",strerror(errno));
-           
-    
+#ifdef _WIN32
+        if (UnmapViewOfFile(mmap_ptr_) == 0) {
+
+            error_record = MXLoggerError("munmap_ error:%lu",GetLastError());
+
+
             return false;
         }
+#else
+        if (munmap(mmap_ptr_, file_size_) != 0) {
+
+            error_record = MXLoggerError("munmap_ error:%s",strerror(errno));
+
+
+            return false;
+        }
+#endif
         error_record = "";
         mmap_ptr_ = nullptr;
     }
+#ifdef _WIN32
+    if (file_mapping_ != nullptr) {
+        CloseHandle((HANDLE)file_mapping_);
+        file_mapping_ = nullptr;
+    }
+#endif
     return true;
 }
 
 // 建立文件与内存的映射
 bool mmap_sink::mmap_(){
-    
+
+#ifdef _WIN32
+    HANDLE file_handle = (HANDLE)_get_osfhandle(file_ident);
+    if (file_handle == INVALID_HANDLE_VALUE) {
+        error_record = MXLoggerError("[mxlogger_error]start_mmap invalid fd\n");
+        return false;
+    }
+
+    file_mapping_ = CreateFileMappingW(file_handle, NULL, PAGE_READWRITE,
+                                       (DWORD)(((uint64_t)file_size_) >> 32),
+                                       (DWORD)(file_size_ & 0xFFFFFFFF), NULL);
+    if (file_mapping_ == nullptr) {
+        error_record = MXLoggerError("[mxlogger_error]CreateFileMapping error:%lu\n",GetLastError());
+        close();
+        return false;
+    }
+
+    mmap_ptr_ = (uint8_t*)MapViewOfFile((HANDLE)file_mapping_, FILE_MAP_ALL_ACCESS, 0, 0, file_size_);
+    if (mmap_ptr_ == nullptr) {
+        error_record = MXLoggerError("[mxlogger_error]MapViewOfFile error:%lu\n",GetLastError());
+        CloseHandle((HANDLE)file_mapping_);
+        file_mapping_ = nullptr;
+        close();
+        return false;
+    }
+#else
     mmap_ptr_ =  (uint8_t*)::mmap(NULL, file_size_, PROT_READ|PROT_WRITE, MAP_SHARED, file_ident, 0);
-    
+
     if (mmap_ptr_ == MAP_FAILED) {
         mmap_ptr_ = nullptr;
-       
+
         error_record = MXLoggerError("[mxlogger_error]start_mmap error:%s\n",strerror(errno));
-       
+
         close();
-        
+
         return  false;
     }
+#endif
     error_record = "";
-    
+
     return  true;
 }
 
 void mmap_sink::flush() {
     async_();
 }
-bool mmap_sink::msync_(int flag){
+bool mmap_sink::msync_(bool is_sync){
     if (mmap_ptr_ == nullptr) {
         return false;
     }
-    if (msync(mmap_ptr_, get_file_size(), flag) != 0) {
-        
-        error_record =  MXLoggerError("[mxlogger_error]msync_ error:%s\n",strerror(errno));
-       
+#ifdef _WIN32
+    if (FlushViewOfFile(mmap_ptr_, 0) == 0) {
+
+        error_record =  MXLoggerError("[mxlogger_error]msync_ error:%lu\n",GetLastError());
+
         return false;
     }
+    if (is_sync) {
+        /// FlushViewOfFile是异步写回，同步语义需要再刷文件缓冲
+        FlushFileBuffers((HANDLE)_get_osfhandle(file_ident));
+    }
+#else
+    if (msync(mmap_ptr_, get_file_size(), is_sync ? MS_SYNC : MS_ASYNC) != 0) {
+
+        error_record =  MXLoggerError("[mxlogger_error]msync_ error:%s\n",strerror(errno));
+
+        return false;
+    }
+#endif
     error_record = "";
     return true;
-   
+
 }
 
 bool mmap_sink::sync_(){
-    
-    return msync_(MS_SYNC);
+
+    return msync_(true);
 }
 
 bool mmap_sink::async_(){
-    return msync_(MS_ASYNC);
+    return msync_(false);
 }
 
 

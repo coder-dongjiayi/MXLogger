@@ -9,8 +9,11 @@
 
 #include <mutex>
 #include <unordered_map>
+#include <cstring>
+#ifndef _WIN32
 #include <unistd.h>
 #include <fcntl.h>
+#endif
 #include <stdlib.h>
 
 #include "sink/mmap_sink.hpp"

@@ -6,9 +6,15 @@
 //
 
 #include "logger_os.hpp"
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <sys/types.h>
-#include <sys/syscall.h>
 #include <unistd.h>
+#endif
+#ifdef __linux__
+#include <sys/syscall.h>
+#endif
 #include <thread>
 #include <stdio.h>
 #ifndef MXLOG_NO_TLS

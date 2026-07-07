@@ -12,6 +12,8 @@
 #include <chrono>
 #include <memory>
 #include <string>
+#include <cstring>
+#include <ctime>
 #include <stdexcept>
 #include "log_enum.h"
 extern "C"
@@ -93,7 +95,11 @@ std::string string_format( const std::string& format, Args ... args )
 inline std::tm localtime(const std::time_t &time_tt)
 {
     std::tm tm;
+#ifdef _WIN32
+    ::localtime_s(&tm, &time_tt);
+#else
     ::localtime_r(&time_tt, &tm);
+#endif
     return tm;
 }
 inline std::tm now(){
