@@ -1,10 +1,12 @@
-
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
-import  'package:ffi/ffi.dart';
+import 'package:ffi/ffi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+
+List<String> _levelIcons = ["🟩", "🟦", "🟨", "🟥", "❌"];
+List<String> _levelNames = ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"];
 
 ///日志文件存储策略
 enum MXStoragePolicyType {
@@ -57,7 +59,7 @@ class MXLogger with WidgetsBindingObserver {
   Pointer<Void> _handle = nullptr;
 
   static const MethodChannel _channel = MethodChannel('flutter_mxlogger');
-
+  static bool _consoleEnable = false;
   IOSink? _ioSink;
   bool get enable => _enable;
 
@@ -105,6 +107,7 @@ class MXLogger with WidgetsBindingObserver {
   MXLogger(
       {required String nameSpace,
       required String directory,
+      bool consoleEnable = false,
       MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
       String? fileName,
       String? fileHeader,
@@ -112,6 +115,7 @@ class MXLogger with WidgetsBindingObserver {
       String? iv}) {
     _cryptKey = cryptKey;
     _iv = iv;
+    _consoleEnable = consoleEnable;
     WidgetsBinding.instance.addObserver(this);
 
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
@@ -166,6 +170,7 @@ class MXLogger with WidgetsBindingObserver {
   static Future<MXLogger> initialize(
       {required String nameSpace,
       String? directory,
+      bool consoleEnable = false,
       MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
       String? fileName,
       String? fileHeader,
@@ -181,6 +186,7 @@ class MXLogger with WidgetsBindingObserver {
     MXLogger mxLogger = MXLogger(
         nameSpace: ns,
         directory: dr,
+        consoleEnable: consoleEnable,
         storagePolicy: storagePolicy,
         fileName: fileName,
         fileHeader: fileHeader,
@@ -210,6 +216,10 @@ class MXLogger with WidgetsBindingObserver {
   /// 类方法 使用 mapKey操作日志
   static void logLoggerKey(String? loggerKey, int lvl, String msg,
       {String? name, String? tag}) {
+    if (_consoleEnable == true) {
+      debugPrint(
+          "-----------MXLogger-----------\nlevel:${_levelIcons[lvl]}${_levelNames[lvl]}\nname:$name\ntags:$tag\nmsg:$msg");
+    }
     Pointer<Utf8> loggerKeyPtr =
         loggerKey != null ? loggerKey.toNativeUtf8() : nullptr;
 
@@ -275,14 +285,6 @@ class MXLogger with WidgetsBindingObserver {
   void setEnable(bool enable) {
     _enable = enable;
     _setEnable(_handle, enable == true ? 1 : 0);
-  }
-
-  /// 设置是否禁用控制台输出功能，
-  /// 注意:1.这个方法只是禁用了控制台的输出和打印，并不影响日志的文件的写入
-  ///     2.在测试环境或者debug状态的时候可以开启console,但是app上线建议关掉。生产环境这种性能损耗毫无意义。
-  void setConsoleEnable(bool e) {
-    if (enable == false) return;
-    _setConsoleEnable(_handle, e == true ? 1 : 0);
   }
 
   /// 设置日志文件存储最大时长(s) 默认为0 不限制   60 * 60 *24 *7； 即一个星期
@@ -379,7 +381,10 @@ class MXLogger with WidgetsBindingObserver {
   /// 当返回值不等于0的时候 开发者可以调用[writeFail] 方法写入错误信息到本地。
   int log(int lvl, String msg, {String? name, String? tag}) {
     if (enable == false) return 0;
-
+    if (_consoleEnable == true) {
+      debugPrint(
+          "-----------MXLogger-----------\nlevel:${_levelIcons[lvl]}${_levelNames[lvl]}\nname:$name\ntags:$tag\nmsg:$msg");
+    }
     Pointer<Utf8> namePtr = name != null ? name.toNativeUtf8() : nullptr;
     Pointer<Utf8> tagPtr = tag != null ? tag.toNativeUtf8() : nullptr;
     Pointer<Utf8> msgPtr = msg.toNativeUtf8();
@@ -578,6 +583,7 @@ class MXLogger with WidgetsBindingObserver {
   String? _cryptKey;
   String? _iv;
   bool _enable = true;
+
   bool _shouldRemoveExpiredDataWhenEnterBackground = true;
 }
 

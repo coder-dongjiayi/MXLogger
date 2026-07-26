@@ -37,8 +37,8 @@ MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* di
     }
     
     MXLogger * logger = [MXLogger initializeWithNamespace:_ns diskCacheDirectory:_directory storagePolicy:policyType fileName:_fileName fileHeader:_fileHeader  cryptKey:_cryptKey iv:_iv];
-        
-  
+     //flutter端直接禁掉控制台输出 由flutter层面进行输出
+    logger.consoleEnable = NO;
     logger.shouldRemoveExpiredDataWhenEnterBackground = NO;
     
     return (int64_t)logger;
@@ -64,7 +64,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_enable)(const void *handle,int e
 
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_enable)(const void *handle,int enable){
     MXLogger *logger = (__bridge MXLogger *) handle;
-    logger.enable = enable == 1 ? YES : NO;
+    logger.enable = NO;
 }
 
 

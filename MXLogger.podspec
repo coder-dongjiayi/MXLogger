@@ -15,14 +15,14 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = "9.0"
 
   s.source       = { :git => "https://github.com/coder-dongjiayi/MXLogger.git", :tag => "v#{s.version}" }
- 
+
   s.source_files =  "iOS/MXLogger/MXLogger", "iOS/MXLogger/MXLogger/*.{h,mm}"
   s.public_header_files = "iOS/MXLogger/MXLogger/MXLogger.h"
 
 
    s.framework    = "CoreFoundation"
 
-   s.dependency 'MXLoggerCore', "1.2.14"
+   s.dependency 'MXLoggerCore'
    s.libraries    = "z", "c++"
    
   s.pod_target_xcconfig = {

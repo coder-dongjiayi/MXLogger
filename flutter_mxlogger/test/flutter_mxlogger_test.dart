@@ -421,7 +421,6 @@ void main() {
       expect(logger.errorDesc, isNull);
       // setLevel/setMaxDiskAge等在disable下为no-op, 调用不应崩溃
       logger.setLevel(0);
-      logger.setConsoleEnable(false);
       logger.setMaxDiskAge(100);
       logger.setMaxDiskSize(100);
       logger.removeExpireData();
@@ -438,18 +437,7 @@ void main() {
     });
   });
 
-  // ---------------------------------------------------------------
-  group('setConsoleEnable', () {
-    test('开关控制台输出不影响文件写入', () {
-      final logger =
-          MXLogger(nameSpace: uniqueNs(), directory: newDir('con').path);
-      logger.setConsoleEnable(true);
-      logger.info('with-console');
-      logger.setConsoleEnable(false);
-      logger.info('without-console');
-      expect(readBack(logger), hasLength(2));
-    });
-  });
+
 
   // ---------------------------------------------------------------
   group('文件清理', () {

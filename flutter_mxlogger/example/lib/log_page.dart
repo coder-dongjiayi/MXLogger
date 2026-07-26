@@ -33,6 +33,7 @@ class _LogPageState extends State<LogPage> {
     _mxLogger = await MXLogger.initialize(
         nameSpace: "flutter.mxlogger",
         directory: directory.path,
+        consoleEnable: true,
         storagePolicy: MXStoragePolicyType.yyyy_MM_dd,
         fileHeader: "version 1.2.9",
         cryptKey: _cryptKey,
@@ -40,12 +41,11 @@ class _LogPageState extends State<LogPage> {
 
     _mxLogger.setMaxDiskAge(60 * 60 * 24 * 7);
     _mxLogger.setMaxDiskSize(1024 * 1024 * 10);
-    _mxLogger.setConsoleEnable(true);
     _mxLogger.setLevel(0);
     updateSize();
 
-    print("path:${_mxLogger.diskcachePath}");
-    print("loggerKey:${_mxLogger.loggerKey}");
+    // print("path:${_mxLogger.diskcachePath}");
+    // print("loggerKey:${_mxLogger.loggerKey}");
 
     loggerKey = _mxLogger.getLoggerKey();
   }
