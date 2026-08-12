@@ -5,6 +5,7 @@ import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import 'package:mxlogger_analyzer_lib/src/level/mx_level.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/log_model.dart';
 import 'package:mxlogger_analyzer_lib/src/provider/level_list_state.dart';
+import 'package:mxlogger_analyzer_lib/src/provider/advanced_filter_state.dart';
 
 enum AnalyzerPlatform { desktop, mobile, package }
 
@@ -39,21 +40,35 @@ class MXLogListNotifier extends AutoDisposeAsyncNotifier<({bool? isSearch,List<L
   String? _keyWord;
   List<int>? _levels;
 
+  /// 高级过滤器条件，由 advancedFilterProvider 生成
+  String? _filterCondition;
+
   /// 查询序号。几十万条日志一次查询要一两秒，用户连点筛选时会有多个查询同时在飞，
   /// 只认最后一次发出的结果，否则先发的慢查询后返回会把新结果覆盖掉
   int _requestId = 0;
 
   bool get searchCondition =>
-      _condition != null || _keyWord != null || _levels?.isNotEmpty == true;
+      _condition != null ||
+      _keyWord != null ||
+      _levels?.isNotEmpty == true ||
+      _filterCondition != null;
 
   @override
   FutureOr<({bool? isSearch,List<LogModel> dataSource})> build() async{
+    /// 白名单/黑名单变化时自动重新查询，同时保留已有的搜索和等级条件
+    _filterCondition = ref.watch(advancedFilterProvider).sqlCondition;
+
     /// build 也算一次新查询，作废掉还在飞的旧查询
     _requestId = _requestId + 1;
 
     final repository = ref.watch(mxloggerRepository);
-    final dataSource =  await repository.fetchLogs();
-    return (isSearch:false,dataSource:dataSource);
+    final dataSource =  await repository.fetchLogs(
+        searchCondition: _condition,
+        keyWord: _keyWord,
+        order: _sort == true ? "desc" : "asc",
+        filterCondition: _filterCondition,
+        levels: _levels);
+    return (isSearch:searchCondition,dataSource:dataSource);
   }
 
   /// 按时间排序
@@ -128,6 +143,7 @@ class MXLogListNotifier extends AutoDisposeAsyncNotifier<({bool? isSearch,List<L
         order: _sort == true ? "desc" : "asc",
         condition: _condition,
         keyWord: _keyWord,
+        filterCondition: _filterCondition,
         levels: _levels);
   }
 
@@ -136,6 +152,7 @@ class MXLogListNotifier extends AutoDisposeAsyncNotifier<({bool? isSearch,List<L
       int? page,
       String? keyWord,
       String? order,
+      String? filterCondition,
       List<int>? levels}) async {
     final repository = ref.read(mxloggerRepository);
     final int requestId = _requestId = _requestId + 1;
@@ -152,6 +169,7 @@ class MXLogListNotifier extends AutoDisposeAsyncNotifier<({bool? isSearch,List<L
           page: page,
           keyWord: keyWord,
           order: order,
+          filterCondition: filterCondition,
           levels: levels);
      return (isSearch:searchCondition,dataSource:dataSource);
     });

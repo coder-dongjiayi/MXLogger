@@ -75,7 +75,7 @@ void main() {
     expect(names, contains("idx_mxlog_timestamp"));
   });
 
-  test("fetchLogs 在后台 isolate 里查询并正确应用筛选条件", () async {
+  test("fetchLogs 在后台 isolate 里查询并正确应用过滤条件", () async {
     seed(100);
     final repository = MXLoggerRepository();
 
@@ -93,18 +93,24 @@ void main() {
     expect(errors.length, 20);
     expect(errors.every((e) => e.level == 3), true);
 
-    /// 自定义条件搜索
-    final byTag =
-        await repository.fetchLogs(searchCondition: "tag like '%payment%'");
-    expect(byTag.length, 50);
-    expect(byTag.every((e) => e.tag == "payment"), true);
+    /// 高级过滤器条件
+    final white = await repository.fetchLogs(
+        filterCondition: "(ifnull(tag,'') like '%payment%')");
+    expect(white.length, 50);
+    expect(white.every((e) => e.tag == "payment"), true);
 
-    /// 多选等级 + 搜索条件叠加。
-    /// 修复前 where 拼成 (条件) and level=0 or level=3，and 优先级高于 or，
-    /// 等价于 ((条件) and level=0) or level=3，tag 条件会对 level=3 失效
+    /// 白 + 黑
+    final combo = await repository.fetchLogs(
+        filterCondition: "(ifnull(tag,'') like '%payment%') and "
+            "not (ifnull(msg,'') like '%消息内容 2%')");
+    expect(combo.length, lessThan(50));
+    expect(combo.every((e) => e.tag == "payment"), true);
+    expect(combo.any((e) => e.msg?.contains("消息内容 2") == true), false);
+
+    /// 等级 + 过滤器叠加(验证 or 优先级那处括号)
     final both = await repository.fetchLogs(
-        levels: [0, 3], searchCondition: "tag like '%payment%'");
-    expect(both.isNotEmpty, true);
+        levels: [0, 3],
+        filterCondition: "(ifnull(tag,'') like '%payment%')");
     expect(both.every((e) => e.tag == "payment"), true);
     expect(both.every((e) => e.level == 0 || e.level == 3), true);
   });
@@ -165,10 +171,10 @@ void main() {
         ..reset()
         ..start();
       final filtered = await repository.fetchLogs(
-          searchCondition: "msg not like '%upload%'");
+          filterCondition: "not (ifnull(msg,'') like '%upload%')");
       sw.stop();
       // ignore: avoid_print
-      print("条件过滤 ${filtered.length} 条, 耗时 ${sw.elapsedMilliseconds}ms");
+      print("黑名单过滤 ${filtered.length} 条, 耗时 ${sw.elapsedMilliseconds}ms");
 
       expect(all.length, greaterThan(0));
     }, timeout: const Timeout(Duration(minutes: 3)));
