@@ -13,6 +13,7 @@ import 'package:mxlogger_analyzer_lib/src/global/widget/mx_icon_button.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_logo.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_toast.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/dialog/clear_data_dialog.dart';
+import 'package:mxlogger_analyzer_lib/src/screens/home/dialog/key_iv_dialog.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/home_screen.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/model/header_info.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/model/log_model.dart';
@@ -76,6 +77,14 @@ class DataHeader extends MXConsumerWidget {
                         size: buttonSize,
                         onTap: () => pickAndImportLogFiles(context, store),
                       ),
+                    // 桌面端：查看当前配置的解密 KEY / IV（只读，点值复制）
+                    if (!store.isEmbedded)
+                      MXIconButton(
+                        tooltip: context.l10n.keyIvTip,
+                        icon: const Icon(Icons.key_outlined, size: 15),
+                        size: buttonSize,
+                        onTap: () => showKeyIvDialog(context),
+                      ),
                     MXIconButton(
                       tooltip: context.l10n.clearDataTip,
                       icon: const Icon(Icons.delete_outline),
@@ -117,14 +126,16 @@ class DataHeader extends MXConsumerWidget {
     );
   }
 
-  /// 清除数据：二次确认 → 清库 → 回到首次引导页
+  /// 清除数据：二次确认 → 清库。桌面端回到首次引导页；
+  /// 嵌入模式日志来源固定为本机目录，引导页无意义——留在数据页，
+  /// 清空后自然落到带「刷新」按钮的空态。
   Future<void> _confirmClearData(BuildContext context, MXStore store) async {
     final bool? confirmed = await showClearDataDialog(context);
     if (confirmed != true || !context.mounted) return;
     await store.importer.clearAll();
     if (!context.mounted) return;
     showMXToast(context, context.l10n.dataCleared);
-    store.screen.resetToLanding();
+    if (!store.isEmbedded) store.screen.resetToLanding();
   }
 
   Widget _brand(BuildContext context, MXTokens tokens) {

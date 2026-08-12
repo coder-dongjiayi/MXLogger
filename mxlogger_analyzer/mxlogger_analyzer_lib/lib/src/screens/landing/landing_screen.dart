@@ -41,14 +41,15 @@ class LandingScreenState extends MXConsumerState<LandingScreen> {
   void initState() {
     super.initState();
     _initialEntries = store.crypt.value.entries;
-    // 导入失败回退：读取失败回第一步，解析失败（多为 Key/IV 错误）回第二步
+    // 导入失败回退：读取失败/文件里没有日志回第一步（换文件），
+    // 解析失败（多为 Key/IV 错误）回第二步
     ref.listen(store.importer, (ImportState previous, ImportState next) {
       if (!mounted || previous.status == next.status) return;
       if (next.status == ImportStatus.failure) {
         _goTo(
-          next.error == ImportError.readFailed
-              ? _WizardStep.files
-              : _WizardStep.crypt,
+          next.error == ImportError.parseFailed
+              ? _WizardStep.crypt
+              : _WizardStep.files,
           forward: false,
         );
       }

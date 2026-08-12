@@ -47,6 +47,8 @@ void main() {
       navigatorKey.currentState!.overlay!,
       diskcachePath: logDir.path,
       databasePath: dbDir.path,
+      cryptPairs: const [],
+      onShare: (_) async => false,
     );
     await tester.pumpAndSettle();
 

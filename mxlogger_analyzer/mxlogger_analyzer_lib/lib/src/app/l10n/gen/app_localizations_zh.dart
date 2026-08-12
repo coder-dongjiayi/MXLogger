@@ -411,4 +411,31 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dataCleared => '数据已清空';
+
+  @override
+  String get sortAsc => '时间正序';
+
+  @override
+  String get sortDesc => '时间倒序';
+
+  @override
+  String get keyIvTip => '查看解密 KEY / IV';
+
+  @override
+  String get keyIvDialogTitle => '解密 KEY / IV';
+
+  @override
+  String get keyIvNote => '当前配置的解密参数，勾选编号为解密尝试顺序。';
+
+  @override
+  String get keyIvEmpty => '尚未配置解密参数';
+
+  @override
+  String get keyIvDisabled => '未启用';
+
+  @override
+  String get clickToCopy => '点击复制';
+
+  @override
+  String get noLogRecords => '没有可解析的日志文件';
 }

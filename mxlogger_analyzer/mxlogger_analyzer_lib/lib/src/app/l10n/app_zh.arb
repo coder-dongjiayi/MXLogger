@@ -215,5 +215,15 @@
   "clearDataConfirmMessage": "您确认要清空数据么？",
   "cancel": "取消",
   "confirmClear": "清空",
-  "dataCleared": "数据已清空"
+  "dataCleared": "数据已清空",
+  "sortAsc": "时间正序",
+  "sortDesc": "时间倒序",
+  "keyIvTip": "查看解密 KEY / IV",
+  "keyIvDialogTitle": "解密 KEY / IV",
+  "keyIvNote": "当前配置的解密参数，勾选编号为解密尝试顺序。",
+  "keyIvEmpty": "尚未配置解密参数",
+  "keyIvDisabled": "未启用",
+  "clickToCopy": "点击复制",
+  "close": "关闭",
+  "noLogRecords": "没有可解析的日志文件"
 }

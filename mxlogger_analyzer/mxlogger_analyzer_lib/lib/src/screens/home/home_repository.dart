@@ -56,9 +56,9 @@ class HomeRepository {
         onProgress: (double fraction) => onProgress?.call(i, fraction),
       );
       onProgress?.call(i, 1);
-      // 无一条有效记录（如 key 错误导致全部解密失败）视为解析失败
-      final bool usable = result != null && result.records.isNotEmpty;
-      results.add((name: name, result: usable ? result : null));
+      // result 为 null 仅代表解析异常（格式损坏等）；空记录的结果原样保留，
+      // 由上层结合 errorCount 区分「文件里没有日志」与「Key/IV 错误全部解密失败」
+      results.add((name: name, result: result));
     }
     return results;
   }

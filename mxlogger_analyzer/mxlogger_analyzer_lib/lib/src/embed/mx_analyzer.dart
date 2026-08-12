@@ -13,23 +13,17 @@ import 'package:mxlogger_analyzer_lib/src/screens/main/main_screen.dart';
 /// 嵌入式调试入口：在宿主 app 内显示可拖动悬浮球，
 /// 点击弹出完整的 2.0 分析器（自带主题/多语言/导航，不依赖宿主配置）。
 ///
-/// 用法（与 1.x 的 MXAnalyzer 对齐）：
+/// 用法（分享实现与解密参数都由主 app 注入）：
 /// ```dart
 /// MXAnalyzer.showDebug(navigatorKey.currentState!.overlay!,
 ///     diskcachePath: logger.diskcachePath,
-///     cryptKey: logger.cryptKey,
-///     iv: logger.iv);
+///     // 日志未加密传空数组；换过密钥可传多组，解析时逐条按顺序尝试
+///     cryptPairs: [MxCryptPair(key: logger.cryptKey!, iv: logger.iv!)],
+///     onShare: (MXShareRequest request) async {
+///       // 主 app 自行接入 share_plus 等插件；返回 false 降级复制剪贴板
+///       ...
+///     });
 /// MXAnalyzer.dismiss();
-/// ```
-///
-/// 日志换过密钥时可一次传入多组，解析时逐条按顺序尝试：
-/// ```dart
-/// MXAnalyzer.showDebug(navigatorKey.currentState!.overlay!,
-///     diskcachePath: logger.diskcachePath,
-///     cryptPairs: const [
-///       MxCryptPair(key: "current-key", iv: "current-iv"),
-///       MxCryptPair(key: "legacy-key", iv: "legacy-iv"),
-///     ]);
 /// ```
 class MXAnalyzer {
   MXAnalyzer._();
@@ -49,17 +43,12 @@ class MXAnalyzer {
   /// [prefs] 注入设置（主题/语言/解密参数）的持久化实现；
   /// 不注入则只存内存——KEY/IV 每次由 [showDebug] 传入，本就无需落盘，
   /// 分析器也因此不必依赖 shared_preferences 之类的存储插件。
-  /// [share] 注入分享实现（主 app 自行接入 share_plus 等插件后转调，
-  /// 见 [MXShareHandler]）；不注入则分析器内的「分享」降级为复制到剪贴板，
-  /// 分析器因此不必依赖分享插件。
   static void initialize({
     String? databasePath,
     MXPrefs? prefs,
-    MXShareHandler? share,
   }) {
     _databasePath = databasePath;
     if (prefs != null) _prefs = prefs;
-    if (share != null) _share = share;
   }
 
   /// 显示悬浮球。重复调用（悬浮球已存在时）直接忽略。
@@ -67,35 +56,30 @@ class MXAnalyzer {
   /// [diskcachePath]：MXLogger 的日志目录。打开弹窗**不会**自动解析，
   /// 由用户点分析器里的「刷新」按钮扫描其中的 .mx/.log/.txt/.json；
   /// 每次刷新都清空数据库重新解析，所见即本次扫描的全量结果。
-  /// [cryptKey]/[iv]：日志的 AES 解密参数（单组的简写入口）。
-  /// [cryptPairs]：多组解密参数，用于同一个日志文件里的记录由不同 Key/IV 加密的
-  /// 情况（写入端换过密钥），解析时逐条按给定顺序尝试，第一组解不开就换下一组。
+  /// [cryptPairs]：日志的 AES 解密参数，必传。日志未加密传空数组；
+  /// 同一个日志文件里的记录由不同 Key/IV 加密（写入端换过密钥）时可传多组，
+  /// 解析时逐条按给定顺序尝试，第一组解不开就换下一组。
   /// 传入的组会置于分析器设置表首并勾选（已存在的同一组只确保勾选），
   /// 用户在分析器里自己加的组原样保留，后续「重新解析」弹窗会自动代入。
-  /// [share]：分享实现（同 [initialize] 的 share 参数，不必两处都传），
-  /// 不注入则分析器内的「分享」降级为复制到剪贴板。
+  /// [onShare]：分享实现，必传。分析器内核不依赖分享插件，由主 app 决定
+  /// 怎么分享（如自行接入 share_plus 后转调，见 [MXShareHandler]）；
+  /// 不想支持系统分享时返回 false，分析器会降级为复制到剪贴板。
   static Future<void> showDebug(
     OverlayState overlayState, {
     required String diskcachePath,
-    String? cryptKey,
-    String? iv,
-    List<MxCryptPair> cryptPairs = const <MxCryptPair>[],
+    required List<MxCryptPair> cryptPairs,
+    required MXShareHandler onShare,
     String? databasePath,
-    MXShareHandler? share,
   }) async {
     if (_entry != null) return;
     if (databasePath != null) _databasePath = databasePath;
-    if (share != null) _share = share;
+    _share = onShare;
     final Size screen = MediaQuery.of(overlayState.context).size;
 
     final MXStore store = await _ensureStore(diskcachePath);
     // 嵌入模式跳过首次引导向导，直接进数据页
     store.screen.enter();
-    store.crypt.upsertAll([
-      if (cryptKey != null || iv != null)
-        MxCryptPair(key: cryptKey ?? "", iv: iv ?? ""),
-      ...cryptPairs,
-    ]);
+    store.crypt.upsertAll(cryptPairs);
 
     _offset = Offset((screen.width - _size) / 2, (screen.height - _size) / 2);
     _ballVisible = true;
@@ -150,7 +134,7 @@ class MXAnalyzer {
     final MXPrefs prefs = _prefs ??= MXMemoryPrefs();
     final MXStore store = MXStore(
       // 嵌入模式不注入选文件/拖入能力：日志来源固定为宿主日志目录；
-      // 分享能力由主 app 经 initialize(share:) 决定是否注入
+      // 分享能力由主 app 经 showDebug(onShare:) 注入
       host: MXHost(prefs: prefs, share: _share),
       databasePath: _databasePath,
       // 非空即嵌入模式：日志来源固定为本机目录，由用户点「刷新」触发解析

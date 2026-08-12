@@ -215,5 +215,15 @@
   "clearDataConfirmMessage": "Are you sure you want to clear all data?",
   "cancel": "Cancel",
   "confirmClear": "Clear",
-  "dataCleared": "Data cleared"
+  "dataCleared": "Data cleared",
+  "sortAsc": "Oldest first",
+  "sortDesc": "Newest first",
+  "keyIvTip": "View decryption KEY / IV",
+  "keyIvDialogTitle": "Decryption KEY / IV",
+  "keyIvNote": "Configured decryption keys; the number marks the try order.",
+  "keyIvEmpty": "No decryption keys configured",
+  "keyIvDisabled": "Disabled",
+  "clickToCopy": "Click to copy",
+  "close": "Close",
+  "noLogRecords": "No parsable log records"
 }

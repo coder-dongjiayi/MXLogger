@@ -145,11 +145,12 @@ void main() {
     expect(await repository.fetchCount(), 1);
   });
 
-  test("parseFiles：错误 key 的 .mx 判定为解析失败（result 为 null）", () async {
+  test("parseFiles：错误 key 的 .mx 全部解密失败（记录空且 errorCount > 0）", () async {
     final int base = DateTime(2026, 7, 3, 10).microsecondsSinceEpoch;
+    final List<Uint8List> items = sampleItems(base);
     final File mxFile = File("${tempDir.path}/enc.mx")
       ..writeAsBytesSync(buildMxFile(
-        sampleItems(base)
+        items
             .map((Uint8List item) => encryptItem(item, "right-key", "right-key"))
             .toList(),
       ));
@@ -158,7 +159,10 @@ void main() {
         await repository.parseFiles(
             paths: [mxFile.path],
             cryptPairs: const [MxCryptPair(key: "wrong-key")]);
-    expect(parsed.single.result, isNull);
+    // 解密失败不再折叠成 null：上层靠 errorCount 区分 Key 错误与「文件里没日志」
+    final MxParseResult result = parsed.single.result!;
+    expect(result.records, isEmpty);
+    expect(result.errorCount, items.length);
   });
 
   test("parseFiles：文件不存在抛出 IO 异常", () async {

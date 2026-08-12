@@ -59,8 +59,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   /// 16 字节 AES key / iv，需与分析器设置里的解密参数一致（showDebug 会自动写入）
-  static const String _cryptKey = "nnnnlokiuihjmmxxg";
-  static const String _iv = "cmnslokiuihqlq";
+  static const String _cryptKey = "bnijioijuojiuoju";
+  static const String _iv = "njkoiuhjbjuiasdh";
 
   MXLogger? _mxLogger;
   String _status = "初始化中…";
@@ -197,12 +197,12 @@ When the exception was thrown, this was the stack:
     await MXAnalyzer.showDebug(
       _navigatorStateKey.currentState!.overlay!,
       diskcachePath: logger.diskcachePath,
-      cryptKey: logger.cryptKey,
-      iv: logger.iv,
+      // 解密参数由主 app 全量传入（未加密传空数组）；多组时按顺序依次尝试
       cryptPairs: [
-        MxCryptPair(key: "abchjilokiuihjng",iv: "abchjilokiuihqqq")
+        MxCryptPair(key: logger.cryptKey ?? "", iv: logger.iv ?? ""),
+        // MxCryptPair(key: "abchjilokiuihjng", iv: "abchjilokiuihqqq"),
       ],
-      share: _shareWithSharePlus,
+      onShare: _shareWithSharePlus,
     );
   }
 

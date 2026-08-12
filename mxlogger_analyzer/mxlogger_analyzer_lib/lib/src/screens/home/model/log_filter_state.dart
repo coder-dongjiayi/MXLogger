@@ -13,6 +13,7 @@ class LogFilterState {
     this.names = const <String>[],
     this.fromUs,
     this.toUs,
+    this.ascending = true,
   });
 
   final String keyword;
@@ -26,6 +27,10 @@ class LogFilterState {
   final List<String> names;
   final int? fromUs;
   final int? toUs;
+
+  /// 按日志时间正序（默认）/ 倒序排列。排序不算过滤条件（不参与 hasFilter），
+  /// 「全部清除」也不重置它。
+  final bool ascending;
 
   bool get timeActive => fromUs != null || toUs != null;
 
@@ -44,6 +49,7 @@ class LogFilterState {
     List<String>? names,
     Object? fromUs = _unset,
     Object? toUs = _unset,
+    bool? ascending,
   }) {
     return LogFilterState(
       keyword: keyword ?? this.keyword,
@@ -53,6 +59,7 @@ class LogFilterState {
       names: names ?? this.names,
       fromUs: identical(fromUs, _unset) ? this.fromUs : fromUs as int?,
       toUs: identical(toUs, _unset) ? this.toUs : toUs as int?,
+      ascending: ascending ?? this.ascending,
     );
   }
 
@@ -100,7 +107,7 @@ class LogFilterState {
   LogFilterState removeName(String name) =>
       copyWith(names: List<String>.from(names)..remove(name));
 
-  LogFilterState clearAll() => LogFilterState(scope: scope);
+  LogFilterState clearAll() => LogFilterState(scope: scope, ascending: ascending);
 
   LogQuery toQuery({int? limit, int? offset}) {
     return LogQuery(
@@ -111,6 +118,7 @@ class LogFilterState {
       names: names,
       fromUs: fromUs,
       toUs: toUs,
+      ascending: ascending,
       limit: limit,
       offset: offset,
     );

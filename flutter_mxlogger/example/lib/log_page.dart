@@ -17,8 +17,8 @@ class LogPage extends StatefulWidget {
 class _LogPageState extends State<LogPage> {
   late MXLogger _mxLogger;
   int _size = 0;
-  final String _cryptKey = "abchjilokiuihjng";
-  final String _iv = "abchjilokiuihqqq";
+  final String _cryptKey = "mikjnjojukunjxddsss";
+  final String _iv = "mlimjkojujhkkiknjkasdhn";
   String? loggerKey;
   @override
   void initState() {

@@ -859,6 +859,60 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'数据已清空'**
   String get dataCleared;
+
+  /// No description provided for @sortAsc.
+  ///
+  /// In zh, this message translates to:
+  /// **'时间正序'**
+  String get sortAsc;
+
+  /// No description provided for @sortDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'时间倒序'**
+  String get sortDesc;
+
+  /// No description provided for @keyIvTip.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看解密 KEY / IV'**
+  String get keyIvTip;
+
+  /// No description provided for @keyIvDialogTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'解密 KEY / IV'**
+  String get keyIvDialogTitle;
+
+  /// No description provided for @keyIvNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前配置的解密参数，勾选编号为解密尝试顺序。'**
+  String get keyIvNote;
+
+  /// No description provided for @keyIvEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚未配置解密参数'**
+  String get keyIvEmpty;
+
+  /// No description provided for @keyIvDisabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'未启用'**
+  String get keyIvDisabled;
+
+  /// No description provided for @clickToCopy.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击复制'**
+  String get clickToCopy;
+
+  /// No description provided for @noLogRecords.
+  ///
+  /// In zh, this message translates to:
+  /// **'没有可解析的日志文件'**
+  String get noLogRecords;
 }
 
 class _AppLocalizationsDelegate

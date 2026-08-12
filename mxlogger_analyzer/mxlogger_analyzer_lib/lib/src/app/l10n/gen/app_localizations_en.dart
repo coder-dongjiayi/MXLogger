@@ -419,4 +419,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dataCleared => 'Data cleared';
+
+  @override
+  String get sortAsc => 'Oldest first';
+
+  @override
+  String get sortDesc => 'Newest first';
+
+  @override
+  String get keyIvTip => 'View decryption KEY / IV';
+
+  @override
+  String get keyIvDialogTitle => 'Decryption KEY / IV';
+
+  @override
+  String get keyIvNote =>
+      'Configured decryption keys; the number marks the try order.';
+
+  @override
+  String get keyIvEmpty => 'No decryption keys configured';
+
+  @override
+  String get keyIvDisabled => 'Disabled';
+
+  @override
+  String get clickToCopy => 'Click to copy';
+
+  @override
+  String get noLogRecords => 'No parsable log records';
 }

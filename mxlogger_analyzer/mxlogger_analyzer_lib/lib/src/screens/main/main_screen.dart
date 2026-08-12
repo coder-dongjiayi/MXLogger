@@ -28,7 +28,11 @@ class MainScreenState extends MXConsumerState<MainScreen> {
     if (!mounted || previous.status == next.status) return;
     if (next.status == ImportStatus.failure) {
       final String message;
-      if (next.reparse) {
+      if (next.error == ImportError.noRecords) {
+        // 文件都解析正常但没有一条日志（如空 .mx）：与 Key/IV 错误区分提示，
+        // 重解析同样适用（Key 没错，只是没日志可解）
+        message = context.l10n.noLogRecords;
+      } else if (next.reparse) {
         message = context.l10n.reparseFailed;
       } else if (next.error == ImportError.readFailed) {
         message = context.l10n.fileReadFailed;

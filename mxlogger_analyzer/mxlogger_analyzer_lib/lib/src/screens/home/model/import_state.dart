@@ -3,7 +3,9 @@ enum ImportStatus { idle, running, success, failure }
 /// 加载步骤（对齐设计稿 setLoad 的阶段文案）。
 enum ImportStep { reading, decrypting, indexing, done }
 
-enum ImportError { parseFailed, readFailed }
+/// [noRecords]：文件都能正常解析但没有一条日志记录（如刚初始化、还没写过
+/// 日志的空 .mx），与 Key/IV 错误（[parseFailed]）区分提示。
+enum ImportError { parseFailed, readFailed, noRecords }
 
 /// 导入任务状态机：idle → running(步骤 + 真实百分比) → success/failure。
 class ImportState {

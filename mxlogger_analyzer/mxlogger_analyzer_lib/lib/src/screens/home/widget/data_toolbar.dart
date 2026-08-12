@@ -256,6 +256,15 @@ class DataToolbarState extends MXConsumerState<DataToolbar> {
       badge: filter.timeActive ? "1" : null,
       onTap: () => store.timeOpen.value = !timeOpen,
     );
+    // 时间排序切换：默认正序（旧→新），点一下按时间倒序重排，再点切回
+    final Widget sortButton = _ToolButton(
+      icon: filter.ascending ? Icons.arrow_downward : Icons.arrow_upward,
+      label: filter.ascending ? context.l10n.sortAsc : context.l10n.sortDesc,
+      showLabel: !mobile,
+      active: !filter.ascending,
+      onTap: () => store.filter.update(
+          (LogFilterState state) => state.copyWith(ascending: !state.ascending)),
+    );
     final Widget foldButton = _ToolButton(
       icon: Icons.menu,
       label: allCollapsed ? context.l10n.unfoldAll : context.l10n.foldAll,
@@ -281,6 +290,8 @@ class DataToolbarState extends MXConsumerState<DataToolbar> {
                   children: [
                     timeButton,
                     const SizedBox(width: 10),
+                    sortButton,
+                    const SizedBox(width: 10),
                     foldButton,
                   ],
                 ),
@@ -296,6 +307,8 @@ class DataToolbarState extends MXConsumerState<DataToolbar> {
                 ),
                 const SizedBox(width: 10),
                 timeButton,
+                const SizedBox(width: 10),
+                sortButton,
                 const SizedBox(width: 10),
                 foldButton,
               ],

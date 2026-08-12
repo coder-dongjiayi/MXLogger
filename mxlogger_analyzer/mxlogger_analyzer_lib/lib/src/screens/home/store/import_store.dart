@@ -75,10 +75,18 @@ class ImportStore extends MXState<ImportState> {
       return;
     }
 
-    final List<MxParseResult> usable =
-        parsed.map((ParsedFile file) => file.result).whereType<MxParseResult>().toList();
+    final List<MxParseResult> usable = parsed
+        .map((ParsedFile file) => file.result)
+        .whereType<MxParseResult>()
+        .where((MxParseResult result) => result.records.isNotEmpty)
+        .toList();
     if (usable.isEmpty) {
-      _fail(ImportError.parseFailed);
+      // 没有一条记录时区分两种情况：出现过解析异常或解密失败（errorCount>0）
+      // 按 Key/IV/格式错误提示；一个错误都没有说明文件本身就没有日志记录
+      // （如刚初始化、还没写过日志的空 .mx），提示没有可解析的日志
+      final bool cryptSuspect = parsed.any((ParsedFile file) =>
+          file.result == null || file.result!.errorCount > 0);
+      _fail(cryptSuspect ? ImportError.parseFailed : ImportError.noRecords);
       return;
     }
 
@@ -174,7 +182,7 @@ class ImportStore extends MXState<ImportState> {
 
   String _joinNames(List<ParsedFile> parsed) {
     final List<String> names = parsed
-        .where((ParsedFile file) => file.result != null)
+        .where((ParsedFile file) => file.result?.records.isNotEmpty ?? false)
         .map((ParsedFile file) => file.name)
         .toList();
     if (names.isEmpty) return "";

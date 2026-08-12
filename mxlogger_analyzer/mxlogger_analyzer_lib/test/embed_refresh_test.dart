@@ -75,6 +75,29 @@ class _FakeHomeRepository extends EmptyRepository {
   Future<void> clearAll() async => hasData = false;
 }
 
+/// 解析不出任何记录的假数据层：[errorCount] 为 0 模拟空日志文件（如刚初始化
+/// 还没写过日志的 .mx），大于 0 模拟 Key/IV 错误导致的全部解密失败。
+class _NoRecordsRepository extends _FakeHomeRepository {
+  _NoRecordsRepository({required this.errorCount});
+
+  final int errorCount;
+
+  @override
+  Future<List<ParsedFile>> parseFiles({
+    required List<String> paths,
+    List<MxCryptPair> cryptPairs = const <MxCryptPair>[],
+    void Function(int fileIndex, double fraction)? onProgress,
+  }) async {
+    parsedPaths.add(paths);
+    return paths
+        .map((String path) => (
+              name: path.split(Platform.pathSeparator).last,
+              result: MxParseResult(records: const [], errorCount: errorCount),
+            ))
+        .toList();
+  }
+}
+
 /// 嵌入模式（悬浮球唤起）：打开不解析，用户点「刷新」才扫描本机日志目录，
 /// 且每次刷新都是清空重解析。
 void main() {
@@ -157,6 +180,44 @@ void main() {
     expect(repo.parsedPaths.length, 1);
     expect(repo.parsedPaths.single, ["${dir.path}/2026-08-11_log.mx"]);
     expect(repo.writeClearExisting, [true]);
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets("空日志文件刷新：提示没有可解析的日志，而不是 Key/IV 错误", (WidgetTester tester) async {
+    final Directory dir = Directory.systemTemp.createTempSync("mx_embed_norec");
+    File("${dir.path}/log.mx").writeAsBytesSync(<int>[0, 0, 0, 0]);
+    addTearDown(() => dir.deleteSync(recursive: true));
+
+    final MXStore store = await createTestStore(
+      repository: _NoRecordsRepository(errorCount: 0),
+      initialPrefs: const {"mx_entered": true},
+      diskcachePath: dir.path,
+    );
+    await pumpEmbedded(tester, store);
+
+    await tester.tap(find.text("刷新日志"));
+    await tester.pumpAndSettle();
+    expect(find.text("没有可解析的日志文件"), findsOneWidget);
+    expect(find.text("解析失败（格式或 Key/IV 有误）"), findsNothing);
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets("全部解密失败（errorCount > 0）仍提示 Key/IV 错误", (WidgetTester tester) async {
+    final Directory dir = Directory.systemTemp.createTempSync("mx_embed_badkey");
+    File("${dir.path}/log.mx").writeAsBytesSync(<int>[0, 0, 0, 0]);
+    addTearDown(() => dir.deleteSync(recursive: true));
+
+    final MXStore store = await createTestStore(
+      repository: _NoRecordsRepository(errorCount: 3),
+      initialPrefs: const {"mx_entered": true},
+      diskcachePath: dir.path,
+    );
+    await pumpEmbedded(tester, store);
+
+    await tester.tap(find.text("刷新日志"));
+    await tester.pumpAndSettle();
+    expect(find.text("解析失败（格式或 Key/IV 有误）"), findsOneWidget);
+    expect(find.text("没有可解析的日志文件"), findsNothing);
     await tester.pump(const Duration(seconds: 2));
   });
 
