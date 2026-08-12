@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider.dart';
+import 'package:mxlogger_analyzer_lib/src/screen/home_screen/log_model.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/search_dialog.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/widget/home_log_list_view.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/widget/search_app_bar.dart';
@@ -39,91 +40,97 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: Consumer(builder: (context, ref, child) {
         final asyncData = ref.watch(mxLogDataSourceProvider);
-        return asyncData.when(
-            data: (result) {
-              if (result.isSearch == false &&
-                  result.dataSource.isEmpty == true) {
-                return _empty(isSearch: false);
-              }
 
-              String timeRang = "";
-              if (result.dataSource.isNotEmpty) {
-                int first = result.dataSource.first.timestamp;
-                int last = result.dataSource.last.timestamp;
-                int f = first < last ? first : last;
-                int l = last > first ? last : first;
-
-                DateTime firstTime = DateTime.fromMicrosecondsSinceEpoch(f);
-                DateTime lastTime = DateTime.fromMicrosecondsSinceEpoch(l);
-                String firstString = firstTime.toString().split(".").first;
-                String lastString = lastTime.toString().split(".").first;
-                timeRang = " $firstString 至 $lastString";
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(
-                      left: 10,
-                    ),
-                    child: SearchResultWrap(
-                      onChange: (searchState) {
-                        ref
-                            .read(mxLogDataSourceProvider.notifier)
-                            .deleteSearch(searchState: searchState);
-                      },
-                    ),
-                  ),
-                  Container(
-                    margin:
-                        const EdgeInsets.only(top: 10, left: 10, bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(child: MXLoggerText(
-                            text: "共产生${result.dataSource.length}条数据 $timeRang",
-                            style: TextStyle(
-                                color: MXTheme.subText, fontSize: 13))),
-                        GestureDetector(
-                          onTap: () {
-                            ref
-                                .read(mxLogDataSourceProvider.notifier)
-                                .sortSearch();
-                          },
-                          child: Container(
-                            color: Colors.transparent,
-                            padding: const EdgeInsets.only(left: 30, right: 10),
-                            child: Icon(
-                              Icons.swap_vert_rounded,
-                              color: ref
-                                          .read(
-                                              mxLogDataSourceProvider.notifier)
-                                          .sort ==
-                                      true
-                                  ? MXTheme.subText
-                                  : MXTheme.buttonColor,
-                              size: 15,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  result.dataSource.isEmpty == true
-                      ? Expanded(child: _empty(isSearch: true))
-                      : Expanded(
-                          child: HomeLogListView(
-                          dataSource: result.dataSource,
-                        ))
-                ],
-              );
-            },
-            error: (Object error, StackTrace stackTrace) {
-              return const SizedBox();
-            },
-            loading: () => const Center(
-                child: CupertinoActivityIndicator(color: Colors.white)));
+        /// 加载中仍然渲染上一次的结果，再盖一层遮罩，
+        /// 既不闪空白，也能挡住重复点击(几十万条时一次查询要一两秒)
+        final result = asyncData.valueOrNull;
+        if (result == null) {
+          return asyncData.hasError
+              ? const SizedBox()
+              : Center(
+                  child: CupertinoActivityIndicator(color: MXTheme.white));
+        }
+        return Stack(
+          children: [
+            _content(ref, result),
+            if (asyncData.isLoading) const _LoadingMask(),
+          ],
+        );
       }),
+    );
+  }
+
+  Widget _content(
+      WidgetRef ref, ({bool? isSearch, List<LogModel> dataSource}) result) {
+    if (result.isSearch == false && result.dataSource.isEmpty == true) {
+      return _empty(isSearch: false);
+    }
+
+    String timeRang = "";
+    if (result.dataSource.isNotEmpty) {
+      int first = result.dataSource.first.timestamp;
+      int last = result.dataSource.last.timestamp;
+      int f = first < last ? first : last;
+      int l = last > first ? last : first;
+
+      DateTime firstTime = DateTime.fromMicrosecondsSinceEpoch(f);
+      DateTime lastTime = DateTime.fromMicrosecondsSinceEpoch(l);
+      String firstString = firstTime.toString().split(".").first;
+      String lastString = lastTime.toString().split(".").first;
+      timeRang = " $firstString 至 $lastString";
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(
+            left: 10,
+          ),
+          child: SearchResultWrap(
+            onChange: (searchState) {
+              ref
+                  .read(mxLogDataSourceProvider.notifier)
+                  .deleteSearch(searchState: searchState);
+            },
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.only(top: 10, left: 10, bottom: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: MXLoggerText(
+                      text: "共产生${result.dataSource.length}条数据 $timeRang",
+                      style:
+                          TextStyle(color: MXTheme.subText, fontSize: 13))),
+              GestureDetector(
+                onTap: () {
+                  ref.read(mxLogDataSourceProvider.notifier).sortSearch();
+                },
+                child: Container(
+                  color: Colors.transparent,
+                  padding: const EdgeInsets.only(left: 30, right: 10),
+                  child: Icon(
+                    Icons.swap_vert_rounded,
+                    color: ref.read(mxLogDataSourceProvider.notifier).sort ==
+                            true
+                        ? MXTheme.subText
+                        : MXTheme.buttonColor,
+                    size: 15,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+        result.dataSource.isEmpty == true
+            ? Expanded(child: _empty(isSearch: true))
+            : Expanded(
+                child: HomeLogListView(
+                dataSource: result.dataSource,
+              ))
+      ],
     );
   }
 
@@ -164,5 +171,43 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
       return "拖拽日志文件到窗口";
     }
     return "点击以导入日志数据";
+  }
+}
+
+/// 筛选期间盖在列表上的遮罩。
+///
+/// 查询已经在后台 isolate 里跑，界面不会冻住，这里主要是给出"点中了、正在算"
+/// 的反馈，并挡住这段时间的重复点击。
+class _LoadingMask extends StatelessWidget {
+  const _LoadingMask();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: AbsorbPointer(
+        child: Container(
+          color: MXTheme.themeColor.withOpacity(0.55),
+          alignment: Alignment.center,
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            decoration: BoxDecoration(
+              color: MXTheme.sliderColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: MXTheme.white.withOpacity(0.08)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CupertinoActivityIndicator(color: MXTheme.white),
+                const SizedBox(width: 12),
+                Text("正在筛选…",
+                    style: TextStyle(color: MXTheme.white, fontSize: 14)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
