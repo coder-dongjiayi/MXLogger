@@ -39,11 +39,18 @@ class MXLogListNotifier extends AutoDisposeAsyncNotifier<({bool? isSearch,List<L
   String? _keyWord;
   List<int>? _levels;
 
+  /// 查询序号。几十万条日志一次查询要一两秒，用户连点筛选时会有多个查询同时在飞，
+  /// 只认最后一次发出的结果，否则先发的慢查询后返回会把新结果覆盖掉
+  int _requestId = 0;
+
   bool get searchCondition =>
       _condition != null || _keyWord != null || _levels?.isNotEmpty == true;
 
   @override
   FutureOr<({bool? isSearch,List<LogModel> dataSource})> build() async{
+    /// build 也算一次新查询，作废掉还在飞的旧查询
+    _requestId = _requestId + 1;
+
     final repository = ref.watch(mxloggerRepository);
     final dataSource =  await repository.fetchLogs();
     return (isSearch:false,dataSource:dataSource);
@@ -131,9 +138,15 @@ class MXLogListNotifier extends AutoDisposeAsyncNotifier<({bool? isSearch,List<L
       String? order,
       List<int>? levels}) async {
     final repository = ref.read(mxloggerRepository);
+    final int requestId = _requestId = _requestId + 1;
 
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async{
+    /// copyWithPrevious 让加载期间旧列表still可见，只叠一层遮罩，
+    /// 不会先闪成空白再刷回来
+    state = const AsyncValue<({bool? isSearch, List<LogModel> dataSource})>
+        .loading()
+        .copyWithPrevious(state);
+
+    final result = await AsyncValue.guard(() async{
      final dataSource = await repository.fetchLogs(
           searchCondition: condition,
           page: page,
@@ -142,6 +155,10 @@ class MXLogListNotifier extends AutoDisposeAsyncNotifier<({bool? isSearch,List<L
           levels: levels);
      return (isSearch:searchCondition,dataSource:dataSource);
     });
+
+    /// 期间又发起了新查询，这次的结果已经过期
+    if (requestId != _requestId) return;
+    state = result;
   }
 }
 

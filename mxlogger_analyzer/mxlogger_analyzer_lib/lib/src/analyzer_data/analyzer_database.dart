@@ -10,9 +10,15 @@ class AnalyzerDatabase {
 
   static SQLite.Database get db => _db;
 
+  static String _databaseFile = "";
+
+  /// 数据库文件的完整路径，查询 isolate 需要用它另开一个只读连接
+  static String get databaseFile => _databaseFile;
+
   static void initDataBase(String path) {
 
     String mxloggerDatabase = path + "/mxlogger_analyzer.db";
+    _databaseFile = mxloggerDatabase;
     _db = SQLite.sqlite3.open(mxloggerDatabase);
 
     _db.execute(
@@ -28,19 +34,30 @@ class AnalyzerDatabase {
         "dateTime TEXT," // 日志创建时间
         "createDateTime TEXT" // 日志写入到数据库的时间
         ")");
+
+    _ensureIndexes();
   }
 
-  static Future<List<Map<String, Object?>>> selectData(
-      {required int page,
-       String? condition,
-      int pageSize = 20,
-      String? keyWord,
+  /// 建查询用的索引。
+  ///
+  /// 没有索引时 `order by timestamp` 每次都要把整表排序，`where level=?`
+  /// 也是全表扫描，几十万条日志下一次筛选要一两秒。
+  /// 旧版本建的库没有索引，这里用 if not exists 补建，只在第一次打开时有开销。
+  static void _ensureIndexes() {
+    _db.execute(
+        "create index if not exists idx_mxlog_timestamp on mxlog(timestamp)");
+    _db.execute("create index if not exists idx_mxlog_level on mxlog(level)");
+  }
+
+  /// 拼出查询语句。
+  ///
+  /// 只负责拼字符串、不碰数据库连接，这样查询可以整段丢进后台 isolate 执行
+  /// (见 MXLoggerRepository.fetchLogs)，避免几十万条日志把 UI 线程堵死。
+  static String buildQuerySql(
+      {String? keyWord,
       String? searchCondition,
       String? order,
-      List<int>? levels}) async {
-    List<Map<String, Object?>> _result = [];
-    int start = (page - 1) * pageSize;
-
+      List<int>? levels}) {
     String where = "1=1";
 
     if (keyWord?.isNotEmpty == true) {
@@ -67,27 +84,13 @@ class AnalyzerDatabase {
       levels?.forEach((element) {
         levelSqls.add("level=$element");
       });
-      where = "($where) and ${levelSqls.join(" or ")}";
-    }
-    SQLite.ResultSet resultSet = _db.select(
-        "select * from mxlog where $where order by timestamp ${order ?? "desc"}");
-    resultSet.forEach((element) {
-      Map<String, Object?> map = {
-        "name": element["name"],
-        "tag": element["tag"],
-        "msg": element["msg"],
-        "level": element["level"],
-        "threadId": element["threadId"],
-        "isMainThread": element["isMainThread"],
-        "timestamp": element["timestamp"],
-        "fileHeader": element["fileHeader"],
-        "dateTime": element["dateTime"],
-        "createDateTime": element["createDateTime"]
-      };
-      _result.add(map);
-    });
 
-    return _result;
+      /// 等级之间是 or，整体必须括起来，否则 and 的优先级高于 or，
+      /// 会变成 (前置条件 and level=0) or level=1，把前置条件漏掉
+      where = "($where) and (${levelSqls.join(" or ")})";
+    }
+    return "select name,tag,msg,level,threadId,isMainThread,timestamp,fileHeader "
+        "from mxlog where $where order by timestamp ${order ?? "desc"}";
   }
 
   static int count() {
