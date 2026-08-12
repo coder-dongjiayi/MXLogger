@@ -15,10 +15,11 @@ dependencies:
     path: mxlogger_analyzer_lib
 
   # 桌面壳注入内核的宿主能力（见 lib/src/host/desktop_host.dart）：
-  # 设置落盘 / 选文件 / 拖入文件。内核本身不依赖这些插件
+  # 设置落盘 / 选文件 / 拖入文件 / 系统分享。内核本身不依赖这些插件
   shared_preferences: ^2.3.3
   file_picker: ^8.3.7
   desktop_drop: ^0.4.4
+  share_plus: ^11.0.0
 
   # 仅 lib/main_package.dart（真机嵌入调试入口）使用：写入真实 .mx 日志 + 设备信息文件头
   flutter_mxlogger:

@@ -1,18 +1,23 @@
+import 'dart:convert';
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 桌面壳的宿主能力实现：内核（mxlogger_analyzer_lib）不依赖这些插件，
-/// 选文件 / 拖入 / 设置落盘统一在这里用 file_picker / desktop_drop /
-/// shared_preferences 实现后注入 [MXHost]。
+/// 选文件 / 拖入 / 设置落盘 / 系统分享统一在这里用 file_picker /
+/// desktop_drop / shared_preferences / share_plus 实现后注入 [MXHost]。
 Future<MXHost> createDesktopHost() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   return MXHost(
     prefs: _SharedPrefsAdapter(prefs),
     pickLogFiles: _pickLogFiles,
     dropTargetBuilder: _buildDropTarget,
+    share: _share,
   );
 }
 
@@ -33,6 +38,33 @@ class _SharedPrefsAdapter implements MXPrefs {
 
   @override
   void setBool(String key, bool value) => _prefs.setBool(key, value);
+}
+
+/// 系统分享面板：携带 fileName 时以文本文件分享，否则分享纯文本。
+/// 返回 false（分享在当前环境不可用）时内核会降级复制到剪贴板。
+Future<bool> _share(MXShareRequest request) async {
+  final ShareResult result;
+  if (request.fileName != null) {
+    result = await SharePlus.instance.share(ShareParams(
+      title: request.title,
+      files: [
+        XFile.fromData(
+          Uint8List.fromList(utf8.encode(request.text)),
+          name: request.fileName,
+          mimeType: "text/plain",
+        ),
+      ],
+      fileNameOverrides: [request.fileName!],
+      sharePositionOrigin: request.origin,
+    ));
+  } else {
+    result = await SharePlus.instance.share(ShareParams(
+      title: request.title,
+      text: request.text,
+      sharePositionOrigin: request.origin,
+    ));
+  }
+  return result.status != ShareResultStatus.unavailable;
 }
 
 Future<List<String>> _pickLogFiles() async {

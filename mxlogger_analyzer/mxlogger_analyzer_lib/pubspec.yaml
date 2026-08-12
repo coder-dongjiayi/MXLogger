@@ -20,12 +20,6 @@ dependencies:
   sqlite3: ^2.4.6
   sqlite3_flutter_libs: ^0.5.28
 
-  # 文件导入（选文件/拖入）与设置持久化不直接依赖插件：
-  # 由宿主经 MXHost/MXPrefs 注入实现（桌面壳注入 file_picker/desktop_drop/
-  # shared_preferences，嵌入模式全部走默认值），移动端集成零额外 KV/文件插件
-
-  # 系统分享（不可用时降级为剪贴板）
-  share_plus: any
 
   # 应用目录（数据库存放路径）
   path_provider: any

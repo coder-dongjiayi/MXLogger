@@ -40,6 +40,7 @@ class MXAnalyzer {
   static Offset _offset = Offset.zero;
   static String? _databasePath;
   static MXPrefs? _prefs;
+  static MXShareHandler? _share;
   static const double _size = 64;
 
   /// 可选预配置：
@@ -48,9 +49,17 @@ class MXAnalyzer {
   /// [prefs] 注入设置（主题/语言/解密参数）的持久化实现；
   /// 不注入则只存内存——KEY/IV 每次由 [showDebug] 传入，本就无需落盘，
   /// 分析器也因此不必依赖 shared_preferences 之类的存储插件。
-  static void initialize({String? databasePath, MXPrefs? prefs}) {
+  /// [share] 注入分享实现（主 app 自行接入 share_plus 等插件后转调，
+  /// 见 [MXShareHandler]）；不注入则分析器内的「分享」降级为复制到剪贴板，
+  /// 分析器因此不必依赖分享插件。
+  static void initialize({
+    String? databasePath,
+    MXPrefs? prefs,
+    MXShareHandler? share,
+  }) {
     _databasePath = databasePath;
     if (prefs != null) _prefs = prefs;
+    if (share != null) _share = share;
   }
 
   /// 显示悬浮球。重复调用（悬浮球已存在时）直接忽略。
@@ -63,6 +72,8 @@ class MXAnalyzer {
   /// 情况（写入端换过密钥），解析时逐条按给定顺序尝试，第一组解不开就换下一组。
   /// 传入的组会置于分析器设置表首并勾选（已存在的同一组只确保勾选），
   /// 用户在分析器里自己加的组原样保留，后续「重新解析」弹窗会自动代入。
+  /// [share]：分享实现（同 [initialize] 的 share 参数，不必两处都传），
+  /// 不注入则分析器内的「分享」降级为复制到剪贴板。
   static Future<void> showDebug(
     OverlayState overlayState, {
     required String diskcachePath,
@@ -70,9 +81,11 @@ class MXAnalyzer {
     String? iv,
     List<MxCryptPair> cryptPairs = const <MxCryptPair>[],
     String? databasePath,
+    MXShareHandler? share,
   }) async {
     if (_entry != null) return;
     if (databasePath != null) _databasePath = databasePath;
+    if (share != null) _share = share;
     final Size screen = MediaQuery.of(overlayState.context).size;
 
     final MXStore store = await _ensureStore(diskcachePath);
@@ -136,8 +149,9 @@ class MXAnalyzer {
     // 默认内存 prefs 进程内复用：悬浮球关了再开，主题/语言/临时加的组不丢
     final MXPrefs prefs = _prefs ??= MXMemoryPrefs();
     final MXStore store = MXStore(
-      // 嵌入模式不注入选文件/拖入能力：日志来源固定为宿主日志目录
-      host: MXHost(prefs: prefs),
+      // 嵌入模式不注入选文件/拖入能力：日志来源固定为宿主日志目录；
+      // 分享能力由主 app 经 initialize(share:) 决定是否注入
+      host: MXHost(prefs: prefs, share: _share),
       databasePath: _databasePath,
       // 非空即嵌入模式：日志来源固定为本机目录，由用户点「刷新」触发解析
       diskcachePath: diskcachePath,

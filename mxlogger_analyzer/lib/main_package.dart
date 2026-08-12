@@ -8,14 +8,43 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
+import 'package:share_plus/share_plus.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+/// 用 share_plus 弹系统分享面板：携带 fileName 时以文本文件分享，
+/// 否则分享纯文本。返回 false（当前环境不可用）时内核降级复制剪贴板。
+Future<bool> _shareWithSharePlus(MXShareRequest request) async {
+  final ShareResult result;
+  if (request.fileName != null) {
+    result = await SharePlus.instance.share(ShareParams(
+      title: request.title,
+      files: [
+        XFile.fromData(
+          Uint8List.fromList(utf8.encode(request.text)),
+          name: request.fileName,
+          mimeType: "text/plain",
+        ),
+      ],
+      fileNameOverrides: [request.fileName!],
+      sharePositionOrigin: request.origin,
+    ));
+  } else {
+    result = await SharePlus.instance.share(ShareParams(
+      title: request.title,
+      text: request.text,
+      sharePositionOrigin: request.origin,
+    ));
+  }
+  return result.status != ShareResultStatus.unavailable;
 }
 
 /// 宿主 app 的 navigatorKey：MXAnalyzer 需要它的 overlay 挂载悬浮球
@@ -162,7 +191,9 @@ When the exception was thrown, this was the stack:
   Future<void> _showAnalyzer() async {
     final MXLogger? logger = _mxLogger;
     if (logger == null) return;
-    // 悬浮球：拖动移位，单击打开分析器弹窗，双击关闭
+    // 悬浮球：拖动移位，单击打开分析器弹窗，双击关闭。
+    // 分析器内核不依赖分享插件：主 app 自己接 share_plus 后经 share 注入，
+    // 不注入则分析器里的「分享」降级为复制到剪贴板
     await MXAnalyzer.showDebug(
       _navigatorStateKey.currentState!.overlay!,
       diskcachePath: logger.diskcachePath,
@@ -170,7 +201,8 @@ When the exception was thrown, this was the stack:
       iv: logger.iv,
       cryptPairs: [
         MxCryptPair(key: "abchjilokiuihjng",iv: "abchjilokiuihqqq")
-      ]
+      ],
+      share: _shareWithSharePlus,
     );
   }
 

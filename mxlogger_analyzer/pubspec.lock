@@ -158,7 +158,7 @@ packages:
   flutter_mxlogger:
     dependency: "direct main"
     description:
-      path: "../../MXLogger/flutter_mxlogger"
+      path: "../flutter_mxlogger"
       relative: true
     source: path
     version: "2.0.0"
@@ -404,13 +404,13 @@ packages:
     source: hosted
     version: "0.6.0"
   share_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: share_plus
-      sha256: "223873d106614442ea6f20db5a038685cc5b32a2fba81cdecaefbbae0523f7fa"
+      sha256: d7dc0630a923883c6328ca31b89aa682bacbf2f8304162d29f7c6aaff03a27a1
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "12.0.2"
+    version: "11.1.0"
   share_plus_platform_interface:
     dependency: transitive
     description:
