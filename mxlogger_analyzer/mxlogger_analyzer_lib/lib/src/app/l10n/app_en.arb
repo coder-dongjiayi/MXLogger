@@ -1,0 +1,219 @@
+{
+  "@@locale": "en",
+  "appTitle": "MXLogger Analyzer",
+  "parserSubtitle": "· Log Analyzer",
+  "landingSubtitlePrefix": "Cross-platform high-performance logging built on ",
+  "landingSubtitleSuffix": "",
+  "landingDot1": "Zero-copy writes",
+  "landingDot2": "Power-loss safe",
+  "dropTitle": "Drop a log file to start",
+  "dropDesc": "Drop .mx log files here, or click the button below to choose\nLogs show up automatically once parsed",
+  "landingFilesTitle": "Choose a log file to start",
+  "landingFilesDesc": "Drag & drop or click to choose a .mx file",
+  "keyLabel": "KEY",
+  "ivLabel": "IV",
+  "keyHint": "16-byte decryption key",
+  "ivHint": "16-byte IV",
+  "cryptNote": "For encrypted logs, fill in Key and IV; add and check several sets if needed, or leave empty for plain logs",
+  "cryptConfirmTitle": "Confirm decryption parameters",
+  "cryptConfirmNote": "Confirm the decryption parameters for this .mx file (prefilled with your last values); check several sets to try them in order, or leave empty for plain logs.",
+  "addCryptGroup": "Add key set",
+  "removeCryptGroup": "Remove this set",
+  "cryptGroupToggleTip": "Check to use for decryption",
+  "cryptGroupOrderHint": "Tried in the order shown in the checkboxes; falls through to the next set",
+  "clearExistingData": "Clear existing data before import",
+  "clearExistingDataHint": "Checked keeps only this import; unchecked merges with existing data",
+  "pickFile": "Choose log file",
+  "stepReading": "Mapping file (mmap)…",
+  "stepDecrypting": "Decrypting & decoding…",
+  "stepIndexing": "Building index…",
+  "stepDone": "Done",
+  "parseFailed": "Parse failed (bad format or wrong Key/IV)",
+  "fileReadFailed": "Failed to read file, please retry",
+  "themeToLight": "Switch to light mode",
+  "themeToDark": "Switch to dark mode",
+  "languageTip": "切换为中文",
+  "statStart": "Start",
+  "statEnd": "End",
+  "shareAllTip": "Share logs (current filter result)",
+  "cryptoTip": "Edit decryption Key / IV",
+  "changeFileTip": "Open another file",
+  "refreshTip": "Rescan on-device logs",
+  "refresh": "Refresh logs",
+  "embedEmptyTitle": "On-device logs not parsed yet",
+  "embedEmptyDesc": "Tap the button below to scan and parse the log directory\nParsing takes a few seconds when there are many logs",
+  "noLogFiles": "No parsable files in the log directory",
+  "levelCountTip": "{count} logs",
+  "@levelCountTip": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "distTip": "{label}  {count} logs ({pct}%)",
+  "@distTip": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "headerTitle": "Header",
+  "headerItems": "{count} fields",
+  "@headerItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copyHeaderTip": "Copy all header fields",
+  "headerCopied": "Header copied",
+  "headerEmpty": "This log has no header info",
+  "headerRowTip": "View this log's header",
+  "applyReparse": "Apply & re-parse",
+  "keyIvUpdated": "Key/IV updated",
+  "reparsedWithNewKey": "Re-parsed with new Key/IV",
+  "reparseFailed": "Re-parse failed, please check Key/IV",
+  "searchLogsHint": "Search logs…  (# for tags, @ for names)",
+  "searchLogsHintShort": "Search…",
+  "searchPickTag": "Pick a tag · ↑↓ to move · Enter to select",
+  "searchPickName": "Pick a name · ↑↓ to move · Enter to select",
+  "searchNoMatch": "No matches",
+  "timeRange": "Time range",
+  "timeFrom": "From",
+  "timeTo": "To",
+  "timeInputHint": "2026-07-03 10:30:15",
+  "apply": "Apply",
+  "clear": "Clear",
+  "foldAll": "Collapse all",
+  "unfoldAll": "Expand all",
+  "filterLabel": "Filters:",
+  "filterTypeTag": "tag",
+  "filterTypeName": "name",
+  "filterTypeTime": "time",
+  "removeFilterTip": "Remove filter",
+  "clearAllFilters": "Clear all",
+  "resultMatch": "Matched {matched} / {total}",
+  "@resultMatch": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "resultTotal": "{total} logs",
+  "@resultTotal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "noMatchLogs": "No logs match the current filters",
+  "clearAllFiltersLink": "Clear all filters",
+  "foldTip": "Collapse",
+  "unfoldTip": "Expand",
+  "filterByNameTip": "Filter by name",
+  "filterByTagTip": "Filter by tag",
+  "shareRowTip": "Share this log",
+  "fullscreenTip": "View fullscreen",
+  "collapseFilters": "Hide filters",
+  "expandFilters": "Show filters",
+  "moreActions": "More actions",
+  "copyRowTip": "Copy this log",
+  "copied": "Copied to clipboard",
+  "jumpTopTip": "Back to top",
+  "jumpBottomTip": "Jump to bottom",
+  "modalTitle": "Log detail",
+  "fieldName": "Name",
+  "fieldTags": "Tags",
+  "fieldTime": "Time",
+  "fieldKind": "Kind",
+  "kindJson": "JSON",
+  "kindText": "Text",
+  "share": "Share",
+  "copyLog": "⧉ Copy log",
+  "closeEsc": "Close (Esc)",
+  "close": "Close",
+  "shareUnsupported": "System share unavailable, copied to clipboard instead",
+  "shareFailed": "Share failed, please copy manually",
+  "jsonItems": "{count} items",
+  "@jsonItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "jsonKeys": "{count} keys",
+  "@jsonKeys": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clickExpandTip": "Click to expand",
+  "viewFullLog": "View full ({count} lines)",
+  "@viewFullLog": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareExportTitle": "MXLogger logs",
+  "shareHeaderSection": "===== Header =====",
+  "shareBodyFiltered": "===== Logs (filtered {matched}/{total}) =====",
+  "@shareBodyFiltered": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shareBodyAll": "===== Logs ({total} total) =====",
+  "@shareBodyAll": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "enterAnalyzer": "Enter Analyzer",
+  "nextStep": "Next",
+  "prevStep": "← Back",
+  "startImport": "Start import",
+  "selectedFiles": "{count} file(s) selected",
+  "@selectedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wizardStepFiles": "Choose logs",
+  "wizardStepCrypt": "Decryption",
+  "wizardStepImport": "Parse & import",
+  "clearSearchTip": "Clear search",
+  "clearDataTip": "Clear data",
+  "clearDataConfirmTitle": "Clear Data",
+  "clearDataConfirmMessage": "Are you sure you want to clear all data?",
+  "cancel": "Cancel",
+  "confirmClear": "Clear",
+  "dataCleared": "Data cleared"
+}
