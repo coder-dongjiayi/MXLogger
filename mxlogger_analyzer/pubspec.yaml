@@ -1,109 +1,34 @@
 name: mxlogger_analyzer
-description: A new Flutter project.
-
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+description: "MXLogger 日志分析工具（桌面壳）：核心功能在 mxlogger_analyzer_lib，可嵌入任意 Flutter app。"
+publish_to: 'none'
+version: 2.0.0+1
 
 environment:
-  sdk: ">=3.3.0 <=4.0.0"
+  sdk: ^3.11.1
 
-# Dependencies specify other packages that your package needs in order to work.
-# To automatically upgrade your package dependencies to the latest versions
-# consider running `flutter pub upgrade --major-versions`. Alternatively,
-# dependencies can be manually updated by changing the version numbers below to
-# the latest version available on pub.dev. To see which dependencies have newer
-# versions available, run `flutter pub outdated`.
 dependencies:
   flutter:
     sdk: flutter
 
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-
-  device_info_plus: ^9.0.2
-
-  #用于测试 main_package的情况
-  flutter_mxlogger: ^1.2.11
-  #支持android ios  在m1设置上可以能pod 失败，可以去掉这个库里面的ios依赖
-#  sqlite3_flutter_libs: ^0.5.32
-
-  auto_size_text: ^3.0.0
-  badges: ^2.0.3
-  easy_refresh: ^3.0.4+2
-  flutter_easyloading: ^3.0.5
-  desktop_drop: ^0.3.3
-  file_selector: ^0.8.4+3
-  path_provider: ^2.1.2
-
-  shared_preferences: ^2.0.15
-
+  # 分析器内核（UI/解析/数据库全部在包内，可单独发布供 app 嵌入）
   mxlogger_analyzer_lib:
-    path: ./mxlogger_analyzer_lib
+    path: mxlogger_analyzer_lib
 
+  # 桌面壳注入内核的宿主能力（见 lib/src/host/desktop_host.dart）：
+  # 设置落盘 / 选文件 / 拖入文件。内核本身不依赖这些插件
+  shared_preferences: ^2.3.3
+  file_picker: ^8.3.7
+  desktop_drop: ^0.4.4
+
+  # 仅 lib/main_package.dart（真机嵌入调试入口）使用：写入真实 .mx 日志 + 设备信息文件头
+  flutter_mxlogger:
+    path: ../../MXLogger/flutter_mxlogger
+  device_info_plus: ^11.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^5.0.0
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^2.0.0
-
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
-# The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
-
-  # To add assets to your application, add an assets section, like this:
-  assets:
-   - assets/images/
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/assets-and-images/#resolution-aware
-
-  # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/assets-and-images/#from-packages
-
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/custom-fonts/#from-packages

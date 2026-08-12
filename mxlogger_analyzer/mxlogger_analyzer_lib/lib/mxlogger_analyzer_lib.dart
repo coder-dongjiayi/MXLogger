@@ -1,124 +1,36 @@
-library mxlogger_analyzer_lib;
+/// MXLogger 2.0 日志分析器：既可作为独立桌面 app 的内核，
+/// 也可通过 [MXAnalyzer] 以悬浮球+弹窗形式嵌入任意 Flutter app。
+library;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:mxlogger_analyzer_lib/src/analyzer_data/analyzer_database.dart';
+/// 嵌入式调试入口（悬浮球 + 底部弹窗）
+export 'package:mxlogger_analyzer_lib/src/embed/mx_analyzer.dart';
 
-import 'mxlogger_analyzer_lib.dart';
-export 'package:flutter_riverpod/flutter_riverpod.dart';
+/// 独立 app 壳（桌面端入口使用）
+export 'package:mxlogger_analyzer_lib/src/app/app.dart';
+export 'package:mxlogger_analyzer_lib/src/app/theme/mx_theme.dart';
 
-export 'package:mxlogger_analyzer_lib/src/provider/mxlogger_repository.dart';
+/// 宿主能力适配层（设置存储 / 选文件 / 拖入文件），桌面壳注入平台实现
+export 'package:mxlogger_analyzer_lib/src/global/host/mx_host.dart';
+export 'package:mxlogger_analyzer_lib/src/global/host/mx_prefs.dart';
 
-export 'package:mxlogger_analyzer_lib/src/theme/mx_theme.dart';
+/// 基于 stream 的轻量状态管理（MXState / MXAsyncState / MXScope / 消费组件）
+export 'package:mxlogger_analyzer_lib/src/global/state/mx_state.dart';
+export 'package:mxlogger_analyzer_lib/src/global/state/mx_scope.dart';
 
-export 'package:mxlogger_analyzer_lib/src/screen/detail_screen/mxlogger_detail_screen.dart';
-export 'package:mxlogger_analyzer_lib/src/component/mxlogger_text.dart';
-export 'package:mxlogger_analyzer_lib/src/component/mxlogger_button.dart';
-export 'package:mxlogger_analyzer_lib/src/component/mxlogger_textfield.dart';
-export 'package:mxlogger_analyzer_lib/src/page/debug_page/debug_page.dart';
-export 'package:mxlogger_analyzer_lib/src/mxdebug_page.dart';
+/// 宿主可按需触达的状态容器
+export 'package:mxlogger_analyzer_lib/src/global/store/mx_store.dart';
+export 'package:mxlogger_analyzer_lib/src/global/store/settings_store.dart';
+export 'package:mxlogger_analyzer_lib/src/global/store/theme_store.dart';
+export 'package:mxlogger_analyzer_lib/src/global/store/locale_store.dart';
+export 'package:mxlogger_analyzer_lib/src/global/store/screen_store.dart';
 
-class MXAnalyzer {
-  static OverlayEntry? _analyzerOverlayEntry;
+/// 页面（自定义嵌入方式时可直接使用）
+export 'package:mxlogger_analyzer_lib/src/screens/main/main_screen.dart';
+export 'package:mxlogger_analyzer_lib/src/screens/home/home_screen.dart';
 
-  static bool _visible = true;
-
-  static double _size = 80;
-  static double _radius = _size / 2.0;
-  static late Offset offset;
-
-  static void initialize({required String databasePath}) {
-    AnalyzerDatabase.initDataBase(databasePath);
-  }
-
-  static void dismiss() {
-    _analyzerOverlayEntry?.remove();
-    _analyzerOverlayEntry = null;
-  }
-
-  static Future<void> _showModalBottomSheet(BuildContext context,
-      {required String diskcachePath,
-      required String databasePath,
-      String? cryptKey,
-      String? iv}) async {
-    AnalyzerDatabase.initDataBase(databasePath);
-
-    await showModalBottomSheet(
-        context: context,
-        enableDrag: false,
-        isScrollControlled: true,
-        backgroundColor: MXTheme.themeColor,
-        builder: (context) {
-          return SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: MXDebugPage(
-              databasePath: databasePath,
-              diskcachePath: diskcachePath,
-              cryptKey: cryptKey,
-              iv: iv,
-            ),
-          );
-        });
-    AnalyzerDatabase.db.dispose();
-  }
-
-  static void showDebug(OverlayState overlayState,
-      {required String diskcachePath,
-      required String databasePath,
-      String? cryptKey,
-      String? iv}) {
-
-    if (_analyzerOverlayEntry != null) return;
-    double screenWidth = MediaQuery.of(overlayState.context).size.width;
-    double screenHeight = MediaQuery.of(overlayState.context).size.height;
-
-    offset = Offset((screenWidth - _size) / 2.0, (screenHeight - _size) / 2.0);
-
-    _analyzerOverlayEntry = OverlayEntry(builder: (context) {
-      return Positioned(
-          left: offset.dx,
-          top: offset.dy,
-          child: GestureDetector(
-            onPanUpdate: (DragUpdateDetails details) {
-              if (details.globalPosition.dx - _radius > 0 &&
-                  details.globalPosition.dy + _radius < screenHeight &&
-                  details.globalPosition.dx + _radius < screenWidth &&
-                  details.globalPosition.dy -_radius > 0
-              ) {
-                offset += details.delta;
-                _analyzerOverlayEntry?.markNeedsBuild();
-
-              }
-            },
-            onDoubleTap: (){
-              dismiss();
-            },
-            onTap: () async {
-              _visible = false;
-              _analyzerOverlayEntry?.markNeedsBuild();
-              await _showModalBottomSheet(context,
-                  diskcachePath: diskcachePath,
-                  databasePath: databasePath,
-                  cryptKey: cryptKey,
-                  iv: iv);
-              _visible = true;
-              _analyzerOverlayEntry?.markNeedsBuild();
-            },
-            child: Visibility(
-              visible: _visible,
-              child: Container(
-                  decoration: BoxDecoration(
-                      color: MXTheme.themeColor,
-                      borderRadius: BorderRadius.circular(_size / 2.0)),
-                  child: Image.asset(
-                    "assets/images/logo.png",
-                    width: _size,
-                    height: _size,
-                    package: "mxlogger_analyzer_lib",
-                  )),
-            ),
-          ));
-    });
-    overlayState.insert(_analyzerOverlayEntry!);
-  }
-}
+/// 数据层（导入/查询能力）
+export 'package:mxlogger_analyzer_lib/src/data/database/analyzer_database.dart';
+export 'package:mxlogger_analyzer_lib/src/data/parser/mx_binary_parser.dart';
+export 'package:mxlogger_analyzer_lib/src/screens/home/home_repository.dart';
+export 'package:mxlogger_analyzer_lib/src/screens/home/store/import_store.dart';
+export 'package:mxlogger_analyzer_lib/src/screens/home/store/log_list_store.dart';

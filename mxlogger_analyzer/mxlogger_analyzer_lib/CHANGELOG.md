@@ -1,3 +1,6 @@
+## 2.0.0
+* 移除 `flutter_riverpod` 依赖，改用内置的、基于 Stream 的轻量状态管理(`MXStore` / `MXAsyncStore` / `MXBuilder`)，避免作为插件集成到宿主工程时和宿主的状态管理库产生版本冲突。
+* 破坏性变更：不再导出 `flutter_riverpod`；`MXLoggerButton.onPressed` 由 `ValueChanged<WidgetRef>` 改为 `VoidCallback`。
 
 ## 1.2.2
 * update `share_plus`-> ^11.0.0

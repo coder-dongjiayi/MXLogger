@@ -1,4 +1,13 @@
+# 静态分析配置：业务代码执行 flutter_lints 全量规则；
+# lib/src/dependencies/ 为第三方 vendored 代码（aes_crypt / flat_buffers），排除分析。
 include: package:flutter_lints/flutter.yaml
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+analyzer:
+  exclude:
+    - lib/src/dependencies/**
+    - lib/src/app/l10n/gen/**
+
+linter:
+  rules:
+    # import 一律使用 package: 绝对路径，禁止相对路径
+    - always_use_package_imports
