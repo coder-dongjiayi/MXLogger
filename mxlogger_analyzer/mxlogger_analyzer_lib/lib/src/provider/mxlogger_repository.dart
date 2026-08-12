@@ -16,6 +16,7 @@ class MXLoggerRepository {
   /// page 当前页数 不传则请求全部
   /// keyWord 搜索关键词
   /// levels 需要过滤的日志等级
+  /// filterCondition 高级过滤器(白名单/黑名单)生成的条件
   ///
   /// 查询和 LogModel 构造整段放在后台 isolate 里跑，主 isolate 全程不阻塞，
   /// 加载指示器才转得起来。Isolate.run 结束时通过 Isolate.exit 把结果所在的
@@ -25,6 +26,7 @@ class MXLoggerRepository {
       int? page,
       String? keyWord,
       String? order,
+      String? filterCondition,
       List<int>? levels}) {
     final String databaseFile = AnalyzerDatabase.databaseFile;
     if (databaseFile.isEmpty) return Future.value(const []);
@@ -33,6 +35,7 @@ class MXLoggerRepository {
         order: order,
         searchCondition: searchCondition,
         keyWord: keyWord,
+        filterCondition: filterCondition,
         levels: levels);
 
     return Isolate.run(() => _queryLogs(databaseFile, sql));

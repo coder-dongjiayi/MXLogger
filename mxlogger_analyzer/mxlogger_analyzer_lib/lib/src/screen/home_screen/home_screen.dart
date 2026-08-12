@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import 'package:mxlogger_analyzer_lib/src/provider/mxlogger_provider.dart';
+import 'package:mxlogger_analyzer_lib/src/screen/home_screen/advanced_filter_dialog.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/log_model.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/search_dialog.dart';
 import 'package:mxlogger_analyzer_lib/src/screen/home_screen/widget/home_log_list_view.dart';
@@ -27,6 +28,9 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
         menuCallback: widget.menuCallback,
         onLevelCallback: (list) {
           ref.read(mxLogDataSourceProvider.notifier).levelSearch(levels: list);
+        },
+        onAdvancedFilter: () {
+          showAdvancedFilterDialog(context);
         },
         onSearch: () {
           showSearchDialog(context,

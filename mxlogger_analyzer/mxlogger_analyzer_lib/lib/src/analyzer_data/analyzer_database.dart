@@ -56,6 +56,7 @@ class AnalyzerDatabase {
   static String buildQuerySql(
       {String? keyWord,
       String? searchCondition,
+      String? filterCondition,
       String? order,
       List<int>? levels}) {
     String where = "1=1";
@@ -88,6 +89,11 @@ class AnalyzerDatabase {
       /// 等级之间是 or，整体必须括起来，否则 and 的优先级高于 or，
       /// 会变成 (前置条件 and level=0) or level=1，把前置条件漏掉
       where = "($where) and (${levelSqls.join(" or ")})";
+    }
+
+    /// 高级过滤器（白名单 / 黑名单）
+    if (filterCondition?.isNotEmpty == true) {
+      where = "($where) and ($filterCondition)";
     }
     return "select name,tag,msg,level,threadId,isMainThread,timestamp,fileHeader "
         "from mxlog where $where order by timestamp ${order ?? "desc"}";
