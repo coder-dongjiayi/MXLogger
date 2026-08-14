@@ -6,36 +6,18 @@
 //
 
 #import "ViewController.h"
-
-#import <MXLogger/MXLogger.h>
-#import "LogViewController.h"
-
-@interface ViewController ()
-{
-   MXLogger * _logger;
-    NSString * _cryptKey;
-    NSString * _iv;
-}
-@end
+#import "MXDemoHomeViewController.h"
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-
+    self.navigationItem.backButtonTitle = @"";
 }
-
 
 - (IBAction)entryLogButtonAction:(id)sender {
-    LogViewController * controller = [[LogViewController alloc] initWithNibName:nil bundle:nil];
+    MXDemoHomeViewController *controller = [[MXDemoHomeViewController alloc] initWithNibName:@"MXDemoHomeViewController" bundle:nil];
     [self.navigationController pushViewController:controller animated:YES];
 }
-
-
-
-
-
-
 
 @end
