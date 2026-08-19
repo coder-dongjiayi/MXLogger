@@ -304,7 +304,20 @@ inline int get_files(std::vector<std::map<std::string, std::string>> *destinatio
         }
         std::string subdir = std::string(dir_) + entry->d_name;
 
-        lstat(subdir.c_str(), &statbuf);
+        /// lstat失败(文件在readdir后被删除)则跳过，防止读到未初始化的statbuf
+        /// Skip on lstat failure (the file was removed after readdir) to avoid
+        /// reading an uninitialized statbuf
+        if (lstat(subdir.c_str(), &statbuf) != 0) {
+            continue;
+        }
+        /// 只统计常规文件：与Windows分支行为对齐，跳过子目录/符号链接等，
+        /// 否则目录会被当成日志文件计入大小、进入列表甚至被清理逻辑删除
+        /// Regular files only — consistent with the Windows branch. Without this,
+        /// subdirectories are treated as log files: counted into dir_size, listed,
+        /// and even deleted by the cleanup logic
+        if (!S_ISREG(statbuf.st_mode)) {
+            continue;
+        }
 
         long last_time = (long)statbuf.st_mtime;
         long st_size =  (long)statbuf.st_size;

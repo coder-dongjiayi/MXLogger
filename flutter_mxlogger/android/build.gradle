@@ -20,10 +20,10 @@ rootProject.allprojects {
         google()
         mavenCentral()
         mavenLocal()
-//        flatDir {
-//
-//            dirs "/Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/mxlogger/build/outputs/aar"
-//        }
+        // 本地开发: 直接引用本仓库 Android 库构建产物(先执行 :mxlogger:assembleDefaultCppRelease)
+        flatDir {
+            dirs "/Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/mxlogger/build/outputs/aar"
+        }
     }
 }
 
@@ -40,13 +40,13 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 21
     }
     dependencies {
 
-     implementation 'io.github.coder-dongjiayi:mxlogger:1.2.15'
-
-//       implementation (name:"mxlogger-DefaultCpp-release",ext:"aar")
+        // 本地开发走本地 AAR；发布 pub 包时换回 maven 坐标:
+        // implementation 'io.github.coder-dongjiayi:mxlogger:2.0.0'
+        implementation(name: "mxlogger-DefaultCpp-release", ext: "aar")
 
     }
 }

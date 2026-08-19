@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+
+    <!-- 品牌色: 与iOS demo一致的靛蓝 -->
+    <color name="indigo">#FF4F46E5</color>
+    <color name="indigo_dark">#FF3730A3</color>
+
+    <!-- 日志等级色: 对齐iOS系统色 -->
+    <color name="level_debug">#FF8E8E93</color>
+    <color name="level_info">#FF007AFF</color>
+    <color name="level_warn">#FFFF9500</color>
+    <color name="level_error">#FFFF3B30</color>
+    <color name="level_fatal">#FFAF52DE</color>
+
+    <!-- 功能图标底色 -->
+    <color name="tint_teal">#FF30B0C7</color>
+    <color name="tint_brown">#FFA2845E</color>
+    <color name="tint_green">#FF34C759</color>
+    <color name="tint_pink">#FFFF2D55</color>
+    <color name="tint_yellow">#FFFFCC00</color>
+    <color name="tint_indigo">#FF5856D6</color>
+    <color name="tint_gray">#FF8E8E93</color>
+    <color name="tint_blue">#FF007AFF</color>
+    <color name="tint_orange">#FFFF9500</color>
+    <color name="tint_red">#FFFF3B30</color>
+
+    <!-- 页面背景/表面/文字 -->
+    <color name="bg_grouped">#FFF2F2F7</color>
+    <color name="surface">#FFFFFFFF</color>
+    <color name="divider">#14000000</color>
+    <color name="text_primary">#FF000000</color>
+    <color name="text_secondary">#993C3C43</color>
+    <color name="text_tertiary">#4D3C3C43</color>
+    <color name="tag_chip_bg">#1F767680</color>
+
+    <!-- App图标背景(取自logo外框色) -->
+    <color name="ic_launcher_bg">#FF565662</color>
 </resources>

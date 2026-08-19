@@ -138,7 +138,7 @@ void mxlogger::destroy(){
 
 
 mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name, const char* file_header,const char* cryptKey, const char* iv) : diskcache_path_(diskcache_path){
-    std::string filename_ = file_name == nullptr ? "log" : file_name;
+    std::string filename_ = file_name == nullptr ? "mxlog" : file_name;
     
     mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,filename_, mxlogger_helper::policy_(storage_policy));
    

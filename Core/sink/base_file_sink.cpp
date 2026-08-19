@@ -240,6 +240,13 @@ void base_file_sink::remove_before_all(){
     MXLoggerInfo("remove_before_all  files:(%d)",files);
 }
 
+/// 根据存储策略生成带日期前缀的文件名，仅在构造时调用一次。
+/// 设计说明：文件名在logger初始化时一次性确定，运行期间不随日期变化滚动，
+/// 切换新文件发生在App下一次初始化logger的时候
+/// Generates the date-prefixed file name from the storage policy; called once at
+/// construction. By design the name is fixed at initialization and never rolls over
+/// at runtime — switching to a new file happens the next time the app initializes
+/// the logger
 void base_file_sink::handle_date_(policy::storage_policy policy){
 
 
@@ -262,11 +269,18 @@ void base_file_sink::handle_date_(policy::storage_policy policy){
             /// 与其他策略保持一致使用本地时间，原来用gmtime会导致跨时区周界不一致
             int wd = tm_time.tm_wday;
             int yd = tm_time.tm_yday;
-            int base = 7 - (yd + 1 - (wd + 1)) % 7;
-            if (base == 7){
-                base = 0;
-            }
-           int  week_n = (base + yd) / 7 + 1;
+            /// 周数定义：周日为一周起点，1月1日所在周为第1周。
+            /// w0 = 当年1月1日是星期几(周日=0)，对负数取模做非负规整——
+            /// 原写法在年初 yd < wd 时 (yd-wd)%7 为负数(C++截断取模)，导致周号整体+1，
+            /// 例如2024-01-01~01-06会被错记为02w并与真正的第2周写进同一个文件
+            /// Week definition: weeks start on Sunday and the week containing Jan 1st is
+            /// week 1. w0 is the weekday of Jan 1st (Sunday = 0), normalized to a
+            /// non-negative modulus — the old formula went negative when yd < wd in the
+            /// first days of a year (C++ truncated modulo), shifting the week number up
+            /// by one, e.g. 2024-01-01~01-06 was mislabeled 02w and shared a file with
+            /// the real week 2
+            int w0 = ((wd - yd) % 7 + 7) % 7;
+            int week_n = (yd + w0) / 7 + 1;
 
             auto result = mxlogger_helper::string_format("%04d-%02d-%02dw",  tm_year, tm_mon,week_n);
 

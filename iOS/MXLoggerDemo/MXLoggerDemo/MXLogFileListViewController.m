@@ -4,6 +4,7 @@
 //
 
 #import "MXLogFileListViewController.h"
+#import "MXDemoL10n.h"
 #import "MXLogFileCell.h"
 #import "MXLogViewerViewController.h"
 #import <MXLogger/MXLogger.h>
@@ -22,7 +23,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = @"日志文件";
+    self.title = MXDemoStr(@"filelist.title");
+    self.emptyLabel.text = MXDemoStr(@"filelist.empty");
 
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
@@ -53,7 +55,7 @@
     for (NSDictionary *file in self.files) {
         totalSize += (unsigned long long)[[file[@"size"] description] longLongValue];
     }
-    self.summaryLabel.text = [NSString stringWithFormat:@"共 %lu 个文件 · 总大小 %@",
+    self.summaryLabel.text = [NSString stringWithFormat:MXDemoStr(@"filelist.summary.fmt"),
                               (unsigned long)self.files.count, [self byteText:totalSize]];
     self.emptyLabel.hidden = self.files.count > 0;
     [self.tableView reloadData];
@@ -86,7 +88,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     MXLogFileCell *cell = [tableView dequeueReusableCellWithIdentifier:MXLogFileCellReuseId forIndexPath:indexPath];
     NSDictionary *file = self.files[indexPath.row];
-    NSString *dates = [NSString stringWithFormat:@"创建 %@ · 更新 %@",
+    NSString *dates = [NSString stringWithFormat:MXDemoStr(@"filelist.dates.fmt"),
                        [self dateText:file[@"create_timestamp"]],
                        [self dateText:file[@"last_timestamp"]]];
     [cell configureWithName:[file[@"name"] description]

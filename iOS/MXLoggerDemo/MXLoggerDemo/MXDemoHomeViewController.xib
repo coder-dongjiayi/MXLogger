@@ -17,6 +17,10 @@
                 <outlet property="filesValueLabel" destination="s2v-01" id="oc-s2v-01"/>
                 <outlet property="levelValueLabel" destination="s3v-01" id="oc-s3v-01"/>
                 <outlet property="policyValueLabel" destination="s4v-01" id="oc-s4v-01"/>
+                <outlet property="sizeCaptionLabel" destination="s1c-01" id="oc-s1c-01"/>
+                <outlet property="filesCaptionLabel" destination="s2c-01" id="oc-s2c-01"/>
+                <outlet property="levelCaptionLabel" destination="s3c-01" id="oc-s3c-01"/>
+                <outlet property="policyCaptionLabel" destination="s4c-01" id="oc-s4c-01"/>
                 <outlet property="tableView" destination="tabl-01" id="oc-tabl-01"/>
                 <outlet property="view" destination="root-01" id="oc-root-01"/>
             </connections>

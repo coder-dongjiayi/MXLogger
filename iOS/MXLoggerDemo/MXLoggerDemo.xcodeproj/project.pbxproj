@@ -31,6 +31,8 @@
 		DD00000000000000000002AF /* MXLogViewerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = DD00000000000000000001AF /* MXLogViewerViewController.xib */; };
 		DD00000000000000000002B1 /* MXLogRecordCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00000000000000000001B1 /* MXLogRecordCell.m */; };
 		DD00000000000000000002B2 /* MXLogRecordCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = DD00000000000000000001B2 /* MXLogRecordCell.xib */; };
+		DD00000000000000000002C1 /* MXDemoL10n.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00000000000000000001C1 /* MXDemoL10n.m */; };
+		DD00000000000000000002C3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = DD00000000000000000001C3 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -123,6 +125,10 @@
 		DD00000000000000000001B0 /* MXLogRecordCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MXLogRecordCell.h; sourceTree = "<group>"; };
 		DD00000000000000000001B1 /* MXLogRecordCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MXLogRecordCell.m; sourceTree = "<group>"; };
 		DD00000000000000000001B2 /* MXLogRecordCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MXLogRecordCell.xib; sourceTree = "<group>"; };
+		DD00000000000000000001C0 /* MXDemoL10n.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MXDemoL10n.h; sourceTree = "<group>"; };
+		DD00000000000000000001C1 /* MXDemoL10n.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MXDemoL10n.m; sourceTree = "<group>"; };
+		DD00000000000000000001C4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		DD00000000000000000001C5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -195,6 +201,9 @@
 				DD00000000000000000001B0 /* MXLogRecordCell.h */,
 				DD00000000000000000001B1 /* MXLogRecordCell.m */,
 				DD00000000000000000001B2 /* MXLogRecordCell.xib */,
+				DD00000000000000000001C0 /* MXDemoL10n.h */,
+				DD00000000000000000001C1 /* MXDemoL10n.m */,
+				DD00000000000000000001C3 /* Localizable.strings */,
 				BD62876A27EB2FCD00362E4C /* AppDelegate.h */,
 				BD62876B27EB2FCD00362E4C /* AppDelegate.m */,
 				BD62876D27EB2FCD00362E4C /* SceneDelegate.h */,
@@ -330,6 +339,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = BD62875E27EB2FCD00362E4C;
 			productRefGroup = BD62876827EB2FCD00362E4C /* Products */;
@@ -380,6 +390,7 @@
 				DD00000000000000000002AC /* MXLogFileCell.xib in Resources */,
 				DD00000000000000000002AF /* MXLogViewerViewController.xib in Resources */,
 				DD00000000000000000002B2 /* MXLogRecordCell.xib in Resources */,
+				DD00000000000000000002C3 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -414,6 +425,7 @@
 				DD00000000000000000002AB /* MXLogFileCell.m in Sources */,
 				DD00000000000000000002AE /* MXLogViewerViewController.m in Sources */,
 				DD00000000000000000002B1 /* MXLogRecordCell.m in Sources */,
+				DD00000000000000000002C1 /* MXDemoL10n.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -454,6 +466,15 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		DD00000000000000000001C3 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DD00000000000000000001C4 /* en */,
+				DD00000000000000000001C5 /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 		BD62877327EB2FCD00362E4C /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (

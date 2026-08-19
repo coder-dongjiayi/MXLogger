@@ -43,7 +43,10 @@ void mxlogger_console::print(const details::log_msg& msg){
     
             }
         console.append("\0");
-            __android_log_write(priority,  msg.tag, console.c_str());
+            /// tag可能为nullptr(调用方未传tag)，liblog内部会对tag做strlen，必须兜底
+            /// tag may be nullptr when the caller passes none; liblog runs strlen on it
+            /// internally, so a fallback is required
+            __android_log_write(priority,  msg.tag == nullptr ? "mxlogger" : msg.tag, console.c_str());
     #else
 
     /// Apple/Linux/Windows 统一走标准输出

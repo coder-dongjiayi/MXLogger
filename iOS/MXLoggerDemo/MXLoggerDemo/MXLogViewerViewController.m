@@ -4,6 +4,7 @@
 //
 
 #import "MXLogViewerViewController.h"
+#import "MXDemoL10n.h"
 #import "MXLogRecordCell.h"
 #import <MXLogger/MXLogger.h>
 
@@ -14,6 +15,7 @@
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UILabel *emptyLabel;
 @property (weak, nonatomic) IBOutlet UIStackView *loadingView;
+@property (weak, nonatomic) IBOutlet UILabel *loadingLabel;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *loadingIndicator;
 
 @property (nonatomic, copy) NSArray<NSDictionary *> *allRecords;       // 解析出的全部日志
@@ -25,7 +27,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = self.fileName ?: @"日志详情";
+    self.title = self.fileName ?: MXDemoStr(@"viewer.title");
+    [self.levelSegment setTitle:MXDemoStr(@"viewer.segment.all") forSegmentAtIndex:0];
+    self.searchBar.placeholder = MXDemoStr(@"viewer.search.placeholder");
+    self.emptyLabel.text = MXDemoStr(@"viewer.empty");
+    self.loadingLabel.text = MXDemoStr(@"viewer.loading");
 
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
@@ -58,7 +64,7 @@
             self.levelSegment.enabled = YES;
             self.title = self.fileName
                 ? [NSString stringWithFormat:@"%@ (%lu)", self.fileName, (unsigned long)records.count]
-                : @"日志详情";
+                : MXDemoStr(@"viewer.title");
             [self applyFilter];
         });
     });
@@ -118,13 +124,13 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     // 长内容(如 JSON 日志)弹窗查看完整信息
     NSDictionary *record = self.filteredRecords[indexPath.row];
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:record[@"name"] ?: @"日志详情"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:record[@"name"] ?: MXDemoStr(@"viewer.title")
                                                                    message:record[@"msg"]
                                                             preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"复制" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    [alert addAction:[UIAlertAction actionWithTitle:MXDemoStr(@"common.copy") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         UIPasteboard.generalPasteboard.string = record[@"msg"] ?: @"";
     }]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"关闭" style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:MXDemoStr(@"common.close") style:UIAlertActionStyleCancel handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
 

@@ -16,6 +16,7 @@
                 <outlet property="tableView" destination="tabl-01" id="oc-tabl-01"/>
                 <outlet property="emptyLabel" destination="empt-01" id="oc-empt-01"/>
                 <outlet property="loadingView" destination="ldst-01" id="oc-ldst-01"/>
+                <outlet property="loadingLabel" destination="ldlb-01" id="oc-ldlb-01"/>
                 <outlet property="loadingIndicator" destination="load-01" id="oc-load-01"/>
                 <outlet property="view" destination="root-01" id="oc-root-01"/>
             </connections>

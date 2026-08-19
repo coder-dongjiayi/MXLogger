@@ -17,6 +17,7 @@
 
 #import "MXDemoHomeViewController.h"
 #import "MXDemoActionCell.h"
+#import "MXDemoL10n.h"
 #import "MXLogFileListViewController.h"
 #import <MXLogger/MXLogger.h>
 
@@ -68,6 +69,10 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 @property (weak, nonatomic) IBOutlet UILabel *filesValueLabel;
 @property (weak, nonatomic) IBOutlet UILabel *levelValueLabel;
 @property (weak, nonatomic) IBOutlet UILabel *policyValueLabel;
+@property (weak, nonatomic) IBOutlet UILabel *sizeCaptionLabel;
+@property (weak, nonatomic) IBOutlet UILabel *filesCaptionLabel;
+@property (weak, nonatomic) IBOutlet UILabel *levelCaptionLabel;
+@property (weak, nonatomic) IBOutlet UILabel *policyCaptionLabel;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 
 @property (nonatomic, strong) MXLogger *logger;
@@ -82,7 +87,6 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = @"MXLogger Demo";
     self.navigationItem.backButtonTitle = @"";
 
     [self setupLogger];
@@ -94,6 +98,16 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     [self.tableView registerNib:[UINib nibWithNibName:@"MXDemoActionCell" bundle:nil]
          forCellReuseIdentifier:MXDemoActionCellReuseId];
 
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:[MXDemoL10n switchButtonTitle]
+                                                                              style:UIBarButtonItemStylePlain
+                                                                             target:self
+                                                                             action:@selector(toggleLanguage)];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(languageDidChange)
+                                                 name:MXDemoLanguageDidChangeNotification
+                                               object:nil];
+
+    [self applyLocalization];
     [self buildSections];
     [self refreshStatus];
 }
@@ -104,7 +118,31 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 }
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [MXLogger destroyWithNamespace:kMXDemoNamespace];
+}
+
+#pragma mark - 多语言
+
+- (void)toggleLanguage {
+    [MXDemoL10n toggleLanguage];
+}
+
+- (void)languageDidChange {
+    [self applyLocalization];
+    [self buildSections];
+    [self.tableView reloadData];
+    [self refreshStatus];
+}
+
+// 语言相关的静态文案统一在这里应用，语言切换后重新调用即可
+- (void)applyLocalization {
+    self.title = MXDemoStr(@"home.title");
+    self.navigationItem.rightBarButtonItem.title = [MXDemoL10n switchButtonTitle];
+    self.sizeCaptionLabel.text = MXDemoStr(@"home.card.size");
+    self.filesCaptionLabel.text = MXDemoStr(@"home.card.files");
+    self.levelCaptionLabel.text = MXDemoStr(@"home.card.level");
+    self.policyCaptionLabel.text = MXDemoStr(@"home.card.policy");
 }
 
 #pragma mark - Logger
@@ -147,69 +185,77 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 
     // ---------- 日志写入 ----------
     MXDemoSection *writeSection = [MXDemoSection new];
-    writeSection.title = @"日志写入";
-    writeSection.footer = @"每个等级对应一个实例方法，返回 0 表示写入成功。";
+    writeSection.title = MXDemoStr(@"home.section.write");
+    writeSection.footer = MXDemoStr(@"home.section.write.footer");
 
     NSArray *levelMeta = @[
-        @[@"ant.fill",                     UIColor.systemGrayColor,   @"写入 Debug 日志", @"debugWithName:msg:tag:"],
-        @[@"info.circle.fill",             UIColor.systemBlueColor,   @"写入 Info 日志",  @"infoWithName:msg:tag:"],
-        @[@"exclamationmark.triangle.fill",UIColor.systemOrangeColor, @"写入 Warn 日志",  @"warnWithName:msg:tag:"],
-        @[@"xmark.octagon.fill",           UIColor.systemRedColor,    @"写入 Error 日志", @"errorWithName:msg:tag:"],
-        @[@"flame.fill",                   UIColor.systemPurpleColor, @"写入 Fatal 日志", @"fatalWithName:msg:tag:"],
+        @[@"ant.fill",                     UIColor.systemGrayColor,   @"debugWithName:msg:tag:"],
+        @[@"info.circle.fill",             UIColor.systemBlueColor,   @"infoWithName:msg:tag:"],
+        @[@"exclamationmark.triangle.fill",UIColor.systemOrangeColor, @"warnWithName:msg:tag:"],
+        @[@"xmark.octagon.fill",           UIColor.systemRedColor,    @"errorWithName:msg:tag:"],
+        @[@"flame.fill",                   UIColor.systemPurpleColor, @"fatalWithName:msg:tag:"],
     ];
     NSMutableArray *writeRows = [NSMutableArray array];
     [levelMeta enumerateObjectsUsingBlock:^(NSArray *meta, NSUInteger level, BOOL *stop) {
-        MXDemoRow *row = [MXDemoRow rowWithIcon:meta[0] tint:meta[1] title:meta[2] subtitle:meta[3]];
+        NSString *title = [NSString stringWithFormat:MXDemoStr(@"home.write.level.title"), [self levelName:level]];
+        MXDemoRow *row = [MXDemoRow rowWithIcon:meta[0] tint:meta[1] title:title subtitle:meta[2]];
         row.action = ^(MXDemoRow *r) { [weakSelf writeLogWithLevel:level]; };
         [writeRows addObject:row];
     }];
 
     MXDemoRow *jsonRow = [MXDemoRow rowWithIcon:@"network" tint:UIColor.systemTealColor
-                                          title:@"写入网络请求日志" subtitle:@"msg 为 JSON 字符串，tag = request"];
+                                          title:MXDemoStr(@"home.write.network.title")
+                                       subtitle:MXDemoStr(@"home.write.network.subtitle")];
     jsonRow.action = ^(MXDemoRow *r) { [weakSelf writeNetworkLog]; };
     [writeRows addObject:jsonRow];
 
     MXDemoRow *customRow = [MXDemoRow rowWithIcon:@"dial.max.fill" tint:UIColor.systemIndigoColor
-                                            title:@"logWithLevel: 通用写入" subtitle:@"自定义等级写入，本例 level = 3 (error)"];
+                                            title:MXDemoStr(@"home.write.custom.title")
+                                         subtitle:MXDemoStr(@"home.write.custom.subtitle")];
     customRow.action = ^(MXDemoRow *r) { [weakSelf writeCustomLevelLog]; };
     [writeRows addObject:customRow];
 
     MXDemoRow *keyRow = [MXDemoRow rowWithIcon:@"key.fill" tint:UIColor.systemBrownColor
-                                         title:@"通过 loggerKey 写入" subtitle:@"组件化场景：只传 key 不传对象，+infoWithLoggerKey:"];
+                                         title:MXDemoStr(@"home.write.key.title")
+                                      subtitle:MXDemoStr(@"home.write.key.subtitle")];
     keyRow.action = ^(MXDemoRow *r) { [weakSelf writeByLoggerKey]; };
     [writeRows addObject:keyRow];
     writeSection.rows = writeRows;
 
     // ---------- 配置 ----------
     MXDemoSection *configSection = [MXDemoSection new];
-    configSection.title = @"配置";
-    configSection.footer = @"level 只影响磁盘写入；开启 consoleEnable 后控制台仍输出全部日志。";
+    configSection.title = MXDemoStr(@"home.section.config");
+    configSection.footer = MXDemoStr(@"home.section.config.footer");
 
     MXDemoRow *levelRow = [MXDemoRow rowWithIcon:@"slider.horizontal.3" tint:UIColor.systemBlueColor
-                                           title:@"写入等级 level" subtitle:@"低于该等级的日志不写入文件"];
+                                           title:MXDemoStr(@"home.config.level.title")
+                                        subtitle:MXDemoStr(@"home.config.level.subtitle")];
     levelRow.value = [self levelName:self.logger.level];
     levelRow.action = ^(MXDemoRow *r) { [weakSelf pickLevelForRow:r]; };
 
     MXDemoRow *consoleRow = [MXDemoRow rowWithIcon:@"terminal.fill" tint:UIColor.systemGrayColor
-                                             title:@"控制台打印 consoleEnable" subtitle:@"影响写入性能，发布环境建议关闭"];
+                                             title:MXDemoStr(@"home.config.console.title")
+                                          subtitle:MXDemoStr(@"home.config.console.subtitle")];
     consoleRow.style = MXDemoRowStyleSwitch;
     consoleRow.switchOn = self.logger.consoleEnable;
     consoleRow.switchAction = ^(BOOL isOn) {
         weakSelf.logger.consoleEnable = isOn;
-        [weakSelf toast:isOn ? @"已开启控制台打印" : @"已关闭控制台打印"];
+        [weakSelf toast:MXDemoStr(isOn ? @"toast.console.on" : @"toast.console.off")];
     };
 
     MXDemoRow *enableRow = [MXDemoRow rowWithIcon:@"power" tint:UIColor.systemGreenColor
-                                            title:@"日志总开关 enable" subtitle:@"关闭后所有日志停止写入"];
+                                            title:MXDemoStr(@"home.config.enable.title")
+                                         subtitle:MXDemoStr(@"home.config.enable.subtitle")];
     enableRow.style = MXDemoRowStyleSwitch;
     enableRow.switchOn = YES;
     enableRow.switchAction = ^(BOOL isOn) {
         weakSelf.logger.enable = isOn;
-        [weakSelf toast:isOn ? @"日志已启用" : @"日志已禁用"];
+        [weakSelf toast:MXDemoStr(isOn ? @"toast.enable.on" : @"toast.enable.off")];
     };
 
     MXDemoRow *backgroundRow = [MXDemoRow rowWithIcon:@"moon.zzz.fill" tint:UIColor.systemIndigoColor
-                                                title:@"进入后台清理过期文件" subtitle:@"shouldRemoveExpiredDataWhenEnterBackground"];
+                                                title:MXDemoStr(@"home.config.background.title")
+                                             subtitle:@"shouldRemoveExpiredDataWhenEnterBackground"];
     backgroundRow.style = MXDemoRowStyleSwitch;
     backgroundRow.switchOn = self.logger.shouldRemoveExpiredDataWhenEnterBackground;
     backgroundRow.switchAction = ^(BOOL isOn) {
@@ -217,12 +263,14 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     };
 
     MXDemoRow *ageRow = [MXDemoRow rowWithIcon:@"clock.badge.exclamationmark" tint:UIColor.systemOrangeColor
-                                         title:@"有效期 maxDiskAge" subtitle:@"超期文件将被清理，0 为无限制"];
+                                         title:MXDemoStr(@"home.config.age.title")
+                                      subtitle:MXDemoStr(@"home.config.age.subtitle")];
     ageRow.value = [self diskAgeText:self.logger.maxDiskAge];
     ageRow.action = ^(MXDemoRow *r) { [weakSelf pickDiskAgeForRow:r]; };
 
     MXDemoRow *sizeRow = [MXDemoRow rowWithIcon:@"externaldrive.fill.badge.exclamationmark" tint:UIColor.systemPinkColor
-                                          title:@"容量上限 maxDiskSize" subtitle:@"超过上限按时间从旧到新清理，0 为无限制"];
+                                          title:MXDemoStr(@"home.config.size.title")
+                                       subtitle:MXDemoStr(@"home.config.size.subtitle")];
     sizeRow.value = [self diskSizeText:self.logger.maxDiskSize];
     sizeRow.action = ^(MXDemoRow *r) { [weakSelf pickDiskSizeForRow:r]; };
 
@@ -230,83 +278,92 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 
     // ---------- 性能测试 ----------
     MXDemoSection *perfSection = [MXDemoSection new];
-    perfSection.title = @"性能测试";
-    perfSection.footer = @"性能测试前建议关闭 consoleEnable，控制台输出会显著拖慢写入。";
+    perfSection.title = MXDemoStr(@"home.section.perf");
+    perfSection.footer = MXDemoStr(@"home.section.perf.footer");
 
     MXDemoRow *perfRow = [MXDemoRow rowWithIcon:@"speedometer" tint:UIColor.systemGreenColor
-                                          title:@"连续写入 100,000 条" subtitle:@"单条约 136 字节，统计总耗时"];
+                                          title:MXDemoStr(@"home.perf.bench.title")
+                                       subtitle:MXDemoStr(@"home.perf.bench.subtitle")];
+    perfRow.value = self.perfResult;
     perfRow.action = ^(MXDemoRow *r) { [weakSelf runBenchmark:r]; };
 
     MXDemoRow *threadRow = [MXDemoRow rowWithIcon:@"cpu" tint:UIColor.systemTealColor
-                                            title:@"多线程并发写入" subtitle:@"主线程 + 3 个 QoS 队列并发写入，完成后自动校验条数与顺序"];
+                                            title:MXDemoStr(@"home.perf.thread.title")
+                                         subtitle:MXDemoStr(@"home.perf.thread.subtitle")];
     threadRow.action = ^(MXDemoRow *r) { [weakSelf runConcurrentWrite]; };
     perfSection.rows = @[perfRow, threadRow];
 
     // ---------- 文件管理 ----------
     MXDemoSection *fileSection = [MXDemoSection new];
-    fileSection.title = @"文件管理";
+    fileSection.title = MXDemoStr(@"home.section.file");
 
     MXDemoRow *browseRow = [MXDemoRow rowWithIcon:@"folder.fill" tint:UIColor.systemBlueColor
-                                            title:@"浏览日志文件" subtitle:@"logFiles + selectWithDiskCacheFilePath: 解析"];
+                                            title:MXDemoStr(@"home.file.browse.title")
+                                         subtitle:MXDemoStr(@"home.file.browse.subtitle")];
     browseRow.style = MXDemoRowStylePush;
     browseRow.action = ^(MXDemoRow *r) { [weakSelf openFileList]; };
 
     MXDemoRow *expireRow = [MXDemoRow rowWithIcon:@"clock.arrow.circlepath" tint:UIColor.systemOrangeColor
-                                            title:@"清理过期文件" subtitle:@"removeExpireData"];
+                                            title:MXDemoStr(@"home.file.expire.title")
+                                         subtitle:@"removeExpireData"];
     expireRow.action = ^(MXDemoRow *r) {
         [weakSelf.logger removeExpireData];
-        [weakSelf toast:@"已清理过期文件"];
+        [weakSelf toast:MXDemoStr(@"toast.expire.done")];
         [weakSelf refreshStatus];
     };
 
     MXDemoRow *beforeRow = [MXDemoRow rowWithIcon:@"trash.slash.fill" tint:UIColor.systemYellowColor
-                                            title:@"清理历史文件" subtitle:@"removeBeforeAllData，保留当前写入中的文件"];
+                                            title:MXDemoStr(@"home.file.before.title")
+                                         subtitle:MXDemoStr(@"home.file.before.subtitle")];
     beforeRow.action = ^(MXDemoRow *r) {
         [weakSelf.logger removeBeforeAllData];
-        [weakSelf toast:@"已清理历史文件"];
+        [weakSelf toast:MXDemoStr(@"toast.before.done")];
         [weakSelf refreshStatus];
     };
 
     MXDemoRow *allRow = [MXDemoRow rowWithIcon:@"trash.fill" tint:UIColor.systemRedColor
-                                         title:@"清空全部日志" subtitle:@"removeAllData"];
+                                         title:MXDemoStr(@"home.file.all.title")
+                                      subtitle:@"removeAllData"];
     allRow.action = ^(MXDemoRow *r) { [weakSelf confirmRemoveAll]; };
     fileSection.rows = @[browseRow, expireRow, beforeRow, allRow];
 
     // ---------- 实例信息 ----------
     MXDemoSection *infoSection = [MXDemoSection new];
-    infoSection.title = @"实例信息";
-    infoSection.footer = @"loggerKey = md5(namespace + directory)，跨模块通过 valueForLoggerKey: 找回实例。";
+    infoSection.title = MXDemoStr(@"home.section.info");
+    infoSection.footer = MXDemoStr(@"home.section.info.footer");
 
     MXDemoRow *keyInfoRow = [MXDemoRow rowWithIcon:@"number" tint:UIColor.systemIndigoColor
                                              title:@"loggerKey" subtitle:self.logger.loggerKey];
     keyInfoRow.action = ^(MXDemoRow *r) {
         UIPasteboard.generalPasteboard.string = weakSelf.logger.loggerKey;
-        [weakSelf toast:@"loggerKey 已复制"];
+        [weakSelf toast:MXDemoStr(@"toast.key.copied")];
     };
 
     MXDemoRow *pathRow = [MXDemoRow rowWithIcon:@"folder.badge.gearshape" tint:UIColor.systemGrayColor
-                                          title:@"缓存目录 diskCachePath" subtitle:self.logger.diskCachePath];
+                                          title:MXDemoStr(@"home.info.path.title") subtitle:self.logger.diskCachePath];
     pathRow.action = ^(MXDemoRow *r) {
         UIPasteboard.generalPasteboard.string = weakSelf.logger.diskCachePath;
-        [weakSelf toast:@"路径已复制"];
+        [weakSelf toast:MXDemoStr(@"toast.path.copied")];
     };
 
     MXDemoRow *errorRow = [MXDemoRow rowWithIcon:@"exclamationmark.bubble.fill" tint:UIColor.systemOrangeColor
-                                           title:@"查看最近错误 errorDesc" subtitle:@"写入返回非 0 时的错误描述"];
+                                           title:MXDemoStr(@"home.info.error.title")
+                                        subtitle:MXDemoStr(@"home.info.error.subtitle")];
     errorRow.action = ^(MXDemoRow *r) {
         NSString *desc = [weakSelf.logger errorDesc];
-        [weakSelf alertWithTitle:@"errorDesc" message:desc.length > 0 ? desc : @"暂无错误"];
+        [weakSelf alertWithTitle:@"errorDesc" message:desc.length > 0 ? desc : MXDemoStr(@"alert.no.error")];
     };
 
     MXDemoRow *rebuildRow = [MXDemoRow rowWithIcon:@"arrow.triangle.2.circlepath" tint:UIColor.systemRedColor
-                                             title:@"销毁并重建实例" subtitle:@"destroyWithNamespace: 后重新 initialize"];
+                                             title:MXDemoStr(@"home.info.rebuild.title")
+                                          subtitle:MXDemoStr(@"home.info.rebuild.subtitle")];
     rebuildRow.action = ^(MXDemoRow *r) {
         [MXLogger destroyWithNamespace:kMXDemoNamespace];
         [weakSelf setupLogger];
         [weakSelf buildSections];
         [weakSelf.tableView reloadData];
         [weakSelf refreshStatus];
-        [weakSelf toast:@"实例已重建"];
+        [weakSelf toast:MXDemoStr(@"toast.rebuild.done")];
     };
     infoSection.rows = @[keyInfoRow, pathRow, errorRow, rebuildRow];
 
@@ -318,7 +375,7 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 - (void)writeLogWithLevel:(NSInteger)level {
     NSString *name = @"mxlogger";
     NSString *tag = @"demo";
-    NSString *msg = [NSString stringWithFormat:@"这是第 %lu 条 %@ 日志，写于 %@",
+    NSString *msg = [NSString stringWithFormat:MXDemoStr(@"log.msg.fmt"),
                      (unsigned long)(self.writeCount + 1),
                      [self levelName:level],
                      [NSDateFormatter localizedStringFromDate:[NSDate date]
@@ -333,7 +390,7 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
         case 4: result = [self.logger fatalWithName:name msg:msg tag:tag]; break;
         default: break;
     }
-    [self handleWriteResult:result successText:[NSString stringWithFormat:@"%@ 写入成功", [self levelName:level]]];
+    [self handleWriteResult:result successText:[NSString stringWithFormat:MXDemoStr(@"toast.write.success"), [self levelName:level]]];
 }
 
 - (void)writeNetworkLog {
@@ -344,21 +401,21 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
         @"costTime" : @"183ms",
         @"requestHeaders" : @{@"content-type" : @"application/json", @"token" : @"eyJhbGciOi..."},
         @"requestBody" : @{@"mobile" : @"188****8888"},
-        @"response" : @{@"code" : @0, @"msg" : @"操作成功"},
+        @"response" : @{@"code" : @0, @"msg" : @"ok"},
     };
     NSData *data = [NSJSONSerialization dataWithJSONObject:request options:NSJSONWritingPrettyPrinted error:NULL];
     NSString *json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     NSInteger result = [self.logger infoWithName:@"network" msg:json tag:@"request"];
-    [self handleWriteResult:result successText:@"网络日志写入成功"];
+    [self handleWriteResult:result successText:MXDemoStr(@"toast.network.success")];
 }
 
 - (void)writeCustomLevelLog {
     // logWithLevel: 是所有便捷方法的底层通用入口
     NSInteger result = [self.logger logWithLevel:3
                                             name:@"pay"
-                                             msg:@"订单支付失败: code=-1009 网络连接中断"
+                                             msg:MXDemoStr(@"log.pay.msg")
                                              tag:@"order"];
-    [self handleWriteResult:result successText:@"logWithLevel: 写入成功"];
+    [self handleWriteResult:result successText:MXDemoStr(@"toast.custom.success")];
 }
 
 - (void)writeByLoggerKey {
@@ -371,9 +428,9 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 
     NSInteger result = [MXLogger infoWithLoggerKey:loggerKey
                                               name:@"module.user"
-                                               msg:@"子组件通过 loggerKey 写入的日志"
+                                               msg:MXDemoStr(@"log.module.msg")
                                                tag:@"module"];
-    [self handleWriteResult:result successText:@"loggerKey 写入成功"];
+    [self handleWriteResult:result successText:MXDemoStr(@"toast.key.success")];
 }
 
 - (void)handleWriteResult:(NSInteger)result successText:(NSString *)text {
@@ -382,7 +439,7 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
         [self toast:text];
     } else {
         // -1 扩容失败 -2 解除映射失败 -3 映射失败
-        [self alertWithTitle:[NSString stringWithFormat:@"写入失败(%ld)", (long)result]
+        [self alertWithTitle:[NSString stringWithFormat:MXDemoStr(@"alert.write.failed"), (long)result]
                      message:[self.logger errorDesc]];
     }
     [self refreshStatus];
@@ -394,7 +451,7 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     BOOL consoleWasOn = self.logger.consoleEnable;
     self.logger.consoleEnable = NO; // 控制台输出会严重拖慢写入，测试期间临时关闭
 
-    row.value = @"测试中…";
+    row.value = MXDemoStr(@"home.perf.bench.running");
     [self.tableView reloadData];
 
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
@@ -409,10 +466,11 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.logger.consoleEnable = consoleWasOn;
             self.writeCount += 100000;
-            row.value = [NSString stringWithFormat:@"%.0f ms", cost * 1000];
+            self.perfResult = [NSString stringWithFormat:@"%.0f ms", cost * 1000];
+            row.value = self.perfResult;
             [self.tableView reloadData];
             [self refreshStatus];
-            [self toast:[NSString stringWithFormat:@"10 万条写入耗时 %.0f ms", cost * 1000]];
+            [self toast:[NSString stringWithFormat:MXDemoStr(@"toast.bench.done"), cost * 1000]];
         });
     });
 }
@@ -438,7 +496,7 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     for (NSArray *source in sources) expected[source[0]] = source[2];
     expected[@"main"] = @(mainCount);
 
-    [self toast:@"并发写入中…"];
+    [self toast:MXDemoStr(@"toast.concurrent.running")];
     dispatch_group_t group = dispatch_group_create();
 
     for (NSArray *source in sources) {
@@ -451,10 +509,10 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
                 NSString *msg;
                 if (i % 100 == 0) {
                     // 混入长消息，覆盖 mmap 扩容/跨页写入等边界
-                    msg = [NSString stringWithFormat:@"#%05ld %@ 长消息: %@", (long)i, tag,
+                    msg = [NSString stringWithFormat:@"#%05ld %@ long message: %@", (long)i, tag,
                            [@"" stringByPaddingToLength:600 withString:@"payload-" startingAtIndex:0]];
                 } else {
-                    msg = [NSString stringWithFormat:@"#%05ld %@ 并发写入", (long)i, tag];
+                    msg = [NSString stringWithFormat:@"#%05ld %@ concurrent write", (long)i, tag];
                 }
                 [self.logger infoWithName:runName msg:msg tag:tag];
 
@@ -470,7 +528,7 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     dispatch_group_enter(group);
     dispatch_async(dispatch_get_main_queue(), ^{
         for (NSInteger i = 1; i <= mainCount; i++) {
-            NSString *msg = [NSString stringWithFormat:@"#%05ld main 并发写入", (long)i];
+            NSString *msg = [NSString stringWithFormat:@"#%05ld main concurrent write", (long)i];
             [self.logger infoWithName:runName msg:msg tag:@"main"];
         }
         dispatch_group_leave(group);
@@ -488,7 +546,7 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 
 // 解析当前日志文件，按来源校验: 条数是否等于预期、序号是否连续递增(单线程内顺序不被打乱)
 - (void)verifyConcurrentRunName:(NSString *)runName expected:(NSDictionary<NSString *, NSNumber *> *)expected {
-    [self toast:@"写入完成，正在解析校验…"];
+    [self toast:MXDemoStr(@"toast.concurrent.verifying")];
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
         // 找到最后更新的文件(当前写入中的文件)
         NSDictionary *latest = nil;
@@ -532,14 +590,15 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
                 }
             }
             if (!countOK || !orderOK) allPass = NO;
-            [report appendFormat:@"%@: %ld/%ld 条 %@\n", tag,
-             (unsigned long)sequence.count, (long)expectCount,
-             (countOK && orderOK) ? @"✓ 顺序完整" : (countOK ? @"✗ 顺序异常" : @"✗ 条数缺失")];
+            NSString *status = (countOK && orderOK) ? MXDemoStr(@"verify.line.ok")
+                             : (countOK ? MXDemoStr(@"verify.line.order") : MXDemoStr(@"verify.line.missing"));
+            [report appendFormat:MXDemoStr(@"verify.line.fmt"), tag,
+             (unsigned long)sequence.count, (long)expectCount, status];
         }
-        [report appendFormat:@"\n文件共 %lu 条，校验来源 %lu 个", (unsigned long)records.count, (unsigned long)tags.count];
+        [report appendFormat:MXDemoStr(@"verify.summary.fmt"), (unsigned long)records.count, (unsigned long)tags.count];
 
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self alertWithTitle:allPass ? @"✅ 并发校验通过" : @"❌ 并发校验失败"
+            [self alertWithTitle:MXDemoStr(allPass ? @"verify.pass.title" : @"verify.fail.title")
                          message:report];
         });
     });
@@ -548,8 +607,8 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 #pragma mark - 配置动作
 
 - (void)pickLevelForRow:(MXDemoRow *)row {
-    UIAlertController *sheet = [UIAlertController alertControllerWithTitle:@"写入等级 level"
-                                                                   message:@"低于该等级的日志不会写入磁盘文件"
+    UIAlertController *sheet = [UIAlertController alertControllerWithTitle:MXDemoStr(@"home.config.level.title")
+                                                                   message:MXDemoStr(@"picker.level.message")
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     for (NSInteger level = 0; level <= 4; level++) {
         NSString *title = [NSString stringWithFormat:@"%@ (%ld)", [self levelName:level], (long)level];
@@ -560,15 +619,17 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
             [self refreshStatus];
         }]];
     }
-    [sheet addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+    [sheet addAction:[UIAlertAction actionWithTitle:MXDemoStr(@"common.cancel") style:UIAlertActionStyleCancel handler:nil]];
     [self presentSheet:sheet];
 }
 
 - (void)pickDiskAgeForRow:(MXDemoRow *)row {
     UIAlertController *sheet = [UIAlertController alertControllerWithTitle:@"maxDiskAge"
-                                                                   message:@"日志文件最长保留时间"
+                                                                   message:MXDemoStr(@"picker.age.message")
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
-    NSArray *options = @[@[@"1 分钟", @60], @[@"1 小时", @3600], @[@"1 天", @86400], @[@"7 天", @604800], @[@"无限制", @0]];
+    NSArray *options = @[@[MXDemoStr(@"duration.1min"), @60], @[MXDemoStr(@"duration.1hour"), @3600],
+                         @[MXDemoStr(@"duration.1day"), @86400], @[MXDemoStr(@"duration.7days"), @604800],
+                         @[MXDemoStr(@"common.unlimited"), @0]];
     for (NSArray *option in options) {
         [sheet addAction:[UIAlertAction actionWithTitle:option[0] style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             self.logger.maxDiskAge = [option[1] unsignedIntegerValue];
@@ -576,16 +637,16 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
             [self.tableView reloadData];
         }]];
     }
-    [sheet addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+    [sheet addAction:[UIAlertAction actionWithTitle:MXDemoStr(@"common.cancel") style:UIAlertActionStyleCancel handler:nil]];
     [self presentSheet:sheet];
 }
 
 - (void)pickDiskSizeForRow:(MXDemoRow *)row {
     UIAlertController *sheet = [UIAlertController alertControllerWithTitle:@"maxDiskSize"
-                                                                   message:@"日志文件占用磁盘上限"
+                                                                   message:MXDemoStr(@"picker.size.message")
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     NSArray *options = @[@[@"1 MB", @(1024 * 1024)], @[@"10 MB", @(1024 * 1024 * 10)],
-                         @[@"100 MB", @(1024 * 1024 * 100)], @[@"无限制", @0]];
+                         @[@"100 MB", @(1024 * 1024 * 100)], @[MXDemoStr(@"common.unlimited"), @0]];
     for (NSArray *option in options) {
         [sheet addAction:[UIAlertAction actionWithTitle:option[0] style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             self.logger.maxDiskSize = [option[1] unsignedIntegerValue];
@@ -593,7 +654,7 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
             [self.tableView reloadData];
         }]];
     }
-    [sheet addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+    [sheet addAction:[UIAlertAction actionWithTitle:MXDemoStr(@"common.cancel") style:UIAlertActionStyleCancel handler:nil]];
     [self presentSheet:sheet];
 }
 
@@ -608,15 +669,15 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 }
 
 - (void)confirmRemoveAll {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"清空全部日志？"
-                                                                   message:@"removeAllData 将删除所有日志文件，且不可恢复。"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:MXDemoStr(@"alert.removeall.title")
+                                                                   message:MXDemoStr(@"alert.removeall.message")
                                                             preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"清空" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
+    [alert addAction:[UIAlertAction actionWithTitle:MXDemoStr(@"common.cancel") style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:MXDemoStr(@"common.remove") style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
         [self.logger removeAllData];
         self.writeCount = 0;
         [self refreshStatus];
-        [self toast:@"日志已清空"];
+        [self toast:MXDemoStr(@"toast.removeall.done")];
     }]];
     [self presentViewController:alert animated:YES completion:nil];
 }
@@ -628,8 +689,8 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     self.sizeValueLabel.text = [self byteText:logSize];
     self.filesValueLabel.text = [NSString stringWithFormat:@"%lu", (unsigned long)[self.logger logFiles].count];
     self.levelValueLabel.text = [self levelName:self.logger.level];
-    self.policyValueLabel.text = @"按小时";
-    self.namespaceLabel.text = [NSString stringWithFormat:@"%@ · AES-CFB 128 加密", kMXDemoNamespace];
+    self.policyValueLabel.text = MXDemoStr(@"home.card.policy.hourly");
+    self.namespaceLabel.text = [NSString stringWithFormat:MXDemoStr(@"home.card.namespace.fmt"), kMXDemoNamespace];
 }
 
 #pragma mark - Helper
@@ -646,14 +707,14 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 }
 
 - (NSString *)diskAgeText:(NSUInteger)seconds {
-    if (seconds == 0) return @"无限制";
-    if (seconds < 3600) return [NSString stringWithFormat:@"%lu 分钟", (unsigned long)(seconds / 60)];
-    if (seconds < 86400) return [NSString stringWithFormat:@"%lu 小时", (unsigned long)(seconds / 3600)];
-    return [NSString stringWithFormat:@"%lu 天", (unsigned long)(seconds / 86400)];
+    if (seconds == 0) return MXDemoStr(@"common.unlimited");
+    if (seconds < 3600) return [NSString stringWithFormat:MXDemoStr(@"duration.minutes.fmt"), (unsigned long)(seconds / 60)];
+    if (seconds < 86400) return [NSString stringWithFormat:MXDemoStr(@"duration.hours.fmt"), (unsigned long)(seconds / 3600)];
+    return [NSString stringWithFormat:MXDemoStr(@"duration.days.fmt"), (unsigned long)(seconds / 86400)];
 }
 
 - (NSString *)diskSizeText:(NSUInteger)bytes {
-    if (bytes == 0) return @"无限制";
+    if (bytes == 0) return MXDemoStr(@"common.unlimited");
     return [self byteText:bytes];
 }
 
@@ -668,7 +729,7 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
                                                                    message:message
                                                             preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:MXDemoStr(@"common.ok") style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
 

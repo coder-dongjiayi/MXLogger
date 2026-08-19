@@ -46,8 +46,18 @@ mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,po
     }
 
     actual_size_ = get_actual_size_();
-    
-    
+
+    /// 文件头记录的actual_size超过文件容量说明文件已损坏(如被外部截断或上次写入中断)，
+    /// 直接信任会导致后续写入越界，此处重置为0从头写入
+    /// An actual_size beyond the file capacity means the file is corrupted (externally
+    /// truncated or a previous write was interrupted); trusting it would make later
+    /// writes run out of bounds, so reset to 0 and start over
+    if (actual_size_ + offset_length > file_size_) {
+        actual_size_ = 0;
+        if (mmap_ptr_ != nullptr) {
+            write_actual_size_(0);
+        }
+    }
 }
 mmap_sink::~mmap_sink(){
     munmap_();
@@ -96,10 +106,18 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size){
 
     size_t total = actual_size_ + buffer_size + offset_length;
 
-    /// 2、 如果写入长度大于文件长度进行扩容
-    if (total >=file_size_) {
+    /// 2、如果需要的空间大于文件长度进行扩容。
+    /// 文件布局为[4字节actual_size头][数据区]，实际需要 total + offset_length 字节；
+    /// 原来按 total >= file_size_ 判断少算了4字节文件头，total落在页尾3字节窗口内时
+    /// 不触发扩容，写入会越出mmap映射区导致段错误
+    /// The file layout is [4-byte actual_size header][data], so total + offset_length
+    /// bytes are required. The old check (total >= file_size_) ignored the 4-byte header:
+    /// when total landed within 3 bytes of the page end, no expansion was triggered and
+    /// the write ran past the mapped region, crashing with SIGSEGV
+    size_t required = total + offset_length;
+    if (required > file_size_) {
         /// 扩容逻辑失败 就不往下进行了
-       int r =  truncate_(total);
+       int r =  truncate_(required);
         if(r != 0){
             return r;
         }

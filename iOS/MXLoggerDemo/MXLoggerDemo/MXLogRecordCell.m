@@ -4,6 +4,7 @@
 //
 
 #import "MXLogRecordCell.h"
+#import "MXDemoL10n.h"
 
 NSString * const MXLogRecordCellReuseId = @"MXLogRecordCell";
 
@@ -53,7 +54,7 @@ NSString * const MXLogRecordCellReuseId = @"MXLogRecordCell";
     self.nameLabel.text = name.length > 0 ? name : @"-";
     self.timeLabel.text = [self timeText:record[@"timestamp"]];
     self.msgLabel.text = parseFailed
-        ? [NSString stringWithFormat:@"数据解析失败: %@", record[@"msg"] ?: @""]
+        ? [NSString stringWithFormat:MXDemoStr(@"record.parse.failed.fmt"), record[@"msg"] ?: @""]
         : [record[@"msg"] description];
 
     NSString *tag = [record[@"tag"] description];
@@ -63,12 +64,16 @@ NSString * const MXLogRecordCellReuseId = @"MXLogRecordCell";
 
     BOOL isMain = [record[@"is_main_thread"] boolValue];
     self.threadLabel.text = [NSString stringWithFormat:@"%@ · tid %@",
-                             isMain ? @"主线程" : @"子线程", record[@"thread_id"] ?: @"-"];
+                             MXDemoStr(isMain ? @"record.thread.main" : @"record.thread.sub"),
+                             record[@"thread_id"] ?: @"-"];
 }
 
 - (NSString *)timeText:(id)timestamp {
+    // 日志记录的 timestamp 是微秒(core 用 time_stamp_microseconds 写入)，按量级识别兼容秒/毫秒
     NSTimeInterval interval = [[timestamp description] doubleValue];
     if (interval <= 0) return [timestamp description] ?: @"-";
+    if (interval > 1e14) interval /= 1e6;       // 微秒
+    else if (interval > 1e11) interval /= 1e3;  // 毫秒
     static NSDateFormatter *formatter;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{

@@ -73,6 +73,10 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="pnk-aB-qiJ"/>
+                    <connections>
+                        <outlet property="subtitleLabel" destination="subt-lb" id="oc-subt-lb"/>
+                        <outlet property="entryButton" destination="ba2-xx-LWQ" id="oc-entr-bt"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

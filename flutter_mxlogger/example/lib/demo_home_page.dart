@@ -1,0 +1,985 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:isolate';
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_mxlogger/flutter_mxlogger.dart';
+
+import 'demo_util.dart';
+import 'log_file_list_page.dart';
+
+/// MXLogger 全功能演示主页(与 iOS / Android 原生 demo 保持一致)
+/// 覆盖的 API:
+///  - MXLogger.initialize / destroyWithLoggerKey
+///  - debug / info / warn / error / fatal / log
+///  - MXLogger.infoLog 等通过 loggerKey 的类方法写入
+///  - setLevel / setConsoleEnable / setEnable / shouldRemoveExpiredDataWhenEnterBackground
+///  - setMaxDiskAge / setMaxDiskSize / logSize / diskcachePath / loggerKey / errorDesc
+///  - getLogFiles / selectLogmsg
+///  - removeExpireData / removeBeforeAllData / removeAll
+class DemoHomePage extends StatefulWidget {
+  const DemoHomePage({super.key});
+
+  @override
+  State<DemoHomePage> createState() => _DemoHomePageState();
+}
+
+class _DemoHomePageState extends State<DemoHomePage> {
+  MXLogger? _logger;
+  String _loggerKey = '';
+  String _diskCachePath = '';
+
+  int _level = 0;
+  bool _consoleOn = true;
+  bool _enableOn = true;
+  bool _backgroundCleanOn = true;
+  int _maxDiskAge = 60 * 60 * 24 * 7;
+  int _maxDiskSize = 1024 * 1024 * 10;
+
+  int _writeCount = 0; // 本次会话写入条数
+  String? _perfResult; // 10万条写入耗时
+  bool _benchRunning = false;
+  bool _concurrentRunning = false;
+
+  String _sizeText = '-';
+  int _fileCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupLogger();
+  }
+
+  @override
+  void dispose() {
+    if (_loggerKey.isNotEmpty) {
+      MXLogger.destroyWithLoggerKey(_loggerKey);
+    }
+    super.dispose();
+  }
+
+  // ---------------- Logger ----------------
+
+  Future<void> _setupLogger() async {
+    // 文件头信息: 文件创建时会写入，一般放 App 版本、平台等业务信息
+    final fileHeader = jsonEncode({
+      'platform': Platform.operatingSystem,
+      'appVersion': '2.0.0',
+      'systemVersion': Platform.operatingSystemVersion,
+      'from': 'flutter-demo',
+    });
+
+    // 按小时分片存储 + AES CFB-128 加密(与原生 demo 相同参数)
+    final logger = await MXLogger.initialize(
+        nameSpace: kDemoNamespace,
+        consoleEnable: true,
+        storagePolicy: MXStoragePolicyType.yyyy_MM_dd_HH,
+        fileHeader: fileHeader,
+        cryptKey: kDemoCryptKey,
+        iv: kDemoIV);
+
+    logger.setMaxDiskAge(60 * 60 * 24 * 7); // 日志最多保留 7 天
+    logger.setMaxDiskSize(1024 * 1024 * 10); // 日志最多占用 10 MB
+    logger.setLevel(0); // 0:debug 全部写入
+    logger.shouldRemoveExpiredDataWhenEnterBackground(true);
+
+    if (!mounted) return;
+    setState(() {
+      _logger = logger;
+      _loggerKey = logger.loggerKey ?? '';
+      _diskCachePath = logger.diskcachePath;
+      _level = 0;
+      _consoleOn = true;
+      _enableOn = true;
+      _backgroundCleanOn = true;
+      _maxDiskAge = 60 * 60 * 24 * 7;
+      _maxDiskSize = 1024 * 1024 * 10;
+    });
+    _refreshStatus();
+  }
+
+  void _refreshStatus() {
+    final logger = _logger;
+    if (logger == null || !mounted) return;
+    setState(() {
+      _sizeText = byteText(logger.logSize);
+      _fileCount = logger.getLogFiles().length;
+    });
+  }
+
+  // ---------------- 写入动作 ----------------
+
+  void _writeLevelLog(int level) {
+    final logger = _logger;
+    if (logger == null) return;
+    const name = 'mxlogger';
+    const tag = 'demo';
+    final msg = '这是第 ${_writeCount + 1} 条 ${levelName(level)} 日志，写于 ${timeNowText()}';
+    int result;
+    switch (level) {
+      case 0:
+        result = logger.debug(msg, name: name, tag: tag);
+      case 1:
+        result = logger.info(msg, name: name, tag: tag);
+      case 2:
+        result = logger.warn(msg, name: name, tag: tag);
+      case 3:
+        result = logger.error(msg, name: name, tag: tag);
+      default:
+        result = logger.fatal(msg, name: name, tag: tag);
+    }
+    _handleWriteResult(result, '${levelName(level)} 写入成功');
+  }
+
+  void _writeNetworkLog() {
+    final request = {
+      'uri': 'https://api.example.com/v1/login',
+      'method': 'POST',
+      'statusCode': 200,
+      'costTime': '183ms',
+      'requestHeaders': {
+        'content-type': 'application/json',
+        'token': 'eyJhbGciOi...'
+      },
+      'requestBody': {'mobile': '188****8888'},
+      'response': {'code': 0, 'msg': '操作成功'},
+    };
+    final json = const JsonEncoder.withIndent('  ').convert(request);
+    final result = _logger?.info(json, name: 'network', tag: 'request') ?? 0;
+    _handleWriteResult(result, '网络日志写入成功');
+  }
+
+  void _writeCustomLevelLog() {
+    // log() 是所有便捷方法的底层通用入口
+    final result = _logger?.log(3, '订单支付失败: code=-1009 网络连接中断',
+            name: 'pay', tag: 'order') ??
+        0;
+    _handleWriteResult(result, 'log() 写入成功');
+  }
+
+  void _writeByLoggerKey() {
+    // 业务组件不持有 logger 对象，只拿一个字符串 key 即可写入
+    MXLogger.infoLog(_loggerKey, '子组件通过 loggerKey 写入的日志',
+        name: 'module.user', tag: 'module');
+    _handleWriteResult(0, 'loggerKey 写入成功');
+  }
+
+  void _handleWriteResult(int result, String successText) {
+    if (result == 0) {
+      _writeCount += 1;
+      showToast(context, successText);
+    } else {
+      // -1 扩容失败 -2 解除映射失败 -3 映射失败
+      _showAlert('写入失败($result)', _logger?.errorDesc ?? '');
+    }
+    _refreshStatus();
+  }
+
+  // ---------------- 性能测试 ----------------
+
+  Future<void> _runBenchmark() async {
+    if (_benchRunning || _logger == null) return;
+    final consoleWasOn = _consoleOn;
+    _logger!.setConsoleEnable(false); // 控制台输出会严重拖慢写入，测试期间临时关闭
+    setState(() {
+      _benchRunning = true;
+    });
+
+    // 写入放到后台 isolate 避免卡 UI。isolate 里没有实例对象，
+    // 通过 loggerKey 走类方法写入(与主 isolate 是底层同一个 logger)
+    final cost = await _spawnBenchmark(_loggerKey);
+
+    if (!mounted) return;
+    _logger!.setConsoleEnable(consoleWasOn);
+    _writeCount += 100000;
+    setState(() {
+      _benchRunning = false;
+      _perfResult = '$cost ms';
+    });
+    _refreshStatus();
+    showToast(context, '10 万条写入耗时 $cost ms');
+  }
+
+  /// 模拟真实 App 的多来源并发日志: 主 isolate(UI 事件) + 3 个后台 isolate(网络回调/后台任务)。
+  /// 每条日志带 "#序号"，写入期间随机 sleep 扰动调度、穿插 getLogFiles 读取，
+  /// 结束后解析当前日志文件，逐来源校验条数与顺序，给出可信的并发安全结论。
+  Future<void> _runConcurrentWrite() async {
+    if (_concurrentRunning || _logger == null) return;
+    final consoleWasOn = _consoleOn;
+    _logger!.setConsoleEnable(false);
+    setState(() => _concurrentRunning = true);
+
+    // 每轮用随机 runName 作为 name 字段，避免与历史数据混淆
+    final runName =
+        'mt-${Random().nextInt(0x7fffffff).toRadixString(16).padLeft(8, '0')}';
+    const sources = <String, int>{
+      'isolate-fast': 1000,
+      'isolate-normal': 1000,
+      'isolate-slow': 1000,
+    };
+    const mainCount = 200; // 主 isolate 写少一些，避免长时间卡 UI
+
+    showToast(context, '并发写入中…');
+    await Future.wait([
+      for (final source in sources.entries)
+        _spawnConcurrentWorker(_loggerKey, runName, source.key, source.value),
+      _writeOnMainIsolate(runName, mainCount),
+    ]);
+
+    if (!mounted) return;
+    _logger!.setConsoleEnable(consoleWasOn);
+    _writeCount += sources.values.fold<int>(0, (a, b) => a + b) + mainCount;
+    setState(() => _concurrentRunning = false);
+    _refreshStatus();
+    await _verifyConcurrent(runName, {...sources, 'main': mainCount});
+  }
+
+  /// 主 isolate 来源: 模拟 UI 事件里打日志，边写边读 getLogFiles
+  Future<void> _writeOnMainIsolate(String runName, int total) async {
+    for (var i = 1; i <= total; i++) {
+      _logger!.info('#${'$i'.padLeft(5, '0')} main 并发写入',
+          name: runName, tag: 'main');
+      if (i % 50 == 0) {
+        _logger!.getLogFiles(); // 覆盖"写入与查询并发"的场景
+        await Future<void>.delayed(Duration.zero); // 让出事件循环，保持 UI 响应
+      }
+    }
+  }
+
+  /// 解析当前日志文件，按来源校验: 条数是否等于预期、序号是否连续(单来源内顺序不被打乱)
+  Future<void> _verifyConcurrent(
+      String runName, Map<String, int> expected) async {
+    showToast(context, '写入完成，正在解析校验…');
+    final logger = _logger!;
+
+    // 找到最后更新的文件(当前写入中的文件)
+    MXFileEntity? latest;
+    for (final file in logger.getLogFiles()) {
+      if (latest == null || file.lastTimeStamp > latest.lastTimeStamp) {
+        latest = file;
+      }
+    }
+    if (latest == null) {
+      await _showAlert('❌ 并发校验失败', '未找到日志文件');
+      return;
+    }
+    final path = joinPath(logger.diskcachePath, latest.name ?? '');
+
+    // 解析放到后台 isolate，大文件解析不卡 UI
+    final parsed = await _parseRunRecords(path, runName);
+
+    // 逐来源校验。注意: selectLogmsg 返回"最新的在前"(倒序)，
+    // 因此单个来源的序号应严格递减: N, N-1, ..., 1
+    var allPass = true;
+    final report = StringBuffer();
+    final tags = expected.keys.toList()..sort();
+    for (final tag in tags) {
+      final expectCount = expected[tag]!;
+      final sequence = parsed.seqs[tag] ?? const <int>[];
+      final countOK = sequence.length == expectCount;
+      var orderOK = countOK;
+      if (countOK) {
+        var next = expectCount;
+        for (final seq in sequence) {
+          if (seq != next--) {
+            orderOK = false;
+            break;
+          }
+        }
+      }
+      if (!countOK || !orderOK) allPass = false;
+      final state = (countOK && orderOK)
+          ? '✓ 顺序完整'
+          : (countOK ? '✗ 顺序异常' : '✗ 条数缺失');
+      report.writeln('$tag: ${sequence.length}/$expectCount 条 $state');
+    }
+    report.write('\n文件共 ${parsed.total} 条，校验来源 ${tags.length} 个');
+
+    if (!mounted) return;
+    await _showAlert(allPass ? '✅ 并发校验通过' : '❌ 并发校验失败', report.toString());
+  }
+
+  // ---------------- 配置动作 ----------------
+
+  Future<void> _pickLevel() async {
+    final selected = await _showOptionsSheet<int>(
+        '写入等级 level', '低于该等级的日志不会写入磁盘文件',
+        [for (var l = 0; l <= 4; l++) MapEntry('${levelName(l)} ($l)', l)]);
+    if (selected == null) return;
+    _logger?.setLevel(selected);
+    setState(() => _level = selected);
+  }
+
+  Future<void> _pickDiskAge() async {
+    final selected =
+        await _showOptionsSheet<int>('maxDiskAge', '日志文件最长保留时间', const [
+      MapEntry('1 分钟', 60),
+      MapEntry('1 小时', 3600),
+      MapEntry('1 天', 86400),
+      MapEntry('7 天', 604800),
+      MapEntry('无限制', 0),
+    ]);
+    if (selected == null) return;
+    _logger?.setMaxDiskAge(selected);
+    setState(() => _maxDiskAge = selected);
+  }
+
+  Future<void> _pickDiskSize() async {
+    final selected =
+        await _showOptionsSheet<int>('maxDiskSize', '日志文件占用磁盘上限', const [
+      MapEntry('1 MB', 1024 * 1024),
+      MapEntry('10 MB', 1024 * 1024 * 10),
+      MapEntry('100 MB', 1024 * 1024 * 100),
+      MapEntry('无限制', 0),
+    ]);
+    if (selected == null) return;
+    _logger?.setMaxDiskSize(selected);
+    setState(() => _maxDiskSize = selected);
+  }
+
+  // ---------------- 文件管理 ----------------
+
+  Future<void> _openFileList() async {
+    final logger = _logger;
+    if (logger == null) return;
+    await Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => LogFileListPage(
+            logger: logger, cryptKey: kDemoCryptKey, iv: kDemoIV)));
+    _refreshStatus();
+  }
+
+  Future<void> _confirmRemoveAll() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('清空全部日志？'),
+        content: const Text('removeAll 将删除所有日志文件，且不可恢复。'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('取消')),
+          TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text('清空', style: TextStyle(color: kLevelColors[3]))),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    _logger?.removeAll();
+    _writeCount = 0;
+    _refreshStatus();
+    showToast(context, '日志已清空');
+  }
+
+  // ---------------- 实例信息 ----------------
+
+  Future<void> _rebuildLogger() async {
+    // 通过 loggerKey 释放底层实例，再重新 initialize
+    MXLogger.destroyWithLoggerKey(_loggerKey);
+    setState(() => _logger = null);
+    await _setupLogger();
+    if (!mounted) return;
+    showToast(context, '实例已重建');
+  }
+
+  void _copyText(String text, String toast) {
+    Clipboard.setData(ClipboardData(text: text));
+    showToast(context, toast);
+  }
+
+  // ---------------- UI ----------------
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: groupedBg(context),
+      appBar: AppBar(
+        title: const Text('MXLogger Demo',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+        centerTitle: true,
+        backgroundColor: groupedBg(context),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: _logger == null
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+              children: [
+                _statusCard(),
+                _section('日志写入',
+                    footer: '每个等级对应一个实例方法，返回 0 表示写入成功。', rows: _writeRows()),
+                _section('配置',
+                    footer: 'level 只影响磁盘写入；开启 consoleEnable 后控制台仍输出全部日志。',
+                    rows: _configRows()),
+                _section('性能测试',
+                    footer: '性能测试前建议关闭 consoleEnable，控制台输出会显著拖慢写入。',
+                    rows: _perfRows()),
+                _section('文件管理', rows: _fileRows()),
+                _section('实例信息',
+                    footer: 'loggerKey = md5(namespace + directory)，跨模块通过 loggerKey 找回实例。',
+                    rows: _infoRows()),
+              ],
+            ),
+    );
+  }
+
+  Widget _statusCard() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+            colors: [Color(0xFF4F46E5), Color(0xFF6366F1)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight),
+        boxShadow: [
+          BoxShadow(
+              color: kBrandColor.withValues(alpha: 0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 6)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(9),
+                child: Image.asset('assets/mxlogger_logo.png',
+                    width: 40, height: 40),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('MXLogger',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 2),
+                    Text('$kDemoNamespace · AES-CFB 128 加密',
+                        style: const TextStyle(
+                            color: Colors.white70, fontSize: 11)),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(8)),
+                child: const Text('mmap',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              _stat('日志大小', _sizeText),
+              _stat('文件数', '$_fileCount'),
+              _stat('写入等级', levelName(_level)),
+              _stat('分片策略', '按小时'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stat(String label, String value) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700)),
+          const SizedBox(height: 3),
+          Text(label,
+              style: const TextStyle(color: Colors.white60, fontSize: 11)),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _writeRows() {
+    const icons = [
+      Icons.bug_report,
+      Icons.info,
+      Icons.warning_amber_rounded,
+      Icons.cancel,
+      Icons.local_fire_department,
+    ];
+    const methods = ['debug', 'info', 'warn', 'error', 'fatal'];
+    return [
+      for (var level = 0; level < 5; level++)
+        _actionRow(
+          icon: icons[level],
+          tint: kLevelColors[level],
+          title: '写入 ${levelName(level)} 日志',
+          subtitle: '${methods[level]}(msg, name:, tag:)',
+          onTap: () => _writeLevelLog(level),
+        ),
+      _actionRow(
+        icon: Icons.wifi,
+        tint: const Color(0xFF30B0C7),
+        title: '写入网络请求日志',
+        subtitle: 'msg 为 JSON 字符串，tag = request',
+        onTap: _writeNetworkLog,
+      ),
+      _actionRow(
+        icon: Icons.tune,
+        tint: kBrandColor,
+        title: 'log() 通用写入',
+        subtitle: '自定义等级写入，本例 level = 3 (error)',
+        onTap: _writeCustomLevelLog,
+      ),
+      _actionRow(
+        icon: Icons.key,
+        tint: const Color(0xFFA2845E),
+        title: '通过 loggerKey 写入',
+        subtitle: '组件化场景：只传 key 不传对象，MXLogger.infoLog',
+        onTap: _writeByLoggerKey,
+      ),
+    ];
+  }
+
+  List<Widget> _configRows() {
+    return [
+      _actionRow(
+        icon: Icons.filter_alt,
+        tint: kLevelColors[1],
+        title: '写入等级 level',
+        subtitle: '低于该等级的日志不写入文件',
+        value: levelName(_level),
+        onTap: _pickLevel,
+      ),
+      _switchRow(
+        icon: Icons.terminal,
+        tint: kLevelColors[0],
+        title: '控制台打印 consoleEnable',
+        subtitle: '影响写入性能，发布环境建议关闭',
+        value: _consoleOn,
+        onChanged: (isOn) {
+          _logger?.setConsoleEnable(isOn);
+          setState(() => _consoleOn = isOn);
+          showToast(context, isOn ? '已开启控制台打印' : '已关闭控制台打印');
+        },
+      ),
+      _switchRow(
+        icon: Icons.power_settings_new,
+        tint: const Color(0xFF34C759),
+        title: '日志总开关 enable',
+        subtitle: '关闭后所有日志停止写入',
+        value: _enableOn,
+        onChanged: (isOn) {
+          _logger?.setEnable(isOn);
+          setState(() => _enableOn = isOn);
+          showToast(context, isOn ? '日志已启用' : '日志已禁用');
+        },
+      ),
+      _switchRow(
+        icon: Icons.nightlight_round,
+        tint: kBrandColor,
+        title: '进入后台清理过期文件',
+        subtitle: 'shouldRemoveExpiredDataWhenEnterBackground',
+        value: _backgroundCleanOn,
+        onChanged: (isOn) {
+          _logger?.shouldRemoveExpiredDataWhenEnterBackground(isOn);
+          setState(() => _backgroundCleanOn = isOn);
+        },
+      ),
+      _actionRow(
+        icon: Icons.schedule,
+        tint: kLevelColors[2],
+        title: '有效期 maxDiskAge',
+        subtitle: '超期文件将被清理，0 为无限制',
+        value: diskAgeText(_maxDiskAge),
+        onTap: _pickDiskAge,
+      ),
+      _actionRow(
+        icon: Icons.storage,
+        tint: const Color(0xFFFF2D55),
+        title: '容量上限 maxDiskSize',
+        subtitle: '超过上限按时间从旧到新清理，0 为无限制',
+        value: diskSizeText(_maxDiskSize),
+        onTap: _pickDiskSize,
+      ),
+    ];
+  }
+
+  List<Widget> _perfRows() {
+    return [
+      _actionRow(
+        icon: Icons.speed,
+        tint: const Color(0xFF34C759),
+        title: '连续写入 100,000 条',
+        subtitle: '后台 isolate 写入，单条约 136 字节，统计总耗时',
+        value: _benchRunning ? '测试中…' : _perfResult,
+        onTap: _runBenchmark,
+      ),
+      _actionRow(
+        icon: Icons.memory,
+        tint: const Color(0xFF30B0C7),
+        title: '多 isolate 并发写入',
+        subtitle: '主 isolate + 3 个后台 isolate 并发写入，完成后自动校验条数与顺序',
+        value: _concurrentRunning ? '写入中…' : null,
+        onTap: _runConcurrentWrite,
+      ),
+    ];
+  }
+
+  List<Widget> _fileRows() {
+    return [
+      _actionRow(
+        icon: Icons.folder,
+        tint: kLevelColors[1],
+        title: '浏览日志文件',
+        subtitle: 'getLogFiles + selectLogmsg 解析',
+        push: true,
+        onTap: _openFileList,
+      ),
+      _actionRow(
+        icon: Icons.history,
+        tint: kLevelColors[2],
+        title: '清理过期文件',
+        subtitle: 'removeExpireData',
+        onTap: () {
+          _logger?.removeExpireData();
+          showToast(context, '已清理过期文件');
+          _refreshStatus();
+        },
+      ),
+      _actionRow(
+        icon: Icons.auto_delete,
+        tint: const Color(0xFFFFCC00),
+        title: '清理历史文件',
+        subtitle: 'removeBeforeAllData，保留当前写入中的文件',
+        onTap: () {
+          _logger?.removeBeforeAllData();
+          showToast(context, '已清理历史文件');
+          _refreshStatus();
+        },
+      ),
+      _actionRow(
+        icon: Icons.delete,
+        tint: kLevelColors[3],
+        title: '清空全部日志',
+        subtitle: 'removeAll',
+        onTap: _confirmRemoveAll,
+      ),
+    ];
+  }
+
+  List<Widget> _infoRows() {
+    return [
+      _actionRow(
+        icon: Icons.tag,
+        tint: kBrandColor,
+        title: 'loggerKey',
+        subtitle: _loggerKey,
+        onTap: () => _copyText(_loggerKey, 'loggerKey 已复制'),
+      ),
+      _actionRow(
+        icon: Icons.folder_open,
+        tint: kLevelColors[0],
+        title: '缓存目录 diskcachePath',
+        subtitle: _diskCachePath,
+        onTap: () => _copyText(_diskCachePath, '路径已复制'),
+      ),
+      _actionRow(
+        icon: Icons.feedback,
+        tint: kLevelColors[2],
+        title: '查看最近错误 errorDesc',
+        subtitle: '写入返回非 0 时的错误描述',
+        onTap: () {
+          final desc = _logger?.errorDesc;
+          _showAlert('errorDesc', (desc == null || desc.isEmpty) ? '暂无错误' : desc);
+        },
+      ),
+      _actionRow(
+        icon: Icons.sync,
+        tint: kLevelColors[3],
+        title: '销毁并重建实例',
+        subtitle: 'destroyWithLoggerKey 后重新 initialize',
+        onTap: _rebuildLogger,
+      ),
+    ];
+  }
+
+  Widget _section(String title, {String? footer, required List<Widget> rows}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+          child: Text(title,
+              style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: secondaryText(context))),
+        ),
+        Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+              color: cardBg(context), borderRadius: BorderRadius.circular(12)),
+          child: Column(
+            children: [
+              for (var i = 0; i < rows.length; i++) ...[
+                if (i > 0)
+                  Divider(
+                      height: 0.5,
+                      thickness: 0.5,
+                      indent: 58,
+                      color: demoDividerColor(context)),
+                rows[i],
+              ],
+            ],
+          ),
+        ),
+        if (footer != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Text(footer,
+                style: TextStyle(fontSize: 12, color: tertiaryText(context))),
+          ),
+      ],
+    );
+  }
+
+  Widget _iconTile(IconData icon, Color tint) {
+    return Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+          color: tint, borderRadius: BorderRadius.circular(8)),
+      child: Icon(icon, size: 18, color: Colors.white),
+    );
+  }
+
+  Widget _actionRow({
+    required IconData icon,
+    required Color tint,
+    required String title,
+    String? subtitle,
+    String? value,
+    bool push = false,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            _iconTile(icon, tint),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: TextStyle(
+                          fontSize: 15, color: primaryText(context))),
+                  if (subtitle != null && subtitle.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 12, color: secondaryText(context))),
+                  ],
+                ],
+              ),
+            ),
+            if (value != null) ...[
+              const SizedBox(width: 8),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 110),
+                child: Text(value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 13, color: secondaryText(context))),
+              ),
+            ],
+            if (push) ...[
+              const SizedBox(width: 4),
+              Icon(Icons.chevron_right, size: 18, color: tertiaryText(context)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _switchRow({
+    required IconData icon,
+    required Color tint,
+    required String title,
+    String? subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 12, 6),
+      child: Row(
+        children: [
+          _iconTile(icon, tint),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style:
+                        TextStyle(fontSize: 15, color: primaryText(context))),
+                if (subtitle != null && subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 12, color: secondaryText(context))),
+                ],
+              ],
+            ),
+          ),
+          Switch.adaptive(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+
+  Future<T?> _showOptionsSheet<T>(
+      String title, String subtitle, List<MapEntry<String, T>> options) {
+    return showModalBottomSheet<T>(
+      context: context,
+      backgroundColor: cardBg(context),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Column(
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 4),
+                  Text(subtitle,
+                      style: TextStyle(
+                          fontSize: 12, color: secondaryText(context))),
+                ],
+              ),
+            ),
+            for (final option in options)
+              ListTile(
+                title: Text(option.key, textAlign: TextAlign.center),
+                onTap: () => Navigator.of(sheetContext).pop(option.value),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAlert(String title, String message) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(title, style: const TextStyle(fontSize: 17)),
+        content: message.isEmpty
+            ? null
+            : SingleChildScrollView(
+                child: SelectableText(message,
+                    style: const TextStyle(fontSize: 14))),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('好')),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------- isolate 入口(必须是顶层函数) ----------------
+// 注意: Isolate.run 的闭包不能在 State 的方法里创建——那样闭包上下文会把
+// State/Element 一起捕获进去，导致 isolate 消息发送失败。
+// 这里的顶层函数只捕获自己的参数(字符串/整数)，可以安全跨 isolate。
+
+/// 后台 isolate 执行 10 万条写入基准测试，返回耗时(ms)
+Future<int> _spawnBenchmark(String loggerKey) {
+  return Isolate.run(() {
+    final watch = Stopwatch()..start();
+    for (var i = 1; i <= 100000; i++) {
+      // 每条日志带序号，方便在查看器里核对写入顺序和完整性
+      MXLogger.infoLog(loggerKey,
+          '[${'$i'.padLeft(6, '0')}] This is a benchmark loooooooooooooooooooooooooooooog',
+          name: 'benchmark', tag: 'perf');
+    }
+    return watch.elapsedMilliseconds;
+  });
+}
+
+/// 启动一个后台 isolate 写入来源。isolate 之间共享的是 native 侧同一个
+/// logger(通过 loggerKey 寻址)，与原生端多线程写同一个 logger 的场景等价。
+Future<void> _spawnConcurrentWorker(
+    String loggerKey, String runName, String tag, int total) {
+  return Isolate.run(() {
+    final random = Random();
+    for (var i = 1; i <= total; i++) {
+      final seq = '$i'.padLeft(5, '0');
+      String msg;
+      if (i % 100 == 0) {
+        // 混入长消息，覆盖 mmap 扩容/跨页写入等边界
+        msg = '#$seq $tag 长消息: ${'payload-' * 75}';
+      } else {
+        msg = '#$seq $tag 并发写入';
+      }
+      MXLogger.infoLog(loggerKey, msg, name: runName, tag: tag);
+      // 随机让出 CPU，拉长并发重叠窗口，让调度交错更接近真实
+      if (i % 50 == 0) sleep(Duration(microseconds: random.nextInt(500)));
+    }
+  });
+}
+
+/// 后台 isolate 解析日志文件，收集指定 runName 各来源的序号列表
+Future<({int total, Map<String, List<int>> seqs})> _parseRunRecords(
+    String path, String runName) {
+  return Isolate.run(() {
+    final records = MXLogger.selectLogmsg(
+        diskcacheFilePath: path, cryptKey: kDemoCryptKey, iv: kDemoIV);
+    // 按 tag 收集本轮日志的序号(保持文件中的先后顺序)
+    final seqs = <String, List<int>>{};
+    for (final record in records) {
+      if (record['name']?.toString() != runName) continue;
+      final msg = record['msg']?.toString() ?? '';
+      final match = RegExp(r'^#(\d+)').firstMatch(msg);
+      if (match == null) continue;
+      final tag = record['tag']?.toString() ?? '';
+      seqs.putIfAbsent(tag, () => <int>[]).add(int.parse(match.group(1)!));
+    }
+    return (total: records.length, seqs: seqs);
+  });
+}
