@@ -17,7 +17,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,9 +31,7 @@ import java.util.List;
 import java.util.Locale;
 
 /** 日志查看器: 演示 selectWithFilePath 解析日志文件 支持等级筛选与搜索 */
-public class LogViewerActivity extends AppCompatActivity {
-
-    private static final String[] CHIP_TITLES = {"全部", "Debug", "Info", "Warn", "Error", "Fatal"};
+public class LogViewerActivity extends BaseDemoActivity {
 
     private final List<JSONObject> allRecords = new ArrayList<>();
     private final List<JSONObject> filteredRecords = new ArrayList<>();
@@ -58,7 +55,7 @@ public class LogViewerActivity extends AppCompatActivity {
         fileName = getIntent().getStringExtra("fileName");
 
         toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(fileName == null ? "日志详情" : fileName);
+        toolbar.setTitle(fileName == null ? getString(R.string.viewer_title) : fileName);
         toolbar.setNavigationOnClickListener(v -> finish());
 
         levelChips = findViewById(R.id.levelChips);
@@ -92,10 +89,11 @@ public class LogViewerActivity extends AppCompatActivity {
     }
 
     private void buildChips() {
-        for (int i = 0; i < CHIP_TITLES.length; i++) {
+        String[] chipTitles = {getString(R.string.viewer_segment_all), "Debug", "Info", "Warn", "Error", "Fatal"};
+        for (int i = 0; i < chipTitles.length; i++) {
             final int index = i;
             TextView chip = new TextView(this);
-            chip.setText(CHIP_TITLES[i]);
+            chip.setText(chipTitles[i]);
             chip.setTextSize(13);
             chip.setPadding(dp(14), dp(6), dp(14), dp(6));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -176,13 +174,13 @@ public class LogViewerActivity extends AppCompatActivity {
         String name = record.optString("name");
         final String msg = record.optString("msg");
         new AlertDialog.Builder(this)
-                .setTitle(name.length() > 0 ? name : "日志详情")
+                .setTitle(name.length() > 0 ? name : getString(R.string.viewer_title))
                 .setMessage(msg)
-                .setPositiveButton("复制", (dialog, which) -> {
+                .setPositiveButton(getString(R.string.common_copy), (dialog, which) -> {
                     ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     manager.setPrimaryClip(ClipData.newPlainText("mxlogger", msg));
                 })
-                .setNegativeButton("关闭", null)
+                .setNegativeButton(getString(R.string.common_close), null)
                 .show();
     }
 
@@ -219,7 +217,9 @@ public class LogViewerActivity extends AppCompatActivity {
             String name = record.optString("name");
             holder.name.setText(name.length() > 0 ? name : "-");
             holder.time.setText(DemoUtil.dateText(record.optString("timestamp"), "MM-dd HH:mm:ss.SSS"));
-            holder.msg.setText(parseFailed ? "数据解析失败: " + record.optString("msg") : record.optString("msg"));
+            holder.msg.setText(parseFailed
+                    ? getString(R.string.record_parse_failed_fmt, record.optString("msg"))
+                    : record.optString("msg"));
 
             String tag = record.optString("tag");
             holder.tagChip.setVisibility(tag.length() > 0 ? View.VISIBLE : View.GONE);
@@ -228,7 +228,8 @@ public class LogViewerActivity extends AppCompatActivity {
             boolean isMain = "1".equals(record.optString("is_main_thread"))
                     || "true".equals(record.optString("is_main_thread"));
             holder.thread.setText(String.format(Locale.US, "%s · tid %s",
-                    isMain ? "主线程" : "子线程", record.optString("thread_id", "-")));
+                    getString(isMain ? R.string.record_thread_main : R.string.record_thread_sub),
+                    record.optString("thread_id", "-")));
 
             holder.itemView.setOnClickListener(v -> showDetail(record));
         }

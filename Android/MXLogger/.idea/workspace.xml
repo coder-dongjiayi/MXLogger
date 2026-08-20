@@ -14,78 +14,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/FirstFragment.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/DemoHomeActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/DemoHomeActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/LogFileListActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/LogFileListActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/LogViewerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/LogViewerActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/MainActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/java/com/dongjiayi/mxloggerdemo/SecondFragment.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/drawable-v24/ic_launcher_foreground.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/drawable/ic_launcher_background.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/activity_demo_home.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/activity_demo_home.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/activity_file_list.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/activity_file_list.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/activity_log_viewer.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/activity_log_viewer.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/activity_main.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/content_main.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/fragment_first.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/layout/fragment_second.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/menu/menu_main.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-hdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-hdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-mdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-mdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-xhdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-xxhdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/navigation/nav_graph.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values-land/dimens.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values-night/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values-night/themes.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values-w1240dp/dimens.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values-w600dp/dimens.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values/colors.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values/dimens.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values/strings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mxloggerdemo/src/main/res/values/themes.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/publish.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/publish.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/android/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/mipmap-hdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/mipmap-hdpi/ic_launcher.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/mipmap-mdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/mipmap-mdpi/ic_launcher.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/ios/Runner/Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/log_page.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/example/test/widget_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/example/test/widget_test.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/flutter-bridge.mm" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/ios/Classes/flutter-bridge.mm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/lib/src/flutter_mxlogger.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/lib/src/flutter_mxlogger.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/MXLogRecordCell.m" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo/MXLogRecordCell.m" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +33,7 @@
     <option name="clangTidyViaClangd" value="false" />
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=PhysicalDevice, isTemplate=false, identifier=serial=64f6ed47)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=PhysicalDevice, isTemplate=false, identifier=serial=CLB0219309002436)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -193,33 +130,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Android App.mxloggerdemo.executor": "Debug",
-    "Gradle./Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/publish.gradle [androidSourcesJar].executor": "Run",
-    "Gradle.MXLogger [assemble].executor": "Run",
-    "Gradle.MXLogger:mxlogger [assembleRelease].executor": "Run",
-    "Gradle.MXLogger:mxlogger [assemble].executor": "Run",
-    "Gradle.MXLogger:mxlogger [build].executor": "Run",
-    "Gradle.MXLogger:mxlogger [publishReleasePublicationToMavenLocal].executor": "Run",
-    "Gradle.MXLogger:mxlogger [publishReleasePublicationToMavencentralRepository].executor": "Run",
-    "Gradle.MXLogger:mxlogger [publish].executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "v2.0",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/mxlogger",
-    "settings.editor.selected.configurable": "AndroidSdkUpdater",
-    "show.do.not.copy.http.proxy.settings.to.gradle": "true",
-    "show.migrate.to.gradle.popup": "false"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Android App.mxloggerdemo.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle./Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/publish.gradle [androidSourcesJar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [assembleRelease].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [publishReleasePublicationToMavenLocal].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [publishReleasePublicationToMavencentralRepository].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MXLogger:mxlogger [publish].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;v2.0&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/dongjiayi/Documents/github/MXLogger/Android/MXLogger/mxlogger&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;AndroidSdkUpdater&quot;,
+    &quot;show.do.not.copy.http.proxy.settings.to.gradle&quot;: &quot;true&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
   }
-}]]></component>
+}</component>
   <component name="PsdUISettings">
     <option name="MODULE_TAB" value="Signing Configs" />
     <option name="LAST_EDITED_SIGNING_CONFIG" value="debug" />

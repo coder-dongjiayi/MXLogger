@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'demo_home_page.dart';
+import 'demo_l10n.dart';
 import 'demo_util.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await DemoL10n.load(); // 读取上次选择的语言(默认英文)
   runApp(const MXDemoApp());
 }
 
@@ -36,6 +38,10 @@ class LandingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return L10nScope(builder: _build);
+  }
+
+  Widget _build(BuildContext context) {
     return Scaffold(
       backgroundColor: cardBg(context),
       body: SafeArea(
@@ -43,6 +49,13 @@ class LandingPage extends StatelessWidget {
           width: double.infinity,
           child: Column(
             children: [
+              const Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(0, 8, 12, 0),
+                  child: LanguageToggleButton(),
+                ),
+              ),
               const Spacer(flex: 3),
               ClipRRect(
                 borderRadius: BorderRadius.circular(22),
@@ -56,7 +69,8 @@ class LandingPage extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       color: primaryText(context))),
               const SizedBox(height: 10),
-              Text('基于 mmap 的高性能跨平台日志库',
+              Text(tr('landing.subtitle'),
+                  textAlign: TextAlign.center,
                   style:
                       TextStyle(fontSize: 15, color: secondaryText(context))),
               const Spacer(flex: 4),
@@ -72,8 +86,8 @@ class LandingPage extends StatelessWidget {
                   onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
                           builder: (_) => const DemoHomePage())),
-                  child: const Text('进入演示控制台',
-                      style: TextStyle(
+                  child: Text(tr('landing.enter'),
+                      style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
               ),

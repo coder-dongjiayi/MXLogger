@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import 'package:example/demo_l10n.dart';
 import 'package:example/main.dart' as app;
 
 /// 轮询等待某个 widget 出现(integration test 里等待真实异步任务完成)
@@ -35,23 +36,27 @@ void main() {
 
     // ---- 落地页 ----
     expect(find.text('MXLogger'), findsOneWidget);
-    expect(find.text('进入演示控制台'), findsOneWidget);
+    expect(find.text(tr('landing.enter')), findsOneWidget);
     await binding.takeScreenshot('$platform-01-landing');
 
     // ---- 进入控制台(等待 logger 初始化完成) ----
-    await tester.tap(find.text('进入演示控制台'));
-    await pumpUntilFound(tester, find.text('日志写入'));
+    await tester.tap(find.text(tr('landing.enter')));
+    await pumpUntilFound(tester, find.text(tr('home.section.write')));
     await tester.pumpAndSettle();
     await binding.takeScreenshot('$platform-02-home');
 
     // ---- 各等级写入 ----
-    for (final title in ['写入 Debug 日志', '写入 Info 日志', '写入 Warn 日志']) {
-      await tester.tap(find.text(title));
+    for (final level in ['Debug', 'Info', 'Warn']) {
+      await tester.tap(find.text(tr('home.write.level.title', [level])));
       await tester.pump(const Duration(milliseconds: 250));
     }
 
     final scrollable = find.byType(Scrollable).first;
-    for (final title in ['写入网络请求日志', 'log() 通用写入', '通过 loggerKey 写入']) {
+    for (final title in [
+      tr('home.write.network.title'),
+      tr('home.write.custom.title'),
+      tr('home.write.key.title')
+    ]) {
       await tester.scrollUntilVisible(find.text(title), 120,
           scrollable: scrollable);
       await tester.pump(const Duration(milliseconds: 150));
@@ -62,25 +67,32 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1800));
 
     // ---- 多 isolate 并发写入 + 自动校验 ----
-    await tester.scrollUntilVisible(find.text('多 isolate 并发写入'), 120,
+    final concurrentTitle = find.text(tr('home.perf.thread.title'));
+    await tester.scrollUntilVisible(concurrentTitle, 120,
         scrollable: scrollable);
     await tester.pump(const Duration(milliseconds: 150));
-    await tester.tap(find.text('多 isolate 并发写入'));
-    await pumpUntilFound(tester, find.textContaining('并发校验'),
+    await tester.tap(concurrentTitle);
+    // 通过/失败任一弹窗标题出现即结束等待(不依赖具体语言)
+    await pumpUntilFound(
+        tester,
+        find.byWidgetPredicate((widget) =>
+            widget is Text &&
+            (widget.data == tr('verify.pass.title') ||
+                widget.data == tr('verify.fail.title'))),
         timeout: const Duration(seconds: 120));
-    expect(find.text('✅ 并发校验通过'), findsOneWidget,
+    expect(find.text(tr('verify.pass.title')), findsOneWidget,
         reason: '并发写入自检应通过(条数与顺序完整)');
     await tester.pumpAndSettle(); // 等弹窗淡入动画完成再截图
     await binding.takeScreenshot('$platform-03-concurrent-verify');
-    await tester.tap(find.text('好'));
+    await tester.tap(find.text(tr('common.ok')));
     await tester.pump(const Duration(milliseconds: 400));
 
     // ---- 浏览日志文件 ----
-    await tester.scrollUntilVisible(find.text('浏览日志文件'), 120,
-        scrollable: scrollable);
+    final browseTitle = find.text(tr('home.file.browse.title'));
+    await tester.scrollUntilVisible(browseTitle, 120, scrollable: scrollable);
     await tester.pump(const Duration(milliseconds: 150));
-    await tester.tap(find.text('浏览日志文件'));
-    await pumpUntilFound(tester, find.textContaining('个文件'));
+    await tester.tap(browseTitle);
+    await pumpUntilFound(tester, find.byIcon(Icons.description));
     await tester.pumpAndSettle(); // 等转场动画与 toast 结束
     expect(find.byIcon(Icons.description), findsWidgets,
         reason: '应至少有一个日志文件');
@@ -98,11 +110,11 @@ void main() {
     // ---- 筛选: Info 等级 + 关键字搜索 ----
     await tester.tap(find.text('Info'));
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.textContaining('并发写入'), findsWidgets);
-    await tester.enterText(find.byType(TextField), '长消息');
+    expect(find.textContaining('concurrent write'), findsWidgets);
+    await tester.enterText(find.byType(TextField), 'long message');
     await tester.pump(const Duration(milliseconds: 600));
     expect(find.textContaining('payload-'), findsWidgets,
-        reason: '搜索"长消息"应命中并发测试里的长消息日志');
+        reason: '搜索"long message"应命中并发测试里的长消息日志');
     await binding.takeScreenshot('$platform-06-viewer-filter');
   });
 }

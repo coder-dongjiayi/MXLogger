@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
+import 'demo_l10n.dart';
 import 'demo_util.dart';
 import 'log_file_list_page.dart';
 
@@ -116,7 +117,8 @@ class _DemoHomePageState extends State<DemoHomePage> {
     if (logger == null) return;
     const name = 'mxlogger';
     const tag = 'demo';
-    final msg = '这是第 ${_writeCount + 1} 条 ${levelName(level)} 日志，写于 ${timeNowText()}';
+    final msg =
+        tr('log.msg.fmt', [_writeCount + 1, levelName(level), timeNowText()]);
     int result;
     switch (level) {
       case 0:
@@ -130,7 +132,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
       default:
         result = logger.fatal(msg, name: name, tag: tag);
     }
-    _handleWriteResult(result, '${levelName(level)} 写入成功');
+    _handleWriteResult(result, tr('toast.write.success', [levelName(level)]));
   }
 
   void _writeNetworkLog() {
@@ -144,26 +146,25 @@ class _DemoHomePageState extends State<DemoHomePage> {
         'token': 'eyJhbGciOi...'
       },
       'requestBody': {'mobile': '188****8888'},
-      'response': {'code': 0, 'msg': '操作成功'},
+      'response': {'code': 0, 'msg': 'ok'},
     };
     final json = const JsonEncoder.withIndent('  ').convert(request);
     final result = _logger?.info(json, name: 'network', tag: 'request') ?? 0;
-    _handleWriteResult(result, '网络日志写入成功');
+    _handleWriteResult(result, tr('toast.network.success'));
   }
 
   void _writeCustomLevelLog() {
     // log() 是所有便捷方法的底层通用入口
-    final result = _logger?.log(3, '订单支付失败: code=-1009 网络连接中断',
-            name: 'pay', tag: 'order') ??
-        0;
-    _handleWriteResult(result, 'log() 写入成功');
+    final result =
+        _logger?.log(3, tr('log.pay.msg'), name: 'pay', tag: 'order') ?? 0;
+    _handleWriteResult(result, tr('toast.custom.success'));
   }
 
   void _writeByLoggerKey() {
     // 业务组件不持有 logger 对象，只拿一个字符串 key 即可写入
-    MXLogger.infoLog(_loggerKey, '子组件通过 loggerKey 写入的日志',
+    MXLogger.infoLog(_loggerKey, tr('log.module.msg'),
         name: 'module.user', tag: 'module');
-    _handleWriteResult(0, 'loggerKey 写入成功');
+    _handleWriteResult(0, tr('toast.key.success'));
   }
 
   void _handleWriteResult(int result, String successText) {
@@ -172,7 +173,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
       showToast(context, successText);
     } else {
       // -1 扩容失败 -2 解除映射失败 -3 映射失败
-      _showAlert('写入失败($result)', _logger?.errorDesc ?? '');
+      _showAlert(tr('alert.write.failed', [result]), _logger?.errorDesc ?? '');
     }
     _refreshStatus();
   }
@@ -199,7 +200,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
       _perfResult = '$cost ms';
     });
     _refreshStatus();
-    showToast(context, '10 万条写入耗时 $cost ms');
+    showToast(context, tr('toast.bench.done', [cost]));
   }
 
   /// 模拟真实 App 的多来源并发日志: 主 isolate(UI 事件) + 3 个后台 isolate(网络回调/后台任务)。
@@ -221,7 +222,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     };
     const mainCount = 200; // 主 isolate 写少一些，避免长时间卡 UI
 
-    showToast(context, '并发写入中…');
+    showToast(context, tr('toast.concurrent.running'));
     await Future.wait([
       for (final source in sources.entries)
         _spawnConcurrentWorker(_loggerKey, runName, source.key, source.value),
@@ -239,7 +240,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
   /// 主 isolate 来源: 模拟 UI 事件里打日志，边写边读 getLogFiles
   Future<void> _writeOnMainIsolate(String runName, int total) async {
     for (var i = 1; i <= total; i++) {
-      _logger!.info('#${'$i'.padLeft(5, '0')} main 并发写入',
+      _logger!.info('#${'$i'.padLeft(5, '0')} main concurrent write',
           name: runName, tag: 'main');
       if (i % 50 == 0) {
         _logger!.getLogFiles(); // 覆盖"写入与查询并发"的场景
@@ -251,7 +252,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
   /// 解析当前日志文件，按来源校验: 条数是否等于预期、序号是否连续(单来源内顺序不被打乱)
   Future<void> _verifyConcurrent(
       String runName, Map<String, int> expected) async {
-    showToast(context, '写入完成，正在解析校验…');
+    showToast(context, tr('toast.concurrent.verifying'));
     final logger = _logger!;
 
     // 找到最后更新的文件(当前写入中的文件)
@@ -262,7 +263,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
       }
     }
     if (latest == null) {
-      await _showAlert('❌ 并发校验失败', '未找到日志文件');
+      await _showAlert(tr('verify.fail.title'), tr('verify.no.file'));
       return;
     }
     final path = joinPath(logger.diskcachePath, latest.name ?? '');
@@ -291,21 +292,24 @@ class _DemoHomePageState extends State<DemoHomePage> {
       }
       if (!countOK || !orderOK) allPass = false;
       final state = (countOK && orderOK)
-          ? '✓ 顺序完整'
-          : (countOK ? '✗ 顺序异常' : '✗ 条数缺失');
-      report.writeln('$tag: ${sequence.length}/$expectCount 条 $state');
+          ? tr('verify.line.ok')
+          : (countOK ? tr('verify.line.order') : tr('verify.line.missing'));
+      report.writeln(
+          tr('verify.line.fmt', [tag, sequence.length, expectCount, state]));
     }
-    report.write('\n文件共 ${parsed.total} 条，校验来源 ${tags.length} 个');
+    report.write('\n${tr('verify.summary.fmt', [parsed.total, tags.length])}');
 
     if (!mounted) return;
-    await _showAlert(allPass ? '✅ 并发校验通过' : '❌ 并发校验失败', report.toString());
+    await _showAlert(
+        tr(allPass ? 'verify.pass.title' : 'verify.fail.title'),
+        report.toString());
   }
 
   // ---------------- 配置动作 ----------------
 
   Future<void> _pickLevel() async {
     final selected = await _showOptionsSheet<int>(
-        '写入等级 level', '低于该等级的日志不会写入磁盘文件',
+        tr('home.config.level.title'), tr('picker.level.message'),
         [for (var l = 0; l <= 4; l++) MapEntry('${levelName(l)} ($l)', l)]);
     if (selected == null) return;
     _logger?.setLevel(selected);
@@ -313,13 +317,13 @@ class _DemoHomePageState extends State<DemoHomePage> {
   }
 
   Future<void> _pickDiskAge() async {
-    final selected =
-        await _showOptionsSheet<int>('maxDiskAge', '日志文件最长保留时间', const [
-      MapEntry('1 分钟', 60),
-      MapEntry('1 小时', 3600),
-      MapEntry('1 天', 86400),
-      MapEntry('7 天', 604800),
-      MapEntry('无限制', 0),
+    final selected = await _showOptionsSheet<int>(
+        'maxDiskAge', tr('picker.age.message'), [
+      MapEntry(tr('duration.1min'), 60),
+      MapEntry(tr('duration.1hour'), 3600),
+      MapEntry(tr('duration.1day'), 86400),
+      MapEntry(tr('duration.7days'), 604800),
+      MapEntry(tr('common.unlimited'), 0),
     ]);
     if (selected == null) return;
     _logger?.setMaxDiskAge(selected);
@@ -327,12 +331,12 @@ class _DemoHomePageState extends State<DemoHomePage> {
   }
 
   Future<void> _pickDiskSize() async {
-    final selected =
-        await _showOptionsSheet<int>('maxDiskSize', '日志文件占用磁盘上限', const [
-      MapEntry('1 MB', 1024 * 1024),
-      MapEntry('10 MB', 1024 * 1024 * 10),
-      MapEntry('100 MB', 1024 * 1024 * 100),
-      MapEntry('无限制', 0),
+    final selected = await _showOptionsSheet<int>(
+        'maxDiskSize', tr('picker.size.message'), [
+      const MapEntry('1 MB', 1024 * 1024),
+      const MapEntry('10 MB', 1024 * 1024 * 10),
+      const MapEntry('100 MB', 1024 * 1024 * 100),
+      MapEntry(tr('common.unlimited'), 0),
     ]);
     if (selected == null) return;
     _logger?.setMaxDiskSize(selected);
@@ -354,15 +358,16 @@ class _DemoHomePageState extends State<DemoHomePage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('清空全部日志？'),
-        content: const Text('removeAll 将删除所有日志文件，且不可恢复。'),
+        title: Text(tr('alert.removeall.title')),
+        content: Text(tr('alert.removeall.message')),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('取消')),
+              child: Text(tr('common.cancel'))),
           TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text('清空', style: TextStyle(color: kLevelColors[3]))),
+              child: Text(tr('common.remove'),
+                  style: TextStyle(color: kLevelColors[3]))),
         ],
       ),
     );
@@ -370,7 +375,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     _logger?.removeAll();
     _writeCount = 0;
     _refreshStatus();
-    showToast(context, '日志已清空');
+    showToast(context, tr('toast.removeall.done'));
   }
 
   // ---------------- 实例信息 ----------------
@@ -381,7 +386,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     setState(() => _logger = null);
     await _setupLogger();
     if (!mounted) return;
-    showToast(context, '实例已重建');
+    showToast(context, tr('toast.rebuild.done'));
   }
 
   void _copyText(String text, String toast) {
@@ -392,16 +397,19 @@ class _DemoHomePageState extends State<DemoHomePage> {
   // ---------------- UI ----------------
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => L10nScope(builder: _build);
+
+  Widget _build(BuildContext context) {
     return Scaffold(
       backgroundColor: groupedBg(context),
       appBar: AppBar(
-        title: const Text('MXLogger Demo',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+        title: Text(tr('home.title'),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
         centerTitle: true,
         backgroundColor: groupedBg(context),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        actions: const [LanguageToggleButton(), SizedBox(width: 8)],
       ),
       body: _logger == null
           ? const Center(child: CircularProgressIndicator())
@@ -409,17 +417,18 @@ class _DemoHomePageState extends State<DemoHomePage> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
               children: [
                 _statusCard(),
-                _section('日志写入',
-                    footer: '每个等级对应一个实例方法，返回 0 表示写入成功。', rows: _writeRows()),
-                _section('配置',
-                    footer: 'level 只影响磁盘写入；开启 consoleEnable 后控制台仍输出全部日志。',
+                _section(tr('home.section.write'),
+                    footer: tr('home.section.write.footer'),
+                    rows: _writeRows()),
+                _section(tr('home.section.config'),
+                    footer: tr('home.section.config.footer'),
                     rows: _configRows()),
-                _section('性能测试',
-                    footer: '性能测试前建议关闭 consoleEnable，控制台输出会显著拖慢写入。',
+                _section(tr('home.section.perf'),
+                    footer: tr('home.section.perf.footer'),
                     rows: _perfRows()),
-                _section('文件管理', rows: _fileRows()),
-                _section('实例信息',
-                    footer: 'loggerKey = md5(namespace + directory)，跨模块通过 loggerKey 找回实例。',
+                _section(tr('home.section.file'), rows: _fileRows()),
+                _section(tr('home.section.info'),
+                    footer: tr('home.section.info.footer'),
                     rows: _infoRows()),
               ],
             ),
@@ -463,7 +472,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
                             fontSize: 17,
                             fontWeight: FontWeight.w700)),
                     const SizedBox(height: 2),
-                    Text('$kDemoNamespace · AES-CFB 128 加密',
+                    Text(tr('home.card.namespace.fmt', [kDemoNamespace]),
                         style: const TextStyle(
                             color: Colors.white70, fontSize: 11)),
                   ],
@@ -486,10 +495,10 @@ class _DemoHomePageState extends State<DemoHomePage> {
           const SizedBox(height: 18),
           Row(
             children: [
-              _stat('日志大小', _sizeText),
-              _stat('文件数', '$_fileCount'),
-              _stat('写入等级', levelName(_level)),
-              _stat('分片策略', '按小时'),
+              _stat(tr('home.card.size'), _sizeText),
+              _stat(tr('home.card.files'), '$_fileCount'),
+              _stat(tr('home.card.level'), levelName(_level)),
+              _stat(tr('home.card.policy'), tr('home.card.policy.hourly')),
             ],
           ),
         ],
@@ -531,29 +540,29 @@ class _DemoHomePageState extends State<DemoHomePage> {
         _actionRow(
           icon: icons[level],
           tint: kLevelColors[level],
-          title: '写入 ${levelName(level)} 日志',
+          title: tr('home.write.level.title', [levelName(level)]),
           subtitle: '${methods[level]}(msg, name:, tag:)',
           onTap: () => _writeLevelLog(level),
         ),
       _actionRow(
         icon: Icons.wifi,
         tint: const Color(0xFF30B0C7),
-        title: '写入网络请求日志',
-        subtitle: 'msg 为 JSON 字符串，tag = request',
+        title: tr('home.write.network.title'),
+        subtitle: tr('home.write.network.subtitle'),
         onTap: _writeNetworkLog,
       ),
       _actionRow(
         icon: Icons.tune,
         tint: kBrandColor,
-        title: 'log() 通用写入',
-        subtitle: '自定义等级写入，本例 level = 3 (error)',
+        title: tr('home.write.custom.title'),
+        subtitle: tr('home.write.custom.subtitle'),
         onTap: _writeCustomLevelLog,
       ),
       _actionRow(
         icon: Icons.key,
         tint: const Color(0xFFA2845E),
-        title: '通过 loggerKey 写入',
-        subtitle: '组件化场景：只传 key 不传对象，MXLogger.infoLog',
+        title: tr('home.write.key.title'),
+        subtitle: tr('home.write.key.subtitle'),
         onTap: _writeByLoggerKey,
       ),
     ];
@@ -564,39 +573,39 @@ class _DemoHomePageState extends State<DemoHomePage> {
       _actionRow(
         icon: Icons.filter_alt,
         tint: kLevelColors[1],
-        title: '写入等级 level',
-        subtitle: '低于该等级的日志不写入文件',
+        title: tr('home.config.level.title'),
+        subtitle: tr('home.config.level.subtitle'),
         value: levelName(_level),
         onTap: _pickLevel,
       ),
       _switchRow(
         icon: Icons.terminal,
         tint: kLevelColors[0],
-        title: '控制台打印 consoleEnable',
-        subtitle: '影响写入性能，发布环境建议关闭',
+        title: tr('home.config.console.title'),
+        subtitle: tr('home.config.console.subtitle'),
         value: _consoleOn,
         onChanged: (isOn) {
           _logger?.setConsoleEnable(isOn);
           setState(() => _consoleOn = isOn);
-          showToast(context, isOn ? '已开启控制台打印' : '已关闭控制台打印');
+          showToast(context, tr(isOn ? 'toast.console.on' : 'toast.console.off'));
         },
       ),
       _switchRow(
         icon: Icons.power_settings_new,
         tint: const Color(0xFF34C759),
-        title: '日志总开关 enable',
-        subtitle: '关闭后所有日志停止写入',
+        title: tr('home.config.enable.title'),
+        subtitle: tr('home.config.enable.subtitle'),
         value: _enableOn,
         onChanged: (isOn) {
           _logger?.setEnable(isOn);
           setState(() => _enableOn = isOn);
-          showToast(context, isOn ? '日志已启用' : '日志已禁用');
+          showToast(context, tr(isOn ? 'toast.enable.on' : 'toast.enable.off'));
         },
       ),
       _switchRow(
         icon: Icons.nightlight_round,
         tint: kBrandColor,
-        title: '进入后台清理过期文件',
+        title: tr('home.config.background.title'),
         subtitle: 'shouldRemoveExpiredDataWhenEnterBackground',
         value: _backgroundCleanOn,
         onChanged: (isOn) {
@@ -607,16 +616,16 @@ class _DemoHomePageState extends State<DemoHomePage> {
       _actionRow(
         icon: Icons.schedule,
         tint: kLevelColors[2],
-        title: '有效期 maxDiskAge',
-        subtitle: '超期文件将被清理，0 为无限制',
+        title: tr('home.config.age.title'),
+        subtitle: tr('home.config.age.subtitle'),
         value: diskAgeText(_maxDiskAge),
         onTap: _pickDiskAge,
       ),
       _actionRow(
         icon: Icons.storage,
         tint: const Color(0xFFFF2D55),
-        title: '容量上限 maxDiskSize',
-        subtitle: '超过上限按时间从旧到新清理，0 为无限制',
+        title: tr('home.config.size.title'),
+        subtitle: tr('home.config.size.subtitle'),
         value: diskSizeText(_maxDiskSize),
         onTap: _pickDiskSize,
       ),
@@ -628,17 +637,17 @@ class _DemoHomePageState extends State<DemoHomePage> {
       _actionRow(
         icon: Icons.speed,
         tint: const Color(0xFF34C759),
-        title: '连续写入 100,000 条',
-        subtitle: '后台 isolate 写入，单条约 136 字节，统计总耗时',
-        value: _benchRunning ? '测试中…' : _perfResult,
+        title: tr('home.perf.bench.title'),
+        subtitle: tr('home.perf.bench.subtitle'),
+        value: _benchRunning ? tr('home.perf.bench.running') : _perfResult,
         onTap: _runBenchmark,
       ),
       _actionRow(
         icon: Icons.memory,
         tint: const Color(0xFF30B0C7),
-        title: '多 isolate 并发写入',
-        subtitle: '主 isolate + 3 个后台 isolate 并发写入，完成后自动校验条数与顺序',
-        value: _concurrentRunning ? '写入中…' : null,
+        title: tr('home.perf.thread.title'),
+        subtitle: tr('home.perf.thread.subtitle'),
+        value: _concurrentRunning ? tr('home.perf.thread.running') : null,
         onTap: _runConcurrentWrite,
       ),
     ];
@@ -649,37 +658,37 @@ class _DemoHomePageState extends State<DemoHomePage> {
       _actionRow(
         icon: Icons.folder,
         tint: kLevelColors[1],
-        title: '浏览日志文件',
-        subtitle: 'getLogFiles + selectLogmsg 解析',
+        title: tr('home.file.browse.title'),
+        subtitle: tr('home.file.browse.subtitle'),
         push: true,
         onTap: _openFileList,
       ),
       _actionRow(
         icon: Icons.history,
         tint: kLevelColors[2],
-        title: '清理过期文件',
+        title: tr('home.file.expire.title'),
         subtitle: 'removeExpireData',
         onTap: () {
           _logger?.removeExpireData();
-          showToast(context, '已清理过期文件');
+          showToast(context, tr('toast.expire.done'));
           _refreshStatus();
         },
       ),
       _actionRow(
         icon: Icons.auto_delete,
         tint: const Color(0xFFFFCC00),
-        title: '清理历史文件',
-        subtitle: 'removeBeforeAllData，保留当前写入中的文件',
+        title: tr('home.file.before.title'),
+        subtitle: tr('home.file.before.subtitle'),
         onTap: () {
           _logger?.removeBeforeAllData();
-          showToast(context, '已清理历史文件');
+          showToast(context, tr('toast.before.done'));
           _refreshStatus();
         },
       ),
       _actionRow(
         icon: Icons.delete,
         tint: kLevelColors[3],
-        title: '清空全部日志',
+        title: tr('home.file.all.title'),
         subtitle: 'removeAll',
         onTap: _confirmRemoveAll,
       ),
@@ -693,30 +702,31 @@ class _DemoHomePageState extends State<DemoHomePage> {
         tint: kBrandColor,
         title: 'loggerKey',
         subtitle: _loggerKey,
-        onTap: () => _copyText(_loggerKey, 'loggerKey 已复制'),
+        onTap: () => _copyText(_loggerKey, tr('toast.key.copied')),
       ),
       _actionRow(
         icon: Icons.folder_open,
         tint: kLevelColors[0],
-        title: '缓存目录 diskcachePath',
+        title: tr('home.info.path.title'),
         subtitle: _diskCachePath,
-        onTap: () => _copyText(_diskCachePath, '路径已复制'),
+        onTap: () => _copyText(_diskCachePath, tr('toast.path.copied')),
       ),
       _actionRow(
         icon: Icons.feedback,
         tint: kLevelColors[2],
-        title: '查看最近错误 errorDesc',
-        subtitle: '写入返回非 0 时的错误描述',
+        title: tr('home.info.error.title'),
+        subtitle: tr('home.info.error.subtitle'),
         onTap: () {
           final desc = _logger?.errorDesc;
-          _showAlert('errorDesc', (desc == null || desc.isEmpty) ? '暂无错误' : desc);
+          _showAlert('errorDesc',
+              (desc == null || desc.isEmpty) ? tr('alert.no.error') : desc);
         },
       ),
       _actionRow(
         icon: Icons.sync,
         tint: kLevelColors[3],
-        title: '销毁并重建实例',
-        subtitle: 'destroyWithLoggerKey 后重新 initialize',
+        title: tr('home.info.rebuild.title'),
+        subtitle: tr('home.info.rebuild.subtitle'),
         onTap: _rebuildLogger,
       ),
     ];
@@ -916,7 +926,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
         actions: [
           TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('好')),
+              child: Text(tr('common.ok'))),
         ],
       ),
     );
@@ -953,9 +963,9 @@ Future<void> _spawnConcurrentWorker(
       String msg;
       if (i % 100 == 0) {
         // 混入长消息，覆盖 mmap 扩容/跨页写入等边界
-        msg = '#$seq $tag 长消息: ${'payload-' * 75}';
+        msg = '#$seq $tag long message: ${'payload-' * 75}';
       } else {
-        msg = '#$seq $tag 并发写入';
+        msg = '#$seq $tag concurrent write';
       }
       MXLogger.infoLog(loggerKey, msg, name: runName, tag: tag);
       // 随机让出 CPU，拉长并发重叠窗口，让调度交错更接近真实

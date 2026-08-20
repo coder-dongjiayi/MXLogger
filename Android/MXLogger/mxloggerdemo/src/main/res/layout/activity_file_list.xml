@@ -12,7 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/bg_grouped"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:title="日志文件"
+        app:title="@string/filelist_title"
         app:titleTextColor="@color/text_primary" />
 
     <TextView
@@ -22,7 +22,7 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:paddingBottom="8dp"
-        android:text="共 0 个文件 · 总大小 0 B"
+        android:text="@string/filelist_summary_fmt"
         android:textColor="@color/text_secondary"
         android:textSize="13sp" />
 
@@ -46,7 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="暂无日志文件"
+            android:text="@string/filelist_empty"
             android:textColor="@color/text_secondary"
             android:textSize="15sp"
             android:visibility="gone" />

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'demo_l10n.dart';
+
 /// demo 初始化常量(与 iOS / Android 原生 demo 保持一致)
 const String kDemoNamespace = 'com.djy.mxlogger';
 const String kDemoCryptKey = 'abcdefgabcdefgob';
@@ -30,13 +32,14 @@ String byteText(int bytes) {
 }
 
 String diskAgeText(int seconds) {
-  if (seconds == 0) return '无限制';
-  if (seconds < 3600) return '${seconds ~/ 60} 分钟';
-  if (seconds < 86400) return '${seconds ~/ 3600} 小时';
-  return '${seconds ~/ 86400} 天';
+  if (seconds == 0) return tr('common.unlimited');
+  if (seconds < 3600) return tr('duration.minutes.fmt', [seconds ~/ 60]);
+  if (seconds < 86400) return tr('duration.hours.fmt', [seconds ~/ 3600]);
+  return tr('duration.days.fmt', [seconds ~/ 86400]);
 }
 
-String diskSizeText(int bytes) => bytes == 0 ? '无限制' : byteText(bytes);
+String diskSizeText(int bytes) =>
+    bytes == 0 ? tr('common.unlimited') : byteText(bytes);
 
 String _two(int n) => n.toString().padLeft(2, '0');
 
@@ -90,6 +93,27 @@ Color tertiaryText(BuildContext context) =>
 
 Color demoDividerColor(BuildContext context) =>
     _isDark(context) ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA);
+
+/// 语言切换按钮: 英文环境显示 "中文" 中文环境显示 "English"
+class LanguageToggleButton extends StatelessWidget {
+  const LanguageToggleButton({super.key});
+
+  // 自己订阅语言变化: 本按钮常以 const 实例挂在 AppBar/Align 下，
+  // 父级重建会因实例相同而短路，不自己监听的话标题不会刷新
+  @override
+  Widget build(BuildContext context) => L10nScope(builder: _build);
+
+  Widget _build(BuildContext context) {
+    return TextButton(
+      onPressed: DemoL10n.toggle,
+      style: TextButton.styleFrom(
+          foregroundColor: secondaryText(context),
+          visualDensity: VisualDensity.compact),
+      child: Text(DemoL10n.switchButtonTitle,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+    );
+  }
+}
 
 /// 底部悬浮 toast(对齐 iOS demo 的黑色胶囊提示)
 void showToast(BuildContext context, String text) {

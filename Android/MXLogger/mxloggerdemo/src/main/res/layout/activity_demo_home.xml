@@ -97,7 +97,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="日志大小"
+                    android:text="@string/home_card_size"
                     android:textColor="#A6FFFFFF"
                     android:textSize="11sp" />
             </LinearLayout>
@@ -121,7 +121,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="文件数"
+                    android:text="@string/home_card_files"
                     android:textColor="#A6FFFFFF"
                     android:textSize="11sp" />
             </LinearLayout>
@@ -145,7 +145,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="写入等级"
+                    android:text="@string/home_card_level"
                     android:textColor="#A6FFFFFF"
                     android:textSize="11sp" />
             </LinearLayout>
@@ -160,7 +160,7 @@
                     android:id="@+id/statPolicy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="按小时"
+                    android:text="@string/home_card_policy_hourly"
                     android:textColor="@color/white"
                     android:textSize="17sp"
                     android:textStyle="bold" />
@@ -169,7 +169,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="分片策略"
+                    android:text="@string/home_card_policy"
                     android:textColor="#A6FFFFFF"
                     android:textSize="11sp" />
             </LinearLayout>

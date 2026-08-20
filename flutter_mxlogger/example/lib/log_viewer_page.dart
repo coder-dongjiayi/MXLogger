@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
+import 'demo_l10n.dart';
 import 'demo_util.dart';
 
 /// 日志查看器: selectLogmsg 解析(解密)日志文件
@@ -90,7 +91,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(name.isEmpty ? '日志详情' : name,
+        title: Text(name.isEmpty ? tr('viewer.title') : name,
             style: const TextStyle(fontSize: 16)),
         content: ConstrainedBox(
           constraints: BoxConstraints(
@@ -104,20 +105,22 @@ class _LogViewerPageState extends State<LogViewerPage> {
             onPressed: () {
               Clipboard.setData(ClipboardData(text: msg));
               Navigator.of(dialogContext).pop();
-              showToast(context, '已复制');
+              showToast(context, tr('toast.copied'));
             },
-            child: const Text('复制'),
+            child: Text(tr('common.copy')),
           ),
           TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('关闭')),
+              child: Text(tr('common.close'))),
         ],
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => L10nScope(builder: _build);
+
+  Widget _build(BuildContext context) {
     final title =
         _loading ? widget.fileName : '${widget.fileName} (${_all.length})';
     return Scaffold(
@@ -140,7 +143,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
                 ? _loadingView()
                 : _filtered.isEmpty
                     ? Center(
-                        child: Text('没有匹配的日志',
+                        child: Text(tr('viewer.empty'),
                             style: TextStyle(
                                 fontSize: 14, color: secondaryText(context))))
                     : ListView.separated(
@@ -157,7 +160,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
   }
 
   Widget _filterBar() {
-    final labels = ['全部', ...kLevelNames];
+    final labels = [tr('viewer.segment.all'), ...kLevelNames];
     return Column(
       children: [
         SizedBox(
@@ -208,7 +211,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
             }),
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
-              hintText: '搜索 msg / name / tag',
+              hintText: tr('viewer.search.placeholder'),
               hintStyle:
                   TextStyle(fontSize: 14, color: tertiaryText(context)),
               prefixIcon:
@@ -234,7 +237,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
         children: [
           const CircularProgressIndicator(strokeWidth: 3),
           const SizedBox(height: 14),
-          Text('日志解析中…',
+          Text(tr('viewer.loading'),
               style: TextStyle(fontSize: 13, color: secondaryText(context))),
         ],
       ),
@@ -302,7 +305,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
               ],
             ),
             const SizedBox(height: 6),
-            Text(parseFailed ? '数据解析失败: $msg' : msg,
+            Text(parseFailed ? tr('record.parse.failed.fmt', [msg]) : msg,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 13, color: primaryText(context))),
@@ -322,7 +325,9 @@ class _LogViewerPageState extends State<LogViewerPage> {
                   ),
                   const SizedBox(width: 8),
                 ],
-                Text('${isMain ? '主线程' : '子线程'} · tid ${record['thread_id'] ?? '-'}',
+                Text(
+                    '${tr(isMain ? 'record.thread.main' : 'record.thread.sub')}'
+                    ' · tid ${record['thread_id'] ?? '-'}',
                     style: TextStyle(
                         fontSize: 11, color: tertiaryText(context))),
               ],

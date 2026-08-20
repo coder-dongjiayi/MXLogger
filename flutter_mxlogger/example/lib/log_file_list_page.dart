@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
+import 'demo_l10n.dart';
 import 'demo_util.dart';
 import 'log_viewer_page.dart';
 
@@ -50,12 +51,14 @@ class _LogFileListPageState extends State<LogFileListPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => L10nScope(builder: _build);
+
+  Widget _build(BuildContext context) {
     return Scaffold(
       backgroundColor: groupedBg(context),
       appBar: AppBar(
-        title: const Text('日志文件',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+        title: Text(tr('filelist.title'),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
         centerTitle: true,
         backgroundColor: groupedBg(context),
         surfaceTintColor: Colors.transparent,
@@ -66,13 +69,15 @@ class _LogFileListPageState extends State<LogFileListPage> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Text('共 ${_files.length} 个文件 · 总大小 ${byteText(_totalSize)}',
+            child: Text(
+                tr('filelist.summary.fmt',
+                    [_files.length, byteText(_totalSize)]),
                 style: TextStyle(fontSize: 13, color: secondaryText(context))),
           ),
           Expanded(
             child: _files.isEmpty
                 ? Center(
-                    child: Text('暂无日志文件',
+                    child: Text(tr('filelist.empty'),
                         style: TextStyle(
                             fontSize: 14, color: secondaryText(context))))
                 : ListView(
@@ -134,7 +139,10 @@ class _LogFileListPageState extends State<LogFileListPage> {
                           color: primaryText(context))),
                   const SizedBox(height: 3),
                   Text(
-                      '创建 ${dateText(file.createTimeStamp)} · 更新 ${dateText(file.lastTimeStamp)}',
+                      tr('filelist.dates.fmt', [
+                        dateText(file.createTimeStamp),
+                        dateText(file.lastTimeStamp)
+                      ]),
                       style: TextStyle(
                           fontSize: 11, color: secondaryText(context))),
                 ],

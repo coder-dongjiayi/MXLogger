@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -17,7 +18,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -46,7 +46,7 @@ import java.util.concurrent.CountDownLatch;
  *  - logFiles / selectWithFilePath
  *  - removeExpireData / removeBeforeAllData / removeAll
  */
-public class DemoHomeActivity extends AppCompatActivity {
+public class DemoHomeActivity extends BaseDemoActivity {
 
     static final String NS = "com.djy.mxlogger";
     static final String CRYPT_KEY = "abcdefgabcdefgob";
@@ -72,6 +72,13 @@ public class DemoHomeActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
+        MenuItem langItem = toolbar.getMenu().add(getString(R.string.lang_switch));
+        langItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        langItem.setOnMenuItemClickListener(item -> {
+            DemoL10n.toggle(this);
+            recreate();
+            return true;
+        });
 
         statSize = findViewById(R.id.statSize);
         statFiles = findViewById(R.id.statFiles);
@@ -129,8 +136,8 @@ public class DemoHomeActivity extends AppCompatActivity {
         String[] files = logger.logFiles();
         statFiles.setText(String.valueOf(files == null ? 0 : files.length));
         statLevel.setText(DemoUtil.levelName(logger.getLevel()));
-        statPolicy.setText("按小时");
-        namespaceLabel.setText(NS + " · AES-CFB 128 加密");
+        statPolicy.setText(R.string.home_card_policy_hourly);
+        namespaceLabel.setText(getString(R.string.home_card_namespace_fmt, NS));
     }
 
     // ---------------- sections ----------------
@@ -139,104 +146,118 @@ public class DemoHomeActivity extends AppCompatActivity {
         sectionsContainer.removeAllViews();
 
         // ---------- 日志写入 ----------
-        addSectionHeader("日志写入");
+        addSectionHeader(getString(R.string.home_section_write));
         LinearLayout write = addSectionCard();
         int[] levelIcons = {R.drawable.ic_bug, R.drawable.ic_info, R.drawable.ic_warn, R.drawable.ic_error, R.drawable.ic_flame};
         String[] levelMethods = {"debug(tag, name, msg)", "info(tag, name, msg)", "warn(tag, name, msg)", "error(tag, name, msg)", "fatal(tag, name, msg)"};
         for (int level = 0; level <= 4; level++) {
             final int lv = level;
             addRow(write, levelIcons[level], DemoUtil.LEVEL_COLORS[level],
-                    "写入 " + DemoUtil.levelName(level) + " 日志", levelMethods[level],
+                    getString(R.string.home_write_level_title, DemoUtil.levelName(level)), levelMethods[level],
                     null, false, () -> writeLog(lv));
         }
         addRow(write, R.drawable.ic_network, R.color.tint_teal,
-                "写入网络请求日志", "msg 为 JSON 字符串，tag = request", null, false, this::writeNetworkLog);
+                getString(R.string.home_write_network_title), getString(R.string.home_write_network_subtitle),
+                null, false, this::writeNetworkLog);
         addRow(write, R.drawable.ic_dial, R.color.tint_indigo,
-                "log() 通用写入", "自定义等级写入，本例 level = 3 (error)", null, false, this::writeCustomLevelLog);
+                getString(R.string.home_write_custom_title), getString(R.string.home_write_custom_subtitle),
+                null, false, this::writeCustomLevelLog);
         addRow(write, R.drawable.ic_key, R.color.tint_brown,
-                "通过 loggerKey 写入", "组件化场景：只传 key 不传对象，MXLogger.log(loggerKey, …)", null, false, this::writeByLoggerKey);
-        addSectionFooter("每个等级对应一个实例方法，返回 0 表示写入成功。");
+                getString(R.string.home_write_key_title), getString(R.string.home_write_key_subtitle),
+                null, false, this::writeByLoggerKey);
+        addSectionFooter(getString(R.string.home_section_write_footer));
 
         // ---------- 配置 ----------
-        addSectionHeader("配置");
+        addSectionHeader(getString(R.string.home_section_config));
         LinearLayout config = addSectionCard();
         levelValueView = addRow(config, R.drawable.ic_dial, R.color.tint_blue,
-                "写入等级 level", "低于该等级的日志不写入文件", DemoUtil.levelName(logger.getLevel()), false, this::pickLevel);
+                getString(R.string.home_config_level_title), getString(R.string.home_config_level_subtitle),
+                DemoUtil.levelName(logger.getLevel()), false, this::pickLevel);
         addSwitchRow(config, R.drawable.ic_terminal, R.color.tint_gray,
-                "控制台打印 consoleEnable", "影响写入性能，发布环境建议关闭", logger.isConsoleEnable(), isOn -> {
+                getString(R.string.home_config_console_title), getString(R.string.home_config_console_subtitle),
+                logger.isConsoleEnable(), isOn -> {
                     logger.setConsoleEnable(isOn);
-                    toast(isOn ? "已开启控制台打印" : "已关闭控制台打印");
+                    toast(getString(isOn ? R.string.toast_console_on : R.string.toast_console_off));
                 });
         addSwitchRow(config, R.drawable.ic_power, R.color.tint_green,
-                "日志总开关 enable", "关闭后所有日志停止写入", logger.isEnable(), isOn -> {
+                getString(R.string.home_config_enable_title), getString(R.string.home_config_enable_subtitle),
+                logger.isEnable(), isOn -> {
                     logger.setEnable(isOn);
-                    toast(isOn ? "日志已启用" : "日志已禁用");
+                    toast(getString(isOn ? R.string.toast_enable_on : R.string.toast_enable_off));
                 });
         TextView ageValue = addRow(config, R.drawable.ic_clock, R.color.tint_orange,
-                "有效期 maxDiskAge", "超期文件将被清理，0 为无限制", diskAgeText(logger.getMaxDiskAge()), false, null);
+                getString(R.string.home_config_age_title), getString(R.string.home_config_age_subtitle),
+                diskAgeText(logger.getMaxDiskAge()), false, null);
         setRowClick(ageValue, () -> pickDiskAge(ageValue));
         TextView sizeValue = addRow(config, R.drawable.ic_storage, R.color.tint_pink,
-                "容量上限 maxDiskSize", "超过上限按时间从旧到新清理，0 为无限制", diskSizeText(logger.getMaxDiskSize()), false, null);
+                getString(R.string.home_config_size_title), getString(R.string.home_config_size_subtitle),
+                diskSizeText(logger.getMaxDiskSize()), false, null);
         setRowClick(sizeValue, () -> pickDiskSize(sizeValue));
-        addSectionFooter("level 只影响磁盘写入；开启 consoleEnable 后控制台仍输出全部日志。");
+        addSectionFooter(getString(R.string.home_section_config_footer));
 
         // ---------- 性能测试 ----------
-        addSectionHeader("性能测试");
+        addSectionHeader(getString(R.string.home_section_perf));
         LinearLayout perf = addSectionCard();
         benchmarkValueView = addRow(perf, R.drawable.ic_speed, R.color.tint_green,
-                "连续写入 100,000 条", "每条带递增序号，统计总耗时", null, false, this::runBenchmark);
+                getString(R.string.home_perf_bench_title), getString(R.string.home_perf_bench_subtitle),
+                null, false, this::runBenchmark);
         addRow(perf, R.drawable.ic_cpu, R.color.tint_teal,
-                "多线程并发写入", "主线程 + 3 个优先级线程并发写入，完成后自动校验条数与顺序", null, false, this::runConcurrentWrite);
-        addSectionFooter("性能测试前建议关闭 consoleEnable，控制台输出会显著拖慢写入。");
+                getString(R.string.home_perf_thread_title), getString(R.string.home_perf_thread_subtitle),
+                null, false, this::runConcurrentWrite);
+        addSectionFooter(getString(R.string.home_section_perf_footer));
 
         // ---------- 文件管理 ----------
-        addSectionHeader("文件管理");
+        addSectionHeader(getString(R.string.home_section_file));
         LinearLayout file = addSectionCard();
         addRow(file, R.drawable.ic_folder, R.color.tint_blue,
-                "浏览日志文件", "logFiles + selectWithFilePath 解析", null, true,
+                getString(R.string.home_file_browse_title), getString(R.string.home_file_browse_subtitle),
+                null, true,
                 () -> startActivity(new Intent(this, LogFileListActivity.class)));
         addRow(file, R.drawable.ic_history, R.color.tint_orange,
-                "清理过期文件", "removeExpireData()", null, false, () -> {
+                getString(R.string.home_file_expire_title), "removeExpireData()", null, false, () -> {
                     logger.removeExpireData();
-                    toast("已清理过期文件");
+                    toast(getString(R.string.toast_expire_done));
                     refreshStatus();
                 });
         addRow(file, R.drawable.ic_trash_keep, R.color.tint_yellow,
-                "清理历史文件", "removeBeforeAllData()，保留当前写入中的文件", null, false, () -> {
+                getString(R.string.home_file_before_title), getString(R.string.home_file_before_subtitle),
+                null, false, () -> {
                     logger.removeBeforeAllData();
-                    toast("已清理历史文件");
+                    toast(getString(R.string.toast_before_done));
                     refreshStatus();
                 });
         addRow(file, R.drawable.ic_trash, R.color.tint_red,
-                "清空全部日志", "removeAll()", null, false, this::confirmRemoveAll);
+                getString(R.string.home_file_all_title), "removeAll()", null, false, this::confirmRemoveAll);
 
         // ---------- 实例信息 ----------
-        addSectionHeader("实例信息");
+        addSectionHeader(getString(R.string.home_section_info));
         LinearLayout info = addSectionCard();
         addRow(info, R.drawable.ic_hash, R.color.tint_indigo,
                 "loggerKey", logger.getLoggerKey(), null, false, () -> {
                     copyToClipboard(logger.getLoggerKey());
-                    toast("loggerKey 已复制");
+                    toast(getString(R.string.toast_key_copied));
                 });
         addRow(info, R.drawable.ic_gear, R.color.tint_gray,
-                "缓存目录 diskCachePath", logger.getDiskCachePath(), null, false, () -> {
+                getString(R.string.home_info_path_title), logger.getDiskCachePath(), null, false, () -> {
                     copyToClipboard(logger.getDiskCachePath());
-                    toast("路径已复制");
+                    toast(getString(R.string.toast_path_copied));
                 });
         addRow(info, R.drawable.ic_bubble, R.color.tint_orange,
-                "查看最近错误 errorDesc", "写入返回非 0 时的错误描述", null, false, () -> {
+                getString(R.string.home_info_error_title), getString(R.string.home_info_error_subtitle),
+                null, false, () -> {
                     String desc = logger.getErrorDesc();
-                    alert("errorDesc", desc == null || desc.length() == 0 ? "暂无错误" : desc);
+                    alert("errorDesc", desc == null || desc.length() == 0 ? getString(R.string.alert_no_error) : desc);
                 });
         addRow(info, R.drawable.ic_refresh, R.color.tint_red,
-                "销毁并重建实例", "destroy() 后重新构造", null, false, () -> {
+                getString(R.string.home_info_rebuild_title), getString(R.string.home_info_rebuild_subtitle),
+                null, false, () -> {
                     MXLogger.destroy(this, NS, null);
                     setupLogger();
                     buildSections();
                     refreshStatus();
-                    toast("实例已重建");
+                    toast(getString(R.string.toast_rebuild_done));
                 });
-        addSectionFooter("loggerKey = md5(namespace + directory)，跨模块只传这个 key 即可写入。");
+        addSectionFooter(getString(R.string.home_section_info_footer));
     }
 
     // ---------------- 写入动作 ----------------
@@ -244,7 +265,7 @@ public class DemoHomeActivity extends AppCompatActivity {
     private void writeLog(int level) {
         String name = "mxlogger";
         String tag = "demo";
-        String msg = String.format(Locale.US, "这是第 %d 条 %s 日志，写于 %s",
+        String msg = getString(R.string.log_msg_fmt,
                 writeCount + 1, DemoUtil.levelName(level),
                 DemoUtil.dateText(String.valueOf(System.currentTimeMillis() / 1000.0), "HH:mm:ss"));
         int result;
@@ -255,7 +276,7 @@ public class DemoHomeActivity extends AppCompatActivity {
             case 4: result = logger.fatal(tag, name, msg); break;
             default: result = logger.debug(tag, name, msg); break;
         }
-        handleWriteResult(result, DemoUtil.levelName(level) + " 写入成功");
+        handleWriteResult(result, getString(R.string.toast_write_success, DemoUtil.levelName(level)));
     }
 
     private void writeNetworkLog() {
@@ -266,24 +287,24 @@ public class DemoHomeActivity extends AppCompatActivity {
             body.put("statusCode", 200);
             body.put("costTime", "183ms");
             body.put("requestBody", new JSONObject().put("mobile", "188****8888"));
-            body.put("response", new JSONObject().put("code", 0).put("msg", "操作成功"));
+            body.put("response", new JSONObject().put("code", 0).put("msg", "ok"));
             int result = logger.info("request", "network", body.toString(2));
-            handleWriteResult(result, "网络日志写入成功");
+            handleWriteResult(result, getString(R.string.toast_network_success));
         } catch (Exception ignored) {
         }
     }
 
     private void writeCustomLevelLog() {
         // log() 是所有便捷方法的底层通用入口
-        int result = logger.log("order", 3, "pay", "订单支付失败: code=-1009 网络连接中断");
-        handleWriteResult(result, "log() 写入成功");
+        int result = logger.log("order", 3, "pay", getString(R.string.log_pay_msg));
+        handleWriteResult(result, getString(R.string.toast_custom_success));
     }
 
     private void writeByLoggerKey() {
         // 业务组件不持有 logger 对象，只拿一个字符串 key 即可写入
         String loggerKey = logger.getLoggerKey();
-        int result = MXLogger.log(loggerKey, "module", 1, "module.user", "子组件通过 loggerKey 写入的日志");
-        handleWriteResult(result, "loggerKey 写入成功");
+        int result = MXLogger.log(loggerKey, "module", 1, "module.user", getString(R.string.log_module_msg));
+        handleWriteResult(result, getString(R.string.toast_key_success));
     }
 
     private void handleWriteResult(int result, String successText) {
@@ -292,7 +313,7 @@ public class DemoHomeActivity extends AppCompatActivity {
             toast(successText);
         } else {
             // -1 扩容失败 -2 解除映射失败 -3 映射失败
-            alert("写入失败(" + result + ")", logger.getErrorDesc());
+            alert(getString(R.string.alert_write_failed, result), logger.getErrorDesc());
         }
         refreshStatus();
     }
@@ -300,7 +321,7 @@ public class DemoHomeActivity extends AppCompatActivity {
     // ---------------- 性能测试 ----------------
 
     private void runBenchmark() {
-        benchmarkValueView.setText("测试中…");
+        benchmarkValueView.setText(R.string.home_perf_bench_running);
         benchmarkValueView.setVisibility(View.VISIBLE);
         final boolean consoleWasOn = logger.isConsoleEnable();
         logger.setConsoleEnable(false); // 控制台输出会严重拖慢写入 测试期间临时关闭
@@ -316,9 +337,9 @@ public class DemoHomeActivity extends AppCompatActivity {
             mainHandler.post(() -> {
                 logger.setConsoleEnable(consoleWasOn);
                 writeCount += 100000;
-                benchmarkValueView.setText(cost + " ms");
+                benchmarkValueView.setText(String.format(Locale.US, "%d ms", cost));
                 refreshStatus();
-                toast("10 万条写入耗时 " + cost + " ms");
+                toast(getString(R.string.toast_bench_done, cost));
             });
         }).start();
     }
@@ -345,7 +366,7 @@ public class DemoHomeActivity extends AppCompatActivity {
         for (String[] source : sources) expected.put(source[0], perThread);
         expected.put("main", mainCount);
 
-        toast("并发写入中…");
+        toast(getString(R.string.toast_concurrent_running));
         final CountDownLatch latch = new CountDownLatch(sources.length + 1);
 
         StringBuilder padding = new StringBuilder();
@@ -359,9 +380,9 @@ public class DemoHomeActivity extends AppCompatActivity {
                     String msg;
                     if (i % 100 == 0) {
                         // 混入长消息 覆盖 mmap 扩容/跨页写入等边界
-                        msg = String.format(Locale.US, "#%05d %s 长消息: %s", i, tag, longPayload);
+                        msg = String.format(Locale.US, "#%05d %s long message: %s", i, tag, longPayload);
                     } else {
-                        msg = String.format(Locale.US, "#%05d %s 并发写入", i, tag);
+                        msg = String.format(Locale.US, "#%05d %s concurrent write", i, tag);
                     }
                     logger.info(tag, runName, msg);
                     try {
@@ -381,7 +402,7 @@ public class DemoHomeActivity extends AppCompatActivity {
         // 主线程来源: 模拟 UI 事件里打日志
         mainHandler.post(() -> {
             for (int i = 1; i <= mainCount; i++) {
-                logger.info("main", runName, String.format(Locale.US, "#%05d main 并发写入", i));
+                logger.info("main", runName, String.format(Locale.US, "#%05d main concurrent write", i));
             }
             latch.countDown();
         });
@@ -404,7 +425,7 @@ public class DemoHomeActivity extends AppCompatActivity {
 
     /** 解析当前日志文件 按来源校验: 条数是否等于预期、序号顺序是否保持(解析结果最新在前 因此应严格递减) */
     private void verifyConcurrentRun(final String runName, final Map<String, Integer> expected) {
-        toast("写入完成，正在解析校验…");
+        toast(getString(R.string.toast_concurrent_verifying));
         new Thread(() -> {
             try {
                 // 找到最后更新的文件(当前写入中的文件)
@@ -468,17 +489,18 @@ public class DemoHomeActivity extends AppCompatActivity {
                         }
                     }
                     if (!countOK || !orderOK) allPass = false;
-                    report.append(String.format(Locale.US, "%s: %d/%d 条 %s\n", tag, sequence.size(), expectCount,
-                            (countOK && orderOK) ? "✓ 顺序完整" : (countOK ? "✗ 顺序异常" : "✗ 条数缺失")));
+                    String status = (countOK && orderOK) ? getString(R.string.verify_line_ok)
+                            : (countOK ? getString(R.string.verify_line_order) : getString(R.string.verify_line_missing));
+                    report.append(getString(R.string.verify_line_fmt, tag, sequence.size(), expectCount, status));
                 }
-                report.append(String.format(Locale.US, "\n文件共 %d 条，校验来源 %d 个",
+                report.append(getString(R.string.verify_summary_fmt,
                         records == null ? 0 : records.length, expected.size()));
 
                 final boolean pass = allPass;
                 final String message = report.toString();
-                mainHandler.post(() -> alert(pass ? "✅ 并发校验通过" : "❌ 并发校验失败", message));
+                mainHandler.post(() -> alert(getString(pass ? R.string.verify_pass_title : R.string.verify_fail_title), message));
             } catch (Exception e) {
-                mainHandler.post(() -> alert("校验异常", String.valueOf(e)));
+                mainHandler.post(() -> alert(getString(R.string.alert_verify_error), String.valueOf(e)));
             }
         }).start();
     }
@@ -487,7 +509,7 @@ public class DemoHomeActivity extends AppCompatActivity {
 
     private void pickLevel() {
         new AlertDialog.Builder(this)
-                .setTitle("写入等级 level")
+                .setTitle(getString(R.string.home_config_level_title))
                 .setItems(new String[]{"Debug (0)", "Info (1)", "Warn (2)", "Error (3)", "Fatal (4)"}, (dialog, which) -> {
                     logger.setLevel(which);
                     levelValueView.setText(DemoUtil.levelName(which));
@@ -497,7 +519,9 @@ public class DemoHomeActivity extends AppCompatActivity {
     }
 
     private void pickDiskAge(TextView valueView) {
-        final String[] titles = {"1 分钟", "1 小时", "1 天", "7 天", "无限制"};
+        final String[] titles = {getString(R.string.duration_1min), getString(R.string.duration_1hour),
+                getString(R.string.duration_1day), getString(R.string.duration_7days),
+                getString(R.string.common_unlimited)};
         final long[] values = {60, 3600, 86400, 604800, 0};
         new AlertDialog.Builder(this)
                 .setTitle("maxDiskAge")
@@ -509,7 +533,7 @@ public class DemoHomeActivity extends AppCompatActivity {
     }
 
     private void pickDiskSize(TextView valueView) {
-        final String[] titles = {"1 MB", "10 MB", "100 MB", "无限制"};
+        final String[] titles = {"1 MB", "10 MB", "100 MB", getString(R.string.common_unlimited)};
         final long[] values = {1024 * 1024, 1024 * 1024 * 10, 1024 * 1024 * 100, 0};
         new AlertDialog.Builder(this)
                 .setTitle("maxDiskSize")
@@ -522,14 +546,14 @@ public class DemoHomeActivity extends AppCompatActivity {
 
     private void confirmRemoveAll() {
         new AlertDialog.Builder(this)
-                .setTitle("清空全部日志？")
-                .setMessage("removeAll() 将删除所有日志文件，且不可恢复。")
-                .setNegativeButton("取消", null)
-                .setPositiveButton("清空", (dialog, which) -> {
+                .setTitle(getString(R.string.alert_removeall_title))
+                .setMessage(getString(R.string.alert_removeall_message))
+                .setNegativeButton(getString(R.string.common_cancel), null)
+                .setPositiveButton(getString(R.string.common_remove), (dialog, which) -> {
                     logger.removeAll();
                     writeCount = 0;
                     refreshStatus();
-                    toast("日志已清空");
+                    toast(getString(R.string.toast_removeall_done));
                 })
                 .show();
     }
@@ -629,14 +653,14 @@ public class DemoHomeActivity extends AppCompatActivity {
     }
 
     private String diskAgeText(long seconds) {
-        if (seconds == 0) return "无限制";
-        if (seconds < 3600) return (seconds / 60) + " 分钟";
-        if (seconds < 86400) return (seconds / 3600) + " 小时";
-        return (seconds / 86400) + " 天";
+        if (seconds == 0) return getString(R.string.common_unlimited);
+        if (seconds < 3600) return getString(R.string.duration_minutes_fmt, seconds / 60);
+        if (seconds < 86400) return getString(R.string.duration_hours_fmt, seconds / 3600);
+        return getString(R.string.duration_days_fmt, seconds / 86400);
     }
 
     private String diskSizeText(long bytes) {
-        return bytes == 0 ? "无限制" : DemoUtil.byteText(bytes);
+        return bytes == 0 ? getString(R.string.common_unlimited) : DemoUtil.byteText(bytes);
     }
 
     private void copyToClipboard(String text) {
@@ -648,7 +672,7 @@ public class DemoHomeActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton("好", null)
+                .setPositiveButton(getString(R.string.common_ok), null)
                 .show();
     }
 

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 首页 -->
+    <string name="landing_subtitle">基于 mmap 的高性能跨平台日志库\nAES-CFB 128 加密 · iOS / Android / Flutter</string>
+    <string name="landing_enter">进入演示</string>
+
+    <!-- 语言切换按钮: 显示要切换到的语言 -->
+    <string name="lang_switch">English</string>
+
+    <!-- 通用 -->
+    <string name="common_cancel">取消</string>
+    <string name="common_ok">好</string>
+    <string name="common_copy">复制</string>
+    <string name="common_close">关闭</string>
+    <string name="common_remove">清空</string>
+    <string name="common_unlimited">无限制</string>
+
+    <!-- 主页 - 状态卡片 -->
+    <string name="home_card_size">日志大小</string>
+    <string name="home_card_files">文件数</string>
+    <string name="home_card_level">写入等级</string>
+    <string name="home_card_policy">分片策略</string>
+    <string name="home_card_policy_hourly">按小时</string>
+    <string name="home_card_namespace_fmt">%1$s · AES-CFB 128 加密</string>
+
+    <!-- 主页 - 日志写入 -->
+    <string name="home_section_write">日志写入</string>
+    <string name="home_section_write_footer">每个等级对应一个实例方法，返回 0 表示写入成功。</string>
+    <string name="home_write_level_title">写入 %1$s 日志</string>
+    <string name="home_write_network_title">写入网络请求日志</string>
+    <string name="home_write_network_subtitle">msg 为 JSON 字符串，tag = request</string>
+    <string name="home_write_custom_title">log() 通用写入</string>
+    <string name="home_write_custom_subtitle">自定义等级写入，本例 level = 3 (error)</string>
+    <string name="home_write_key_title">通过 loggerKey 写入</string>
+    <string name="home_write_key_subtitle">组件化场景：只传 key 不传对象，MXLogger.log(loggerKey, …)</string>
+
+    <!-- 主页 - 配置 -->
+    <string name="home_section_config">配置</string>
+    <string name="home_section_config_footer">level 只影响磁盘写入；开启 consoleEnable 后控制台仍输出全部日志。</string>
+    <string name="home_config_level_title">写入等级 level</string>
+    <string name="home_config_level_subtitle">低于该等级的日志不写入文件</string>
+    <string name="home_config_console_title">控制台打印 consoleEnable</string>
+    <string name="home_config_console_subtitle">影响写入性能，发布环境建议关闭</string>
+    <string name="home_config_enable_title">日志总开关 enable</string>
+    <string name="home_config_enable_subtitle">关闭后所有日志停止写入</string>
+    <string name="home_config_age_title">有效期 maxDiskAge</string>
+    <string name="home_config_age_subtitle">超期文件将被清理，0 为无限制</string>
+    <string name="home_config_size_title">容量上限 maxDiskSize</string>
+    <string name="home_config_size_subtitle">超过上限按时间从旧到新清理，0 为无限制</string>
+
+    <!-- 主页 - 性能测试 -->
+    <string name="home_section_perf">性能测试</string>
+    <string name="home_section_perf_footer">性能测试前建议关闭 consoleEnable，控制台输出会显著拖慢写入。</string>
+    <string name="home_perf_bench_title">连续写入 100,000 条</string>
+    <string name="home_perf_bench_subtitle">每条带递增序号，统计总耗时</string>
+    <string name="home_perf_bench_running">测试中…</string>
+    <string name="home_perf_thread_title">多线程并发写入</string>
+    <string name="home_perf_thread_subtitle">主线程 + 3 个优先级线程并发写入，完成后自动校验条数与顺序</string>
+
+    <!-- 主页 - 文件管理 -->
+    <string name="home_section_file">文件管理</string>
+    <string name="home_file_browse_title">浏览日志文件</string>
+    <string name="home_file_browse_subtitle">logFiles + selectWithFilePath 解析</string>
+    <string name="home_file_expire_title">清理过期文件</string>
+    <string name="home_file_before_title">清理历史文件</string>
+    <string name="home_file_before_subtitle">removeBeforeAllData()，保留当前写入中的文件</string>
+    <string name="home_file_all_title">清空全部日志</string>
+
+    <!-- 主页 - 实例信息 -->
+    <string name="home_section_info">实例信息</string>
+    <string name="home_section_info_footer">loggerKey = md5(namespace + directory)，跨模块只传这个 key 即可写入。</string>
+    <string name="home_info_path_title">缓存目录 diskCachePath</string>
+    <string name="home_info_error_title">查看最近错误 errorDesc</string>
+    <string name="home_info_error_subtitle">写入返回非 0 时的错误描述</string>
+    <string name="home_info_rebuild_title">销毁并重建实例</string>
+    <string name="home_info_rebuild_subtitle">destroy() 后重新构造</string>
+
+    <!-- Toast -->
+    <string name="toast_console_on">已开启控制台打印</string>
+    <string name="toast_console_off">已关闭控制台打印</string>
+    <string name="toast_enable_on">日志已启用</string>
+    <string name="toast_enable_off">日志已禁用</string>
+    <string name="toast_expire_done">已清理过期文件</string>
+    <string name="toast_before_done">已清理历史文件</string>
+    <string name="toast_key_copied">loggerKey 已复制</string>
+    <string name="toast_path_copied">路径已复制</string>
+    <string name="toast_rebuild_done">实例已重建</string>
+    <string name="toast_removeall_done">日志已清空</string>
+    <string name="toast_write_success">%1$s 写入成功</string>
+    <string name="toast_network_success">网络日志写入成功</string>
+    <string name="toast_custom_success">log() 写入成功</string>
+    <string name="toast_key_success">loggerKey 写入成功</string>
+    <string name="toast_bench_done">10 万条写入耗时 %1$d ms</string>
+    <string name="toast_concurrent_running">并发写入中…</string>
+    <string name="toast_concurrent_verifying">写入完成，正在解析校验…</string>
+
+    <!-- 弹窗与选择器 -->
+    <string name="alert_write_failed">写入失败(%1$d)</string>
+    <string name="alert_no_error">暂无错误</string>
+    <string name="alert_removeall_title">清空全部日志？</string>
+    <string name="alert_removeall_message">removeAll() 将删除所有日志文件，且不可恢复。</string>
+    <string name="alert_verify_error">校验异常</string>
+    <string name="duration_1min">1 分钟</string>
+    <string name="duration_1hour">1 小时</string>
+    <string name="duration_1day">1 天</string>
+    <string name="duration_7days">7 天</string>
+    <string name="duration_minutes_fmt">%1$d 分钟</string>
+    <string name="duration_hours_fmt">%1$d 小时</string>
+    <string name="duration_days_fmt">%1$d 天</string>
+
+    <!-- 并发校验 -->
+    <string name="verify_pass_title">✅ 并发校验通过</string>
+    <string name="verify_fail_title">❌ 并发校验失败</string>
+    <string name="verify_line_fmt">%1$s: %2$d/%3$d 条 %4$s\n</string>
+    <string name="verify_line_ok">✓ 顺序完整</string>
+    <string name="verify_line_order">✗ 顺序异常</string>
+    <string name="verify_line_missing">✗ 条数缺失</string>
+    <string name="verify_summary_fmt">\n文件共 %1$d 条，校验来源 %2$d 个</string>
+
+    <!-- 演示日志内容 -->
+    <string name="log_msg_fmt">这是第 %1$d 条 %2$s 日志，写于 %3$s</string>
+    <string name="log_pay_msg">订单支付失败: code=-1009 网络连接中断</string>
+    <string name="log_module_msg">子组件通过 loggerKey 写入的日志</string>
+
+    <!-- 文件列表 -->
+    <string name="filelist_title">日志文件</string>
+    <string name="filelist_summary_fmt">共 %1$d 个文件 · 总大小 %2$s</string>
+    <string name="filelist_empty">暂无日志文件</string>
+    <string name="filelist_dates_fmt">创建 %1$s · 更新 %2$s</string>
+
+    <!-- 日志查看器 -->
+    <string name="viewer_title">日志详情</string>
+    <string name="viewer_segment_all">全部</string>
+    <string name="viewer_search_hint">搜索 msg / name / tag</string>
+    <string name="viewer_empty">暂无日志</string>
+    <string name="viewer_loading">日志解析中…</string>
+
+    <!-- 日志记录 -->
+    <string name="record_parse_failed_fmt">数据解析失败: %1$s</string>
+    <string name="record_thread_main">主线程</string>
+    <string name="record_thread_sub">子线程</string>
+</resources>

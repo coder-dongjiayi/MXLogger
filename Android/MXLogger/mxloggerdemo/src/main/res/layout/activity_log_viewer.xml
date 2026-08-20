@@ -12,7 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/bg_grouped"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:title="日志详情"
+        app:title="@string/viewer_title"
         app:titleTextColor="@color/text_primary" />
 
     <HorizontalScrollView
@@ -37,7 +37,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:background="@drawable/bg_search"
-        android:hint="搜索 msg / name / tag"
+        android:hint="@string/viewer_search_hint"
         android:imeOptions="actionSearch"
         android:importantForAutofill="no"
         android:inputType="text"
@@ -79,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="日志解析中…"
+                android:text="@string/viewer_loading"
                 android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
         </LinearLayout>
@@ -89,7 +89,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="暂无日志"
+            android:text="@string/viewer_empty"
             android:textColor="@color/text_secondary"
             android:textSize="15sp"
             android:visibility="gone" />

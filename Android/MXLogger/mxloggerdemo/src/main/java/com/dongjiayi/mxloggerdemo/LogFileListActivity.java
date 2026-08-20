@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,10 +20,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 /** 日志文件列表: 演示 logFiles API */
-public class LogFileListActivity extends AppCompatActivity {
+public class LogFileListActivity extends BaseDemoActivity {
 
     private final List<JSONObject> files = new ArrayList<>();
     private FileAdapter adapter;
@@ -74,7 +72,7 @@ public class LogFileListActivity extends AppCompatActivity {
         Collections.sort(files, (a, b) ->
                 Double.compare(b.optDouble("last_timestamp", 0), a.optDouble("last_timestamp", 0)));
 
-        summary.setText(String.format(Locale.US, "共 %d 个文件 · 总大小 %s", files.size(), DemoUtil.byteText(totalSize)));
+        summary.setText(getString(R.string.filelist_summary_fmt, files.size(), DemoUtil.byteText(totalSize)));
         emptyLabel.setVisibility(files.isEmpty() ? View.VISIBLE : View.GONE);
         adapter.notifyDataSetChanged();
     }
@@ -93,7 +91,7 @@ public class LogFileListActivity extends AppCompatActivity {
             JSONObject file = files.get(position);
             String name = file.optString("name");
             holder.name.setText(name);
-            holder.dates.setText(String.format(Locale.US, "创建 %s · 更新 %s",
+            holder.dates.setText(getString(R.string.filelist_dates_fmt,
                     DemoUtil.dateText(file.optString("create_timestamp"), "MM-dd HH:mm:ss"),
                     DemoUtil.dateText(file.optString("last_timestamp"), "MM-dd HH:mm:ss")));
             holder.size.setText(DemoUtil.byteText(file.optLong("size", 0)));
