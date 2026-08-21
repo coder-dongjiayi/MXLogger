@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:isolate';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -321,6 +322,58 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(keyPtr);
   }
 
+  /// 控制台输出，格式与native端 mxlogger_console::gen_console_str 保持一致。
+  /// iOS上native的printf写的是stdout，而flutter run/AndroidStudio控制台只从统一日志系统取日志，
+  /// 抓不到native的输出(换成os_log也会被flutter工具的sender谓词过滤)，
+  /// 因此native侧控制台在初始化时关闭，统一由这里debugPrint。
+  /// Print to the console using the same layout as native mxlogger_console::gen_console_str.
+  /// On iOS the native printf writes to stdout, which `flutter run` / the Android Studio
+  /// console never reads (they only consume unified logging, and os_log would be dropped by
+  /// the flutter tool's sender predicate), so native console output is disabled at
+  /// initialization and everything is printed from here instead.
+  static void _consolePrint(int lvl, String msg, {String? name, String? tag}) {
+    if (_consoleEnable == false) return;
+
+    const int width = 100;
+    final String levelName =
+        lvl >= 0 && lvl < _levelNames.length ? _levelNames[lvl] : "$lvl";
+    final String levelIcon =
+        lvl >= 0 && lvl < _levelIcons.length ? _levelIcons[lvl] : "";
+
+    /// msg是合法JSON时格式化输出 对齐native的cJSON_Print
+    /// Pretty-print the message when it is valid JSON, matching native cJSON_Print
+    String content = msg;
+    try {
+      content = const JsonEncoder.withIndent("\t").convert(json.decode(msg));
+    } catch (_) {}
+
+    final DateTime now = DateTime.now();
+    final String time = "${now.year.toString().padLeft(4, '0')}-"
+        "${now.month.toString().padLeft(2, '0')}-"
+        "${now.day.toString().padLeft(2, '0')} "
+        "${now.hour.toString().padLeft(2, '0')}:"
+        "${now.minute.toString().padLeft(2, '0')}:"
+        "${now.second.toString().padLeft(2, '0')}."
+        "${now.microsecondsSinceEpoch.remainder(1000000).toString().padLeft(6, '0')}";
+
+    /// dart侧拿不到线程id 用isolate名代替native的 thread_id:main/child
+    /// Dart has no thread id, so the isolate name stands in for native's thread_id:main/child
+    final String isolate = Isolate.current.debugName ?? "isolate";
+
+    final StringBuffer buffer = StringBuffer();
+    buffer.writeln();
+    buffer.writeln("${"-" * (width ~/ 2)}MXLogger${"-" * (width ~/ 2)}");
+    buffer.writeln(" time : $time [$isolate]");
+    buffer.writeln(" level: $levelName $levelIcon");
+    buffer.writeln(" name : ${name ?? ""}");
+    if (tag != null) {
+      buffer.writeln(" tags : $tag");
+    }
+    buffer.writeln(" msg  : $content");
+    buffer.write("-" * (width + 8));
+    debugPrint(buffer.toString());
+  }
+
   /// 类方法：使用loggerKey写入日志（无需持有logger对象，适用于模块化场景）
   /// Class method: write a log entry via loggerKey (no logger instance needed,
   /// designed for modularized apps)
@@ -333,10 +386,7 @@ class MXLogger with WidgetsBindingObserver {
   /// tag: 标记 / tag
   static void logLoggerKey(String? loggerKey, int lvl, String msg,
       {String? name, String? tag}) {
-    if (_consoleEnable == true) {
-      debugPrint(
-          "-----------MXLogger-----------\nlevel:${_levelIcons[lvl]}${_levelNames[lvl]}\nname:$name\ntags:$tag\nmsg:$msg");
-    }
+    _consolePrint(lvl, msg, name: name, tag: tag);
     Pointer<Utf8> loggerKeyPtr =
         loggerKey != null ? loggerKey.toNativeUtf8() : nullptr;
 
@@ -556,10 +606,7 @@ class MXLogger with WidgetsBindingObserver {
   /// return: 0 success, -1 file expansion failed, -2 unmap failed, -3 mmap failed
   int log(int lvl, String msg, {String? name, String? tag}) {
     if (enable == false) return 0;
-    if (_consoleEnable == true) {
-      debugPrint(
-          "-----------MXLogger-----------\nlevel:${_levelIcons[lvl]}${_levelNames[lvl]}\nname:$name\ntags:$tag\nmsg:$msg");
-    }
+    _consolePrint(lvl, msg, name: name, tag: tag);
     Pointer<Utf8> namePtr = name != null ? name.toNativeUtf8() : nullptr;
     Pointer<Utf8> tagPtr = tag != null ? tag.toNativeUtf8() : nullptr;
     Pointer<Utf8> msgPtr = msg.toNativeUtf8();

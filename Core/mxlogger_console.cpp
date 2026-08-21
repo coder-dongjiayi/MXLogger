@@ -49,7 +49,17 @@ void mxlogger_console::print(const details::log_msg& msg){
             __android_log_write(priority,  msg.tag == nullptr ? "mxlogger" : msg.tag, console.c_str());
     #else
 
-    /// Apple/Linux/Windows 统一走标准输出
+    /// Apple/Linux/Windows 统一走标准输出。
+    /// 注意: iOS上stdout不会进入统一日志系统，flutter run/AndroidStudio控制台抓不到这里的输出
+    /// (换成os_log也不行，flutter工具的模拟器日志谓词只放行sender为Flutter.framework或App主二进制的日志，
+    ///  MXLoggerCore作为动态framework会被过滤掉)，所以flutter插件侧不开启native控制台，改由dart层debugPrint输出。
+    /// Apple/Linux/Windows all go to standard output.
+    /// Note: on iOS stdout never reaches the unified logging system, so `flutter run` /
+    /// the Android Studio console cannot capture it (os_log does not help either: the
+    /// flutter tool's simulator predicate only accepts logs whose sender image is
+    /// Flutter.framework or the app's own executable, and MXLoggerCore is a dynamic
+    /// framework). The Flutter plugin therefore keeps the native console disabled and
+    /// prints from the Dart layer instead.
     printf("%s", console.data());
     #endif
    
@@ -105,7 +115,9 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
     
     stream << " level: " + level << " " << level_icons[msg.level] << std::endl;
     
-    stream << " name : " + std::string{msg.name} <<std::endl;
+    /// name同样可能为nullptr，std::string不接受空指针构造
+    /// name may also be nullptr, and std::string cannot be constructed from one
+    stream << " name : " + std::string{msg.name == nullptr ? "" : msg.name} <<std::endl;
    
     if(msg.tag != nullptr){
         stream << " tags : " + std::string{msg.tag} << std::endl;
