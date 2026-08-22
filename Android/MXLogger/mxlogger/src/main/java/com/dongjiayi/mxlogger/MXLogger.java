@@ -232,7 +232,7 @@ public class MXLogger {
      *         / 0 success, -1 file expansion failed, -2 unmap failed, -3 mmap failed
      *         (call {@link #getErrorDesc()} for details)
      */
-    public  int log(@Nullable String tag,@Nullable int level,@Nullable String name,@Nullable String msg){
+    public  int log(@Nullable String tag, int level, @Nullable String name, @Nullable String msg){
 
        return innerLog(tag,level,msg,name);
     }
@@ -243,8 +243,8 @@ public class MXLogger {
      * Internal write implementation: detects whether the call is on the main thread,
      * then calls into native code; returns 0 immediately when logging is disabled
      */
-    private  int innerLog(@Nullable String tag,@Nullable int level,@Nullable String msg,@Nullable String name){
-        if(enable==false) return 0;
+    private  int innerLog(@Nullable String tag, int level, @Nullable String msg, @Nullable String name){
+        if(!enable) return 0;
        boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
        return native_log(nativeHandle,name,level,msg,tag,isMainThread);
     }
