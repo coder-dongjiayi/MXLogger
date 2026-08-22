@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mxlogger/flutter_mxlogger.dart';
@@ -20,6 +21,24 @@ import 'log_file_list_page.dart';
 ///  - setMaxDiskAge / setMaxDiskSize / logSize / diskcachePath / loggerKey / errorDesc
 ///  - getLogFiles / selectLogmsg
 ///  - removeExpireData / removeBeforeAllData / removeAll
+/// 控制台输出是否可用: 只有 debug 构建才有。
+/// - flutter 层 MXLogger._consolePrint 以 kDebugMode 短路，release/profile 构建
+///   整段连同调用点被 AOT tree-shake 掉；
+/// - native 层的控制台在初始化时就被显式关闭(输出统一由 flutter 层 debugPrint 发出)，
+///   且 iOS 的 native 控制台在 Release 配置下本身也已在编译期被裁掉。
+/// 所以 release/profile 下 setConsoleEnable(true) 不会有任何输出，
+/// demo 直接把开关置灰并说明原因，避免误以为"打开了却没日志"。
+///
+/// Whether console output is available at all: debug builds only.
+/// - MXLogger._consolePrint short-circuits on kDebugMode, so AOT tree-shakes the whole
+///   body and its call sites out of release/profile builds;
+/// - native console output is explicitly disabled at initialization (everything is
+///   printed from the Flutter layer instead), and on iOS the native console is stripped
+///   at compile time in the Release configuration anyway.
+/// setConsoleEnable(true) therefore prints nothing in release/profile, so the demo greys
+/// the switch out and explains why instead of leaving users wondering.
+const bool kConsoleAvailable = kDebugMode;
+
 class DemoHomePage extends StatefulWidget {
   const DemoHomePage({super.key});
 
@@ -33,7 +52,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
   String _diskCachePath = '';
 
   int _level = 0;
-  bool _consoleOn = true;
+  bool _consoleOn = kConsoleAvailable;
   bool _enableOn = true;
   bool _backgroundCleanOn = true;
   int _maxDiskAge = 60 * 60 * 24 * 7;
@@ -75,7 +94,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     // 按小时分片存储 + AES CFB-128 加密(与原生 demo 相同参数)
     final logger = await MXLogger.initialize(
         nameSpace: kDemoNamespace,
-        consoleEnable: true,
+        consoleEnable: kConsoleAvailable,
         storagePolicy: MXStoragePolicyType.yyyy_MM_dd_HH,
         fileHeader: fileHeader,
         cryptKey: kDemoCryptKey,
@@ -92,7 +111,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
       _loggerKey = logger.loggerKey ?? '';
       _diskCachePath = logger.diskcachePath;
       _level = 0;
-      _consoleOn = true;
+      _consoleOn = kConsoleAvailable;
       _enableOn = true;
       _backgroundCleanOn = true;
       _maxDiskAge = 60 * 60 * 24 * 7;
@@ -421,7 +440,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
                     footer: tr('home.section.write.footer'),
                     rows: _writeRows()),
                 _section(tr('home.section.config'),
-                    footer: tr('home.section.config.footer'),
+                    footer: tr(kConsoleAvailable
+                        ? 'home.section.config.footer'
+                        : 'home.section.config.footer.release'),
                     rows: _configRows()),
                 _section(tr('home.section.perf'),
                     footer: tr('home.section.perf.footer'),
@@ -582,13 +603,21 @@ class _DemoHomePageState extends State<DemoHomePage> {
         icon: Icons.terminal,
         tint: kLevelColors[0],
         title: tr('home.config.console.title'),
-        subtitle: tr('home.config.console.subtitle'),
+        subtitle: tr(kConsoleAvailable
+            ? 'home.config.console.subtitle'
+            : 'home.config.console.subtitle.release'),
         value: _consoleOn,
-        onChanged: (isOn) {
-          _logger?.setConsoleEnable(isOn);
-          setState(() => _consoleOn = isOn);
-          showToast(context, tr(isOn ? 'toast.console.on' : 'toast.console.off'));
-        },
+        /// release/profile 构建下控制台输出已被编译期裁掉，开关置灰(onChanged 传 null)
+        /// Console output is compiled out of release/profile builds, so the switch is
+        /// disabled there (onChanged: null)
+        onChanged: kConsoleAvailable
+            ? (isOn) {
+                _logger?.setConsoleEnable(isOn);
+                setState(() => _consoleOn = isOn);
+                showToast(
+                    context, tr(isOn ? 'toast.console.on' : 'toast.console.off'));
+              }
+            : null,
       ),
       _switchRow(
         icon: Icons.power_settings_new,
@@ -844,7 +873,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
     required String title,
     String? subtitle,
     required bool value,
-    required ValueChanged<bool> onChanged,
+    /// null 表示该开关在当前构建下不可用，Switch 自动变为置灰不可点
+    /// null means the switch is unavailable in this build; Switch renders it greyed out
+    ValueChanged<bool>? onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 6, 12, 6),
@@ -857,8 +888,11 @@ class _DemoHomePageState extends State<DemoHomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style:
-                        TextStyle(fontSize: 15, color: primaryText(context))),
+                    style: TextStyle(
+                        fontSize: 15,
+                        color: onChanged == null
+                            ? secondaryText(context)
+                            : primaryText(context))),
                 if (subtitle != null && subtitle.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(subtitle,

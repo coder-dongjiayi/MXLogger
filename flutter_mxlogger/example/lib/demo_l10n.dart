@@ -121,11 +121,15 @@ const Map<String, String> _en = {
   'home.section.config': 'Configuration',
   'home.section.config.footer':
       'level only affects disk writes; with consoleEnable on, the console still prints all logs.',
+  'home.section.config.footer.release':
+      'This is a release build: console output was stripped at compile time, so consoleEnable no longer has any effect. level still affects disk writes as usual.',
   'home.config.level.title': 'Write Level (level)',
   'home.config.level.subtitle': 'Logs below this level are not written to file',
   'home.config.console.title': 'Console Output (consoleEnable)',
   'home.config.console.subtitle':
       'Affects write performance; disable in production',
+  'home.config.console.subtitle.release':
+      'Debug builds only — stripped at compile time in release/profile',
   'home.config.enable.title': 'Master Switch (enable)',
   'home.config.enable.subtitle': 'When off, all log writing stops',
   'home.config.background.title': 'Clean Expired Files in Background',
@@ -275,10 +279,13 @@ const Map<String, String> _zhHans = {
   // 主页 - 配置
   'home.section.config': '配置',
   'home.section.config.footer': 'level 只影响磁盘写入；开启 consoleEnable 后控制台仍输出全部日志。',
+  'home.section.config.footer.release':
+      '当前为 Release 构建：控制台输出已在编译期移除，consoleEnable 不再生效；level 对磁盘写入照常有效。',
   'home.config.level.title': '写入等级 level',
   'home.config.level.subtitle': '低于该等级的日志不写入文件',
   'home.config.console.title': '控制台打印 consoleEnable',
   'home.config.console.subtitle': '影响写入性能，发布环境建议关闭',
+  'home.config.console.subtitle.release': '仅 Debug 构建有效，Release/Profile 已在编译期移除',
   'home.config.enable.title': '日志总开关 enable',
   'home.config.enable.subtitle': '关闭后所有日志停止写入',
   'home.config.background.title': '进入后台清理过期文件',

@@ -84,9 +84,19 @@ static UIImageSymbolConfiguration *MXDemoIconSymbolConfiguration(void) {
     self.subtitleLabel.hidden = (subtitle.length == 0);
     self.valueLabel.text = value;
     self.valueLabel.hidden = (value.length == 0);
+
+    /// 复位禁用态: cell 复用时上一行可能是不可用的开关行，不复位会把变淡带过来
+    /// Reset the disabled look: a reused cell may come from an unavailable switch row,
+    /// and without this the dimming would leak into the next row
+    self.titleLabel.alpha = 1.0;
+    self.iconContainer.alpha = 1.0;
 }
 
-- (void)applySwitchAccessoryOn:(BOOL)isOn tag:(NSInteger)tag target:(id)target action:(SEL)action {
+- (void)applySwitchAccessoryOn:(BOOL)isOn
+                       enabled:(BOOL)enabled
+                           tag:(NSInteger)tag
+                        target:(id)target
+                        action:(SEL)action {
     if (self.switcher == nil) {
         self.switcher = [UISwitch new];
     }
@@ -95,7 +105,15 @@ static UIImageSymbolConfiguration *MXDemoIconSymbolConfiguration(void) {
     [self.switcher removeTarget:nil action:NULL forControlEvents:UIControlEventValueChanged];
     [self.switcher addTarget:target action:action forControlEvents:UIControlEventValueChanged];
     self.switcher.on = isOn;
+    self.switcher.enabled = enabled;
     self.switcher.tag = tag;
+
+    /// 不可用时标题和图标一起变淡，让"这个开关在当前构建下没有意义"一眼可见
+    /// Dim the title and icon together when unavailable, so "this switch means nothing in
+    /// this build" reads at a glance
+    CGFloat contentAlpha = enabled ? 1.0 : 0.45;
+    self.titleLabel.alpha = contentAlpha;
+    self.iconContainer.alpha = contentAlpha;
 
     if (self.accessoryView != self.switcher) {
         self.accessoryView = self.switcher;

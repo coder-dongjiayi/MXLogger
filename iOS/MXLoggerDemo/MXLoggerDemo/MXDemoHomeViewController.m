@@ -21,6 +21,26 @@
 #import "MXLogFileListViewController.h"
 #import <MXLogger/MXLogger.h>
 
+/// 控制台输出在当前构建下是否真的有效，判据与 Core/mxlogger_build_config.h 的 Apple 分支一致。
+/// MXLogger 以源码方式集成(pod)，跟着宿主工程一起编译；Xcode 只在 Debug 配置定义 DEBUG=1，
+/// 所以 Release/Profile 构建里 mxlogger_console 整段(gen_console_str、cJSON 解析打印)
+/// 都不会进产物，consoleEnable = YES 只是记个标记、不会有任何输出。
+/// demo 据此把开关置灰并说明原因，避免"打开了却看不到日志"的困惑。
+/// Whether console output actually does anything in this build; mirrors the Apple branch of
+/// Core/mxlogger_build_config.h. MXLogger is integrated from source (pod) and compiled with
+/// the host project, and Xcode only defines DEBUG=1 in the Debug configuration — so in
+/// Release/Profile builds all of mxlogger_console (gen_console_str, the cJSON parse/print)
+/// is left out of the binary and consoleEnable = YES merely records a flag.
+/// The demo greys the switch out and says why, instead of leaving users wondering why
+/// turning it on prints nothing.
+#if defined(NDEBUG)
+    #define MXDemoConsoleAvailable 0
+#elif defined(DEBUG) || defined(_DEBUG)
+    #define MXDemoConsoleAvailable 1
+#else
+    #define MXDemoConsoleAvailable 0
+#endif
+
 static NSString * const kMXDemoNamespace = @"com.djy.mxlogger";
 static NSString * const kMXDemoCryptKey  = @"abcdefgabcdefgob";
 static NSString * const kMXDemoIV        = @"abcdefgabcdefgcc";
@@ -39,12 +59,17 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 @property (nonatomic, copy, nullable) NSString *value;
 @property (nonatomic, assign) MXDemoRowStyle style;
 @property (nonatomic, assign) BOOL switchOn;
+/// 开关是否可操作，默认 YES；NO 表示该能力在当前构建下不可用
+/// Whether the switch is interactive, YES by default; NO marks the capability
+/// as unavailable in this build
+@property (nonatomic, assign) BOOL switchEnabled;
 @property (nonatomic, copy, nullable) void (^action)(MXDemoRow *row);
 @property (nonatomic, copy, nullable) void (^switchAction)(BOOL isOn);
 @end
 @implementation MXDemoRow
 + (instancetype)rowWithIcon:(NSString *)icon tint:(UIColor *)tint title:(NSString *)title subtitle:(NSString *)subtitle {
     MXDemoRow *row = [MXDemoRow new];
+    row.switchEnabled = YES;
     row.icon = icon;
     row.tint = tint;
     row.title = title;
@@ -176,7 +201,9 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 
     self.logger.maxDiskAge = 60 * 60 * 24 * 7;      // 日志最多保留 7 天
     self.logger.maxDiskSize = 1024 * 1024 * 10;     // 日志最多占用 10 MB
-    self.logger.consoleEnable = YES;                // 控制台同步输出(发布环境建议关闭)
+    // 控制台同步输出。Release/Profile 构建下这段输出已在编译期被裁掉(见 MXDemoConsoleAvailable)，
+    // 这里如实按构建模式赋值，让 UI 上的开关状态与真实行为一致
+    self.logger.consoleEnable = MXDemoConsoleAvailable ? YES : NO;
     self.logger.level = 0;                          // 0:debug 全部写入
     self.logger.shouldRemoveExpiredDataWhenEnterBackground = YES;
 }
@@ -228,7 +255,8 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     // ---------- 配置 ----------
     MXDemoSection *configSection = [MXDemoSection new];
     configSection.title = MXDemoStr(@"home.section.config");
-    configSection.footer = MXDemoStr(@"home.section.config.footer");
+    configSection.footer = MXDemoStr(MXDemoConsoleAvailable ? @"home.section.config.footer"
+                                                            : @"home.section.config.footer.release");
 
     MXDemoRow *levelRow = [MXDemoRow rowWithIcon:@"slider.horizontal.3" tint:UIColor.systemBlueColor
                                            title:MXDemoStr(@"home.config.level.title")
@@ -238,9 +266,14 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 
     MXDemoRow *consoleRow = [MXDemoRow rowWithIcon:@"terminal.fill" tint:UIColor.systemGrayColor
                                              title:MXDemoStr(@"home.config.console.title")
-                                          subtitle:MXDemoStr(@"home.config.console.subtitle")];
+                                          subtitle:MXDemoStr(MXDemoConsoleAvailable ? @"home.config.console.subtitle"
+                                                                                    : @"home.config.console.subtitle.release")];
     consoleRow.style = MXDemoRowStyleSwitch;
     consoleRow.switchOn = self.logger.consoleEnable;
+    /// Release/Profile 构建下控制台输出已在编译期移除，开关无意义，直接置灰
+    /// Console output is stripped at compile time in Release/Profile builds, so the switch
+    /// would be meaningless there and is greyed out
+    consoleRow.switchEnabled = MXDemoConsoleAvailable;
     consoleRow.switchAction = ^(BOOL isOn) {
         weakSelf.logger.consoleEnable = isOn;
         [weakSelf toast:MXDemoStr(isOn ? @"toast.console.on" : @"toast.console.off")];
@@ -793,9 +826,10 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 
     if (row.style == MXDemoRowStyleSwitch) {
         [cell applySwitchAccessoryOn:row.switchOn
-                                tag:indexPath.section * 1000 + indexPath.row
-                             target:self
-                             action:@selector(switchChanged:)];
+                             enabled:row.switchEnabled
+                                 tag:indexPath.section * 1000 + indexPath.row
+                              target:self
+                              action:@selector(switchChanged:)];
     } else {
         [cell applyAccessoryType:(row.style == MXDemoRowStylePush) ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone];
     }

@@ -19,9 +19,16 @@ extern NSString * const MXDemoActionCellReuseId;
                  subtitle:(nullable NSString *)subtitle
                     value:(nullable NSString *)value;
 
-/// 开关行: UISwitch 由 cell 持有复用，只切状态，不每次 new
-/// Switch row: the cell owns and reuses the UISwitch, only its state is updated
-- (void)applySwitchAccessoryOn:(BOOL)isOn tag:(NSInteger)tag target:(id)target action:(SEL)action;
+/// 开关行: UISwitch 由 cell 持有复用，只切状态，不每次 new。
+/// enabled 为 NO 时开关不可点，标题与图标一并变淡，用于表示"当前构建下该能力不可用"
+/// Switch row: the cell owns and reuses the UISwitch, only its state is updated.
+/// When enabled is NO the switch is not interactive and the title/icon dim along with it,
+/// marking the capability as unavailable in this build
+- (void)applySwitchAccessoryOn:(BOOL)isOn
+                       enabled:(BOOL)enabled
+                           tag:(NSInteger)tag
+                        target:(id)target
+                        action:(SEL)action;
 
 /// 非开关行: 还原 accessory
 /// Non-switch row: restore the accessory

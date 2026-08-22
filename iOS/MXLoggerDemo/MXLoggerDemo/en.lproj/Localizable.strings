@@ -33,10 +33,12 @@
 /* Home - config section */
 "home.section.config" = "Configuration";
 "home.section.config.footer" = "level only affects disk writes; with consoleEnable on, the console still prints all logs.";
+"home.section.config.footer.release" = "This is a release build: console output was stripped at compile time, so consoleEnable no longer has any effect. level still affects disk writes as usual.";
 "home.config.level.title" = "Write Level (level)";
 "home.config.level.subtitle" = "Logs below this level are not written to file";
 "home.config.console.title" = "Console Output (consoleEnable)";
 "home.config.console.subtitle" = "Affects write performance; disable in production";
+"home.config.console.subtitle.release" = "Debug builds only — stripped at compile time in Release/Profile";
 "home.config.enable.title" = "Master Switch (enable)";
 "home.config.enable.subtitle" = "When off, all log writing stops";
 "home.config.background.title" = "Clean Expired Files in Background";

@@ -273,6 +273,35 @@ MX_TEST(file_sink, remove_all_clears_dir) {
     EXPECT_EQ(files.size(), (size_t)0);
 }
 
+MX_TEST(file_sink, expire_noop_when_no_limits) {
+    // 默认(max_age/max_size都为0=不限制)下 remove_expire_data 必须什么都不删,
+    // 且直接短路返回不做目录扫描(iOS/Flutter每次进后台都会调到这里)
+    std::string dir = mxtest::temp_dir("expire_noop");
+    mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+    write_log(sink, level::info, "keep me");
+
+    mxtest::write_dummy_file(dir + "ancient.mx", 128);
+    mxtest::set_mtime_days_ago(dir + "ancient.mx", 3650); // 十年前, 有限制时必被清掉
+    mxtest::write_dummy_file(dir + "huge.mx", 512 * 1024);
+
+    sink.remove_expire_data(); // 未设置任何限制
+
+    record_list files;
+    mxlogger::get_files(&files, dir.c_str());
+    bool has_ancient = false, has_huge = false, has_current = false;
+    for (auto& f : files) {
+        if (f["name"] == "ancient.mx") has_ancient = true;
+        if (f["name"] == "huge.mx") has_huge = true;
+        if (f["name"] == mxtest::today_prefix() + "_log.mx") has_current = true;
+    }
+    EXPECT_TRUE(has_ancient);
+    EXPECT_TRUE(has_huge);
+    EXPECT_TRUE(has_current);
+
+    // 短路后当前文件仍可正常写入
+    EXPECT_EQ(write_log(sink, level::info, "after noop"), 0);
+}
+
 MX_TEST(file_sink, expire_by_max_age) {
     std::string dir = mxtest::temp_dir("expire_age");
     mmap_sink sink(dir, "log", policy::yyyy_MM_dd);

@@ -131,8 +131,11 @@ long  base_file_sink::dir_size() const{
 
 // 删除过期文件
 void base_file_sink::remove_expire_data(){
-    
-   
+
+     if (max_disk_age_ <= 0 && max_disk_size_ <= 0) {
+         return;
+     }
+
      long   current_cache_size=0;
    
      std::vector<std::string> delete_urls;
