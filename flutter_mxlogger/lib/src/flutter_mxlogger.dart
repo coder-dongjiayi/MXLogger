@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 List<String> _levelIcons = ["🟩", "🟦", "🟨", "🟥", "❌"];
@@ -80,16 +81,22 @@ class MXLogger with WidgetsBindingObserver {
   /// Whether logging is enabled
   bool get enable => _enable;
 
-  /// 控制台打印是否开启(flutter层输出)
-  /// Whether console printing is enabled (output from the Flutter layer)
+  /// 控制台打印是否开启(flutter层输出)。
+  /// 该开关只在debug模式下有意义: release/profile构建的控制台输出已在编译期被裁掉。
+  /// Whether console printing is enabled (output from the Flutter layer).
+  /// The flag only matters in debug mode: console output is compiled out of
+  /// release/profile builds.
   bool get consoleEnable => _consoleEnable;
 
   /// 运行时开关控制台打印。
   /// native侧输出在初始化时已被禁用，日志统一由flutter层debugPrint输出，
   /// 因此这里只需要更新flutter层的开关。
+  /// release/profile构建下控制台输出整段被tree-shake掉，此时设为true也不会有任何输出。
   /// Toggle console printing at runtime.
   /// Native-side console output is disabled at initialization — all console output
   /// goes through the Flutter layer's debugPrint, so only the Flutter-side flag is updated here.
+  /// In release/profile builds console output is tree-shaken away, so passing true prints
+  /// nothing.
   void setConsoleEnable(bool enable) {
     _consoleEnable = enable;
   }
@@ -332,6 +339,14 @@ class MXLogger with WidgetsBindingObserver {
   /// the flutter tool's sender predicate), so native console output is disabled at
   /// initialization and everything is printed from here instead.
   static void _consolePrint(int lvl, String msg, {String? name, String? tag}) {
+    /// release/profile构建下直接短路。kDebugMode是编译期常量，AOT会把整个方法体连同
+    /// 调用点一起tree-shake掉，等价于native侧的MXLOGGER_CONSOLE_ENABLED。
+    /// 想在profile模式保留控制台，把条件换成 kReleaseMode。
+    /// Short-circuit in release/profile builds. kDebugMode is a compile-time constant, so AOT
+    /// tree-shakes both this body and its call sites away — the Dart counterpart of the native
+    /// MXLOGGER_CONSOLE_ENABLED. Switch the condition to kReleaseMode to keep the console in
+    /// profile mode.
+    if (kDebugMode == false) return;
     if (_consoleEnable == false) return;
 
     const int width = 100;

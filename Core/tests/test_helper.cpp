@@ -83,14 +83,19 @@ MX_TEST(helper, time_functions) {
 }
 
 MX_TEST(debug_log, short_and_long_message) {
-    // 短消息(小于内部16字节栈缓冲)
+    // 返回值格式: [级别][文件:行 函数] 消息，出错位置会一并带给 errorDesc
+    // 短消息(小于内部栈缓冲)
     std::string s = _debug_log(0, "f.cpp", "fn", 1, "%s", "hi");
-    EXPECT_EQ(s, std::string("[mxlogger_info]hi"));
+    EXPECT_EQ(s, std::string("[mxlogger_info][f.cpp:1 fn] hi"));
 
     // 长消息走resize路径，内容不能截断
     std::string long_msg(100, 'A');
     std::string l = _debug_log(1, "f.cpp", "fn", 1, "%s", long_msg.c_str());
-    EXPECT_EQ(l, std::string("[mxlogger_error]") + long_msg);
+    EXPECT_EQ(l, std::string("[mxlogger_error][f.cpp:1 fn] ") + long_msg);
+
+    // filename/func 为空指针时不能崩，降级成 "?"
+    std::string n = _debug_log(1, nullptr, nullptr, 7, "%s", "x");
+    EXPECT_EQ(n, std::string("[mxlogger_error][?:7 ?] x"));
 }
 
 MX_TEST(logger_os, thread_id) {

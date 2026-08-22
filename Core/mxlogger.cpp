@@ -244,11 +244,18 @@ int mxlogger::log(int level,const char* name, const char* msg,const char* tag,bo
     
     int result =  mmap_sink_ -> log(log_msg);
    
+    /// 发布构建下MXLOGGER_CONSOLE_ENABLED为0(Android除外，见mxlogger_console.hpp)，
+    /// 这里连判断带调用整段不编译，gen_console_str/cJSON_Print的开销和代码体积都不会进包
+    /// MXLOGGER_CONSOLE_ENABLED is 0 in release builds (except on Android, see
+    /// mxlogger_console.hpp): the check and the call are both stripped, so neither the cost
+    /// nor the code size of gen_console_str/cJSON_Print ships
+#if MXLOGGER_CONSOLE_ENABLED
     if (enable_console_ == true) {
         
         mxlogger_console::print(log_msg);
 
     }
+#endif
     return  result;
     
    

@@ -27,7 +27,10 @@ if [ -n "$SAN" ]; then
     echo ">> sanitizer: $SAN"
 fi
 
-CXXFLAGS="-std=c++17 -DFORCE_POSIX -pthread $SAN_FLAG -I$CORE -I."
+# 控制台输出和 debug_log 默认在发布构建下被编译期裁掉(见 Core/mxlogger_build_config.h)，
+# 这里手搓编译不带任何配置宏，Apple 平台会判定为发布构建，必须显式打开，
+# 否则 console_output_no_crash 用例会变成空跑、VERBOSE=1 也没有输出可看
+CXXFLAGS="-std=c++17 -DFORCE_POSIX -DMXLOGGER_CONSOLE_ENABLED=1 -DMXLOGGER_DEBUG_LOG_ENABLED=1 -pthread $SAN_FLAG -I$CORE -I."
 CFLAGS="$SAN_FLAG"
 
 echo ">> compiling C dependencies..."

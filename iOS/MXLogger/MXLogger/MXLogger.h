@@ -133,10 +133,16 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// Whether to remove expired log files when the app enters background, defaults to YES
 @property(nonatomic,assign)BOOL shouldRemoveExpiredDataWhenEnterBackground;
 
-/// 是否开启控制台打印，默认不开启。开启控制台打印会影响写入效率，建议发布模式禁用；
-/// 如果要做性能测试，要设置 consoleEnable = NO
+/// 是否开启控制台打印，默认不开启。开启控制台打印会影响写入效率；
+/// 如果要做性能测试，要设置 consoleEnable = NO。
+/// Release/Profile 构建下控制台输出已在编译期整段裁掉(连判断都不会执行)，此时设为 YES 也不会
+/// 有任何输出；确实需要在 Release 包里看日志(灰度/QA包)，在宿主 target 的
+/// GCC_PREPROCESSOR_DEFINITIONS 里加 MXLOGGER_CONSOLE_ENABLED=1 覆盖。
 /// Whether to print logs to the console, disabled by default. Console output hurts write
-/// performance — disable it in release builds, and set consoleEnable = NO for benchmarks
+/// performance — set consoleEnable = NO for benchmarks.
+/// In Release/Profile builds the console path is stripped at compile time (not even the
+/// check runs), so setting YES prints nothing. To keep it in a Release build (QA/beta),
+/// define MXLOGGER_CONSOLE_ENABLED=1 in the host target's GCC_PREPROCESSOR_DEFINITIONS.
 @property (nonatomic,assign)BOOL consoleEnable;
 
 /// 是否启用日志写入，设为 NO 时禁用日志

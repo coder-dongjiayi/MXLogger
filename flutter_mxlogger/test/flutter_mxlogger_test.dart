@@ -169,12 +169,12 @@ void main() {
     final day = '${now.year}-${two(now.month)}-${two(now.day)}';
     final month = '${now.year}-${two(now.month)}';
 
-    test('yyyy_MM_dd(默认): 文件名为 日期_fileName.mx, 默认fileName=log', () {
+    test('yyyy_MM_dd(默认): 文件名为 日期_fileName.mx, 默认fileName=mxlog', () {
       final logger =
           MXLogger(nameSpace: uniqueNs(), directory: newDir('sp1').path);
       logger.debug('hello');
       final files = logger.getLogFiles();
-      expect(files.single.name, '${day}_log.mx');
+      expect(files.single.name, '${day}_mxlog.mx');
     });
 
     test('yyyy_MM_dd_HH: 文件名含小时', () {
@@ -197,7 +197,7 @@ void main() {
       final name = logger.getLogFiles().single.name!;
       expect(name, startsWith('${now.year}-'));
       expect(name, contains('w'));
-      expect(name, endsWith('_log.mx'));
+      expect(name, endsWith('_mxlog.mx'));
     });
 
     test('yyyy_MM: 文件名为 年月_fileName.mx', () {
@@ -206,7 +206,7 @@ void main() {
           directory: newDir('sp4').path,
           storagePolicy: MXStoragePolicyType.yyyy_MM);
       logger.debug('hello');
-      expect(logger.getLogFiles().single.name, '${month}_log.mx');
+      expect(logger.getLogFiles().single.name, '${month}_mxlog.mx');
     });
 
     test('自定义fileName生效', () {

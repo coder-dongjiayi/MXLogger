@@ -16,6 +16,8 @@
 #include "json/cJSON.h"
 namespace mxlogger{
 
+#if MXLOGGER_CONSOLE_ENABLED
+
 void mxlogger_console::print(const details::log_msg& msg){
 
     std::string console = gen_console_str(msg);
@@ -136,6 +138,24 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
     return stream.str();
 }
 
+#else
+
+/// 编译期关闭时保留空实现: OC的consoleEnable/JNI/flutter bridge都还引用着这条链路，
+/// 符号必须存在，否则ABI断裂；调用点已在mxlogger.cpp里整段裁掉，这里不会被执行到。
+/// Keep empty definitions when the console is compiled out: the OC consoleEnable property,
+/// the JNI bridge and the flutter bridges all still reference this path, so the symbols must
+/// remain or the ABI breaks. The call site itself is stripped in mxlogger.cpp, so these are
+/// never reached.
+void mxlogger_console::print(const details::log_msg& msg){
+    (void)msg;
+}
+
+std::string mxlogger_console::gen_console_str(const details::log_msg& msg){
+    (void)msg;
+    return {};
+}
+
+#endif
 
 }
 

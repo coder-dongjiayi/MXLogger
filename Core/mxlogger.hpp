@@ -105,8 +105,15 @@ public:
     /// Enable or disable logging; when disabled, log() returns immediately
     void set_enable(bool enable);
 
-    /// 是否开启控制台输出
-    /// Enable or disable console output
+    /// 是否开启控制台输出。
+    /// 注意: 发布构建(iOS/macOS的Release/Profile、Linux/Windows的NDEBUG构建)下控制台整段
+    /// 被编译期裁掉(见mxlogger_console.hpp的MXLOGGER_CONSOLE_ENABLED)，此时本方法只是记下
+    /// 标记，不会有任何输出；Android发的是预编译aar，不参与裁剪，仍是纯运行时开关。
+    /// Enable or disable console output.
+    /// Note: in release builds (Release/Profile on iOS/macOS, NDEBUG builds on Linux/Windows)
+    /// the console is stripped at compile time (see MXLOGGER_CONSOLE_ENABLED in
+    /// mxlogger_console.hpp), so this only records the flag and nothing is printed. Android
+    /// ships a prebuilt aar, is excluded from stripping and stays purely runtime-gated.
     void set_enable_console(bool enable);
 
     /// 设置日志文件最大字节数(byte)，0 为不限制；超限清理在调用 remove_expire_data 时执行

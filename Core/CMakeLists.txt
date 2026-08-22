@@ -78,6 +78,7 @@ add_library(MXLoggerCore
         # Provides a relative path to your source file(s).
         debug_log.cpp
         debug_log.hpp
+        mxlogger_build_config.h
         log_enum.h
         log_msg.cpp
         log_msg.hpp

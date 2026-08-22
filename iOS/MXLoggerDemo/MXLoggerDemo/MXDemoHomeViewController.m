@@ -109,7 +109,10 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 
     [self applyLocalization];
     [self buildSections];
-    [self refreshStatus];
+    /// 这里不调 refreshStatus: viewWillAppear 紧接着一定会调一次，
+    /// 在 push 动画开始前多做一趟目录遍历纯属浪费
+    /// refreshStatus is not called here: viewWillAppear always calls it right after, so an
+    /// extra directory walk before the push animation starts is pure waste
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -685,9 +688,17 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
 #pragma mark - 状态刷新
 
 - (void)refreshStatus {
-    NSUInteger logSize = self.logger.logSize;
+    /// logSize 和 logFiles 各自会遍历一遍日志目录，logFiles 的每项已经带 size，
+    /// 所以只取 logFiles 再自己求和，省掉一趟遍历
+    /// logSize and logFiles each walk the log directory, and every logFiles entry already
+    /// carries its size, so only logFiles is called and the total is summed here instead
+    NSArray<NSDictionary<NSString *, NSString *> *> *files = [self.logger logFiles];
+    NSUInteger logSize = 0;
+    for (NSDictionary<NSString *, NSString *> *file in files) {
+        logSize += (NSUInteger)[file[@"size"] longLongValue];
+    }
     self.sizeValueLabel.text = [self byteText:logSize];
-    self.filesValueLabel.text = [NSString stringWithFormat:@"%lu", (unsigned long)[self.logger logFiles].count];
+    self.filesValueLabel.text = [NSString stringWithFormat:@"%lu", (unsigned long)files.count];
     self.levelValueLabel.text = [self levelName:self.logger.level];
     self.policyValueLabel.text = MXDemoStr(@"home.card.policy.hourly");
     self.namespaceLabel.text = [NSString stringWithFormat:MXDemoStr(@"home.card.namespace.fmt"), kMXDemoNamespace];
@@ -781,17 +792,12 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     [cell configureWithIcon:row.icon tint:row.tint title:row.title subtitle:row.subtitle value:row.value];
 
     if (row.style == MXDemoRowStyleSwitch) {
-        UISwitch *switcher = [UISwitch new];
-        switcher.on = row.switchOn;
-        switcher.tag = indexPath.section * 1000 + indexPath.row;
-        [switcher addTarget:self action:@selector(switchChanged:) forControlEvents:UIControlEventValueChanged];
-        cell.accessoryView = switcher;
-        cell.accessoryType = UITableViewCellAccessoryNone;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        [cell applySwitchAccessoryOn:row.switchOn
+                                tag:indexPath.section * 1000 + indexPath.row
+                             target:self
+                             action:@selector(switchChanged:)];
     } else {
-        cell.accessoryView = nil;
-        cell.accessoryType = (row.style == MXDemoRowStylePush) ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone;
-        cell.selectionStyle = UITableViewCellSelectionStyleDefault;
+        [cell applyAccessoryType:(row.style == MXDemoRowStylePush) ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone];
     }
     return cell;
 }
