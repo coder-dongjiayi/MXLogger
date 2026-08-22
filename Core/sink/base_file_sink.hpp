@@ -67,9 +67,15 @@ public:
     
     // 文件最大存储时间 默认为0 不限制
     void set_max_disk_age(long long max_age);
-    
+
     // 文件最大存储大小 默认为0 不限制
     void set_max_disk_size(long long max_size);
+
+    // 文件最大存储时间(秒) 0为不限制
+    long long max_disk_age() const;
+
+    // 文件最大存储大小(byte) 0为不限制
+    long long max_disk_size() const;
     
     // 删除过期文件
     void remove_expire_data();

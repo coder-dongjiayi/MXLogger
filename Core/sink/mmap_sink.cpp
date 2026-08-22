@@ -35,14 +35,34 @@ namespace mxlogger{
 namespace sinks{
 mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,policy::storage_policy policy):base_file_sink(dir_path,filename,policy),page_size_(os_page_size()){
 
-    
-    open();
+    /// 构造时失败(如目录暂不可写)不致命：write_data_每次写入前会走同一条恢复路径重试
+    /// A failure here (e.g. the directory is temporarily unwritable) is not fatal:
+    /// write_data_ retries through this same recovery path before every write
+    recover_mmap_();
+}
+
+bool mmap_sink::recover_mmap_(){
+
+    /// fd丢失(初次open失败或映射失败)时重开文件，open对不存在的文件会重新创建
+    /// Reopen the file when the fd is lost (initial open or a mapping failed);
+    /// open() recreates the file when it no longer exists
+    if (file_ident < 0 && open() == false) {
+        return false;
+    }
+
     file_size_ = get_file_size();
     if (file_size_ == 0) {
-        truncate_(0);
-        
-    }else{
-        mmap_();
+        /// 空文件先按页对齐扩容，truncate_内部会完成映射
+        /// Page-align the empty file first; truncate_ establishes the mapping itself
+        if (truncate_(0) != 0) {
+            return false;
+        }
+    }else if (mmap_ptr_ == nullptr && mmap_() == false) {
+        return false;
+    }
+
+    if (mmap_ptr_ == nullptr) {
+        return false;
     }
 
     actual_size_ = get_actual_size_();
@@ -54,10 +74,9 @@ mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,po
     /// writes run out of bounds, so reset to 0 and start over
     if (actual_size_ + offset_length > file_size_) {
         actual_size_ = 0;
-        if (mmap_ptr_ != nullptr) {
-            write_actual_size_(0);
-        }
+        write_actual_size_(0);
     }
+    return true;
 }
 mmap_sink::~mmap_sink(){
     munmap_();
@@ -101,6 +120,18 @@ int mmap_sink::log_(const details::log_msg& msg){
 
 int mmap_sink::write_data_(const void* buffer, size_t buffer_size){
 
+    /// 0、映射缺失(构造失败或上次映射失败)时先自愈：重开文件/重建映射并从
+    /// 文件头恢复actual_size_，防止内存中的偏移与磁盘脱节；仍失败则放弃本次写入。
+    /// 必须在计算total之前做，否则会用失效的actual_size_/file_size_推算扩容
+    /// 0. Self-heal first when the mapping is missing (construction or a previous
+    /// mapping failed): reopen the file / re-establish the mapping and restore
+    /// actual_size_ from the file header so the in-memory offset cannot drift from
+    /// the on-disk state; give up this write if recovery still fails. This must run
+    /// before computing total — otherwise the expansion math uses stale
+    /// actual_size_ / file_size_
+    if (mmap_ptr_ == nullptr && recover_mmap_() == false) {
+        return -3;
+    }
 
     ///1.、需要写入字节总大小 = 当前文件真实长度 + 需要写入buffer的长度 + offset_length
 
@@ -121,11 +152,6 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size){
         if(r != 0){
             return r;
         }
-    }
-
-    /// 之前映射失败(如磁盘满、权限异常)会导致mmap_ptr_为空，重新尝试映射，仍失败则放弃本次写入
-    if (mmap_ptr_ == nullptr && mmap_() == false) {
-        return -3;
     }
 
     uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
@@ -230,9 +256,13 @@ bool mmap_sink::mmap_(){
     file_mapping_ = CreateFileMappingW(file_handle, NULL, PAGE_READWRITE,
                                        (DWORD)(((uint64_t)file_size_) >> 32),
                                        (DWORD)(file_size_ & 0xFFFFFFFF), NULL);
+    /// 映射失败不close文件fd：fd是sink的生命周期资源，关掉它会把瞬时失败
+    /// (如内存压力)变成永久失败——后续写入的重映射自愈全靠这个fd
+    /// Do NOT close the file fd on mapping failure: the fd is a lifetime resource of
+    /// the sink, and closing it turns a transient failure (e.g. memory pressure) into
+    /// a permanent one — the re-mapping self-healing on later writes depends on it
     if (file_mapping_ == nullptr) {
         error_record = MXLoggerError("[mxlogger_error]CreateFileMapping error:%lu\n",GetLastError());
-        close();
         return false;
     }
 
@@ -241,7 +271,6 @@ bool mmap_sink::mmap_(){
         error_record = MXLoggerError("[mxlogger_error]MapViewOfFile error:%lu\n",GetLastError());
         CloseHandle((HANDLE)file_mapping_);
         file_mapping_ = nullptr;
-        close();
         return false;
     }
 #else
@@ -252,8 +281,8 @@ bool mmap_sink::mmap_(){
 
         error_record = MXLoggerError("[mxlogger_error]start_mmap error:%s\n",strerror(errno));
 
-        close();
-
+        /// 同上：保住fd，等下一次写入时recover_mmap_重试映射
+        /// Same as above: keep the fd so recover_mmap_ can retry on the next write
         return  false;
     }
 #endif

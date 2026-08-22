@@ -76,8 +76,13 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,
                                          const char* cryptKey,
                                          const char* iv){
 
+    /// directory为空时get_diskcache_path_返回空串；std::string::data()永不为nullptr，
+    /// 必须用empty()判断，否则会构造出一个dir_path_为空、只能写进cwd的坏logger
+    /// get_diskcache_path_ returns "" when directory is null; std::string::data()
+    /// never returns nullptr, so empty() is the correct check — otherwise a broken
+    /// logger with an empty dir_path_ (writing into the cwd) would be constructed
     std::string diskcache_path = get_diskcache_path_(ns,directory);
-    if (diskcache_path.data() == nullptr) {
+    if (diskcache_path.empty()) {
         return nullptr;
     }
     
@@ -219,6 +224,26 @@ long  mxlogger::dir_size(){
 
 void mxlogger::set_log_level(int level){
     mmap_sink_ -> set_level(mxlogger_helper::level_(level));
+}
+
+bool mxlogger::is_enable() const{
+    return enable_;
+}
+
+bool mxlogger::is_enable_console() const{
+    return enable_console_;
+}
+
+int mxlogger::log_level() const{
+    return static_cast<int>(mmap_sink_ -> level());
+}
+
+long long mxlogger::file_max_size() const{
+    return mmap_sink_ -> max_disk_size();
+}
+
+long long mxlogger::file_max_age() const{
+    return mmap_sink_ -> max_disk_age();
 }
 
 void mxlogger::flush(){

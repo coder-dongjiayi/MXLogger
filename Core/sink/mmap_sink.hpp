@@ -52,6 +52,13 @@ private:
 
     int write_data_(const void* buffer, size_t buffer_size);
 
+    /// 建立(或恢复)文件映射：fd丢失时重开文件，空文件先做页对齐扩容，
+    /// 成功后从文件头恢复actual_size_；构造和写入自愈共用此路径
+    /// Establish (or recover) the file mapping: reopen the file when the fd is lost,
+    /// page-align an empty file first, and restore actual_size_ from the file header
+    /// on success; shared by the constructor and the write-time self-healing path
+    bool recover_mmap_();
+
     int truncate_(size_t size);
 
     bool mmap_();

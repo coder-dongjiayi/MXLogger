@@ -604,6 +604,29 @@ void main() {
       expect(readBack(reopened), hasLength(2));
       MXLogger.destroyWithLoggerKey(key);
     });
+
+    test('同参数重复构造出的多个实例 destroy后全部失效', () {
+      final dir = newDir('dup');
+      final ns = uniqueNs();
+      // 两个Dart实例共享同一个native对象(core按namespace+directory去重)
+      final first = MXLogger(nameSpace: ns, directory: dir.path);
+      final second = MXLogger(nameSpace: ns, directory: dir.path);
+      expect(first.loggerKey, second.loggerKey);
+      first.info('a');
+      second.info('b');
+
+      MXLogger.destroy(nameSpace: ns, directory: dir.path);
+
+      // 两个实例都必须被失效: enable为false且写入安全短路,
+      // 否则先注册的实例会带着悬垂句柄继续调用native(use-after-free)
+      expect(first.enable, isFalse, reason: '先构造的实例destroy后也必须失效');
+      expect(second.enable, isFalse);
+      expect(first.info('after-destroy'), 0);
+      expect(second.info('after-destroy'), 0);
+      // 生命周期回调同样不能再触碰native对象
+      first.didChangeAppLifecycleState(AppLifecycleState.paused);
+      second.didChangeAppLifecycleState(AppLifecycleState.paused);
+    });
   });
 
   // ---------------------------------------------------------------

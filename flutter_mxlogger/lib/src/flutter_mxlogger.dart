@@ -178,7 +178,6 @@ class MXLogger with WidgetsBindingObserver {
     _cryptKey = cryptKey;
     _iv = iv;
     _consoleEnable = consoleEnable;
-    WidgetsBinding.instance.addObserver(this);
 
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
     Pointer<Utf8> drPtr = directory.toNativeUtf8();
@@ -220,11 +219,31 @@ class MXLogger with WidgetsBindingObserver {
 
     _nameSpace = nameSpace;
     _directory = directory;
-    /// 注册到实例表：destroy时据此失效对应实例，防止use-after-free
-    /// Register into the instance map so destroy can invalidate this instance
+
+    /// native初始化失败(如目录不可创建)时句柄为0：直接禁用本实例，
+    /// 后续调用全部安全短路，而不是带着空句柄进native造成崩溃
+    /// The handle is null when native initialization fails (e.g. the directory
+    /// cannot be created): disable this instance so every later call
+    /// short-circuits safely instead of passing a null handle into native code
+    if (_handle == nullptr) {
+      _enable = false;
+      return;
+    }
+
+    WidgetsBinding.instance.addObserver(this);
+
+    /// 注册到实例表：destroy时据此失效对应实例，防止use-after-free。
+    /// 同一nameSpace+directory重复构造时底层native对象是同一个，注册表按key
+    /// 保存全部Dart实例，destroy时逐一失效——只保留最后一个会让先前的实例
+    /// 带着悬垂句柄和生命周期监听继续运行
+    /// Register into the instance map so destroy can invalidate this instance.
+    /// Duplicate constructions with the same nameSpace + directory share one native
+    /// object, so the registry keeps every Dart instance per key and destroy
+    /// invalidates them all — keeping only the last one would leave earlier
+    /// instances running with a dangling handle and lifecycle observer
     final String? registerKey = getLoggerKey();
     if (registerKey != null) {
-      _instanceMap[registerKey] = this;
+      _instanceMap.putIfAbsent(registerKey, () => <MXLogger>[]).add(this);
     }
   }
 
@@ -289,17 +308,20 @@ class MXLogger with WidgetsBindingObserver {
   /// null directory
   static void destroy({required String nameSpace, String? directory}) {
     final List<String> keys = [];
-    _instanceMap.forEach((key, logger) {
-      if (logger._nameSpace == nameSpace &&
-          (directory == null || logger._directory == directory)) {
+    _instanceMap.forEach((key, loggers) {
+      if (loggers.any((logger) =>
+          logger._nameSpace == nameSpace &&
+          (directory == null || logger._directory == directory))) {
         keys.add(key);
       }
     });
     for (final String key in keys) {
-      final MXLogger? logger = _instanceMap.remove(key);
-      if (logger == null) continue;
-      final String? dr = directory ?? logger._directory;
-      logger._invalidate();
+      final List<MXLogger>? loggers = _instanceMap.remove(key);
+      if (loggers == null || loggers.isEmpty) continue;
+      final String? dr = directory ?? loggers.first._directory;
+      for (final MXLogger logger in loggers) {
+        logger._invalidate();
+      }
       _destroyNative(nameSpace, dr);
     }
     /// 没有匹配的Dart实例时保持原有透传行为
@@ -322,8 +344,8 @@ class MXLogger with WidgetsBindingObserver {
   /// Release the logger identified by loggerKey; the matching Dart instance
   /// is invalidated first
   static void destroyWithLoggerKey(String loggerKey) {
-    final MXLogger? logger = _instanceMap.remove(loggerKey);
-    logger?._invalidate();
+    final List<MXLogger>? loggers = _instanceMap.remove(loggerKey);
+    loggers?.forEach((logger) => logger._invalidate());
     Pointer<Utf8> keyPtr = loggerKey.toNativeUtf8();
     _destroyWithLoggerKey(keyPtr);
     calloc.free(keyPtr);
@@ -620,7 +642,11 @@ class MXLogger with WidgetsBindingObserver {
   /// 返回值: 0 成功 -1 扩容失败 -2 解除映射失败 -3 映射失败
   /// return: 0 success, -1 file expansion failed, -2 unmap failed, -3 mmap failed
   int log(int lvl, String msg, {String? name, String? tag}) {
-    if (enable == false) return 0;
+    /// _handle判空是兜底：失效/初始化失败的实例_enable必为false，
+    /// 但绝不能把空句柄传进native
+    /// The null-handle check is a backstop: an invalidated or failed instance
+    /// always has _enable == false, but a null handle must never reach native code
+    if (enable == false || _handle == nullptr) return 0;
     _consolePrint(lvl, msg, name: name, tag: tag);
     Pointer<Utf8> namePtr = name != null ? name.toNativeUtf8() : nullptr;
     Pointer<Utf8> tagPtr = tag != null ? tag.toNativeUtf8() : nullptr;
@@ -856,10 +882,12 @@ class MXLogger with WidgetsBindingObserver {
   String? _nameSpace;
   String? _directory;
 
-  /// loggerKey -> 实例注册表：destroy时据此找到并失效对应的Dart实例
+  /// loggerKey -> 实例注册表：destroy时据此找到并失效对应的Dart实例。
+  /// 值为列表：同一key重复构造出的多个Dart实例共享同一个native对象，必须全部失效
   /// loggerKey -> instance registry; destroy uses it to locate and invalidate
-  /// the matching Dart instances
-  static final Map<String, MXLogger> _instanceMap = {};
+  /// the matching Dart instances. The value is a list: duplicate constructions
+  /// under one key share a single native object, so every instance must be invalidated
+  static final Map<String, List<MXLogger>> _instanceMap = {};
 
   /// 失效当前实例：移除生命周期监听、关闭错误文件流并清空native句柄。
   /// 否则destroy之后App进入后台触发的清理回调会拿着已释放的native指针调用，

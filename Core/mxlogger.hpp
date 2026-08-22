@@ -151,6 +151,32 @@ public:
     /// Set the log storage level; logs below this level are not written
     void set_log_level(int level);
 
+    /// 以下getter供平台封装层查询真实状态，避免各语言层各自缓存导致
+    /// 共享同一logger的多个封装对象读到过期配置（native是唯一事实源）
+    /// The getters below let platform wrappers query the real state instead of
+    /// caching it per wrapper object — with shared loggers those caches go stale;
+    /// the native instance is the single source of truth
+
+    /// 日志写入是否开启
+    /// Whether logging is enabled
+    bool is_enable() const;
+
+    /// 控制台输出是否开启
+    /// Whether console output is enabled
+    bool is_enable_console() const;
+
+    /// 当前日志存储等级：0 debug 1 info 2 warn 3 error 4 fatal
+    /// Current log storage level: 0 debug, 1 info, 2 warn, 3 error, 4 fatal
+    int log_level() const;
+
+    /// 日志文件最大字节数(byte)，0为不限制
+    /// Maximum total size of log files in bytes, 0 means unlimited
+    long long file_max_size() const;
+
+    /// 日志文件最大存储时长(秒)，0为不限制
+    /// Maximum age of log files in seconds, 0 means unlimited
+    long long file_max_age() const;
+
     /// 将缓冲区数据强制刷入磁盘，基于 mmap 写入通常不需要手动调用
     /// Force-flush buffered data to disk; rarely needed since writes go through mmap
     void flush();

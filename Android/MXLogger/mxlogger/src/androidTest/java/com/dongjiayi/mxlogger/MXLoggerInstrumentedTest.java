@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -156,6 +158,71 @@ public class MXLoggerInstrumentedTest {
         // 不同 namespace -> 不同key
         MXLogger c = newLogger();
         assertNotEquals(a.getLoggerKey(), c.getLoggerKey());
+    }
+
+    @Test
+    public void sharedInstancesSeeSameConfiguration() {
+        // 回归: 配置曾按Java对象缓存, 共享同一native对象的第二个实例读到过期默认值;
+        // 现在getter直查native, 任一实例的修改对所有实例实时可见
+        String ns = uniqueNs();
+        String dir = newDir("share").getAbsolutePath();
+        MXLogger a = new MXLogger(context, ns, dir,
+                MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
+        MXLogger b = new MXLogger(context, ns, dir,
+                MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
+
+        a.setLevel(3);
+        a.setConsoleEnable(true);
+        a.setMaxDiskAge(3600);
+        a.setMaxDiskSize(2048);
+        a.setEnable(false);
+
+        assertEquals("level应对共享实例实时一致", 3, b.getLevel());
+        assertTrue(b.isConsoleEnable());
+        assertEquals(3600, b.getMaxDiskAge());
+        assertEquals(2048, b.getMaxDiskSize());
+        assertFalse("enable应对共享实例实时一致", b.isEnable());
+
+        a.setEnable(true);
+        a.setConsoleEnable(false);
+    }
+
+    @Test
+    public void initializeFactoryReturnsSameInstance() {
+        // initialize工厂: 同nameSpace+directory复用同一个Java实例(与iOS/Flutter对齐)
+        String ns = uniqueNs();
+        String dir = newDir("factory").getAbsolutePath();
+        MXLogger a = MXLogger.initialize(context, ns, dir,
+                MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
+        MXLogger b = MXLogger.initialize(context, ns, dir,
+                MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
+        assertSame("同参数initialize应返回同一个Java实例", a, b);
+
+        MXLogger c = MXLogger.initialize(context, uniqueNs(), null,
+                MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
+        assertNotSame(a, c);
+    }
+
+    @Test
+    public void destroyInvalidatesAllJavaInstances() throws IOException {
+        // 回归: destroy后旧实例的句柄必须失效, 后续调用安全短路而不是use-after-free
+        String ns = uniqueNs();
+        String dir = newDir("invalidate").getAbsolutePath();
+        MXLogger a = new MXLogger(context, ns, dir,
+                MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
+        MXLogger b = new MXLogger(context, ns, dir,
+                MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
+        assertEquals(0, a.info("t", "n", "before"));
+
+        MXLogger.destroy(context, ns, dir);
+
+        // -4: 无效句柄; 所有读写都不得触碰已释放的native对象
+        assertEquals(-4, a.info("t", "n", "after"));
+        assertEquals(-4, b.info("t", "n", "after"));
+        assertFalse(a.isEnable());
+        assertEquals(0, a.getLogSize());
+        a.removeExpireData();
+        b.removeAll();
     }
 
     @Test

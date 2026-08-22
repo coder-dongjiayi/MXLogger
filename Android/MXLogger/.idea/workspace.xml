@@ -14,8 +14,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6f37451f-1a2b-4981-b9bd-dc2de2276b5d" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/mxlogger/src/androidTest/java/com/dongjiayi/mxlogger/MXLoggerInstrumentedTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/androidTest/java/com/dongjiayi/mxlogger/MXLoggerInstrumentedTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/flutter-bridge.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/cpp/navtive-bridge.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" beforeDir="false" afterPath="$PROJECT_DIR$/mxlogger/src/main/java/com/dongjiayi/mxlogger/MXLogger.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/mxlogger.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/mxlogger.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/sink/base_file_sink.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/sink/base_file_sink.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/sink/base_file_sink.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/sink/base_file_sink.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/sink/mmap_sink.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/sink/mmap_sink.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/sink/mmap_sink.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/sink/mmap_sink.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Core/tests/test_mmap_file.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Core/tests/test_mmap_file.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/lib/src/flutter_mxlogger.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/lib/src/flutter_mxlogger.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter_mxlogger/test/flutter_mxlogger_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter_mxlogger/test/flutter_mxlogger_test.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/project.xcworkspace/xcuserdata/dongjiayi.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/xcshareddata/xcschemes/MXLoggerDemo.xcscheme" beforeDir="false" afterPath="$PROJECT_DIR$/../../iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj/xcshareddata/xcschemes/MXLoggerDemo.xcscheme" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,7 +39,7 @@
     <option name="clangTidyViaClangd" value="false" />
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=PhysicalDevice, isTemplate=false, identifier=serial=CLB0219309002436)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />

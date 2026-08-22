@@ -114,6 +114,12 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_logmsg)(int number, char **array, uint3
 /// (name/size/last_timestamp/create_timestamp); returns the file count.
 /// The output memory is freed by the Dart side while iterating
 MXLOGGER_EXPORT int MXLOGGERR_FUNC(get_logfiles)(void *handle,char ****array_ptr,uint32_t ***size_array_ptr){
+    /// initialize失败返回0句柄，Dart侧虽已判空短路，这里仍判空兜底，
+    /// 防止其他FFI调用方(如analyzer)带空句柄进来解引用崩溃
+    /// initialize returns a 0 handle on failure; the Dart side already short-circuits,
+    /// but the check here is a backstop for other FFI callers (e.g. the analyzer)
+    /// passing a null handle in
+    if (handle == nullptr) return 0;
     mx_logger *logger = static_cast<mx_logger*>(handle);
 
     std::vector<std::map<std::string, std::string>> destination;
@@ -196,6 +202,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerKey)(const char* logger_key
 /// (currently not bound on the Dart side — console output goes through the Flutter
 /// layer's debugPrint; the symbol is kept for backward compatibility)
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_enable)(void *handle, int enable){
+    if (handle == nullptr) return;
     mx_logger *logger = static_cast<mx_logger*>(handle);
     logger->set_enable_console(enable);
 }
@@ -203,6 +210,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_enable)(void *handle, int enable
 /// 开启/禁用日志写入 1开启 0禁用
 /// Enable or disable logging: 1 to enable, 0 to disable
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_enable)(void *handle,int enable){
+    if (handle == nullptr) return;
     mx_logger *logger = static_cast<mx_logger*>(handle);
     logger ->set_enable(enable == 1 ? true : false);
 }
@@ -211,6 +219,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_enable)(void *handle,int enable){
 /// 设置日志文件最大存储时长(秒)
 /// Set the maximum age of log files in seconds
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_age)(void *handle,int max_age){
+    if (handle == nullptr) return;
     mx_logger *logger = static_cast<mx_logger*>(handle);
 
     logger->set_file_max_age(max_age);
@@ -225,7 +234,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_age)(void *handle,int max_age){
 /// plenty for logs); `long` must be avoided — 4 bytes on 32-bit Android but 8 bytes on
 /// 64-bit, so its width drifts with the architecture and mismatches the Dart declaration
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_size)( void *handle,int32_t max_size){
-
+    if (handle == nullptr) return;
     mx_logger *logger = static_cast<mx_logger*>(handle);
     logger->set_file_max_size(max_size);
 }
@@ -234,6 +243,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_size)( void *handle,int32_t max
 /// Get the total size of stored logs in bytes;
 /// returns int32_t to exactly match Int32 on the Dart side
 MXLOGGER_EXPORT int32_t MXLOGGERR_FUNC(get_log_size)(void *handle){
+    if (handle == nullptr) return 0;
     mx_logger *logger = static_cast<mx_logger*>(handle);
     return (int32_t)logger->dir_size();
 }
@@ -241,6 +251,7 @@ MXLOGGER_EXPORT int32_t MXLOGGERR_FUNC(get_log_size)(void *handle){
 /// 设置写入文件的日志等级 低于该等级的日志不会写入
 /// Set the minimum level written to file; logs below this level are not written
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_level)(void *handle,int level){
+    if (handle == nullptr) return;
     mx_logger *logger = static_cast<mx_logger*>(handle);
     logger->set_log_level(level);
 
@@ -256,6 +267,7 @@ static char * mx_copy_string_(const char *str){
 /// 获取logger的唯一标识loggerKey (nameSpace+directory的md5值)
 /// Get the logger's unique key (the md5 of nameSpace + directory)
 MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerKey)(void *handle){
+    if (handle == nullptr) return nullptr;
     mx_logger *logger = static_cast<mx_logger*>(handle);
     return mx_copy_string_(logger->logger_key());
 }
@@ -263,6 +275,7 @@ MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerKey)(void *handle){
 /// 获取日志文件磁盘缓存目录
 /// Get the disk-cache directory of the log files
 MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_diskcache_path)(void *handle){
+    if (handle == nullptr) return nullptr;
     mx_logger *logger = static_cast<mx_logger*>(handle);
     return mx_copy_string_(logger->diskcache_path());
 }
@@ -270,6 +283,7 @@ MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_diskcache_path)(void *handle){
 /// 获取最近一次写入失败的错误信息
 /// Get the most recent write-error description
 MXLOGGER_EXPORT char * MXLOGGERR_FUNC(get_error_desc)(void *handle){
+    if (handle == nullptr) return nullptr;
     mx_logger *logger = static_cast<mx_logger*>(handle);
     return mx_copy_string_(logger->error_desc());
 }
@@ -283,6 +297,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_string)(char *str){
 /// 删除除当前正在写入文件之外的所有日志文件
 /// Remove all log files except the one currently being written
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_before_all_data)(void *handle){
+    if (handle == nullptr) return;
     mx_logger *logger = static_cast<mx_logger*>(handle);
     logger->remove_before_all();
 }
@@ -290,6 +305,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_before_all_data)(void *handle){
 /// 清理过期日志文件
 /// Remove expired log files
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_expire_data)(void *handle){
+    if (handle == nullptr) return;
     mx_logger *logger = static_cast<mx_logger*>(handle);
 
     logger->remove_expire_data();
@@ -298,6 +314,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_expire_data)(void *handle){
 /// 删除所有日志文件
 /// Remove all log files
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(void *handle){
+    if (handle == nullptr) return;
     mx_logger *logger = static_cast<mx_logger*>(handle);
 
     logger->remove_all();
@@ -323,6 +340,8 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const c
 /// Write a log entry via the handle
 /// Returns 0 success, -1 file expansion failed, -2 unmap failed, -3 mmap failed
 MXLOGGER_EXPORT int MXLOGGERR_FUNC(log)(void *handle,const char* name, int lvl,const char* msg,const char* tag){
+    /// -4: 无效句柄(初始化失败) / -4: invalid handle (initialization failed)
+    if (handle == nullptr) return -4;
     mx_logger *logger = static_cast<mx_logger*>(handle);
 
    return logger->log(lvl,name,msg,tag,true);

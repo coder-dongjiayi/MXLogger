@@ -102,6 +102,14 @@ void base_file_sink::set_max_disk_size(long long max_size){
     MXLoggerInfo("max_size:%lld byte",max_size);
 }
 
+long long base_file_sink::max_disk_age() const{
+    return max_disk_age_;
+}
+
+long long base_file_sink::max_disk_size() const{
+    return max_disk_size_;
+}
+
 long  base_file_sink::dir_size() const{
    
     long   current_cache_size=0;

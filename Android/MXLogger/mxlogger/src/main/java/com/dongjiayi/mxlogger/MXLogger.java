@@ -7,6 +7,11 @@ import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class MXLogger {
 
     static {
@@ -14,68 +19,32 @@ public class MXLogger {
     }
 
     /**
-     * 是否开启控制台打印，默认不开启。开启控制台打印会影响写入效率，建议发布模式禁用 consoleEnable
+     * 配置(enable/consoleEnable/level/maxDiskSize/maxDiskAge)不在Java侧缓存：
+     * 底层C++对象按nameSpace+diskCacheDirectory去重，多个Java实例可能共享同一个
+     * native对象，任何一份Java缓存都会在别的实例修改配置后变成过期数据，
+     * 因此所有getter直接查询native，native是唯一事实源
      * <p>
-     * Whether console printing is enabled, disabled by default. Console output hurts
-     * write performance — disable it in release builds
+     * Configuration (enable/consoleEnable/level/maxDiskSize/maxDiskAge) is NOT cached
+     * on the Java side: the underlying C++ instance is deduplicated per
+     * nameSpace + diskCacheDirectory, so multiple Java objects may share one native
+     * instance and any Java-side cache goes stale as soon as another wrapper changes
+     * the configuration. Every getter queries native — the single source of truth.
      */
-    private boolean consoleEnable;
 
     /**
-     * 是否启用日志写入 默认true 与iOS/Flutter/C++核心的默认行为对齐
+     * loggerKey -> 已创建的Java实例列表。
+     * destroy时据此把所有关联实例的句柄置0，销毁后的调用在JNI层安全短路
+     * 而不是解引用悬垂指针(use-after-free)；同一key允许多个实例是因为
+     * 直接new构造方法仍可能创建出共享同一native对象的多个Java包装
      * <p>
-     * Whether logging is enabled, defaults to true — consistent with the iOS/Flutter/C++ core
+     * loggerKey -> list of created Java instances.
+     * destroy uses it to zero the handle of every associated instance, so calls after
+     * destruction short-circuit safely in the JNI layer instead of dereferencing a
+     * dangling pointer (use-after-free); one key may map to several instances because
+     * direct constructor calls can still create multiple Java wrappers sharing one
+     * native object
      */
-    private boolean enable = true;
-
-    /**
-     * 日志文件最大字节数 默认0 无限制
-     * <p>
-     * Maximum total size of log files in bytes, defaults to 0 (unlimited)
-     */
-    private long maxDiskSize;
-
-    /**
-     * 日志文件最大存储时长(秒) 默认0 无限制
-     * <p>
-     * Maximum age of log files in seconds, defaults to 0 (unlimited)
-     */
-    private long maxDiskAge;
-
-    /**
-     * 写入文件的日志等级 低于这个等级的日志不会被写入到文件，只可能被输出到控制台
-     * <p>
-     * Minimum level written to file; logs below this level are not written to disk
-     * and can only appear in the console
-     */
-    private int level;
-
-    /**
-     * 磁盘缓存目录
-     * <p>
-     * Disk-cache directory of the log files
-     */
-    private String diskCachePath;
-
-    /**
-     * 当前日志文件大小(byte)
-     * <p>
-     * Current total size of stored logs in bytes
-     */
-    private long logSize;
-
-    /**
-     * nameSpace+diskCacheDirectory 做一次md5的值，唯一对应一个logger对象，可以通过这个操作logger对象。
-     * 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)，
-     * 但是你希望所有子模块(子组件)使用在主工程初始化的log，
-     * 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过 {@link #log(String, String, int, String, String)} 进行日志写入
-     * <p>
-     * The md5 of nameSpace + diskCacheDirectory, uniquely identifying this logger instance.
-     * Use case: in a large modularized app, sub-modules can share the logger initialized in
-     * the main project by passing this key around (instead of the logger object) and writing
-     * logs via {@link #log(String, String, int, String, String)} — keeping modules decoupled
-     */
-    private String loggerKey;
+    private static final Map<String, List<MXLogger>> instanceMap = new HashMap<>();
 
     /**
      * 完整构造方法：初始化logger并创建底层C++对象（其他构造方法最终都会调用它）
@@ -138,6 +107,109 @@ public class MXLogger {
 
         nativeHandle =  jniInitialize(nameSpace,diskCacheDirectory,policy,fileName,fileHeader,cryptKey,iv);
 
+        registerInstance(this);
+    }
+
+    /**
+     * 初始化(或复用)logger：同一nameSpace+diskCacheDirectory只对应一个Java实例，
+     * 与iOS/Flutter端的实例复用语义一致。直接new构造方法仍然可用，但会创建出
+     * 共享同一native对象的多个Java实例，推荐统一使用本方法
+     * <p>
+     * Initialize (or reuse) a logger: one Java instance per
+     * nameSpace + diskCacheDirectory, consistent with the instance-reuse semantics of
+     * the iOS/Flutter wrappers. Calling the constructor directly still works but
+     * creates multiple Java wrappers sharing one native instance — prefer this method
+     */
+    public static MXLogger initialize(@NonNull Context context,
+                                      @NonNull String nameSpace,
+                                      @Nullable String diskCacheDirectory,
+                                      @Nullable MXStoragePolicyType storagePolicy,
+                                      @Nullable String fileName,
+                                      @Nullable String fileHeader,
+                                      @Nullable String cryptKey,
+                                      @Nullable String iv) {
+        if (diskCacheDirectory == null) {
+            diskCacheDirectory = defaultDiskCacheDirectory(context);
+        }
+        synchronized (instanceMap) {
+            String key = native_loggerKey_for(nameSpace, diskCacheDirectory);
+            if (key != null) {
+                List<MXLogger> exist = instanceMap.get(key);
+                if (exist != null && !exist.isEmpty()) {
+                    return exist.get(0);
+                }
+            }
+            return new MXLogger(context, nameSpace, diskCacheDirectory, storagePolicy,
+                    fileName, fileHeader, cryptKey, iv);
+        }
+    }
+
+    /**
+     * 便捷初始化：使用默认目录、按天存储、不加密
+     * <p>
+     * Convenience initializer: default directory, daily storage policy, no encryption
+     */
+    public static MXLogger initialize(@NonNull Context context,
+                                      @NonNull String nameSpace,
+                                      @Nullable String fileHeader) {
+        return initialize(context, nameSpace, null, MXStoragePolicyType.YYYY_MM_DD,
+                null, fileHeader, null, null);
+    }
+
+    /**
+     * 便捷初始化：使用默认目录、按天存储，并指定加密key和iv
+     * <p>
+     * Convenience initializer: default directory, daily storage policy,
+     * with the given encryption key and iv
+     */
+    public static MXLogger initialize(@NonNull Context context,
+                                      @NonNull String nameSpace,
+                                      @Nullable String fileHeader,
+                                      @Nullable String cryptKey,
+                                      @Nullable String iv) {
+        return initialize(context, nameSpace, null, MXStoragePolicyType.YYYY_MM_DD,
+                null, fileHeader, cryptKey, iv);
+    }
+
+    /**
+     * 把实例登记进注册表；初始化失败(句柄为0)时不登记
+     * <p>
+     * Register the instance into the registry; skipped when initialization
+     * failed (handle == 0)
+     */
+    private static void registerInstance(@NonNull MXLogger logger) {
+        if (logger.nativeHandle == 0) return;
+        String key = native_loggerKey(logger.nativeHandle);
+        if (key == null) return;
+        synchronized (instanceMap) {
+            List<MXLogger> list = instanceMap.get(key);
+            if (list == null) {
+                list = new ArrayList<>();
+                instanceMap.put(key, list);
+            }
+            list.add(logger);
+        }
+    }
+
+    /**
+     * 失效指定key的全部Java实例(句柄置0)并移出注册表。
+     * 注意这只能拦住销毁之后的调用；与销毁并发进行中的native调用是core层
+     * 生命周期设计的已知缺口，无法在Java层弥补
+     * <p>
+     * Invalidate every Java instance under the key (zero the handle) and drop them
+     * from the registry. This only stops calls made after destruction; a native call
+     * already in flight during destroy is a known gap of the core's lifetime design
+     * that cannot be closed from the Java layer
+     */
+    private static void invalidateInstances(@Nullable String loggerKey) {
+        if (loggerKey == null) return;
+        synchronized (instanceMap) {
+            List<MXLogger> list = instanceMap.remove(loggerKey);
+            if (list == null) return;
+            for (MXLogger logger : list) {
+                logger.nativeHandle = 0;
+            }
+        }
     }
 
     /**
@@ -228,8 +300,10 @@ public class MXLogger {
      *              / log level: 0 debug, 1 info, 2 warn, 3 error, 4 fatal
      * @param name  日志名称 / logger name
      * @param msg   日志信息 / log message
-     * @return 0 成功 -1 扩容失败 -2 解除映射失败 -3 映射失败（可调用 {@link #getErrorDesc()} 查看错误信息）
-     *         / 0 success, -1 file expansion failed, -2 unmap failed, -3 mmap failed
+     * @return 0 成功 -1 扩容失败 -2 解除映射失败 -3 映射失败 -4 无效句柄(初始化失败)
+     *         （可调用 {@link #getErrorDesc()} 查看错误信息）
+     *         / 0 success, -1 file expansion failed, -2 unmap failed, -3 mmap failed,
+     *         -4 invalid handle (initialization failed)
      *         (call {@link #getErrorDesc()} for details)
      */
     public  int log(@Nullable String tag, int level, @Nullable String name, @Nullable String msg){
@@ -238,13 +312,14 @@ public class MXLogger {
     }
 
     /**
-     * 内部写入实现：判断是否在主线程后调用native方法，enable为false时直接返回0
+     * 内部写入实现：判断是否在主线程后调用native方法。
+     * enable开关由C++核心统一判断(native是唯一事实源)，禁用时native返回0
      * <p>
      * Internal write implementation: detects whether the call is on the main thread,
-     * then calls into native code; returns 0 immediately when logging is disabled
+     * then calls into native code. The enable flag is checked by the C++ core (the
+     * single source of truth); native returns 0 when logging is disabled
      */
     private  int innerLog(@Nullable String tag, int level, @Nullable String msg, @Nullable String name){
-        if(!enable) return 0;
        boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
        return native_log(nativeHandle,name,level,msg,tag,isMainThread);
     }
@@ -293,27 +368,28 @@ public class MXLogger {
      * Enable or disable console printing
      */
     public void setConsoleEnable(boolean consoleEnable) {
-        this.consoleEnable = consoleEnable;
         native_consoleEnable(nativeHandle,consoleEnable);
     }
 
     /**
-     * 控制台打印是否开启
+     * 控制台打印是否开启（直接查询native，共享实例间实时一致）
      * <p>
-     * Whether console printing is enabled
+     * Whether console printing is enabled (queried from native, always consistent
+     * across shared instances)
      */
     public boolean isConsoleEnable() {
-        return consoleEnable;
+        return native_isConsoleEnable(nativeHandle);
     }
 
 
     /**
-     * 获取写入文件的日志等级
+     * 获取写入文件的日志等级（直接查询native，共享实例间实时一致）
      * <p>
-     * Get the minimum level written to file
+     * Get the minimum level written to file (queried from native, always consistent
+     * across shared instances)
      */
     public int getLevel() {
-        return level;
+        return native_getLevel(nativeHandle);
     }
 
     /**
@@ -324,35 +400,41 @@ public class MXLogger {
      * logs below this level are not written to disk
      */
     public void setLevel(int level) {
-        this.level = level;
         native_level(nativeHandle,level);
     }
 
     /**
-     * 日志写入功能是否开启
+     * 日志写入功能是否开启（直接查询native，共享实例间实时一致）
      * <p>
-     * Whether logging is enabled
+     * Whether logging is enabled (queried from native, always consistent
+     * across shared instances)
      */
     public boolean isEnable() {
-        return enable;
+        return native_isEnable(nativeHandle);
     }
 
     /**
-     * 设置是否开启日志写入功能，false时禁用日志
+     * 设置是否开启日志写入功能，false时禁用日志。
+     * 会同步到底层C++对象：其他模块通过 {@link #log(String, String, int, String, String)}
+     * 静态方法(loggerKey)写入同一logger时同样会被禁用，与iOS/Flutter端语义一致
      * <p>
-     * Enable or disable logging; pass false to disable
+     * Enable or disable logging; pass false to disable.
+     * The flag is propagated to the underlying C++ instance, so writes from other
+     * modules via the static {@link #log(String, String, int, String, String)} (loggerKey)
+     * path are disabled too — consistent with the iOS/Flutter semantics
      */
     public void setEnable(boolean enable) {
-        this.enable = enable;
+        native_enable(nativeHandle,enable);
     }
 
     /**
-     * 获取日志文件最大字节数
+     * 获取日志文件最大字节数（直接查询native，共享实例间实时一致）
      * <p>
-     * Get the maximum total size of log files in bytes
+     * Get the maximum total size of log files in bytes (queried from native,
+     * always consistent across shared instances)
      */
     public long getMaxDiskSize() {
-        return maxDiskSize;
+        return native_getMaxDiskSize(nativeHandle);
     }
 
     /**
@@ -364,17 +446,17 @@ public class MXLogger {
      * when {@link #removeExpireData()} is called
      */
     public void setMaxDiskSize(long maxDiskSize) {
-        this.maxDiskSize = maxDiskSize;
         native_maxDiskSize(nativeHandle,maxDiskSize);
     }
 
     /**
-     * 获取日志文件最大存储时长(秒)
+     * 获取日志文件最大存储时长(秒)（直接查询native，共享实例间实时一致）
      * <p>
-     * Get the maximum age of log files in seconds
+     * Get the maximum age of log files in seconds (queried from native,
+     * always consistent across shared instances)
      */
     public long getMaxDiskAge() {
-        return maxDiskAge;
+        return native_getMaxDiskAge(nativeHandle);
     }
 
     /**
@@ -386,7 +468,6 @@ public class MXLogger {
      * time, and expired files are deleted when {@link #removeExpireData()} is called
      */
     public void setMaxDiskAge(long maxDiskAge) {
-        this.maxDiskAge = maxDiskAge;
         native_maxDiskAge(nativeHandle,maxDiskAge);
     }
 
@@ -416,7 +497,15 @@ public class MXLogger {
      */
     public  String getErrorDesc(){return  native_errorDesc(nativeHandle);}
 
-    private final long nativeHandle;
+    /**
+     * C++对象指针句柄。volatile保证destroy置0后其他线程立即可见；
+     * JNI层对0句柄的调用全部安全短路
+     * <p>
+     * Pointer handle of the C++ instance. volatile makes the zeroing in destroy
+     * immediately visible to other threads; the JNI layer short-circuits every call
+     * made with a 0 handle
+     */
+    private volatile long nativeHandle;
 
     /**
      * 默认磁盘缓存目录: /files/com.mxlog.LoggerCache
@@ -449,6 +538,10 @@ public class MXLogger {
         if(diskCacheDirectory == null){
             diskCacheDirectory = defaultDiskCacheDirectory(context);
         }
+        /// 先失效全部关联的Java实例再销毁C++对象，销毁后的调用安全短路
+        /// Invalidate every associated Java instance before destroying the C++ object,
+        /// so calls made after destruction short-circuit safely
+        invalidateInstances(native_loggerKey_for(nameSpace, diskCacheDirectory));
         native_destroy(nameSpace,diskCacheDirectory);
     }
 
@@ -458,6 +551,7 @@ public class MXLogger {
      * Destroy the underlying C++ instance identified by loggerKey
      */
     public static void  destroy(@NonNull String loggerKey){
+        invalidateInstances(loggerKey);
         native_destroy_loggerKey(loggerKey);
     }
 
@@ -554,6 +648,56 @@ public class MXLogger {
      * Native method: enable or disable native-side console output
      */
     private  static  native  void  native_consoleEnable(long nativeHandle,boolean enable);
+
+    /**
+     * native方法: 开启/禁用日志写入功能
+     * <p>
+     * Native method: enable or disable logging
+     */
+    private  static  native  void  native_enable(long nativeHandle,boolean enable);
+
+    /**
+     * native方法: 日志写入是否开启
+     * <p>
+     * Native method: whether logging is enabled
+     */
+    private  static  native  boolean native_isEnable(long nativeHandle);
+
+    /**
+     * native方法: 控制台输出是否开启
+     * <p>
+     * Native method: whether console output is enabled
+     */
+    private  static  native  boolean native_isConsoleEnable(long nativeHandle);
+
+    /**
+     * native方法: 获取写入文件的日志等级
+     * <p>
+     * Native method: get the minimum level written to file
+     */
+    private  static  native  int native_getLevel(long nativeHandle);
+
+    /**
+     * native方法: 获取日志文件最大存储时长(秒)
+     * <p>
+     * Native method: get the maximum age of log files in seconds
+     */
+    private  static  native  long native_getMaxDiskAge(long nativeHandle);
+
+    /**
+     * native方法: 获取日志文件最大字节数(byte)
+     * <p>
+     * Native method: get the maximum total size of log files in bytes
+     */
+    private  static  native  long native_getMaxDiskSize(long nativeHandle);
+
+    /**
+     * native方法: 计算nameSpace+diskCacheDirectory对应的loggerKey(md5)，不创建logger对象
+     * <p>
+     * Native method: compute the loggerKey (md5) for nameSpace + diskCacheDirectory
+     * without creating a logger instance
+     */
+    private  static  native  String native_loggerKey_for(String nameSpace,String diskCacheDirectory);
 
     /**
      * native方法: 设置日志文件最大存储时长(秒)

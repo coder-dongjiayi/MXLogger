@@ -164,6 +164,33 @@ MX_TEST(mmap_sink, encryption_hides_plaintext) {
     }
 }
 
+MX_TEST(mmap_sink, recovers_after_initial_open_failure) {
+    // 构造/映射失败必须是瞬时的: 障碍解除后同一个sink实例在下一次写入时自愈,
+    // 而不是从此永久返回错误(回归: 映射失败分支曾close掉fd导致永久失能)
+    std::string root = mxtest::temp_dir("mmap_recover");
+    std::string blocker = root + "blocker";
+    mxtest::write_dummy_file(blocker, 1);
+
+    // 父路径被普通文件占住 → create_dir/open全部失败, fd=-1, 无映射
+    std::string dir = blocker + "/sub/";
+    mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+
+    // 初始不可写: 写入返回-3(映射失败), 不崩溃
+    EXPECT_EQ(write_log(sink, level::info, "before-recover"), -3);
+
+    // 障碍解除后, 无需重建sink, 下一次写入自动重开文件+重建映射
+    ::remove(blocker.c_str());
+    EXPECT_TRUE(mxlogger::create_dir(dir));
+    EXPECT_EQ(write_log(sink, level::info, "after-recover"), 0);
+    sink.flush();
+
+    record_list records = mxtest::parse_dir(dir);
+    EXPECT_EQ(records.size(), (size_t)1);
+    if (!records.empty()) {
+        EXPECT_EQ(records[0]["msg"], std::string("after-recover"));
+    }
+}
+
 MX_TEST(file_sink, filename_policies) {
     std::tm t = mxlogger_helper::now();
     char ym[16], ymd[16], ymdh[20];

@@ -70,9 +70,16 @@ namespace mxlogger{
     }
 
 
+    /// 初始化失败时jniInitialize返回0且Java侧原样持有，任何句柄入参都必须判0，
+    /// 否则reinterpret_cast后的调用是空指针解引用(SIGSEGV)
+    /// jniInitialize returns 0 on failure and the Java side keeps it as-is, so every
+    /// handle parameter must be checked for 0 — otherwise the call after
+    /// reinterpret_cast dereferences a null pointer (SIGSEGV)
+
     /// 获取日志文件磁盘缓存目录
     /// Get the disk-cache directory of the log files
     MXLOGGER_JNI jstring native_diskcache_path(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return string2jstring(env,"");
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         const char * path = logger -> diskcache_path();
        return string2jstring(env,path);
@@ -82,6 +89,7 @@ namespace mxlogger{
     /// 获取logger的唯一标识loggerKey (nameSpace+diskCacheDirectory的md5值)
     /// Get the logger's unique key (the md5 of nameSpace + diskCacheDirectory)
     MXLOGGER_JNI jstring  native_loggerKey(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return nullptr;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         return string2jstring(env,logger ->logger_key());
     }
@@ -89,6 +97,7 @@ namespace mxlogger{
     /// 获取最近一次写入失败的错误信息
     /// Get the most recent write-error description
     MXLOGGER_JNI jstring  native_errorDesc(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return string2jstring(env,"logger initialization failed: invalid native handle");
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         return string2jstring(env,logger ->error_desc());
     }
@@ -99,6 +108,8 @@ namespace mxlogger{
     /// Write a log entry via the handle
     /// Returns 0 success, -1 file expansion failed, -2 unmap failed, -3 mmap failed
     MXLOGGER_JNI jint native_log(JNIEnv *env, jobject obj,jlong handle,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
+        /// -4: 无效句柄(初始化失败) / -4: invalid handle (initialization failed)
+        if (handle == 0) return -4;
 
         const char  * log_tag = tag == NULL ? nullptr :  env->GetStringUTFChars(tag, nullptr);
 
@@ -223,6 +234,9 @@ namespace mxlogger{
     /// Get the list of log files as a JSON string array with fields:
     /// name/size/last_timestamp/create_timestamp
     MXLOGGER_JNI jobjectArray  native_logFiles(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) {
+            return env->NewObjectArray(0, env->FindClass("java/lang/String"), nullptr);
+        }
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
 
         std::vector<std::map<std::string, std::string>> destination;
@@ -302,14 +316,88 @@ namespace mxlogger{
     /// 开启/关闭native侧控制台输出
     /// Enable or disable native-side console output
     MXLOGGER_JNI void native_consoleEnable(JNIEnv *env, jobject obj,jlong handle,jboolean enable){
+        if (handle == 0) return;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
        logger ->set_enable_console(enable);
+    }
+
+    /// 开启/禁用日志写入功能: 同步到C++核心，使loggerKey静态写入路径同样受控
+    /// Enable or disable logging: propagated to the C++ core so the static
+    /// loggerKey write path honors it too
+    MXLOGGER_JNI void native_enable(JNIEnv *env, jobject obj,jlong handle,jboolean enable){
+        if (handle == 0) return;
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        logger ->set_enable(enable);
+    }
+
+    /// 以下getter直接查询C++核心：native是配置的唯一事实源，
+    /// Java侧不再缓存，避免共享同一logger的多个Java实例读到过期配置
+    /// The getters below query the C++ core directly: the native instance is the
+    /// single source of truth, so the Java side no longer caches configuration and
+    /// multiple Java wrappers sharing one logger cannot read stale values
+
+    /// 日志写入是否开启
+    /// Whether logging is enabled
+    MXLOGGER_JNI jboolean native_isEnable(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return JNI_FALSE;
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        return logger ->is_enable() ? JNI_TRUE : JNI_FALSE;
+    }
+
+    /// 控制台输出是否开启
+    /// Whether console output is enabled
+    MXLOGGER_JNI jboolean native_isConsoleEnable(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return JNI_FALSE;
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        return logger ->is_enable_console() ? JNI_TRUE : JNI_FALSE;
+    }
+
+    /// 当前写入文件的日志等级
+    /// Current minimum level written to file
+    MXLOGGER_JNI jint native_getLevel(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return 0;
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        return logger ->log_level();
+    }
+
+    /// 日志文件最大存储时长(秒) 0为不限制
+    /// Maximum age of log files in seconds, 0 means unlimited
+    MXLOGGER_JNI jlong native_getMaxDiskAge(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return 0;
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        return (jlong)logger ->file_max_age();
+    }
+
+    /// 日志文件最大字节数(byte) 0为不限制
+    /// Maximum total size of log files in bytes, 0 means unlimited
+    MXLOGGER_JNI jlong native_getMaxDiskSize(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return 0;
+        mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
+        return (jlong)logger ->file_max_size();
+    }
+
+    /// 计算nameSpace+diskCacheDirectory对应的loggerKey(md5)，不创建logger对象；
+    /// 供Java侧在初始化/销毁前查实例注册表
+    /// Compute the loggerKey (md5) for nameSpace + diskCacheDirectory without creating
+    /// a logger; used by the Java side to consult its instance registry before
+    /// initialize/destroy
+    MXLOGGER_JNI jstring native_loggerKey_for(JNIEnv *env, jclass cls,jstring ns,jstring directory){
+        if (directory == nullptr) return nullptr;
+        const char * nsStr = ns == nullptr ? nullptr : env->GetStringUTFChars(ns, nullptr);
+        const char * directoryStr = env->GetStringUTFChars(directory, nullptr);
+
+        std::string key = mx_logger::md5(nsStr, directoryStr);
+
+        if (nsStr != nullptr) env->ReleaseStringUTFChars(ns, nsStr);
+        env->ReleaseStringUTFChars(directory, directoryStr);
+        return string2jstring(env, key);
     }
 
 
     /// 设置写入文件的日志等级 低于该等级的日志不会写入
     /// Set the minimum level written to file; logs below this level are not written
     MXLOGGER_JNI void native_level(JNIEnv *env, jobject obj,jlong handle,jint level){
+        if (handle == 0) return;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger -> set_log_level(level);
     }
@@ -317,6 +405,7 @@ namespace mxlogger{
     /// 设置日志文件最大存储时长(秒)
     /// Set the maximum age of log files in seconds
     MXLOGGER_JNI void native_maxDiskAge(JNIEnv *env, jobject obj,jlong handle,jlong maxAge){
+        if (handle == 0) return;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger -> set_file_max_age(maxAge);
     }
@@ -324,6 +413,7 @@ namespace mxlogger{
     /// 设置日志文件最大字节数(byte)
     /// Set the maximum total size of log files in bytes
     MXLOGGER_JNI void native_maxDiskSize(JNIEnv *env, jobject obj,jlong handle,jlong maxSize){
+        if (handle == 0) return;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger -> set_file_max_size(maxSize);
     }
@@ -331,6 +421,7 @@ namespace mxlogger{
     /// 获取存储的日志大小(byte)
     /// Get the total size of stored logs in bytes
     MXLOGGER_JNI jlong native_logSize(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return 0;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         return  (long )logger->dir_size();
     }
@@ -339,6 +430,7 @@ namespace mxlogger{
     /// 清理过期日志文件
     /// Remove expired log files
     MXLOGGER_JNI void native_removeExpireData(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger -> remove_expire_data();
     }
@@ -346,6 +438,7 @@ namespace mxlogger{
     /// 删除所有日志文件
     /// Remove all log files
     MXLOGGER_JNI void native_removeAll(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger -> remove_all();
     }
@@ -353,6 +446,7 @@ namespace mxlogger{
     /// 删除除当前正在写入文件之外的所有日志文件
     /// Remove all log files except the one currently being written
     MXLOGGER_JNI void native_removeBeforeAll(JNIEnv *env, jobject obj,jlong handle){
+        if (handle == 0) return;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
         logger -> remove_before_all();
     }
@@ -366,6 +460,13 @@ static JNINativeMethod g_methods[] = {
         {"jniInitialize","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::jniInitialize},
         {"native_level","(JI)V",(void *)mxlogger::native_level},
         {"native_consoleEnable","(JZ)V",(void *)mxlogger::native_consoleEnable},
+        {"native_enable","(JZ)V",(void *)mxlogger::native_enable},
+        {"native_isEnable","(J)Z",(void *)mxlogger::native_isEnable},
+        {"native_isConsoleEnable","(J)Z",(void *)mxlogger::native_isConsoleEnable},
+        {"native_getLevel","(J)I",(void *)mxlogger::native_getLevel},
+        {"native_getMaxDiskAge","(J)J",(void *)mxlogger::native_getMaxDiskAge},
+        {"native_getMaxDiskSize","(J)J",(void *)mxlogger::native_getMaxDiskSize},
+        {"native_loggerKey_for","(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",(void *)mxlogger::native_loggerKey_for},
         {"native_maxDiskAge","(JJ)V",(void *)mxlogger::native_maxDiskAge},
         {"native_maxDiskSize","(JJ)V",(void *)mxlogger::native_maxDiskSize},
         {"native_logSize","(J)J",(void *)mxlogger::native_logSize},
