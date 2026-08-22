@@ -1,5 +1,7 @@
 
 # MXLogger for Flutter Change Log
+# v2.0.0/2026-08-22
+Keep up with MXLogger  native lib v2.0.0 on Android/iOS.
 # v1.2.15/2025-09-05
 * Support 16 KB page sizes on Android。native lib v1.2.15 Android.
 # v1.2.14/2024-10-31

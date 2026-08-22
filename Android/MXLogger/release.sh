@@ -3,6 +3,9 @@ set -euo pipefail
 
 # 用法:
 #   ./release.sh 1.2.15
+#
+# 脚本会自己跑 gradle 构建，改完源码（Java / Kotlin / C++）直接执行即可。
+# 如果确认产物已是最新、想跳过构建，用: SKIP_BUILD=1 ./release.sh 1.2.15
 
 VERSION="${1:-}"
 if [ -z "${VERSION}" ]; then
@@ -18,7 +21,22 @@ GPG_KEY="99ECB1C655BCEDC6"    # 你的 GPG 主 KeyID
 # ===== 路径写死 =====
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SRC_DIR="${PROJECT_DIR}/mxlogger"
+GRADLEW="${PROJECT_DIR}/gradlew"
 AAR_SRC="${SRC_DIR}/build/outputs/aar/mxlogger-DefaultCpp-release.aar"  # 固定 AAR 路径
+JAVADOC_SRC="${SRC_DIR}/build/libs/mxlogger-javadoc.jar"                # javadocJar 任务产物
+
+# ===== 构建 =====
+# assembleDefaultCppRelease 会重新跑 CMake，C++ 改动也会被带进 .so
+if [ "${SKIP_BUILD:-0}" = "1" ]; then
+  echo "⏭  SKIP_BUILD=1，跳过 gradle 构建"
+else
+  echo "🔨 gradle 构建中（AAR + javadoc）..."
+  export LANG="${LANG:-en_US.UTF-8}"
+  "${GRADLEW}" -p "${PROJECT_DIR}" --console=plain \
+    :mxlogger:assembleDefaultCppRelease \
+    :mxlogger:javadocJar
+  echo "✅ 构建完成"
+fi
 
 if [ ! -f "${AAR_SRC}" ]; then
   echo "❌ 未找到 AAR 文件: ${AAR_SRC}"
@@ -26,12 +44,30 @@ if [ ! -f "${AAR_SRC}" ]; then
 fi
 echo "✅ 使用 AAR: ${AAR_SRC}"
 
+# ===== 新鲜度检查 =====
+# 只在跳过构建时才需要：正常路径下 gradle 已经保证了产物是最新的。
+# 注意这里比的是 mtime，而 gradle 比的是内容哈希，两者会不一致——
+# touch / git checkout / 无改动保存都会把源码 mtime 推新而 gradle 判定 UP-TO-DATE
+# （不重写 AAR），此时下面会误报。真遇到就去掉 SKIP_BUILD 正常跑一次。
+if [ "${SKIP_BUILD:-0}" = "1" ]; then
+  STALE="$(find "${SRC_DIR}/src/main" -type f \
+    \( -name '*.java' -o -name '*.kt' -o -name '*.cpp' -o -name '*.cc' -o -name '*.h' -o -name '*.hpp' \) \
+    -newer "${AAR_SRC}" 2>/dev/null | head -5)"
+  if [ -n "${STALE}" ]; then
+    echo "❌ 以下源码比 AAR 新，产物可能不是最新的："
+    echo "${STALE}"
+    echo "   如果确认内容没变（touch / 切分支导致），去掉 SKIP_BUILD 重跑即可。"
+    exit 1
+  fi
+fi
+
 # ===== 输出目录 =====
 OUTPUT_DIR="${PROJECT_DIR}/release/${VERSION}"
 mkdir -p "${OUTPUT_DIR}"
 
 AAR_FILE="${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}.aar"
 SRC_JAR_FILE="${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}-sources.jar"
+DOC_JAR_FILE="${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}-javadoc.jar"
 POM_FILE="${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}.pom"
 
 # 拷贝 AAR
@@ -57,6 +93,18 @@ if [ ! -f "${SRC_JAR_FILE}" ]; then
   echo "placeholder" > "${OUTPUT_DIR}/_empty_sources/placeholder.txt"
   jar cf "${SRC_JAR_FILE}" -C "${OUTPUT_DIR}/_empty_sources" .
   rm -rf "${OUTPUT_DIR}/_empty_sources"
+fi
+
+# ===== javadoc.jar（Maven Central 正式版强制要求）=====
+if [ -f "${JAVADOC_SRC}" ]; then
+  cp -f "${JAVADOC_SRC}" "${DOC_JAR_FILE}"
+  echo "✅ 拷贝 javadoc.jar -> ${DOC_JAR_FILE}"
+else
+  echo "⚠️ 未找到 ${JAVADOC_SRC}，javadoc.jar 将为空占位。"
+  mkdir -p "${OUTPUT_DIR}/_empty_javadoc"
+  echo "placeholder" > "${OUTPUT_DIR}/_empty_javadoc/placeholder.txt"
+  jar cf "${DOC_JAR_FILE}" -C "${OUTPUT_DIR}/_empty_javadoc" .
+  rm -rf "${OUTPUT_DIR}/_empty_javadoc"
 fi
 
 # ===== 生成 pom.xml =====
@@ -117,7 +165,7 @@ sign_and_hash() {
   done
 }
 
-for f in "${AAR_FILE}" "${SRC_JAR_FILE}" "${POM_FILE}"; do
+for f in "${AAR_FILE}" "${SRC_JAR_FILE}" "${DOC_JAR_FILE}" "${POM_FILE}"; do
   sign_and_hash "${f}"
 done
 
@@ -128,9 +176,10 @@ rm -rf "${STAGING_ROOT}"
 mkdir -p "${STAGING_DIR}"
 
 # 拷贝文件到 staging
-cp -f "${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}.aar"*        "${STAGING_DIR}/"
-cp -f "${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}-sources.jar"* "${STAGING_DIR}/"
-cp -f "${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}.pom"*         "${STAGING_DIR}/"
+cp -f "${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}.aar"*          "${STAGING_DIR}/"
+cp -f "${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}-sources.jar"*  "${STAGING_DIR}/"
+cp -f "${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}-javadoc.jar"*  "${STAGING_DIR}/"
+cp -f "${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}.pom"*          "${STAGING_DIR}/"
 
 # 打包 staging 下所有文件为 ZIP 到 release 目录
 ZIP_FILE="${PROJECT_DIR}/release/${VERSION}_mxlogger.zip"
