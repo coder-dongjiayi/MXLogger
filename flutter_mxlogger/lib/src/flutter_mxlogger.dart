@@ -1,44 +1,61 @@
-
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
-import  'package:ffi/ffi.dart';
+import 'dart:isolate';
+import 'package:ffi/ffi.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-///日志文件存储策略
+List<String> _levelIcons = ["🟩", "🟦", "🟨", "🟥", "❌"];
+List<String> _levelNames = ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"];
+
+/// 日志文件存储策略
+/// Log file storage policy
 enum MXStoragePolicyType {
+  /// 按天存储 对应文件名: 2023-01-11_filename.mx
+  /// One file per day, e.g. 2023-01-11_filename.mx
   yyyy_MM_dd,
 
-  /// 按天存储 对应文件名: 2023-01-11_filename.mx
+  /// 按小时存储 对应文件名: 2023-01-11-15_filename.mx
+  /// One file per hour, e.g. 2023-01-11-15_filename.mx
   yyyy_MM_dd_HH,
 
-  /// 按小时存储 对应文件名: 2023-01-11-15_filename.mx
+  /// 按周存储 对应文件名: 2023-01-02w_filename.mx（02w是指一年中的第2周）
+  /// One file per week, e.g. 2023-01-02w_filename.mx (02w means the 2nd week of the year)
   yyyy_ww,
 
-  /// 按周存储 对应文件名: 2023-01-02w_filename.mx（02w是指一年中的第2周）
-  yyyy_MM
-
   /// 按月存储 对应文件名: 2023-01_filename.mx
+  /// One file per month, e.g. 2023-01_filename.mx
+  yyyy_MM
 }
 
+/// 日志文件信息实体
+/// Metadata of a stored log file
 class MXFileEntity {
+  /// 文件名
+  /// File name
   late String? name;
 
-  /// 文件名
+  /// 文件大小(byte)
+  /// File size in bytes
   late int size;
 
-  /// 文件大小(byte)
+  /// 文件创建时间戳(秒)
+  /// File creation timestamp in seconds
   late int createTimeStamp;
 
-  /// 文件创建时间
+  /// 文件最后修改时间戳(秒)
+  /// Last-modified timestamp in seconds
   late int lastTimeStamp;
 
-  /// 文件最后修改时间
-
+  /// 文件创建时间
+  /// File creation time
   DateTime get createTime =>
       DateTime.fromMillisecondsSinceEpoch(createTimeStamp * 1000);
 
+  /// 文件最后修改时间
+  /// Last-modified time
   DateTime get lastTime =>
       DateTime.fromMillisecondsSinceEpoch(lastTimeStamp * 1000);
 
@@ -57,35 +74,73 @@ class MXLogger with WidgetsBindingObserver {
   Pointer<Void> _handle = nullptr;
 
   static const MethodChannel _channel = MethodChannel('flutter_mxlogger');
-
+  static bool _consoleEnable = false;
   IOSink? _ioSink;
+
+  /// 日志写入功能是否开启
+  /// Whether logging is enabled
   bool get enable => _enable;
 
-  /// 获取写入日志的错误数据 当[log]方法 !=0 的时候。
+  /// 控制台打印是否开启(flutter层输出)。
+  /// 该开关只在debug模式下有意义: release/profile构建的控制台输出已在编译期被裁掉。
+  /// Whether console printing is enabled (output from the Flutter layer).
+  /// The flag only matters in debug mode: console output is compiled out of
+  /// release/profile builds.
+  bool get consoleEnable => _consoleEnable;
+
+  /// 运行时开关控制台打印。
+  /// native侧输出在初始化时已被禁用，日志统一由flutter层debugPrint输出，
+  /// 因此这里只需要更新flutter层的开关。
+  /// release/profile构建下控制台输出整段被tree-shake掉，此时设为true也不会有任何输出。
+  /// Toggle console printing at runtime.
+  /// Native-side console output is disabled at initialization — all console output
+  /// goes through the Flutter layer's debugPrint, so only the Flutter-side flag is updated here.
+  /// In release/profile builds console output is tree-shaken away, so passing true prints
+  /// nothing.
+  void setConsoleEnable(bool enable) {
+    _consoleEnable = enable;
+  }
+
+  /// 获取写入日志的错误信息，当[log]方法返回值 != 0 的时候调用
+  /// Get the write-error description; check it when [log] returns a non-zero value
   String? get errorDesc => _errorDesc();
 
   /// 获取日志文件夹的磁盘路径(directory+nameSpace)
+  /// Get the disk path of the log directory (directory + nameSpace)
   String get diskcachePath => getDiskcachePath();
 
   /// 获取错误文件路径
+  /// Get the path of the local error-record file
   String get diskcacheErrorPath => diskcachePath + "/error.txt";
 
-  /// 获取日志底层的唯一标识 可以通过这个key操作日志对象
-  /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
+  /// 获取日志底层的唯一标识，可以通过这个key操作日志对象。
+  /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)，
   /// 但是你希望所有子模块(子组件)使用在主工程初始化的log，
-  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
+  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey进行日志写入
+  /// Get the unique key of the underlying logger, usable to operate on it.
+  /// Use case: in a large modularized app, sub-modules can share the logger initialized
+  /// in the main project by passing this key around (instead of the logger object) and
+  /// writing logs via [logLoggerKey] — keeping modules decoupled
   String? get loggerKey => getLoggerKey();
 
-  /// 获取存储的日志大小 (byte)
+  /// 获取存储的日志大小(byte)
+  /// Get the total size of stored logs in bytes
   int get logSize => getLogSize();
 
   /// 获取日志文件列表
+  /// Get the list of stored log files
   List<MXFileEntity> get logFiles => getLogFiles();
 
+  /// 初始化时传入的加密key
+  /// The encryption key passed at initialization
   String? get cryptKey => _cryptKey;
 
+  /// 初始化时传入的加密向量
+  /// The initialization vector passed at initialization
   String? get iv => _iv;
 
+  /// 监听App生命周期：进入后台时按需清理过期日志文件
+  /// Observe the app lifecycle: remove expired log files when entering background (if enabled)
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused &&
@@ -95,16 +150,26 @@ class MXLogger with WidgetsBindingObserver {
   }
 
   /// 使用自定义路径初始化MXLogger
-  /// nameSpace: 日志文件的命名空间建议使用域名反转保证唯一性
-  /// directory: 自定义日志文件路径
-  /// storagePolicy: 日志文件存储策略
-  /// fileName: 自定义文件名
-  /// fileHeader:日志文件头信息，业务可以在初始化mxlogger的时候 写入一些业务相关的信息 比如app版本 所属平台等等 文件创建的时候这条数据会被写入
-  /// cryptKey:  如果日志信息需要加密需要填入这个值 应为正好为16个英文字母
-  /// iv: 如果不填默认和cryptKey一致
+  /// Initialize MXLogger with a custom directory
+  ///
+  /// nameSpace: 日志文件的命名空间，建议使用域名反转保证唯一性
+  ///            namespace of the log files; a reverse-domain name is recommended for uniqueness
+  /// directory: 自定义日志文件路径 / custom log directory
+  /// consoleEnable: 是否开启控制台打印 / whether to enable console printing
+  /// storagePolicy: 日志文件存储策略 / log file storage policy
+  /// fileName: 自定义文件名 / custom file name
+  /// fileHeader: 日志文件头信息，业务可以在初始化mxlogger的时候写入一些业务相关的信息，
+  ///             比如app版本、所属平台等等，文件创建的时候这条数据会被写入
+  ///             file header; the business layer can write context info (app version,
+  ///             platform, etc.), written once when the file is created
+  /// cryptKey: 如果日志信息需要加密需要填入这个值，16字节：超过16字节自动截断 不足16字节补0
+  ///           encryption key, required for encrypted logs; 16 bytes:
+  ///           truncated if longer, zero-padded if shorter
+  /// iv: 如果不填默认和cryptKey一致 / defaults to cryptKey when omitted
   MXLogger(
       {required String nameSpace,
       required String directory,
+      bool consoleEnable = false,
       MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
       String? fileName,
       String? fileHeader,
@@ -112,7 +177,7 @@ class MXLogger with WidgetsBindingObserver {
       String? iv}) {
     _cryptKey = cryptKey;
     _iv = iv;
-    WidgetsBinding.instance.addObserver(this);
+    _consoleEnable = consoleEnable;
 
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
     Pointer<Utf8> drPtr = directory.toNativeUtf8();
@@ -151,21 +216,61 @@ class MXLogger with WidgetsBindingObserver {
     if (ivPtr != nullptr) {
       calloc.free(ivPtr);
     }
+
+    _nameSpace = nameSpace;
+    _directory = directory;
+
+    /// native初始化失败(如目录不可创建)时句柄为0：直接禁用本实例，
+    /// 后续调用全部安全短路，而不是带着空句柄进native造成崩溃
+    /// The handle is null when native initialization fails (e.g. the directory
+    /// cannot be created): disable this instance so every later call
+    /// short-circuits safely instead of passing a null handle into native code
+    if (_handle == nullptr) {
+      _enable = false;
+      return;
+    }
+
+    WidgetsBinding.instance.addObserver(this);
+
+    /// 注册到实例表：destroy时据此失效对应实例，防止use-after-free。
+    /// 同一nameSpace+directory重复构造时底层native对象是同一个，注册表按key
+    /// 保存全部Dart实例，destroy时逐一失效——只保留最后一个会让先前的实例
+    /// 带着悬垂句柄和生命周期监听继续运行
+    /// Register into the instance map so destroy can invalidate this instance.
+    /// Duplicate constructions with the same nameSpace + directory share one native
+    /// object, so the registry keeps every Dart instance per key and destroy
+    /// invalidates them all — keeping only the last one would leave earlier
+    /// instances running with a dangling handle and lifecycle observer
+    final String? registerKey = getLoggerKey();
+    if (registerKey != null) {
+      _instanceMap.putIfAbsent(registerKey, () => <MXLogger>[]).add(this);
+    }
   }
 
-  /// 初始化MXLogger
-  /// nameSpace: 日志文件的命名空间建议使用域名反转保证唯一性
-  /// directory: 自定义日志文件路径
-  /// storagePolicy: 日志文件存储策略
-  /// 默认路径 ios:/Library/com.mxlog.LoggerCache/nameSpace
-  ///         android: /files/com.mxlog.LoggerCache/nameSpace
-  /// fileName: 自定义文件名 默认值 log
-  /// fileHeader:日志文件头信息，业务可以在初始化mxlogger的时候 写入一些业务相关的信息 比如app版本 所属平台等等 文件创建的时候这条数据会被写入
-  /// cryptKey:  如果日志信息需要加密需要填入这个值 应为正好为16个英文字母
-  /// iv: 如果不填默认和cryptKey一致
+  /// 初始化MXLogger（使用平台默认路径）
+  /// Initialize MXLogger (with the platform default directory)
+  ///
+  /// nameSpace: 日志文件的命名空间，建议使用域名反转保证唯一性
+  ///            namespace of the log files; a reverse-domain name is recommended for uniqueness
+  /// directory: 自定义日志文件路径，不填时使用默认路径：
+  ///            ios: /Library/com.mxlog.LoggerCache/nameSpace
+  ///            android: /files/com.mxlog.LoggerCache/nameSpace
+  ///            custom log directory; defaults to the paths above when omitted
+  /// consoleEnable: 是否开启控制台打印 / whether to enable console printing
+  /// storagePolicy: 日志文件存储策略 / log file storage policy
+  /// fileName: 自定义文件名 默认值 mxlog / custom file name, defaults to "mxlog"
+  /// fileHeader: 日志文件头信息，业务可以在初始化mxlogger的时候写入一些业务相关的信息，
+  ///             比如app版本、所属平台等等，文件创建的时候这条数据会被写入
+  ///             file header; the business layer can write context info (app version,
+  ///             platform, etc.), written once when the file is created
+  /// cryptKey: 如果日志信息需要加密需要填入这个值，16字节：超过16字节自动截断 不足16字节补0
+  ///           encryption key, required for encrypted logs; 16 bytes:
+  ///           truncated if longer, zero-padded if shorter
+  /// iv: 如果不填默认和cryptKey一致 / defaults to cryptKey when omitted
   static Future<MXLogger> initialize(
       {required String nameSpace,
       String? directory,
+      bool consoleEnable = false,
       MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
       String? fileName,
       String? fileHeader,
@@ -181,6 +286,7 @@ class MXLogger with WidgetsBindingObserver {
     MXLogger mxLogger = MXLogger(
         nameSpace: ns,
         directory: dr,
+        consoleEnable: consoleEnable,
         storagePolicy: storagePolicy,
         fileName: fileName,
         fileHeader: fileHeader,
@@ -190,8 +296,42 @@ class MXLogger with WidgetsBindingObserver {
     return mxLogger;
   }
 
-  /// 释放log
+  /// 通过nameSpace+directory释放logger对象。
+  /// 会先失效对应的Dart实例（移除生命周期监听、清空句柄），防止销毁后
+  /// 进入后台的清理回调触碰已释放的native对象(use-after-free)；
+  /// directory不传时用实例记录的实际目录补全——native侧收到null目录是静默无操作
+  /// Release the logger identified by nameSpace + directory.
+  /// Matching Dart instances are invalidated first (lifecycle observer removed,
+  /// handle cleared) so the enter-background cleanup callback cannot touch the freed
+  /// native object (use-after-free). When directory is omitted it is filled in from
+  /// the instance's recorded directory — the native destroy is a silent no-op on a
+  /// null directory
   static void destroy({required String nameSpace, String? directory}) {
+    final List<String> keys = [];
+    _instanceMap.forEach((key, loggers) {
+      if (loggers.any((logger) =>
+          logger._nameSpace == nameSpace &&
+          (directory == null || logger._directory == directory))) {
+        keys.add(key);
+      }
+    });
+    for (final String key in keys) {
+      final List<MXLogger>? loggers = _instanceMap.remove(key);
+      if (loggers == null || loggers.isEmpty) continue;
+      final String? dr = directory ?? loggers.first._directory;
+      for (final MXLogger logger in loggers) {
+        logger._invalidate();
+      }
+      _destroyNative(nameSpace, dr);
+    }
+    /// 没有匹配的Dart实例时保持原有透传行为
+    /// Fall through to the plain native call when no Dart instance matches
+    if (keys.isEmpty) {
+      _destroyNative(nameSpace, directory);
+    }
+  }
+
+  static void _destroyNative(String nameSpace, String? directory) {
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
     Pointer<Utf8> drPtr =
         directory == null ? nullptr : directory.toNativeUtf8();
@@ -200,16 +340,90 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(drPtr);
   }
 
-  /// 通过key 释放log对象
+  /// 通过loggerKey释放logger对象；同样会先失效对应的Dart实例
+  /// Release the logger identified by loggerKey; the matching Dart instance
+  /// is invalidated first
   static void destroyWithLoggerKey(String loggerKey) {
+    final List<MXLogger>? loggers = _instanceMap.remove(loggerKey);
+    loggers?.forEach((logger) => logger._invalidate());
     Pointer<Utf8> keyPtr = loggerKey.toNativeUtf8();
     _destroyWithLoggerKey(keyPtr);
     calloc.free(keyPtr);
   }
 
-  /// 类方法 使用 mapKey操作日志
+  /// 控制台输出，格式与native端 mxlogger_console::gen_console_str 保持一致。
+  /// iOS上native的printf写的是stdout，而flutter run/AndroidStudio控制台只从统一日志系统取日志，
+  /// 抓不到native的输出(换成os_log也会被flutter工具的sender谓词过滤)，
+  /// 因此native侧控制台在初始化时关闭，统一由这里debugPrint。
+  /// Print to the console using the same layout as native mxlogger_console::gen_console_str.
+  /// On iOS the native printf writes to stdout, which `flutter run` / the Android Studio
+  /// console never reads (they only consume unified logging, and os_log would be dropped by
+  /// the flutter tool's sender predicate), so native console output is disabled at
+  /// initialization and everything is printed from here instead.
+  static void _consolePrint(int lvl, String msg, {String? name, String? tag}) {
+    /// release/profile构建下直接短路。kDebugMode是编译期常量，AOT会把整个方法体连同
+    /// 调用点一起tree-shake掉，等价于native侧的MXLOGGER_CONSOLE_ENABLED。
+    /// 想在profile模式保留控制台，把条件换成 kReleaseMode。
+    /// Short-circuit in release/profile builds. kDebugMode is a compile-time constant, so AOT
+    /// tree-shakes both this body and its call sites away — the Dart counterpart of the native
+    /// MXLOGGER_CONSOLE_ENABLED. Switch the condition to kReleaseMode to keep the console in
+    /// profile mode.
+    if (kDebugMode == false) return;
+    if (_consoleEnable == false) return;
+
+    const int width = 100;
+    final String levelName =
+        lvl >= 0 && lvl < _levelNames.length ? _levelNames[lvl] : "$lvl";
+    final String levelIcon =
+        lvl >= 0 && lvl < _levelIcons.length ? _levelIcons[lvl] : "";
+
+    /// msg是合法JSON时格式化输出 对齐native的cJSON_Print
+    /// Pretty-print the message when it is valid JSON, matching native cJSON_Print
+    String content = msg;
+    try {
+      content = const JsonEncoder.withIndent("\t").convert(json.decode(msg));
+    } catch (_) {}
+
+    final DateTime now = DateTime.now();
+    final String time = "${now.year.toString().padLeft(4, '0')}-"
+        "${now.month.toString().padLeft(2, '0')}-"
+        "${now.day.toString().padLeft(2, '0')} "
+        "${now.hour.toString().padLeft(2, '0')}:"
+        "${now.minute.toString().padLeft(2, '0')}:"
+        "${now.second.toString().padLeft(2, '0')}."
+        "${now.microsecondsSinceEpoch.remainder(1000000).toString().padLeft(6, '0')}";
+
+    /// dart侧拿不到线程id 用isolate名代替native的 thread_id:main/child
+    /// Dart has no thread id, so the isolate name stands in for native's thread_id:main/child
+    final String isolate = Isolate.current.debugName ?? "isolate";
+
+    final StringBuffer buffer = StringBuffer();
+    buffer.writeln();
+    buffer.writeln("${"-" * (width ~/ 2)}MXLogger${"-" * (width ~/ 2)}");
+    buffer.writeln(" time : $time [$isolate]");
+    buffer.writeln(" level: $levelName $levelIcon");
+    buffer.writeln(" name : ${name ?? ""}");
+    if (tag != null) {
+      buffer.writeln(" tags : $tag");
+    }
+    buffer.writeln(" msg  : $content");
+    buffer.write("-" * (width + 8));
+    debugPrint(buffer.toString());
+  }
+
+  /// 类方法：使用loggerKey写入日志（无需持有logger对象，适用于模块化场景）
+  /// Class method: write a log entry via loggerKey (no logger instance needed,
+  /// designed for modularized apps)
+  ///
+  /// loggerKey: logger的唯一标识 / unique key of the logger
+  /// lvl: 日志等级 0:debug 1:info 2:warn 3:error 4:fatal
+  ///      log level: 0 debug, 1 info, 2 warn, 3 error, 4 fatal
+  /// msg: 日志信息 / log message
+  /// name: 日志名称 / logger name
+  /// tag: 标记 / tag
   static void logLoggerKey(String? loggerKey, int lvl, String msg,
       {String? name, String? tag}) {
+    _consolePrint(lvl, msg, name: name, tag: tag);
     Pointer<Utf8> loggerKeyPtr =
         loggerKey != null ? loggerKey.toNativeUtf8() : nullptr;
 
@@ -225,158 +439,215 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(msgPtr);
   }
 
-  /// 类方法 方便调用
+  /// 类方法：通过loggerKey写入debug等级日志
+  /// Class method: write a debug-level log entry via loggerKey
   static void debugLog(String? loggerKey, String msg,
       {String? name, String? tag}) {
     logLoggerKey(loggerKey, 0, msg, name: name, tag: tag);
   }
 
+  /// 类方法：通过loggerKey写入info等级日志
+  /// Class method: write an info-level log entry via loggerKey
   static void infoLog(String? loggerKey, String msg,
       {String? name, String? tag}) {
     logLoggerKey(loggerKey, 1, msg, name: name, tag: tag);
   }
 
+  /// 类方法：通过loggerKey写入warn等级日志
+  /// Class method: write a warn-level log entry via loggerKey
   static void warnLog(String? loggerKey, String msg,
       {String? name, String? tag}) {
     logLoggerKey(loggerKey, 2, msg, name: name, tag: tag);
   }
 
+  /// 类方法：通过loggerKey写入error等级日志
+  /// Class method: write an error-level log entry via loggerKey
   static void errorLog(String? loggerKey, String msg,
       {String? name, String? tag}) {
     logLoggerKey(loggerKey, 3, msg, name: name, tag: tag);
   }
 
+  /// 类方法：通过loggerKey写入fatal等级日志
+  /// Class method: write a fatal-level log entry via loggerKey
   static void fatalLog(String? loggerKey, String msg,
       {String? name, String? tag}) {
     logLoggerKey(loggerKey, 4, msg, name: name, tag: tag);
   }
 
-  /// 程序进入后台的时候是否去清理过期文件 默认为YES
+  /// 程序进入后台的时候是否去清理过期文件 默认为true
+  /// Whether to remove expired log files when the app enters background, defaults to true
   void shouldRemoveExpiredDataWhenEnterBackground(bool should) {
     _shouldRemoveExpiredDataWhenEnterBackground = should;
   }
 
-  /// 设置写入日志文件等级
-  ///    0:debug
-  ///     1:info
-  ///     2:warn
-  ///     3:error
-  ///     4:fatal
+  /// 设置写入日志文件等级，低于该等级的日志不会写入文件
+  ///    0:debug 1:info 2:warn 3:error 4:fatal
   ///    lvl=0 >=0 的等级会被写入日志
   ///    lvl=1 >=1 的等级会被写入日志
-  ///    lvl=2 >=2 的等级被毁写入日志
+  ///    lvl=2 >=2 的等级会被写入日志
   ///    .......
+  /// Set the minimum level written to file; logs below this level are not written
+  ///    0 debug, 1 info, 2 warn, 3 error, 4 fatal
+  ///    e.g. lvl=1 means only logs with level >= 1 are written, and so on
   void setLevel(int lvl) {
     if (enable == false) return;
     _setLevel(_handle, lvl);
   }
 
-  /// 设置是否禁用日志写入功能
+  /// 设置是否开启日志写入功能，false时禁用日志
+  /// Enable or disable logging; pass false to disable
   void setEnable(bool enable) {
+    if (_handle == nullptr) return;
     _enable = enable;
     _setEnable(_handle, enable == true ? 1 : 0);
   }
 
-  /// 设置是否禁用控制台输出功能，
-  /// 注意:1.这个方法只是禁用了控制台的输出和打印，并不影响日志的文件的写入
-  ///     2.在测试环境或者debug状态的时候可以开启console,但是app上线建议关掉。生产环境这种性能损耗毫无意义。
-  void setConsoleEnable(bool e) {
-    if (enable == false) return;
-    _setConsoleEnable(_handle, e == true ? 1 : 0);
-  }
-
-  /// 设置日志文件存储最大时长(s) 默认为0 不限制   60 * 60 *24 *7； 即一个星期
+  /// 设置日志文件存储最大时长(秒) 默认为0不限制，如 60 * 60 * 24 * 7 即一个星期；
+  /// 以文件最后修改时间判断是否过期，过期文件在[removeExpireData]时删除
+  /// Set the maximum age of log files in seconds; defaults to 0 (unlimited),
+  /// e.g. 60 * 60 * 24 * 7 for one week. Expiry is judged by each file's last-modified
+  /// time, and expired files are deleted when [removeExpireData] runs
   void setMaxDiskAge(int age) {
     if (enable == false) return;
 
     _setMaxDiskAge(_handle, age);
   }
 
-  /// 设置日志文件存储最大字节数(byte) 默认为0 不限制 1024 * 1024 * 10; 即10M
+  /// 设置日志文件存储最大字节数(byte) 默认为0不限制，如 1024 * 1024 * 10 即10M；
+  /// 超限清理在[removeExpireData]时执行
+  /// Set the maximum total size of log files in bytes; defaults to 0 (unlimited),
+  /// e.g. 1024 * 1024 * 10 for 10 MB. The over-limit cleanup runs
+  /// when [removeExpireData] is called
   void setMaxDiskSize(int size) {
     if (enable == false) return;
     _setMaxDiskSize(_handle, size);
   }
 
-  /// 删除过期文件
+  /// 清理日志文件：先删除过期文件（最后修改时间超过maxDiskAge），若总大小仍超过maxDiskSize
+  /// 则从最旧的文件开始继续删除；当前正在写入的文件不会被删除。
+  /// App进入后台时默认会自动调用（见[shouldRemoveExpiredDataWhenEnterBackground]）
+  /// Clean up log files: first delete expired files (last-modified time older than
+  /// maxDiskAge), then, if the total size still exceeds maxDiskSize, keep deleting from
+  /// the oldest file onward; the file currently being written is never deleted.
+  /// Called automatically when the app enters background by default
+  /// (see [shouldRemoveExpiredDataWhenEnterBackground])
   void removeExpireData() {
     if (enable == false) return;
     _removeExpireData(_handle);
   }
 
-  /// 删除除当前正在写入的所有日志文件
+  /// 删除除当前正在写入文件之外的所有日志文件
+  /// Remove all log files except the one currently being written
   void removeBeforeAllData() {
     if (enable == false) return;
     _removeBeforeAllData(_handle);
   }
 
   /// 删除所有日志文件
+  /// Remove all log files
   void removeAll() {
     if (enable == false) return;
     _removeAll(_handle);
   }
 
-  /// 获取存储的日志大小 (byte)
+  /// 获取存储的日志大小(byte)
+  /// Get the total size of stored logs in bytes
   int getLogSize() {
     if (enable == false) return 0;
     return _getLogSize(_handle);
   }
 
   /// 获取日志文件夹的存储路径
+  /// Get the disk path of the log directory
   String getDiskcachePath() {
     if (enable == false) return "";
     Pointer<Int8> result = _getDiskcachePath(_handle);
-
+    if (result == nullptr) return "";
     String path = result.cast<Utf8>().toDartString();
+
+    /// native侧strdup的内存必须由native侧释放
+    /// Memory strdup-ed on the native side must be freed by the native side
+    _freeString(result);
     return path;
   }
 
+  /// 获取native侧最近一次写入失败的错误信息，无错误时返回null
+  /// Get the most recent native write-error description, or null when there is none
   String? _errorDesc() {
     if (enable == false) return null;
     Pointer<Int8> result = _getErrorDesc(_handle);
+    if (result == nullptr) return null;
     String error = result.cast<Utf8>().toDartString();
+    _freeString(result);
     if (error.isEmpty == true) return null;
     return error;
   }
 
-  /// 获取日志底层的唯一标识 可以通过这个key操作日志对象
-  /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
+  /// 获取日志底层的唯一标识，可以通过这个key操作日志对象。
+  /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)，
   /// 但是你希望所有子模块(子组件)使用在主工程初始化的log，
-  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
+  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey进行日志写入
+  /// Get the unique key of the underlying logger, usable to operate on it.
+  /// Use case: in a large modularized app, sub-modules can share the logger initialized
+  /// in the main project by passing this key around and writing logs via [logLoggerKey]
   String? getLoggerKey() {
+    if (_handle == nullptr) return null;
     Pointer<Int8> result = _getLoggerKey(_handle);
-    Pointer<Utf8> mapPoint = result.cast<Utf8>();
-    if (mapPoint != nullptr) {
-      String loggerKey = mapPoint.toDartString();
-      return loggerKey;
-    }
-    return null;
+    if (result == nullptr) return null;
+    String loggerKey = result.cast<Utf8>().toDartString();
+    _freeString(result);
+    return loggerKey;
   }
 
+  /// 写入debug等级日志
+  /// Write a debug-level log entry
   int debug(String msg, {String? name, String? tag}) {
     return log(0, msg, name: name, tag: tag);
   }
 
+  /// 写入info等级日志
+  /// Write an info-level log entry
   int info(String msg, {String? name, String? tag}) {
     return log(1, msg, name: name, tag: tag);
   }
 
+  /// 写入warn等级日志
+  /// Write a warn-level log entry
   int warn(String msg, {String? name, String? tag}) {
     return log(2, msg, name: name, tag: tag);
   }
 
+  /// 写入error等级日志
+  /// Write an error-level log entry
   int error(String msg, {String? name, String? tag}) {
     return log(3, msg, name: name, tag: tag);
   }
 
+  /// 写入fatal等级日志
+  /// Write a fatal-level log entry
   int fatal(String msg, {String? name, String? tag}) {
     return log(4, msg, name: name, tag: tag);
   }
 
-  /// 当返回值不等于0的时候 开发者可以调用[writeFail] 方法写入错误信息到本地。
+  /// 写入日志
+  /// 当返回值不等于0的时候，开发者可以调用[writeFail]方法写入错误信息到本地
+  /// Write a log entry
+  /// When the return value is non-zero, call [writeFail] to record the error locally
+  ///
+  /// lvl: 日志等级 0:debug 1:info 2:warn 3:error 4:fatal
+  ///      log level: 0 debug, 1 info, 2 warn, 3 error, 4 fatal
+  /// msg: 日志信息 / log message
+  /// name: 日志名称 / logger name
+  /// tag: 标记 / tag
+  /// 返回值: 0 成功 -1 扩容失败 -2 解除映射失败 -3 映射失败
+  /// return: 0 success, -1 file expansion failed, -2 unmap failed, -3 mmap failed
   int log(int lvl, String msg, {String? name, String? tag}) {
-    if (enable == false) return 0;
-
+    /// _handle判空是兜底：失效/初始化失败的实例_enable必为false，
+    /// 但绝不能把空句柄传进native
+    /// The null-handle check is a backstop: an invalidated or failed instance
+    /// always has _enable == false, but a null handle must never reach native code
+    if (enable == false || _handle == nullptr) return 0;
+    _consolePrint(lvl, msg, name: name, tag: tag);
     Pointer<Utf8> namePtr = name != null ? name.toNativeUtf8() : nullptr;
     Pointer<Utf8> tagPtr = tag != null ? tag.toNativeUtf8() : nullptr;
     Pointer<Utf8> msgPtr = msg.toNativeUtf8();
@@ -389,12 +660,20 @@ class MXLogger with WidgetsBindingObserver {
     return result;
   }
 
-  /// call  when log return value != 0.
-  /// code: [log] return value
-  /// errorDesc: [mxlogger.errorDesc]
-  /// other: business
+  /// 当[log]返回值 != 0 时调用，将写入失败的错误信息以JSON格式追加到本地错误文件
+  /// Call this when [log] returns a non-zero value; appends the failure info
+  /// to the local error file as a JSON line
+  ///
+  /// code: [log]的返回值 / return value of [log]
+  /// errorDesc: [errorDesc]的错误信息 / the error description from [errorDesc]
+  /// other: 业务自定义信息 / extra business-defined info
   void writeFail(
       {required int code, required String errorDesc, String? other}) {
+    /// 路径无效(初始化失败、已禁用或已销毁)时diskcachePath为空串，
+    /// 继续写会拼出"/error.txt"指向根目录并抛异常
+    /// diskcachePath is empty when the logger is uninitialized, disabled or
+    /// destroyed; writing would target "/error.txt" at the filesystem root and throw
+    if (diskcachePath.isEmpty) return;
     if (_ioSink == null) {
       File file = File(diskcacheErrorPath);
       _ioSink = file.openWrite(mode: FileMode.append);
@@ -408,17 +687,24 @@ class MXLogger with WidgetsBindingObserver {
     _ioSink?.write(jsonStr + "\n");
   }
 
+  /// 删除本地错误文件
+  /// Delete the local error file
   void deleteFailFile() {
     File file = File(diskcacheErrorPath);
     file.delete();
   }
 
+  /// 关闭错误文件的写入流
+  /// Close the write stream of the error file
   void closeFailFile() {
     _ioSink?.close();
     _ioSink = null;
   }
 
+  /// 获取日志文件列表（文件名、大小、创建时间、最后修改时间）
+  /// Get the list of stored log files (name, size, creation time, last-modified time)
   List<MXFileEntity> getLogFiles() {
+    if (_handle == nullptr) return [];
     final arrayPtr = calloc<Pointer<Pointer<Pointer<Utf8>>>>();
     final sizeArrayPtr = calloc<Pointer<Pointer<Uint32>>>();
     final count = _getLogfiles(_handle, arrayPtr, sizeArrayPtr);
@@ -473,7 +759,13 @@ class MXLogger with WidgetsBindingObserver {
     return _mxFileList;
   }
 
-  /// 目前只对 ios端生效
+  /// 查询指定目录下的日志文件信息(name/size/timestamp)。
+  /// 注意：该接口目前未实现——Android直接返回空列表，iOS侧native符号也只是占位(始终返回0条)，
+  /// 因此所有平台都会得到空列表；获取日志文件信息请使用[logFiles]
+  /// Query the log files (name/size/timestamp) under the given directory.
+  /// NOTE: currently not implemented — Android returns an empty list directly, and the
+  /// iOS native symbol is only a stub (always yields 0 entries), so every platform gets
+  /// an empty list; use [logFiles] to get log file metadata instead
   static List<Map<String, dynamic>> selectLogfiles(
       {required String directory}) {
     if (Platform.isIOS == false) return [];
@@ -514,6 +806,65 @@ class MXLogger with WidgetsBindingObserver {
     return logFiles;
   }
 
+  /// 解析日志文件 返回日志内容列表
+  /// diskcacheFilePath: 日志文件的完整路径
+  /// cryptKey iv: 写入该文件时使用的加密参数 未加密不填
+  /// 返回的每一项包含 name/tag/msg/level/timestamp/thread_id/is_main_thread/error_code，
+  /// error_code为"1"表示该条数据解析失败(可能是cryptKey或iv不正确)，
+  /// 返回顺序为时间倒序(最新的记录在前) 与iOS端selectWithDiskCacheFilePath一致
+  /// Parse a log file and return its entries
+  /// diskcacheFilePath: full path of the log file
+  /// cryptKey / iv: the encryption params used when the file was written; omit for unencrypted files
+  /// Each entry contains name/tag/msg/level/timestamp/thread_id/is_main_thread/error_code;
+  /// error_code "1" means the entry failed to decode (possibly a wrong cryptKey or iv).
+  /// Entries are returned newest first, consistent with iOS selectWithDiskCacheFilePath
+  static List<Map<String, dynamic>> selectLogmsg(
+      {required String diskcacheFilePath, String? cryptKey, String? iv}) {
+    List<Map<String, dynamic>> logList = [];
+
+    Pointer<Utf8> pathPtr = diskcacheFilePath.toNativeUtf8();
+    Pointer<Utf8> cryptKeyPtr =
+        cryptKey == null ? nullptr : cryptKey.toNativeUtf8();
+    Pointer<Utf8> ivPtr = iv == null ? nullptr : iv.toNativeUtf8();
+
+    final numberPtr = calloc<Int32>();
+    final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
+    final sizeArrayPtr = calloc<Pointer<Uint32>>();
+
+    final result = _selectLogmsg(
+        pathPtr, cryptKeyPtr, ivPtr, numberPtr, arrayPtr, sizeArrayPtr);
+    final count = numberPtr.value;
+    if (result == 0 && count > 0) {
+      final array = arrayPtr[0];
+      final sizeArray = sizeArrayPtr[0];
+      for (int i = 0; i < count; i++) {
+        String? json = _buffer2String(array[i].cast(), sizeArray[i]);
+        if (json == null) continue;
+        try {
+          logList.add(Map<String, dynamic>.from(jsonDecode(json)));
+        } catch (_) {}
+      }
+
+      /// native侧malloc的内存必须由native侧释放
+      /// Memory malloc-ed on the native side must be freed by the native side
+      _freeLogmsg(count, array, sizeArray);
+    }
+
+    calloc.free(pathPtr);
+    if (cryptKeyPtr != nullptr) {
+      calloc.free(cryptKeyPtr);
+    }
+    if (ivPtr != nullptr) {
+      calloc.free(ivPtr);
+    }
+    calloc.free(numberPtr);
+    calloc.free(arrayPtr);
+    calloc.free(sizeArrayPtr);
+    return logList;
+  }
+
+  /// 将native返回的UTF-8字节缓冲转为Dart字符串
+  /// Convert a UTF-8 byte buffer returned from native code into a Dart string
   static String? _buffer2String(Pointer<Uint8>? ptr, int length) {
     if (ptr != null && ptr != nullptr) {
       var listView = ptr.asTypedList(length);
@@ -525,7 +876,32 @@ class MXLogger with WidgetsBindingObserver {
   String? _cryptKey;
   String? _iv;
   bool _enable = true;
+
   bool _shouldRemoveExpiredDataWhenEnterBackground = true;
+
+  String? _nameSpace;
+  String? _directory;
+
+  /// loggerKey -> 实例注册表：destroy时据此找到并失效对应的Dart实例。
+  /// 值为列表：同一key重复构造出的多个Dart实例共享同一个native对象，必须全部失效
+  /// loggerKey -> instance registry; destroy uses it to locate and invalidate
+  /// the matching Dart instances. The value is a list: duplicate constructions
+  /// under one key share a single native object, so every instance must be invalidated
+  static final Map<String, List<MXLogger>> _instanceMap = {};
+
+  /// 失效当前实例：移除生命周期监听、关闭错误文件流并清空native句柄。
+  /// 否则destroy之后App进入后台触发的清理回调会拿着已释放的native指针调用，
+  /// 造成use-after-free崩溃
+  /// Invalidate this instance: remove the lifecycle observer, close the error-file
+  /// sink and clear the native handle. Without this, the enter-background cleanup
+  /// callback would call into native code with a freed pointer after destroy,
+  /// crashing with a use-after-free
+  void _invalidate() {
+    WidgetsBinding.instance.removeObserver(this);
+    closeFailFile();
+    _handle = nullptr;
+    _enable = false;
+  }
 }
 
 final DynamicLibrary _nativeLib = Platform.isAndroid
@@ -536,7 +912,8 @@ String _mxloggerFunction(String funcName) {
   return "flutter_mxlogger_" + funcName;
 }
 
-///初始化logger
+/// native函数: 初始化logger，返回logger句柄
+/// Native function: initialize the logger and return its handle
 final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>,
         Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>)
     _initialize = _nativeLib
@@ -552,33 +929,49 @@ final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>,
                     Pointer<Utf8>)>>(_mxloggerFunction("initialize"))
         .asFunction();
 
-final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>) _destroy = _nativeLib
+/// native函数: 通过nameSpace+directory释放logger
+/// (native侧返回void，此处声明须一致)
+/// Native function: release the logger by nameSpace + directory
+/// (the native side returns void, and the declaration here must match)
+final void Function(Pointer<Utf8>, Pointer<Utf8>) _destroy = _nativeLib
     .lookup<
         NativeFunction<
-            Pointer<Void> Function(
+            Void Function(
                 Pointer<Utf8>, Pointer<Utf8>)>>(_mxloggerFunction("destroy"))
     .asFunction();
 
-final Pointer<Void> Function(Pointer<Utf8>) _destroyWithLoggerKey = _nativeLib
-    .lookup<NativeFunction<Pointer<Void> Function(Pointer<Utf8>)>>(
+/// native函数: 通过loggerKey释放logger
+/// Native function: release the logger by loggerKey
+final void Function(Pointer<Utf8>) _destroyWithLoggerKey = _nativeLib
+    .lookup<NativeFunction<Void Function(Pointer<Utf8>)>>(
         _mxloggerFunction("destroyWithLoggerKey"))
     .asFunction();
 
+/// native函数: 通过logger句柄写入日志
+/// 返回值声明为Int32与native的int严格匹配：原Uint64在32位设备上会多读一个
+/// 垃圾寄存器，且负数错误码(-1/-2/-3)会被读成巨大正数
+/// Native function: write a log entry via the logger handle.
+/// The return type is Int32 to exactly match the native int: the previous Uint64 read
+/// an extra garbage register on 32-bit devices, and negative error codes (-1/-2/-3)
+/// came back as huge positive numbers
 final int Function(
         Pointer<Void>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Utf8>) _log =
     _nativeLib
         .lookup<
             NativeFunction<
-                Uint64 Function(Pointer<Void>, Pointer<Utf8>, Int32,
+                Int32 Function(Pointer<Void>, Pointer<Utf8>, Int32,
                     Pointer<Utf8>, Pointer<Utf8>)>>(_mxloggerFunction("log"))
         .asFunction();
 
+/// native函数: 通过loggerKey写入日志 (返回值Int32与native的int严格匹配，理由同_log)
+/// Native function: write a log entry via loggerKey
+/// (the Int32 return exactly matches the native int, same rationale as _log)
 final int Function(
         Pointer<Utf8>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Utf8>)
     _logLoggerKey = _nativeLib
         .lookup<
             NativeFunction<
-                Uint64 Function(
+                Int32 Function(
                     Pointer<Utf8>,
                     Pointer<Utf8>,
                     Int32,
@@ -586,100 +979,154 @@ final int Function(
                     Pointer<Utf8>)>>(_mxloggerFunction("log_loggerKey"))
         .asFunction();
 
+/// native函数: 设置写入文件的日志等级
+/// Native function: set the minimum level written to file
 final void Function(Pointer<Void>, int) _setLevel = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
         _mxloggerFunction("set_level"))
     .asFunction();
 
+/// native函数: 开启/禁用日志写入
+/// Native function: enable or disable logging
 final void Function(Pointer<Void>, int) _setEnable = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
         _mxloggerFunction("set_enable"))
     .asFunction();
 
-final void Function(Pointer<Void>, int) _setConsoleEnable = _nativeLib
-    .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
-        _mxloggerFunction("set_console_enable"))
-    .asFunction();
+// 控制台输出统一由flutter层debugPrint实现(native侧输出在初始化时已禁用)，
+// 因此不再绑定native的set_console_enable，符号仍保留在native侧以兼容旧版本。
+// Console output is handled by the Flutter layer's debugPrint (native output is
+// disabled at initialization), so set_console_enable is no longer bound here;
+// the native symbol is kept for backward compatibility.
 
+/// native函数: 获取日志文件夹磁盘路径
+/// Native function: get the disk path of the log directory
 final Pointer<Int8> Function(Pointer<Void>) _getDiskcachePath = _nativeLib
     .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(
         _mxloggerFunction("get_diskcache_path"))
     .asFunction();
+
+/// native函数: 获取logger的唯一标识loggerKey
+/// Native function: get the logger's unique key (loggerKey)
 final Pointer<Int8> Function(Pointer<Void>) _getLoggerKey = _nativeLib
     .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(
         _mxloggerFunction("get_loggerKey"))
     .asFunction();
 
+/// native函数: 获取最近一次写入失败的错误信息
+/// Native function: get the most recent write-error description
 final Pointer<Int8> Function(Pointer<Void>) _getErrorDesc = _nativeLib
     .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(
         _mxloggerFunction("get_error_desc"))
     .asFunction();
 
+/// native函数: 释放get_loggerKey/get_diskcache_path/get_error_desc返回的native字符串
+/// Native function: free the native strings returned by
+/// get_loggerKey / get_diskcache_path / get_error_desc
+final void Function(Pointer<Int8>) _freeString = _nativeLib
+    .lookup<NativeFunction<Void Function(Pointer<Int8>)>>(
+        _mxloggerFunction("free_string"))
+    .asFunction();
+
+/// native函数: 设置日志文件最大存储时长(秒)
+/// Native function: set the maximum age of log files in seconds
 final void Function(Pointer<Void>, int) _setMaxDiskAge = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
         _mxloggerFunction("set_max_disk_age"))
     .asFunction();
 
+/// native函数: 设置日志文件最大存储字节数(byte)
+/// Native function: set the maximum total size of log files in bytes
 final void Function(Pointer<Void>, int) _setMaxDiskSize = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>, Int32)>>(
         _mxloggerFunction("set_max_disk_size"))
     .asFunction();
 
+/// native函数: 清理过期日志文件
+/// Native function: remove expired log files
 final void Function(Pointer<Void>) _removeExpireData = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
         _mxloggerFunction("remove_expire_data"))
     .asFunction();
 
+/// native函数: 删除除当前正在写入文件之外的所有日志文件
+/// Native function: remove all log files except the one currently being written
 final void Function(Pointer<Void>) _removeBeforeAllData = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
         _mxloggerFunction("remove_before_all_data"))
     .asFunction();
 
+/// native函数: 获取日志文件列表(文件名/大小/时间戳)
+/// Native function: get the list of log files (name/size/timestamps)
 final int Function(Pointer<Void>, Pointer<Pointer<Pointer<Pointer<Utf8>>>>,
         Pointer<Pointer<Pointer<Uint32>>>) _getLogfiles =
     _nativeLib
         .lookup<
                 NativeFunction<
-                    Uint64 Function(
+                    Int32 Function(
                         Pointer<Void>,
                         Pointer<Pointer<Pointer<Pointer<Utf8>>>>,
                         Pointer<Pointer<Pointer<Uint32>>>)>>(
             _mxloggerFunction("get_logfiles"))
         .asFunction();
 
+/// native函数: 查询指定目录下的日志文件信息
+/// (iOS侧该符号为未实现的占位 始终返回0条，见[MXLogger.selectLogfiles])
+/// Native function: query the log files under the given directory
+/// (the iOS symbol is an unimplemented stub that always yields 0 entries,
+/// see [MXLogger.selectLogfiles])
 final int Function(Pointer<Utf8>, Pointer<Pointer<Pointer<Utf8>>>,
         Pointer<Pointer<Uint32>>) _selectLogfiles =
     _nativeLib
         .lookup<
                 NativeFunction<
-                    Uint64 Function(
+                    Uint32 Function(
                         Pointer<Utf8>,
                         Pointer<Pointer<Pointer<Utf8>>>,
                         Pointer<Pointer<Uint32>>)>>(
             _mxloggerFunction("select_logfiles"))
         .asFunction();
 
-// final int Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Int32>,
-//         Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>)
-//     _select_logmsg = _nativeLib
-//         .lookup<
-//                 NativeFunction<
-//                     Uint64 Function(
-//                         Pointer<Utf8>,
-//                         Pointer<Utf8>,
-//                         Pointer<Utf8>,
-//                         Pointer<Int32>,
-//                         Pointer<Pointer<Pointer<Utf8>>>,
-//                         Pointer<Pointer<Uint32>>)>>(
-//     _mxloggerFunction("select_logmsg"))
-//         .asFunction();
+/// native函数: 解析日志文件，返回日志条目
+/// Native function: parse a log file and return its entries
+final int Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>, Pointer<Int32>,
+        Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>)
+    _selectLogmsg = _nativeLib
+        .lookup<
+                NativeFunction<
+                    Int32 Function(
+                        Pointer<Utf8>,
+                        Pointer<Utf8>,
+                        Pointer<Utf8>,
+                        Pointer<Int32>,
+                        Pointer<Pointer<Pointer<Utf8>>>,
+                        Pointer<Pointer<Uint32>>)>>(
+            _mxloggerFunction("select_logmsg"))
+        .asFunction();
 
+/// native函数: 释放select_logmsg返回的native内存
+/// Native function: free the native memory returned by select_logmsg
+final void Function(int, Pointer<Pointer<Utf8>>, Pointer<Uint32>) _freeLogmsg =
+    _nativeLib
+        .lookup<
+            NativeFunction<
+                Void Function(Int32, Pointer<Pointer<Utf8>>,
+                    Pointer<Uint32>)>>(_mxloggerFunction("free_logmsg"))
+        .asFunction();
+
+/// native函数: 删除所有日志文件
+/// Native function: remove all log files
 final void Function(Pointer<Void>) _removeAll = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Void>)>>(
         _mxloggerFunction("remove_all"))
     .asFunction();
 
+/// native函数: 获取存储的日志大小(byte)
+/// 返回值Int32与两端native的int32_t严格匹配(上限约2GB，对日志足够)
+/// Native function: get the total size of stored logs in bytes.
+/// The Int32 return exactly matches the native int32_t on both platforms
+/// (capped at ~2GB, plenty for logs)
 final int Function(Pointer<Void>) _getLogSize = _nativeLib
-    .lookup<NativeFunction<Int Function(Pointer<Void>)>>(
+    .lookup<NativeFunction<Int32 Function(Pointer<Void>)>>(
         _mxloggerFunction("get_log_size"))
     .asFunction();

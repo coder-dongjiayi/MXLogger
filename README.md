@@ -121,7 +121,7 @@ Do not set the log storage directory in a directory that may be cleaned up by th
   
    logger.setMaxDiskAge(60*60*24*7);
    logger.setMaxDiskSize(1024*1024*10);
-   logger.setFileLevel(0);
+   logger.setLevel(0);
   
    logger.debug("this is debug ", name: "mxlogger", tag: "tag1,tag2,tag3");
    logger.info("this is info", name: "mxlogger", tag: "w");

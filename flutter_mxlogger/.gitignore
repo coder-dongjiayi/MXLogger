@@ -7,3 +7,6 @@
 build/
 /pubspec.lock
 .idea/
+# 单元测试用宿主动态库(由 test/native/build_test_dylib.sh 生成)
+test/native/libmxlogger_test.dylib
+test/native/build_tmp/

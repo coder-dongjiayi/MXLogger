@@ -9,8 +9,11 @@
 
 #include <mutex>
 #include <unordered_map>
+#include <cstring>
+#ifndef _WIN32
 #include <unistd.h>
 #include <fcntl.h>
+#endif
 #include <stdlib.h>
 
 #include "sink/mmap_sink.hpp"
@@ -22,6 +25,9 @@
 namespace mxlogger{
 
 std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::unordered_map<std::string, mxlogger *>;
+
+/// 保护global_instanceDic_，logger_mutex是实例级的，护不住并发初始化/释放
+static std::mutex global_instance_mutex_;
 
 
  std::string mxlogger::md5(const char* ns,const char* directory){
@@ -53,6 +59,7 @@ mxlogger *mxlogger::global_for_loggerKey(const char* logger_key){
 
     if(logger_key == nullptr) return nullptr;
 
+    std::lock_guard<std::mutex> lock(global_instance_mutex_);
     auto itr = global_instanceDic_ -> find(logger_key);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
@@ -69,19 +76,26 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,
                                          const char* cryptKey,
                                          const char* iv){
 
+    /// directory为空时get_diskcache_path_返回空串；std::string::data()永不为nullptr，
+    /// 必须用empty()判断，否则会构造出一个dir_path_为空、只能写进cwd的坏logger
+    /// get_diskcache_path_ returns "" when directory is null; std::string::data()
+    /// never returns nullptr, so empty() is the correct check — otherwise a broken
+    /// logger with an empty dir_path_ (writing into the cwd) would be constructed
     std::string diskcache_path = get_diskcache_path_(ns,directory);
-    if (diskcache_path.data() == nullptr) {
+    if (diskcache_path.empty()) {
         return nullptr;
     }
     
     std::string logger_key =  mxlogger_helper::mx_md5(diskcache_path);
-    
+
+    /// find和insert必须在同一把锁内，防止并发初始化同一namespace时创建出两个实例
+    std::lock_guard<std::mutex> lock(global_instance_mutex_);
     auto itr = global_instanceDic_ -> find(logger_key);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
         return logger;
     }
-    
+
     auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,file_header,cryptKey,iv);
     logger -> logger_key_ = logger_key;
     (*global_instanceDic_)[logger_key] = logger;
@@ -107,6 +121,7 @@ void mxlogger::delete_namespace(const char* ns,const char* directory){
 
 //释放指定的logger对象
 void mxlogger::delete_namespace_(const char* logger_key){
+    std::lock_guard<std::mutex> lock(global_instance_mutex_);
     auto itr = global_instanceDic_ -> find(logger_key);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
@@ -115,7 +130,7 @@ void mxlogger::delete_namespace_(const char* logger_key){
     }
 }
 void mxlogger::destroy(){
-    
+    std::lock_guard<std::mutex> lock(global_instance_mutex_);
     for (auto &pair : *global_instanceDic_) {
         mxlogger *logger = pair.second;
         delete logger;
@@ -128,7 +143,7 @@ void mxlogger::destroy(){
 
 
 mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const char* file_name, const char* file_header,const char* cryptKey, const char* iv) : diskcache_path_(diskcache_path){
-    std::string filename_ = file_name == nullptr ? "log" : file_name;
+    std::string filename_ = file_name == nullptr ? "mxlog" : file_name;
     
     mmap_sink_ = std::make_shared<sinks::mmap_sink>(diskcache_path,filename_, mxlogger_helper::policy_(storage_policy));
    
@@ -211,6 +226,26 @@ void mxlogger::set_log_level(int level){
     mmap_sink_ -> set_level(mxlogger_helper::level_(level));
 }
 
+bool mxlogger::is_enable() const{
+    return enable_;
+}
+
+bool mxlogger::is_enable_console() const{
+    return enable_console_;
+}
+
+int mxlogger::log_level() const{
+    return static_cast<int>(mmap_sink_ -> level());
+}
+
+long long mxlogger::file_max_size() const{
+    return mmap_sink_ -> max_disk_size();
+}
+
+long long mxlogger::file_max_age() const{
+    return mmap_sink_ -> max_disk_age();
+}
+
 void mxlogger::flush(){
     std::lock_guard<std::mutex> lock(logger_mutex);
     mmap_sink_ -> flush();
@@ -234,11 +269,18 @@ int mxlogger::log(int level,const char* name, const char* msg,const char* tag,bo
     
     int result =  mmap_sink_ -> log(log_msg);
    
+    /// 发布构建下MXLOGGER_CONSOLE_ENABLED为0(Android除外，见mxlogger_console.hpp)，
+    /// 这里连判断带调用整段不编译，gen_console_str/cJSON_Print的开销和代码体积都不会进包
+    /// MXLOGGER_CONSOLE_ENABLED is 0 in release builds (except on Android, see
+    /// mxlogger_console.hpp): the check and the call are both stripped, so neither the cost
+    /// nor the code size of gen_console_str/cJSON_Print ships
+#if MXLOGGER_CONSOLE_ENABLED
     if (enable_console_ == true) {
         
         mxlogger_console::print(log_msg);
 
     }
+#endif
     return  result;
     
    

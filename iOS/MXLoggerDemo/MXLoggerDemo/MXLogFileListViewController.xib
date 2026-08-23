@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="MXLogFileListViewController">
+            <connections>
+                <outlet property="summaryLabel" destination="suml-01" id="oc-suml-01"/>
+                <outlet property="tableView" destination="tabl-01" id="oc-tabl-01"/>
+                <outlet property="emptyLabel" destination="empt-01" id="oc-empt-01"/>
+                <outlet property="view" destination="root-01" id="oc-root-01"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="root-01">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="共 0 个文件 · 总大小 0 B" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="suml-01">
+                    <rect key="frame" x="20" y="60" width="374" height="16"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                    <color key="textColor" systemColor="secondaryLabelColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="tabl-01">
+                    <rect key="frame" x="0.0" y="84" width="414" height="812"/>
+                    <color key="backgroundColor" systemColor="systemGroupedBackgroundColor"/>
+                </tableView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="暂无日志文件" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" hidden="YES" translatesAutoresizingMaskIntoConstraints="NO" id="empt-01">
+                    <rect key="frame" x="164" y="438" width="86" height="18"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                    <color key="textColor" systemColor="secondaryLabelColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="safe-01"/>
+            <color key="backgroundColor" systemColor="systemGroupedBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="suml-01" firstAttribute="leading" secondItem="safe-01" secondAttribute="leading" constant="20" id="rc-01"/>
+                <constraint firstItem="safe-01" firstAttribute="trailing" secondItem="suml-01" secondAttribute="trailing" constant="20" id="rc-02"/>
+                <constraint firstItem="suml-01" firstAttribute="top" secondItem="safe-01" secondAttribute="top" constant="12" id="rc-03"/>
+                <constraint firstItem="tabl-01" firstAttribute="top" secondItem="suml-01" secondAttribute="bottom" constant="4" id="rc-04"/>
+                <constraint firstItem="tabl-01" firstAttribute="leading" secondItem="root-01" secondAttribute="leading" id="rc-05"/>
+                <constraint firstAttribute="trailing" secondItem="tabl-01" secondAttribute="trailing" id="rc-06"/>
+                <constraint firstAttribute="bottom" secondItem="tabl-01" secondAttribute="bottom" id="rc-07"/>
+                <constraint firstItem="empt-01" firstAttribute="centerX" secondItem="root-01" secondAttribute="centerX" id="rc-08"/>
+                <constraint firstItem="empt-01" firstAttribute="centerY" secondItem="root-01" secondAttribute="centerY" id="rc-09"/>
+            </constraints>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="secondaryLabelColor">
+            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemGroupedBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

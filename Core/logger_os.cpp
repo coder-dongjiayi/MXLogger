@@ -6,14 +6,23 @@
 //
 
 #include "logger_os.hpp"
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <sys/types.h>
-#include <sys/syscall.h>
 #include <unistd.h>
+#endif
+#ifdef __linux__
+#include <sys/syscall.h>
+#endif
 #include <thread>
 #include <stdio.h>
+/// VS2015之前的MSVC和WinRT不支持thread_local，这里自动降级为每次都取系统线程id
+/// MSVC older than VS2015 and WinRT have no thread_local, so fall back to querying the
+/// system thread id on every call
 #ifndef MXLOG_NO_TLS
 #    if (defined(_MSC_VER) && (_MSC_VER < 1900)) || defined(__cplusplus_winrt)
-#        define SPDLOG_NO_TLS 1
+#        define MXLOG_NO_TLS 1
 #    endif
 #endif
 
@@ -23,7 +32,7 @@ size_t logger_os::thread_id(){
   
     
 #if defined(MXLOG_NO_TLS)
-    return _thread_id();
+    return thread_id_();
 #else // cache thread id in tls
     static thread_local const size_t tid = thread_id_();
     return tid;

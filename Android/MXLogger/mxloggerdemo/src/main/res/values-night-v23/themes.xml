@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Mxloggerdemo" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/indigo</item>
+        <item name="colorPrimaryVariant">@color/indigo_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/indigo</item>
+        <item name="colorSecondaryVariant">@color/indigo_dark</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:windowBackground">@color/bg_grouped</item>
+        <item name="android:statusBarColor">@color/bg_grouped</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

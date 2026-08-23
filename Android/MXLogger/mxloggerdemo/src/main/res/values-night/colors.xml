@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_grouped">#FF000000</color>
+    <color name="surface">#FF1C1C1E</color>
+    <color name="divider">#14FFFFFF</color>
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#99EBEBF5</color>
+    <color name="text_tertiary">#4DEBEBF5</color>
+    <color name="tag_chip_bg">#3D767680</color>
+</resources>

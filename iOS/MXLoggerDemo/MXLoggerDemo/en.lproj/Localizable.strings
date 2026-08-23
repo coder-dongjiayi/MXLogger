@@ -1,0 +1,142 @@
+/* Entry */
+"entry.subtitle" = "High-performance cross-platform log library based on mmap\nAES-CFB 128 encryption · iOS / Android / Flutter";
+"entry.button" = "Enter Demo";
+
+/* Common */
+"common.cancel" = "Cancel";
+"common.ok" = "OK";
+"common.copy" = "Copy";
+"common.close" = "Close";
+"common.remove" = "Remove";
+"common.unlimited" = "Unlimited";
+
+/* Home - card */
+"home.title" = "MXLogger Demo";
+"home.card.size" = "Log Size";
+"home.card.files" = "Files";
+"home.card.level" = "Write Level";
+"home.card.policy" = "Policy";
+"home.card.policy.hourly" = "Hourly";
+"home.card.namespace.fmt" = "%@ · AES-CFB 128 encryption";
+
+/* Home - write section */
+"home.section.write" = "Write Logs";
+"home.section.write.footer" = "Each level has its own instance method; a return value of 0 means the write succeeded.";
+"home.write.level.title" = "Write %@ Log";
+"home.write.network.title" = "Write Network Request Log";
+"home.write.network.subtitle" = "msg is a JSON string, tag = request";
+"home.write.custom.title" = "logWithLevel: Generic Write";
+"home.write.custom.subtitle" = "Write with a custom level, here level = 3 (error)";
+"home.write.key.title" = "Write via loggerKey";
+"home.write.key.subtitle" = "Modular scenario: pass only the key, +infoWithLoggerKey:";
+
+/* Home - config section */
+"home.section.config" = "Configuration";
+"home.section.config.footer" = "level only affects disk writes; with consoleEnable on, the console still prints all logs.";
+"home.section.config.footer.release" = "This is a release build: console output was stripped at compile time, so consoleEnable no longer has any effect. level still affects disk writes as usual.";
+"home.config.level.title" = "Write Level (level)";
+"home.config.level.subtitle" = "Logs below this level are not written to file";
+"home.config.console.title" = "Console Output (consoleEnable)";
+"home.config.console.subtitle" = "Affects write performance; disable in production";
+"home.config.console.subtitle.release" = "Debug builds only — stripped at compile time in Release/Profile";
+"home.config.enable.title" = "Master Switch (enable)";
+"home.config.enable.subtitle" = "When off, all log writing stops";
+"home.config.background.title" = "Clean Expired Files in Background";
+"home.config.age.title" = "Max Age (maxDiskAge)";
+"home.config.age.subtitle" = "Expired files will be removed; 0 = unlimited";
+"home.config.size.title" = "Disk Limit (maxDiskSize)";
+"home.config.size.subtitle" = "Oldest files are removed first when over the limit; 0 = unlimited";
+
+/* Home - benchmark section */
+"home.section.perf" = "Benchmark";
+"home.section.perf.footer" = "Disable consoleEnable before benchmarking; console output slows down writes significantly.";
+"home.perf.bench.title" = "Write 100,000 Logs";
+"home.perf.bench.subtitle" = "About 136 bytes each; measures total time";
+"home.perf.bench.running" = "Testing…";
+"home.perf.thread.title" = "Concurrent Multi-thread Write";
+"home.perf.thread.subtitle" = "Main thread + 3 QoS queues write concurrently; count and order are verified afterwards";
+
+/* Home - file section */
+"home.section.file" = "File Management";
+"home.file.browse.title" = "Browse Log Files";
+"home.file.browse.subtitle" = "logFiles + selectWithDiskCacheFilePath: parsing";
+"home.file.expire.title" = "Remove Expired Files";
+"home.file.before.title" = "Remove Historical Files";
+"home.file.before.subtitle" = "removeBeforeAllData, keeps the file currently being written";
+"home.file.all.title" = "Remove All Logs";
+
+/* Home - info section */
+"home.section.info" = "Instance Info";
+"home.section.info.footer" = "loggerKey = md5(namespace + directory); retrieve the instance across modules via valueForLoggerKey:.";
+"home.info.path.title" = "Cache Directory (diskCachePath)";
+"home.info.error.title" = "Last Error (errorDesc)";
+"home.info.error.subtitle" = "Error description when a write returns non-zero";
+"home.info.rebuild.title" = "Destroy & Rebuild Instance";
+"home.info.rebuild.subtitle" = "destroyWithNamespace: then initialize again";
+
+/* Toasts */
+"toast.console.on" = "Console output enabled";
+"toast.console.off" = "Console output disabled";
+"toast.enable.on" = "Logging enabled";
+"toast.enable.off" = "Logging disabled";
+"toast.expire.done" = "Expired files removed";
+"toast.before.done" = "Historical files removed";
+"toast.key.copied" = "loggerKey copied";
+"toast.path.copied" = "Path copied";
+"toast.rebuild.done" = "Instance rebuilt";
+"toast.removeall.done" = "All logs removed";
+"toast.write.success" = "%@ written";
+"toast.network.success" = "Network log written";
+"toast.custom.success" = "logWithLevel: written";
+"toast.key.success" = "Written via loggerKey";
+"toast.bench.done" = "100,000 logs written in %.0f ms";
+"toast.concurrent.running" = "Writing concurrently…";
+"toast.concurrent.verifying" = "Write finished, verifying…";
+
+/* Alerts & pickers */
+"alert.write.failed" = "Write Failed (%ld)";
+"alert.no.error" = "No error";
+"alert.removeall.title" = "Remove all logs?";
+"alert.removeall.message" = "removeAllData deletes all log files and cannot be undone.";
+"picker.level.message" = "Logs below this level will not be written to disk";
+"picker.age.message" = "Maximum retention time of log files";
+"picker.size.message" = "Maximum disk usage of log files";
+"duration.1min" = "1 minute";
+"duration.1hour" = "1 hour";
+"duration.1day" = "1 day";
+"duration.7days" = "7 days";
+"duration.minutes.fmt" = "%lu min";
+"duration.hours.fmt" = "%lu h";
+"duration.days.fmt" = "%lu d";
+
+/* Concurrency verification */
+"verify.pass.title" = "✅ Concurrency Check Passed";
+"verify.fail.title" = "❌ Concurrency Check Failed";
+"verify.line.fmt" = "%@: %lu/%ld records %@\n";
+"verify.line.ok" = "✓ complete & ordered";
+"verify.line.order" = "✗ order broken";
+"verify.line.missing" = "✗ records missing";
+"verify.summary.fmt" = "\nFile has %lu records, %lu sources verified";
+
+/* Demo log content */
+"log.msg.fmt" = "Log #%lu at %@ level, written at %@";
+"log.pay.msg" = "Order payment failed: code=-1009 network connection lost";
+"log.module.msg" = "Log written by a sub-module via loggerKey";
+
+/* File list */
+"filelist.title" = "Log Files";
+"filelist.summary.fmt" = "%lu files · total size %@";
+"filelist.empty" = "No log files";
+"filelist.dates.fmt" = "Created %@ · Updated %@";
+
+/* Log viewer */
+"viewer.title" = "Log Detail";
+"viewer.segment.all" = "All";
+"viewer.search.placeholder" = "Search msg / name / tag";
+"viewer.empty" = "No logs";
+"viewer.loading" = "Parsing…";
+
+/* Record cell */
+"record.parse.failed.fmt" = "Parse failed: %@";
+"record.thread.main" = "main";
+"record.thread.sub" = "background";

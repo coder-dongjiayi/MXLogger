@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 取 logo 边缘色，与 iOS 图标合成底色一致 -->
+    <color name="ic_launcher_bg">#FF565662</color>
+</resources>

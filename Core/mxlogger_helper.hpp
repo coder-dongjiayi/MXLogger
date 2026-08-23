@@ -12,6 +12,8 @@
 #include <chrono>
 #include <memory>
 #include <string>
+#include <cstring>
+#include <ctime>
 #include <stdexcept>
 #include "log_enum.h"
 extern "C"
@@ -93,7 +95,11 @@ std::string string_format( const std::string& format, Args ... args )
 inline std::tm localtime(const std::time_t &time_tt)
 {
     std::tm tm;
+#ifdef _WIN32
+    ::localtime_s(&tm, &time_tt);
+#else
     ::localtime_r(&time_tt, &tm);
+#endif
     return tm;
 }
 inline std::tm now(){
@@ -132,7 +138,10 @@ inline std::string micros_time(std::chrono::system_clock::time_point time){
     auto micro = mxlogger_helper::time_fraction<std::chrono::microseconds>(time);
 
     using std::chrono:: milliseconds;
-    std::string time_str =  mxlogger_helper::string_format("%02d:%02d:%02d.%06d", tm_time.tm_hour,tm_time.tm_min,tm_time.tm_sec,micro);
+    /// %d需要int：chrono::duration对象直接传varargs是未定义行为，必须取count()
+    /// %d expects an int: passing a chrono::duration object through varargs is
+    /// undefined behavior, so count() must be used
+    std::string time_str =  mxlogger_helper::string_format("%02d:%02d:%02d.%06d", tm_time.tm_hour,tm_time.tm_min,tm_time.tm_sec,static_cast<int>(micro.count()));
     return time_str;
 }
 
@@ -142,7 +151,9 @@ inline std::string micros_datetime(std::chrono::system_clock::time_point time){
     auto micro = mxlogger_helper::time_fraction<std::chrono::microseconds>(time);
 
     using std::chrono:: milliseconds;
-    std::string time_str =  mxlogger_helper::string_format("%04d-%02d-%02d %02d:%02d:%02d.%06d", tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday, tm_time.tm_hour,tm_time.tm_min,tm_time.tm_sec,micro);
+    /// 同micros_time：duration对象不能直接进varargs，取count()转int
+    /// Same as micros_time: a duration object cannot go through varargs, use count()
+    std::string time_str =  mxlogger_helper::string_format("%04d-%02d-%02d %02d:%02d:%02d.%06d", tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday, tm_time.tm_hour,tm_time.tm_min,tm_time.tm_sec,static_cast<int>(micro.count()));
     return time_str;
 }
 

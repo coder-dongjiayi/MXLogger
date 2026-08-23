@@ -63,10 +63,29 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.1'
 
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test:runner:1.4.0'
 }
 //ext {
 //    PUBLISH_ARTIFACT_ID = "mxlogger"
 //    PUBLISH_GROUP_ID = 'io.github.coder-dongjiayi'
-//    PUBLISH_VERSION = '1.2.15'
+//    PUBLISH_VERSION = '2.0.0'
 //}
-apply from: '../publish.gradle'
+// ===== Javadoc 产物：Maven Central 要求正式版必须带 -javadoc.jar =====
+tasks.register('javadocRelease', Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    // android.jar + 该 variant 的编译依赖（androidx.annotation 等），否则 import 解析不了
+    classpath = files(android.getBootClasspath())
+    classpath += configurations.getByName('DefaultCppReleaseCompileClasspath')
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
+    failOnError = false
+}
+
+tasks.register('javadocJar', Jar) {
+    dependsOn 'javadocRelease'
+    archiveClassifier.set('javadoc')
+    from tasks.named('javadocRelease').map { it.destinationDir }
+}

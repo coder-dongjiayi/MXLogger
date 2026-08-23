@@ -1,12 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">mxloggerdemo</string>
-    <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="app_name">MXLoggerDemo</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <!-- Landing -->
+    <string name="landing_title">MXLogger</string>
+    <string name="landing_subtitle">High-performance cross-platform log library based on mmap\nAES-CFB 128 encryption · iOS / Android / Flutter</string>
+    <string name="landing_enter">Enter Demo</string>
+
+    <!-- Language switch button: shows the language to switch TO -->
+    <string name="lang_switch">中文</string>
+
+    <!-- Common -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_ok">OK</string>
+    <string name="common_copy">Copy</string>
+    <string name="common_close">Close</string>
+    <string name="common_remove">Remove</string>
+    <string name="common_unlimited">Unlimited</string>
+
+    <!-- Home - status card -->
+    <string name="demo_title">MXLogger Demo</string>
+    <string name="home_card_size">Log Size</string>
+    <string name="home_card_files">Files</string>
+    <string name="home_card_level">Write Level</string>
+    <string name="home_card_policy">Policy</string>
+    <string name="home_card_policy_hourly">Hourly</string>
+    <string name="home_card_namespace_fmt">%1$s · AES-CFB 128 encryption</string>
+
+    <!-- Home - write section -->
+    <string name="home_section_write">Write Logs</string>
+    <string name="home_section_write_footer">Each level has its own instance method; a return value of 0 means the write succeeded.</string>
+    <string name="home_write_level_title">Write %1$s Log</string>
+    <string name="home_write_network_title">Write Network Request Log</string>
+    <string name="home_write_network_subtitle">msg is a JSON string, tag = request</string>
+    <string name="home_write_custom_title">log() Generic Write</string>
+    <string name="home_write_custom_subtitle">Write with a custom level, here level = 3 (error)</string>
+    <string name="home_write_key_title">Write via loggerKey</string>
+    <string name="home_write_key_subtitle">Modular scenario: pass only the key, MXLogger.log(loggerKey, …)</string>
+
+    <!-- Home - config section -->
+    <string name="home_section_config">Configuration</string>
+    <string name="home_section_config_footer">level only affects disk writes; with consoleEnable on, the console still prints all logs.</string>
+    <string name="home_config_level_title">Write Level (level)</string>
+    <string name="home_config_level_subtitle">Logs below this level are not written to file</string>
+    <string name="home_config_console_title">Console Output (consoleEnable)</string>
+    <string name="home_config_console_subtitle">Affects write performance; disable in production</string>
+    <string name="home_config_enable_title">Master Switch (enable)</string>
+    <string name="home_config_enable_subtitle">When off, all log writing stops</string>
+    <string name="home_config_age_title">Max Age (maxDiskAge)</string>
+    <string name="home_config_age_subtitle">Expired files will be removed; 0 = unlimited</string>
+    <string name="home_config_size_title">Disk Limit (maxDiskSize)</string>
+    <string name="home_config_size_subtitle">Oldest files are removed first when over the limit; 0 = unlimited</string>
+
+    <!-- Home - benchmark section -->
+    <string name="home_section_perf">Benchmark</string>
+    <string name="home_section_perf_footer">Disable consoleEnable before benchmarking; console output slows down writes significantly.</string>
+    <string name="home_perf_bench_title">Write 100,000 Logs</string>
+    <string name="home_perf_bench_subtitle">Each log carries an increasing sequence number; measures total time</string>
+    <string name="home_perf_bench_running">Testing…</string>
+    <string name="home_perf_thread_title">Concurrent Multi-thread Write</string>
+    <string name="home_perf_thread_subtitle">Main thread + 3 priority threads write concurrently; count and order are verified afterwards</string>
+
+    <!-- Home - file section -->
+    <string name="home_section_file">File Management</string>
+    <string name="home_file_browse_title">Browse Log Files</string>
+    <string name="home_file_browse_subtitle">logFiles + selectWithFilePath parsing</string>
+    <string name="home_file_expire_title">Remove Expired Files</string>
+    <string name="home_file_before_title">Remove Historical Files</string>
+    <string name="home_file_before_subtitle">removeBeforeAllData(), keeps the file currently being written</string>
+    <string name="home_file_all_title">Remove All Logs</string>
+
+    <!-- Home - info section -->
+    <string name="home_section_info">Instance Info</string>
+    <string name="home_section_info_footer">loggerKey = md5(namespace + directory); other modules can write with just this key.</string>
+    <string name="home_info_path_title">Cache Directory (diskCachePath)</string>
+    <string name="home_info_error_title">Last Error (errorDesc)</string>
+    <string name="home_info_error_subtitle">Error description when a write returns non-zero</string>
+    <string name="home_info_rebuild_title">Destroy &amp; Rebuild Instance</string>
+    <string name="home_info_rebuild_subtitle">Construct again after destroy()</string>
+
+    <!-- Toasts -->
+    <string name="toast_console_on">Console output enabled</string>
+    <string name="toast_console_off">Console output disabled</string>
+    <string name="toast_enable_on">Logging enabled</string>
+    <string name="toast_enable_off">Logging disabled</string>
+    <string name="toast_expire_done">Expired files removed</string>
+    <string name="toast_before_done">Historical files removed</string>
+    <string name="toast_key_copied">loggerKey copied</string>
+    <string name="toast_path_copied">Path copied</string>
+    <string name="toast_rebuild_done">Instance rebuilt</string>
+    <string name="toast_removeall_done">All logs removed</string>
+    <string name="toast_write_success">%1$s written</string>
+    <string name="toast_network_success">Network log written</string>
+    <string name="toast_custom_success">log() written</string>
+    <string name="toast_key_success">Written via loggerKey</string>
+    <string name="toast_bench_done">100,000 logs written in %1$d ms</string>
+    <string name="toast_concurrent_running">Writing concurrently…</string>
+    <string name="toast_concurrent_verifying">Write finished, verifying…</string>
+
+    <!-- Alerts & pickers -->
+    <string name="alert_write_failed">Write Failed (%1$d)</string>
+    <string name="alert_no_error">No error</string>
+    <string name="alert_removeall_title">Remove all logs?</string>
+    <string name="alert_removeall_message">removeAll() deletes all log files and cannot be undone.</string>
+    <string name="alert_verify_error">Verification error</string>
+    <string name="duration_1min">1 minute</string>
+    <string name="duration_1hour">1 hour</string>
+    <string name="duration_1day">1 day</string>
+    <string name="duration_7days">7 days</string>
+    <string name="duration_minutes_fmt">%1$d min</string>
+    <string name="duration_hours_fmt">%1$d h</string>
+    <string name="duration_days_fmt">%1$d d</string>
+
+    <!-- Concurrency verification -->
+    <string name="verify_pass_title">✅ Concurrency Check Passed</string>
+    <string name="verify_fail_title">❌ Concurrency Check Failed</string>
+    <string name="verify_line_fmt">%1$s: %2$d/%3$d records %4$s\n</string>
+    <string name="verify_line_ok">✓ complete &amp; ordered</string>
+    <string name="verify_line_order">✗ order broken</string>
+    <string name="verify_line_missing">✗ records missing</string>
+    <string name="verify_summary_fmt">\nFile has %1$d records, %2$d sources verified</string>
+
+    <!-- Demo log content -->
+    <string name="log_msg_fmt">Log #%1$d at %2$s level, written at %3$s</string>
+    <string name="log_pay_msg">Order payment failed: code=-1009 network connection lost</string>
+    <string name="log_module_msg">Log written by a sub-module via loggerKey</string>
+
+    <!-- File list -->
+    <string name="filelist_title">Log Files</string>
+    <string name="filelist_summary_fmt">%1$d files · total size %2$s</string>
+    <string name="filelist_empty">No log files</string>
+    <string name="filelist_dates_fmt">Created %1$s · Updated %2$s</string>
+
+    <!-- Log viewer -->
+    <string name="viewer_title">Log Detail</string>
+    <string name="viewer_segment_all">All</string>
+    <string name="viewer_search_hint">Search msg / name / tag</string>
+    <string name="viewer_empty">No logs</string>
+    <string name="viewer_loading">Parsing…</string>
+
+    <!-- Record cell -->
+    <string name="record_parse_failed_fmt">Parse failed: %1$s</string>
+    <string name="record_thread_main">main</string>
+    <string name="record_thread_sub">background</string>
 </resources>

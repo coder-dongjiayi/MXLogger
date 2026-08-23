@@ -33,8 +33,15 @@ IF(APPLE)
     add_compile_definitions(FORCE_POSIX)
 ENDIF()
 
-set(can_use_assembler TRUE)
-enable_language(ASM)
+# MSVC没有GNU汇编器，ARM加速汇编仅在非MSVC下启用(内部有架构守卫，x86上编译为空)
+IF(NOT MSVC)
+    set(can_use_assembler TRUE)
+    enable_language(ASM)
+ENDIF()
+
+IF(WIN32)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN)
+ENDIF()
 IF("${ANDROID_ABI}" STREQUAL "arm64-v8a")
     SET(ASM_OPTIONS "-x assembler-with-cpp")
     SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS} -march=armv8+crypto -D__ANDROID__")
@@ -71,6 +78,7 @@ add_library(MXLoggerCore
         # Provides a relative path to your source file(s).
         debug_log.cpp
         debug_log.hpp
+        mxlogger_build_config.h
         log_enum.h
         log_msg.cpp
         log_msg.hpp
@@ -89,9 +97,7 @@ add_library(MXLoggerCore
         aes/aes_crypt.cpp
         aes/openssl/openssl_aes_core.cpp
         aes/openssl/openssl_aes_locl.h
-        aes/openssl/openssl_aes-armv4.S
         aes/openssl/openssl_aes.h
-        aes/openssl/openssl_aesv8-armx.S
         aes/openssl/openssl_arm_arch.h
         aes/openssl/openssl_cfb128.cpp
 
@@ -106,11 +112,17 @@ add_library(MXLoggerCore
         sink/sink.cpp
         sink/base_file_sink.cpp
         sink/base_file_sink.hpp
-        sink/windows_sink.cpp
-        sink/windows_sink.hpp
         sink/mmap_sink.cpp
         sink/mmap_sink.hpp
         )
+
+# ARM加速汇编：MSVC不支持GNU汇编语法，其余平台照常参与编译(源内有架构守卫)
+IF(NOT MSVC)
+    target_sources(MXLoggerCore PRIVATE
+            aes/openssl/openssl_aes-armv4.S
+            aes/openssl/openssl_aesv8-armx.S
+            )
+ENDIF()
 
 target_include_directories(MXLoggerCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

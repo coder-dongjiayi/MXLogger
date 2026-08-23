@@ -1,5 +1,13 @@
 
 # MXLogger for Flutter Change Log
+# v2.0.0/2026-08-22
+Keep up with MXLogger  native lib v2.0.0 on Android/iOS.
+* Fix incorrect week number in `yyyy_ww` file naming when a week spans the new year.
+* Fix a memory leak in the Android native bridge.
+* Fix a low-probability crash caused by mmap mapping.
+* Fix a dangling pointer that could be dereferenced after `destroy()` on Dart/iOS.
+* Fix `key`/`iv` shorter than 16 bytes causing the analyzer to fail to decode log files.
+* **Breaking** Unify all FFI signatures to fixed-width `Int32` to avoid width mismatch across platforms.
 # v1.2.15/2025-09-05
 * Support 16 KB page sizes on Android。native lib v1.2.15 Android.
 # v1.2.14/2024-10-31

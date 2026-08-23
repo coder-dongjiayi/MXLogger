@@ -1,0 +1,147 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:mxlogger_analyzer_lib/src/data/database/analyzer_database.dart';
+import 'package:mxlogger_analyzer_lib/src/data/parser/mx_binary_parser.dart';
+import 'package:mxlogger_analyzer_lib/src/data/parser/parse_isolate.dart';
+import 'package:mxlogger_analyzer_lib/src/screens/home/model/header_info.dart';
+import 'package:mxlogger_analyzer_lib/src/screens/home/model/log_filter_state.dart';
+import 'package:mxlogger_analyzer_lib/src/screens/home/model/log_model.dart';
+
+/// 单个文件的解析产物；result 为 null 表示该文件解析失败。
+typedef ParsedFile = ({String name, MxParseResult? result});
+
+/// 数据库连接的获取方式（由 MXStore 注入，测试可给内存/临时目录库）。
+typedef AnalyzerDatabaseLoader = Future<AnalyzerDatabase> Function();
+
+/// 日志数据层：解析、替换入库、查询、统计，UI 不直接触达数据库。
+class HomeRepository {
+  HomeRepository(this._loadDatabase);
+
+  final AnalyzerDatabaseLoader _loadDatabase;
+
+  static const String _metaFileName = "fileName";
+
+  Future<AnalyzerDatabase> get _database => _loadDatabase();
+
+  /// 各文件字节大小（进度权重与文件标签用）。IO 失败抛出。
+  Future<List<int>> fileSizes(List<String> paths) async {
+    final List<int> sizes = [];
+    for (final String path in paths) {
+      sizes.add(await File(path).length());
+    }
+    return sizes;
+  }
+
+  /// 读取并解析文件（不落库）：.mx 走二进制（解密+flatbuffer），
+  /// 其余扩展名尝试 JSON-lines。解析在独立 isolate 内执行，
+  /// [cryptPairs] 为多组解密参数，按顺序依次尝试（第一组解不开换下一组）。
+  /// [onProgress] 回报（文件下标, 该文件内 0.0-1.0 真实进度）。
+  /// IO 读取失败直接抛出，由上层归类为读取错误。
+  Future<List<ParsedFile>> parseFiles({
+    required List<String> paths,
+    List<MxCryptPair> cryptPairs = const <MxCryptPair>[],
+    void Function(int fileIndex, double fraction)? onProgress,
+  }) async {
+    final List<ParsedFile> results = [];
+    for (int i = 0; i < paths.length; i++) {
+      final String path = paths[i];
+      final Uint8List bytes = await File(path).readAsBytes();
+      final String name = path.split(Platform.pathSeparator).last;
+      onProgress?.call(i, 0);
+      final MxParseResult? result = await ParseIsolate.run(
+        bytes: bytes,
+        isMx: name.toLowerCase().endsWith(".mx"),
+        cryptPairs: cryptPairs,
+        onProgress: (double fraction) => onProgress?.call(i, fraction),
+      );
+      onProgress?.call(i, 1);
+      // result 为 null 仅代表解析异常（格式损坏等）；空记录的结果原样保留，
+      // 由上层结合 errorCount 区分「文件里没有日志」与「Key/IV 错误全部解密失败」
+      results.add((name: name, result: result));
+    }
+    return results;
+  }
+
+  /// 解析成功后写入数据库，[onProgress] 回报写库真实进度（0.0-1.0）。
+  /// [clearExisting] 为 true 时先清空旧数据（替换），否则追加合并
+  /// （timestamp UNIQUE + INSERT OR IGNORE 天然去重）。
+  Future<void> replaceWith({
+    required List<MxParseResult> results,
+    required String fileName,
+    bool clearExisting = true,
+    void Function(double fraction)? onProgress,
+  }) async {
+    final AnalyzerDatabase database = await _database;
+    if (clearExisting) database.clear();
+    final int total = results.fold(
+        0, (int sum, MxParseResult result) => sum + result.records.length);
+    int done = 0;
+    for (final MxParseResult result in results) {
+      await database.insertRecordsWithProgress(
+        result.records,
+        fileHeader: result.fileHeader,
+        onProgress: (int processed, int recordTotal) {
+          if (total > 0) onProgress?.call((done + processed) / total);
+        },
+      );
+      done = done + result.records.length;
+    }
+    database.setMeta(_metaFileName, fileName);
+    onProgress?.call(1);
+  }
+
+  /// 清空全部日志与元信息（「清除数据」功能）。
+  Future<void> clearAll() async {
+    final AnalyzerDatabase database = await _database;
+    database.clear();
+  }
+
+  /// [limit] 为 null 时返回全部（导出分享用），分页查询传 limit + offset。
+  Future<List<LogModel>> fetchLogs(LogFilterState filter, {int? limit, int? offset}) async {
+    final AnalyzerDatabase database = await _database;
+    final List<Map<String, Object?>> rows =
+        database.selectLogs(filter.toQuery(limit: limit, offset: offset));
+    return rows.map(LogModel.fromJson).toList();
+  }
+
+  /// 当前过滤条件下的总条数（分页「共 N 条」与 hasMore 判断用）。
+  Future<int> fetchLogsCount(LogFilterState filter) async {
+    final AnalyzerDatabase database = await _database;
+    return database.countLogs(filter.toQuery());
+  }
+
+  Future<Map<int, int>> fetchLevelCounts() async {
+    final AnalyzerDatabase database = await _database;
+    return database.levelCounts();
+  }
+
+  /// 搜索联想用：全部 tag（分词去重）
+  Future<List<String>> fetchTagOptions() async {
+    final AnalyzerDatabase database = await _database;
+    return database.distinctTags();
+  }
+
+  /// 搜索联想用：全部 name（去重）
+  Future<List<String>> fetchNameOptions() async {
+    final AnalyzerDatabase database = await _database;
+    return database.distinctNames();
+  }
+
+  Future<int> fetchCount() async {
+    final AnalyzerDatabase database = await _database;
+    return database.count();
+  }
+
+  Future<HeaderInfo> fetchHeaderInfo() async {
+    final AnalyzerDatabase database = await _database;
+    final bounds = database.timeBounds();
+    return HeaderInfo(
+      total: database.count(),
+      minUs: bounds?.minUs,
+      maxUs: bounds?.maxUs,
+      fileName: database.getMeta(_metaFileName) ?? "",
+      header: HeaderInfo.parseHeader(database.firstFileHeader()),
+    );
+  }
+}

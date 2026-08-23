@@ -1,30 +1,32 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:example/demo_l10n.dart';
 import 'package:example/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('落地页正常渲染', (tester) async {
+    await tester.pumpWidget(const MXDemoApp());
+    expect(find.text('MXLogger'), findsOneWidget);
+    // 文案跟随 demo 当前语言(默认英文)，用语言包取，避免写死某一种语言
+    expect(find.text(tr('landing.enter')), findsOneWidget);
+    expect(find.text(tr('landing.subtitle')), findsOneWidget);
+    expect(find.text(DemoL10n.switchButtonTitle), findsOneWidget);
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('切换语言后落地页文案随之变化', (tester) async {
+    await tester.pumpWidget(const MXDemoApp());
+    final before = tr('landing.enter');
+    expect(find.text(before), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    // 直接改语言(不走按钮，避免测试环境里 path_provider 持久化不可用)
+    DemoL10n.language.value = DemoL10n.zh;
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    final after = tr('landing.enter');
+    expect(after, isNot(before));
+    expect(find.text(after), findsOneWidget);
+    expect(find.text(before), findsNothing);
+
+    DemoL10n.language.value = DemoL10n.en; // 还原，避免影响其他用例
   });
 }

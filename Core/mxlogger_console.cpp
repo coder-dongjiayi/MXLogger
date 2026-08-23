@@ -16,6 +16,8 @@
 #include "json/cJSON.h"
 namespace mxlogger{
 
+#if MXLOGGER_CONSOLE_ENABLED
+
 void mxlogger_console::print(const details::log_msg& msg){
 
     std::string console = gen_console_str(msg);
@@ -43,9 +45,23 @@ void mxlogger_console::print(const details::log_msg& msg){
     
             }
         console.append("\0");
-            __android_log_write(priority,  msg.tag, console.c_str());
-    #elif __APPLE__
-    
+            /// tag可能为nullptr(调用方未传tag)，liblog内部会对tag做strlen，必须兜底
+            /// tag may be nullptr when the caller passes none; liblog runs strlen on it
+            /// internally, so a fallback is required
+            __android_log_write(priority,  msg.tag == nullptr ? "mxlogger" : msg.tag, console.c_str());
+    #else
+
+    /// Apple/Linux/Windows 统一走标准输出。
+    /// 注意: iOS上stdout不会进入统一日志系统，flutter run/AndroidStudio控制台抓不到这里的输出
+    /// (换成os_log也不行，flutter工具的模拟器日志谓词只放行sender为Flutter.framework或App主二进制的日志，
+    ///  MXLoggerCore作为动态framework会被过滤掉)，所以flutter插件侧不开启native控制台，改由dart层debugPrint输出。
+    /// Apple/Linux/Windows all go to standard output.
+    /// Note: on iOS stdout never reaches the unified logging system, so `flutter run` /
+    /// the Android Studio console cannot capture it (os_log does not help either: the
+    /// flutter tool's simulator predicate only accepts logs whose sender image is
+    /// Flutter.framework or the app's own executable, and MXLoggerCore is a dynamic
+    /// framework). The Flutter plugin therefore keeps the native console disabled and
+    /// prints from the Dart layer instead.
     printf("%s", console.data());
     #endif
    
@@ -73,7 +89,8 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
     if(jsonStr != nullptr){
         string_msg = jsonStr;
     }
-    delete jsonStr;
+    /// cJSON_Print返回的是malloc分配的内存，不能用delete释放
+    cJSON_free(jsonStr);
     
     std::string thread =  std::to_string(msg.thread_id)  + ":"+ (msg.is_main_thread == true ? "main" : "child");
     
@@ -100,7 +117,9 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
     
     stream << " level: " + level << " " << level_icons[msg.level] << std::endl;
     
-    stream << " name : " + std::string{msg.name} <<std::endl;
+    /// name同样可能为nullptr，std::string不接受空指针构造
+    /// name may also be nullptr, and std::string cannot be constructed from one
+    stream << " name : " + std::string{msg.name == nullptr ? "" : msg.name} <<std::endl;
    
     if(msg.tag != nullptr){
         stream << " tags : " + std::string{msg.tag} << std::endl;
@@ -119,6 +138,24 @@ std::string mxlogger_console:: gen_console_str(const details::log_msg& msg){
     return stream.str();
 }
 
+#else
+
+/// 编译期关闭时保留空实现: OC的consoleEnable/JNI/flutter bridge都还引用着这条链路，
+/// 符号必须存在，否则ABI断裂；调用点已在mxlogger.cpp里整段裁掉，这里不会被执行到。
+/// Keep empty definitions when the console is compiled out: the OC consoleEnable property,
+/// the JNI bridge and the flutter bridges all still reference this path, so the symbols must
+/// remain or the ABI breaks. The call site itself is stripped in mxlogger.cpp, so these are
+/// never reached.
+void mxlogger_console::print(const details::log_msg& msg){
+    (void)msg;
+}
+
+std::string mxlogger_console::gen_console_str(const details::log_msg& msg){
+    (void)msg;
+    return {};
+}
+
+#endif
 
 }
 

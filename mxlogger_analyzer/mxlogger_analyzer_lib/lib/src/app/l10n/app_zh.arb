@@ -1,0 +1,229 @@
+{
+  "@@locale": "zh",
+  "appTitle": "MXLogger 日志解析器",
+  "parserSubtitle": "· 日志解析器",
+  "landingSubtitlePrefix": "基于 ",
+  "landingSubtitleSuffix": " 的跨平台高性能日志库",
+  "landingDot1": "零拷贝写入",
+  "landingDot2": "断电不丢日志",
+  "dropTitle": "拖入日志文件开始",
+  "dropDesc": "把 .mx 日志文件拖到这里，或者点击下方按钮选择文件\n解析完成后自动展示日志列表",
+  "landingFilesTitle": "选择日志文件开始",
+  "landingFilesDesc": "拖拽或点击选择 .mx 文件",
+  "keyLabel": "KEY",
+  "ivLabel": "IV",
+  "keyHint": "16位解密密钥",
+  "ivHint": "16位偏移向量",
+  "cryptNote": "日志文件是加密的，请填写 Key 和 IV；可添加多组并勾选，未加密的文件留空即可",
+  "cryptConfirmTitle": "确认解密参数",
+  "cryptConfirmNote": "请确认该 .mx 文件的解密参数，已代入上次填写的内容；可添加多组并勾选，解密时按序号依次尝试；未加密可留空。",
+  "addCryptGroup": "添加一组",
+  "removeCryptGroup": "移除这一组",
+  "cryptGroupToggleTip": "勾选后参与解密",
+  "cryptGroupOrderHint": "按勾选框中的序号依次尝试，解不开自动换下一组",
+  "clearExistingData": "导入前清空已有数据",
+  "clearExistingDataHint": "勾选后仅保留本次文件；不勾则与已有数据合并",
+  "pickFile": "选择日志文件",
+  "stepReading": "映射文件 (mmap)…",
+  "stepDecrypting": "解密并解码日志…",
+  "stepIndexing": "构建索引…",
+  "stepDone": "完成",
+  "parseFailed": "解析失败（格式或 Key/IV 有误）",
+  "fileReadFailed": "文件读取失败，请重试",
+  "themeToLight": "切换到浅色模式",
+  "themeToDark": "切换到深色模式",
+  "languageTip": "切换为英文",
+  "statStart": "起始",
+  "statEnd": "结束",
+  "shareAllTip": "分享日志（当前筛选结果）",
+  "cryptoTip": "修改解密 Key / IV",
+  "changeFileTip": "更换日志文件",
+  "refreshTip": "重新扫描本机日志",
+  "refresh": "刷新日志",
+  "embedEmptyTitle": "尚未解析本机日志",
+  "embedEmptyDesc": "点击下方按钮扫描并解析本机日志目录\n日志较多时解析需要几秒",
+  "noLogFiles": "日志目录下没有可解析的文件",
+  "levelCountTip": "{count} 条",
+  "@levelCountTip": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "distTip": "{label}  {count} 条 ({pct}%)",
+  "@distTip": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "headerTitle": "Header",
+  "headerItems": "{count} 项",
+  "@headerItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copyHeaderTip": "复制全部Header信息",
+  "headerCopied": "已复制 Header 信息",
+  "headerEmpty": "该日志无 Header 信息",
+  "headerRowTip": "查看这条日志的 Header",
+  "applyReparse": "应用并重新解析",
+  "keyIvUpdated": "Key/IV 已更新",
+  "reparsedWithNewKey": "已使用新 Key/IV 重新解析",
+  "reparseFailed": "重新解析失败，请检查 Key/IV 是否正确",
+  "searchLogsHint": "搜索日志…（# 选 Tag，@ 选 Name）",
+  "searchLogsHintShort": "搜索…",
+  "searchPickTag": "选择 Tag · ↑↓ 切换 · 回车选中",
+  "searchPickName": "选择 Name · ↑↓ 切换 · 回车选中",
+  "searchNoMatch": "无匹配项",
+  "timeRange": "时间范围",
+  "timeFrom": "从",
+  "timeTo": "到",
+  "timeInputHint": "2026-07-03 10:30:15",
+  "apply": "应用",
+  "clear": "清除",
+  "foldAll": "折叠全部",
+  "unfoldAll": "展开全部",
+  "filterLabel": "筛选:",
+  "filterTypeTag": "tag",
+  "filterTypeName": "name",
+  "filterTypeTime": "时间",
+  "removeFilterTip": "移除筛选",
+  "clearAllFilters": "全部清除",
+  "resultMatch": "匹配 {matched} / {total} 条",
+  "@resultMatch": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "resultTotal": "{total} 条日志",
+  "@resultTotal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "noMatchLogs": "没有符合条件的日志",
+  "clearAllFiltersLink": "清除全部筛选条件",
+  "foldTip": "折叠",
+  "unfoldTip": "展开",
+  "filterByNameTip": "按 name 筛选",
+  "filterByTagTip": "按 tag 筛选",
+  "shareRowTip": "分享这条日志",
+  "fullscreenTip": "全屏查看",
+  "collapseFilters": "收起筛选区",
+  "expandFilters": "展开筛选区",
+  "moreActions": "更多操作",
+  "copyRowTip": "复制这条日志",
+  "copied": "已复制到剪贴板",
+  "jumpTopTip": "回到顶部",
+  "jumpBottomTip": "跳到底部",
+  "modalTitle": "日志详情",
+  "fieldName": "Name",
+  "fieldTags": "Tags",
+  "fieldTime": "时间",
+  "fieldKind": "类型",
+  "kindJson": "JSON",
+  "kindText": "文本",
+  "share": "分享",
+  "copyLog": "⧉ 复制日志",
+  "closeEsc": "关闭 (Esc)",
+  "close": "关闭",
+  "shareUnsupported": "当前环境不支持系统分享，已复制到剪贴板",
+  "shareFailed": "分享失败，请手动复制",
+  "jsonItems": "{count} 项",
+  "@jsonItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "jsonKeys": "{count} 键",
+  "@jsonKeys": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clickExpandTip": "点击展开",
+  "viewFullLog": "查看完整（共 {count} 行）",
+  "@viewFullLog": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareExportTitle": "MXLogger 日志",
+  "shareHeaderSection": "===== Header =====",
+  "shareBodyFiltered": "===== 日志（筛选结果 {matched}/{total} 条）=====",
+  "@shareBodyFiltered": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shareBodyAll": "===== 日志（共 {total} 条）=====",
+  "@shareBodyAll": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "enterAnalyzer": "进入解析器",
+  "nextStep": "下一步",
+  "prevStep": "← 上一步",
+  "startImport": "开始导入",
+  "selectedFiles": "已选择 {count} 个文件",
+  "@selectedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wizardStepFiles": "选择日志",
+  "wizardStepCrypt": "解密配置",
+  "wizardStepImport": "解析导入",
+  "clearSearchTip": "清除搜索内容",
+  "clearDataTip": "清除数据",
+  "clearDataConfirmTitle": "清空数据",
+  "clearDataConfirmMessage": "您确认要清空数据么？",
+  "cancel": "取消",
+  "confirmClear": "清空",
+  "dataCleared": "数据已清空",
+  "sortAsc": "时间正序",
+  "sortDesc": "时间倒序",
+  "keyIvTip": "查看解密 KEY / IV",
+  "keyIvDialogTitle": "解密 KEY / IV",
+  "keyIvNote": "当前配置的解密参数，勾选编号为解密尝试顺序。",
+  "keyIvEmpty": "尚未配置解密参数",
+  "keyIvDisabled": "未启用",
+  "clickToCopy": "点击复制",
+  "close": "关闭",
+  "noLogRecords": "没有可解析的日志文件"
+}
