@@ -30,6 +30,7 @@
   "stepDone": "完成",
   "parseFailed": "解析失败（格式或 Key/IV 有误）",
   "fileReadFailed": "文件读取失败，请重试",
+  "dbWriteFailed": "写入数据库失败，请重试",
   "themeToLight": "切换到浅色模式",
   "themeToDark": "切换到深色模式",
   "languageTip": "切换为英文",

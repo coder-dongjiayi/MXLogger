@@ -24,6 +24,23 @@ class HomeRepository {
 
   Future<AnalyzerDatabase> get _database => _loadDatabase();
 
+  /// 落库操作的串行队列尾部
+  Future<void> _gate = Future<void>.value();
+
+  /// 串行闸门：所有触达数据库的操作排成一条队列，前一个跑完才放行下一个。
+  ///
+  /// 写库会在批次之间让出事件循环（见 [AnalyzerDatabase.insertRecordsWithProgress]），
+  /// 若此期间放行查询就会读到「导入到一半」的数据，放行 [clearAll] 更会把已提交的
+  /// 批次删掉、让最终数据静默错乱。事务边界解决不了这类交错——只有把整次导入
+  /// 当成不可分割的临界区才行，而这个保证必须落在数据层，不能依赖 UI 层
+  /// isRunning 之类的约定（那些约定散落在各处，新增一次刷新就会破功）。
+  Future<T> _serial<T>(Future<T> Function() action) {
+    final Future<T> result = _gate.then((_) => action());
+    // 失败不能污染队列：错误照常抛给调用方，队列自身吞掉后继续放行
+    _gate = result.then((_) {}, onError: (_) {});
+    return result;
+  }
+
   /// 各文件字节大小（进度权重与文件标签用）。IO 失败抛出。
   Future<List<int>> fileSizes(List<String> paths) async {
     final List<int> sizes = [];
@@ -71,6 +88,19 @@ class HomeRepository {
     required String fileName,
     bool clearExisting = true,
     void Function(double fraction)? onProgress,
+  }) =>
+      _serial(() => _replaceWith(
+            results: results,
+            fileName: fileName,
+            clearExisting: clearExisting,
+            onProgress: onProgress,
+          ));
+
+  Future<void> _replaceWith({
+    required List<MxParseResult> results,
+    required String fileName,
+    bool clearExisting = true,
+    void Function(double fraction)? onProgress,
   }) async {
     final AnalyzerDatabase database = await _database;
     if (clearExisting) database.clear();
@@ -92,56 +122,57 @@ class HomeRepository {
   }
 
   /// 清空全部日志与元信息（「清除数据」功能）。
-  Future<void> clearAll() async {
-    final AnalyzerDatabase database = await _database;
-    database.clear();
-  }
+  Future<void> clearAll() => _serial(() async {
+        final AnalyzerDatabase database = await _database;
+        database.clear();
+      });
 
   /// [limit] 为 null 时返回全部（导出分享用），分页查询传 limit + offset。
-  Future<List<LogModel>> fetchLogs(LogFilterState filter, {int? limit, int? offset}) async {
-    final AnalyzerDatabase database = await _database;
-    final List<Map<String, Object?>> rows =
-        database.selectLogs(filter.toQuery(limit: limit, offset: offset));
-    return rows.map(LogModel.fromJson).toList();
-  }
+  Future<List<LogModel>> fetchLogs(LogFilterState filter, {int? limit, int? offset}) =>
+      _serial(() async {
+        final AnalyzerDatabase database = await _database;
+        final List<Map<String, Object?>> rows =
+            database.selectLogs(filter.toQuery(limit: limit, offset: offset));
+        return rows.map(LogModel.fromJson).toList();
+      });
 
   /// 当前过滤条件下的总条数（分页「共 N 条」与 hasMore 判断用）。
-  Future<int> fetchLogsCount(LogFilterState filter) async {
-    final AnalyzerDatabase database = await _database;
-    return database.countLogs(filter.toQuery());
-  }
+  Future<int> fetchLogsCount(LogFilterState filter) => _serial(() async {
+        final AnalyzerDatabase database = await _database;
+        return database.countLogs(filter.toQuery());
+      });
 
-  Future<Map<int, int>> fetchLevelCounts() async {
-    final AnalyzerDatabase database = await _database;
-    return database.levelCounts();
-  }
+  Future<Map<int, int>> fetchLevelCounts() => _serial(() async {
+        final AnalyzerDatabase database = await _database;
+        return database.levelCounts();
+      });
 
   /// 搜索联想用：全部 tag（分词去重）
-  Future<List<String>> fetchTagOptions() async {
-    final AnalyzerDatabase database = await _database;
-    return database.distinctTags();
-  }
+  Future<List<String>> fetchTagOptions() => _serial(() async {
+        final AnalyzerDatabase database = await _database;
+        return database.distinctTags();
+      });
 
   /// 搜索联想用：全部 name（去重）
-  Future<List<String>> fetchNameOptions() async {
-    final AnalyzerDatabase database = await _database;
-    return database.distinctNames();
-  }
+  Future<List<String>> fetchNameOptions() => _serial(() async {
+        final AnalyzerDatabase database = await _database;
+        return database.distinctNames();
+      });
 
-  Future<int> fetchCount() async {
-    final AnalyzerDatabase database = await _database;
-    return database.count();
-  }
+  Future<int> fetchCount() => _serial(() async {
+        final AnalyzerDatabase database = await _database;
+        return database.count();
+      });
 
-  Future<HeaderInfo> fetchHeaderInfo() async {
-    final AnalyzerDatabase database = await _database;
-    final bounds = database.timeBounds();
-    return HeaderInfo(
-      total: database.count(),
-      minUs: bounds?.minUs,
-      maxUs: bounds?.maxUs,
-      fileName: database.getMeta(_metaFileName) ?? "",
-      header: HeaderInfo.parseHeader(database.firstFileHeader()),
-    );
-  }
+  Future<HeaderInfo> fetchHeaderInfo() => _serial(() async {
+        final AnalyzerDatabase database = await _database;
+        final bounds = database.timeBounds();
+        return HeaderInfo(
+          total: database.count(),
+          minUs: bounds?.minUs,
+          maxUs: bounds?.maxUs,
+          fileName: database.getMeta(_metaFileName) ?? "",
+          header: HeaderInfo.parseHeader(database.firstFileHeader()),
+        );
+      });
 }

@@ -30,6 +30,7 @@
   "stepDone": "Done",
   "parseFailed": "Parse failed (bad format or wrong Key/IV)",
   "fileReadFailed": "Failed to read file, please retry",
+  "dbWriteFailed": "Failed to write to database, please retry",
   "themeToLight": "Switch to light mode",
   "themeToDark": "Switch to dark mode",
   "languageTip": "切换为中文",

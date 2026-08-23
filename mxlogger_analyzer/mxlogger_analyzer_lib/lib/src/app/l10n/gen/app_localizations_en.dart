@@ -105,6 +105,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fileReadFailed => 'Failed to read file, please retry';
 
   @override
+  String get dbWriteFailed => 'Failed to write to database, please retry';
+
+  @override
   String get themeToLight => 'Switch to light mode';
 
   @override

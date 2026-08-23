@@ -92,15 +92,22 @@ class ImportStore extends MXState<ImportState> {
 
     // 写库阶段：分批插入按条数回报进度
     value = value.copyWith(step: ImportStep.indexing, percent: _parseEnd.round());
-    await repository.replaceWith(
-      results: usable,
-      fileName: _joinNames(parsed),
-      // 重解析必须替换；普通导入按用户勾选决定清空或合并
-      clearExisting: reparse || clearExisting,
-      onProgress: (double fraction) {
-        _setPercent(_parseEnd + (_insertEnd - _parseEnd) * fraction);
-      },
-    );
+    // 写库失败也必须落到 failure：否则异常冒出本方法，status 永远停在 running，
+    // home_screen 的 loading 遮罩会永久卡死，用户只能重启 app
+    try {
+      await repository.replaceWith(
+        results: usable,
+        fileName: _joinNames(parsed),
+        // 重解析必须替换；普通导入按用户勾选决定清空或合并
+        clearExisting: reparse || clearExisting,
+        onProgress: (double fraction) {
+          _setPercent(_parseEnd + (_insertEnd - _parseEnd) * fraction);
+        },
+      );
+    } catch (_) {
+      _fail(ImportError.writeFailed);
+      return;
+    }
 
     _lastPaths = paths;
     value = value.copyWith(step: ImportStep.done, percent: 100);

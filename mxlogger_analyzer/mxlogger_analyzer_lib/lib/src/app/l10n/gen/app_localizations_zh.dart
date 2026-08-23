@@ -100,6 +100,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fileReadFailed => '文件读取失败，请重试';
 
   @override
+  String get dbWriteFailed => '写入数据库失败，请重试';
+
+  @override
   String get themeToLight => '切换到浅色模式';
 
   @override

@@ -34,6 +34,9 @@ class MainScreenState extends MXConsumerState<MainScreen> {
         message = context.l10n.noLogRecords;
       } else if (next.reparse) {
         message = context.l10n.reparseFailed;
+      } else if (next.error == ImportError.writeFailed) {
+        // 解析已成功、仅入库失败：不要复用「文件读取失败」误导用户
+        message = context.l10n.dbWriteFailed;
       } else if (next.error == ImportError.readFailed) {
         message = context.l10n.fileReadFailed;
       } else {

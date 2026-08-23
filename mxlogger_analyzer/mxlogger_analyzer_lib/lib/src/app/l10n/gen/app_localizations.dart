@@ -278,6 +278,12 @@ abstract class AppLocalizations {
   /// **'文件读取失败，请重试'**
   String get fileReadFailed;
 
+  /// No description provided for @dbWriteFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'写入数据库失败，请重试'**
+  String get dbWriteFailed;
+
   /// No description provided for @themeToLight.
   ///
   /// In zh, this message translates to:
