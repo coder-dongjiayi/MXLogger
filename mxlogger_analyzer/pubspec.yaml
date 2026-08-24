@@ -29,6 +29,12 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # 截图工具（integration_test/generate_screenshots_test.dart）：跑在真实 macOS
+  # 应用里，才能拿到系统字体渲染的界面图
+  integration_test:
+    sdk: flutter
+  # 同一工具用它把截图写到应用支持目录（沙盒禁止直接写仓库目录时的退路）
+  path_provider: ^2.1.5
   flutter_lints: ^5.0.0
 
 flutter:

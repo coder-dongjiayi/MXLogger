@@ -34,3 +34,14 @@ dev_dependencies:
 flutter:
   generate: true
   uses-material-design: true
+
+# pub.dev 上展示的界面截图（由桌面壳的 integration_test/generate_screenshots_test.dart 生成）
+screenshots:
+  - description: "桌面数据页：等级分布、搜索过滤与 JSON 语法树"
+    path: screenshots/desktop_dark.png
+  - description: "首次使用的三步导入向导"
+    path: screenshots/desktop_wizard.png
+  - description: "单条日志的全屏详情弹窗"
+    path: screenshots/desktop_detail.png
+  - description: "嵌入宿主 app：悬浮球打开的底部弹窗"
+    path: screenshots/mobile_embed.png

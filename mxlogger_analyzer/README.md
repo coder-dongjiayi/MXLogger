@@ -98,6 +98,14 @@ flutter analyze
 dart run tool/generate_sample_mx.dart sample
 ```
 
+重新生成 `mxlogger_analyzer_lib/README.md` 里的界面截图（尺寸与假数据都由代码固定，
+跑在真实 macOS 应用里才拿得到系统字体；沙盒写不进仓库目录时会退回应用支持目录并打印路径）：
+
+```bash
+flutter test integration_test/generate_screenshots_test.dart -d macos \
+    --dart-define=OUT_DIR=$PWD/mxlogger_analyzer_lib/screenshots
+```
+
 改动品牌 logo 后重新生成 macOS AppIcon（复用 `MXLogoPainter` 矢量直绘各尺寸）：
 
 ```bash
