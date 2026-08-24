@@ -22,9 +22,10 @@ dependencies:
 
 
   # 应用目录（数据库存放路径）
-  path_provider: any
+  path_provider: ^2.1.6
 
-  intl: any
+  # 上限跟着 flutter_localizations 走：Flutter 3.24 带 0.19，3.27+ 带 0.20
+  intl: ">=0.19.0 <0.21.0"
 
 dev_dependencies:
   flutter_test:
