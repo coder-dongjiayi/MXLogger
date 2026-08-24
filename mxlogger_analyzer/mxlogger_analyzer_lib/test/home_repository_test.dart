@@ -61,7 +61,7 @@ void main() {
     ];
   }
 
-  test("parseFiles + replaceWith：.mx 加密文件与 JSON-lines 混合", () async {
+  test("parseFiles + replaceWith：两个 .mx 加密文件一起导入", () async {
     final int base = DateTime(2026, 7, 3, 9).microsecondsSinceEpoch;
     const String key = "mxlogger123";
 
@@ -69,16 +69,40 @@ void main() {
       ..writeAsBytesSync(buildMxFile(
         sampleItems(base).map((Uint8List item) => encryptItem(item, key, key)).toList(),
       ));
-    final File jsonFile = File("${tempDir.path}/lines.log")
-      ..writeAsStringSync([
-        "{\"session\":\"s-1\",\"env\":\"prod\"}",
-        "{\"ts\": 1751500000000, \"level\": \"info\", \"name\": \"App\", \"tags\": [\"boot\"], \"content\": \"launched\"}",
-        "{\"ts\": 1751500001000, \"level\": \"fatal\", \"name\": \"Crash\", \"tags\": [\"crash\",\"native\"], \"content\": {\"code\": 11}}",
-      ].join("\n"));
-
+    // 第二个文件：自带文件头 + 一条多 tag 的 fatal 日志
+    final File secondFile = File("${tempDir.path}/encrypted2.mx")
+      ..writeAsBytesSync(buildMxFile(<Uint8List>[
+        buildRecord(
+          name: MxBinaryParser.fileHeaderName,
+          tag: "",
+          msg: "{\"device\":\"iPhone 16\",\"os\":\"iOS 18\"}",
+          level: 0,
+          threadId: 0,
+          isMainThread: 1,
+          timestamp: base + 10,
+        ),
+        buildRecord(
+          name: "App",
+          tag: "boot",
+          msg: "launched",
+          level: 1,
+          threadId: 1,
+          isMainThread: 1,
+          timestamp: base + 11,
+        ),
+        buildRecord(
+          name: "Crash",
+          tag: "crash,native",
+          msg: "{\"code\": 11}",
+          level: 4,
+          threadId: 2,
+          isMainThread: 0,
+          timestamp: base + 12,
+        ),
+      ].map((Uint8List item) => encryptItem(item, key, key)).toList()));
 
     // 真实读取进度：按累计字节 0→1 非递减
-    final List<String> paths = [mxFile.path, jsonFile.path];
+    final List<String> paths = [mxFile.path, secondFile.path];
     final List<double> readProgress = [];
     final List<LoadedFile> files = await repository.readFiles(
       paths: paths,
@@ -90,7 +114,7 @@ void main() {
       expect(readProgress[i], greaterThanOrEqualTo(readProgress[i - 1]));
     }
     expect(files.map((LoadedFile file) => file.name).toList(),
-        [mxFile.uri.pathSegments.last, jsonFile.uri.pathSegments.last]);
+        [mxFile.uri.pathSegments.last, secondFile.uri.pathSegments.last]);
 
     // 真实解析进度：每个文件内 0→1 非递减
     final Map<int, List<double>> parseProgress = {};
@@ -113,7 +137,7 @@ void main() {
     expect(parsed[0].result?.fileHeader, contains("Pixel 9"));
     expect(parsed[1].result, isNotNull);
     expect(parsed[1].result?.records.length, 2);
-    expect(parsed[1].result?.fileHeader, contains("s-1"));
+    expect(parsed[1].result?.fileHeader, contains("iPhone 16"));
 
     // 写库进度收敛到 1
     final List<double> insertProgress = [];
@@ -127,7 +151,7 @@ void main() {
     final List<LogModel> all = await repository.fetchLogs(const LogFilterState());
     expect(all.length, 4);
 
-    // JSON-lines 的多 tag 拆分为分词
+    // 逗号分隔的多 tag 拆成分词
     final List<LogModel> crash =
         await repository.fetchLogs(const LogFilterState(tags: ["native"]));
     expect(crash.length, 1);

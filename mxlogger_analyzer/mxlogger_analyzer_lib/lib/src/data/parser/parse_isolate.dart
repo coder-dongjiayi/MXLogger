@@ -1,15 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:mxlogger_analyzer_lib/src/data/parser/json_lines_parser.dart';
 import 'package:mxlogger_analyzer_lib/src/data/parser/mx_binary_parser.dart';
 
-/// 在独立 isolate 中解析日志文件，并通过 SendPort 回传真实进度（0.0-1.0）。
-/// .mx 走二进制解密+flatbuffer，其余尝试 JSON-lines；解析失败返回 null。
+/// 在独立 isolate 中解析 `.mx` 日志文件（二进制解密 + flatbuffer），
+/// 并通过 SendPort 回传真实进度（0.0-1.0）；解析失败返回 null。
 ///
 /// .mx 文件足够大时会**按记录边界切段、多 isolate 并行解密**：解密占了导入
 /// 耗时的绝大部分（127 MiB 实测 37.5s，同样条数的明文只要 0.7s），而每条记录
@@ -29,28 +27,24 @@ class ParseIsolate {
   /// **[bytes] 的所有权会转移给解析 isolate，调用方在此之后不可再读它。**
   static Future<MxParseResult?> run({
     required Uint8List bytes,
-    required bool isMx,
     List<MxCryptPair> cryptPairs = const <MxCryptPair>[],
     void Function(double fraction)? onProgress,
   }) async {
-    if (isMx) {
-      final int workers = _workerCount(bytes.length);
-      if (workers > 1) {
-        final List<({int start, int end})> ranges =
-            MxBinaryParser.splitRanges(bytes, workers);
-        if (ranges.length > 1) {
-          return _runParallel(
-            bytes: bytes,
-            ranges: ranges,
-            cryptPairs: cryptPairs,
-            onProgress: onProgress,
-          );
-        }
+    final int workers = _workerCount(bytes.length);
+    if (workers > 1) {
+      final List<({int start, int end})> ranges =
+          MxBinaryParser.splitRanges(bytes, workers);
+      if (ranges.length > 1) {
+        return _runParallel(
+          bytes: bytes,
+          ranges: ranges,
+          cryptPairs: cryptPairs,
+          onProgress: onProgress,
+        );
       }
     }
     return _runWhole(
       bytes: bytes,
-      isMx: isMx,
       cryptPairs: cryptPairs,
       onProgress: onProgress,
     );
@@ -131,10 +125,9 @@ class ParseIsolate {
         onProgress,
       );
 
-  /// 整文件单 isolate：非 .mx，或文件小到不值得切段时走这里
+  /// 整文件单 isolate：文件小到不值得切段时走这里
   static Future<MxParseResult?> _runWhole({
     required Uint8List bytes,
-    required bool isMx,
     required List<MxCryptPair> cryptPairs,
     void Function(double fraction)? onProgress,
   }) =>
@@ -142,7 +135,6 @@ class ParseIsolate {
         (SendPort port) => _WholeRequest(
           port,
           TransferableTypedData.fromList(<Uint8List>[bytes]),
-          isMx,
           cryptPairs,
         ),
         _wholeEntry,
@@ -194,16 +186,11 @@ class ParseIsolate {
     final Uint8List bytes = request.data.materialize().asUint8List();
     MxParseResult? result;
     try {
-      if (request.isMx) {
-        result = MxBinaryParser.parse(
-          bytes,
-          cryptPairs: request.cryptPairs,
-          onProgress: _reporter(request.port),
-        );
-      } else {
-        result = JsonLinesParser.parse(utf8.decode(bytes),
-            onProgress: _reporter(request.port));
-      }
+      result = MxBinaryParser.parse(
+        bytes,
+        cryptPairs: request.cryptPairs,
+        onProgress: _reporter(request.port),
+      );
     } catch (_) {
       result = null;
     }
@@ -229,13 +216,12 @@ class ParseIsolate {
 
 /// 整文件请求
 class _WholeRequest {
-  const _WholeRequest(this.port, this.data, this.isMx, this.cryptPairs);
+  const _WholeRequest(this.port, this.data, this.cryptPairs);
 
   final SendPort port;
 
   /// 日志字节，所有权已从调用方转移过来（见 [ParseIsolate.run]）
   final TransferableTypedData data;
-  final bool isMx;
   final List<MxCryptPair> cryptPairs;
 }
 

@@ -1,18 +1,18 @@
-English | [简体中文](README.zh-CN.md)
+English | [简体中文](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/mxlogger_analyzer_lib/README.zh-CN.md)
 
 # mxlogger_analyzer_lib
 
 The MXLogger 2.0 log analyzer core: import, decrypt (AES-CFB-128), parse and search the `.mx`
 mmap binary logs written by [MXLogger](https://github.com/coder-dongjiayi/MXLogger).
-JSON-lines text logs (`.log/.txt/.json`) are supported too. Records land in sqlite, which backs
-full-text search, level/time/Tag/Name filtering and a JSON syntax tree view.
+Records land in sqlite, which backs full-text search, level/time/Tag/Name filtering and a JSON
+syntax tree view.
 
 Two ways to use it, one `main` in this repository for each:
 
 | Mode | Entry point | What it is |
 | --- | --- | --- |
-| Standalone app | [`lib/main_desktop.dart`](../lib/main_desktop.dart) | macOS/Windows/Linux desktop shell — drop or pick a log file to analyze |
-| Embedded in a host app | [`lib/main_package.dart`](../lib/main_package.dart) | Inspect on-device logs inside an iOS/Android app via a floating ball + bottom sheet |
+| Standalone app | [`lib/main_desktop.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_desktop.dart) | macOS/Windows/Linux desktop shell — drop or pick a log file to analyze |
+| Embedded in a host app | [`lib/main_package.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_package.dart) | Inspect on-device logs inside an iOS/Android app via a floating ball + bottom sheet |
 
 ## Screens
 
@@ -21,30 +21,30 @@ tree inside each log card, click-to-filter `@name` / `#tag`, and per-record info
 fullscreen / copy. The top-right toggle switches to the light theme (both token sets are fully
 aligned).
 
-![Data page](screenshots/desktop_dark.png)
+![Data page](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/desktop_dark.png)
 
-**Three-step first-run wizard**: ① drop or pick log files → ② configure the decryption KEY/IV
+**Three-step first-run wizard**: ① drop or pick `.mx` files → ② configure the decryption KEY/IV
 (multiple pairs allowed) → ③ import with real progress.
 
-![First-run wizard](screenshots/desktop_wizard.png)
+![First-run wizard](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/desktop_wizard.png)
 
 **Fullscreen detail of a single record** (Esc closes): Name / Tags / time / type plus the complete
 JSON tree, shareable or copyable as a whole.
 
-![Fullscreen log detail](screenshots/desktop_detail.png)
+![Fullscreen log detail](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/desktop_detail.png)
 
 **Embedded in a host app** (phone): a bottom sheet covering 85% of the screen — tighter padding,
 icons instead of labels, horizontally scrolling level chips, cards collapsed by default and
 actions folded into the "⋯" menu.
 
-![Embedded bottom sheet](screenshots/mobile_embed.png)
+![Embedded bottom sheet](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/mobile_embed.png)
 
 ## Standalone app: the desktop shell entry
 
 The core does not depend on shared_preferences / file_picker / desktop_drop / share_plus directly.
 The shell implements `MXHost` (settings persistence / file picking / file dropping / system share)
 with those plugins and injects it, which keeps the entry point thin — the whole of
-[`lib/main_desktop.dart`](../lib/main_desktop.dart):
+[`lib/main_desktop.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_desktop.dart):
 
 ```dart
 import 'package:flutter/material.dart';
@@ -65,7 +65,7 @@ Future<void> main() async {
 ```
 
 The `MXHost` returned by `createDesktopHost()` (see
-[`lib/src/host/desktop_host.dart`](../lib/src/host/desktop_host.dart)) carries four capabilities.
+[`lib/src/host/desktop_host.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/src/host/desktop_host.dart)) carries four capabilities.
 Leaving one out removes the matching entry point instead of throwing:
 
 | Capability | Desktop shell implementation | When absent |
@@ -83,7 +83,7 @@ flutter run -t lib/main_desktop.dart -d macos   # or windows / linux
 
 ## Embedded in a host app: the on-device entry
 
-[`lib/main_package.dart`](../lib/main_package.dart) closes the loop on a real device:
+[`lib/main_package.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_package.dart) closes the loop on a real device:
 flutter_mxlogger writes genuine encrypted `.mx` files locally, then the floating ball opens the
 analyzer against that same directory.
 
@@ -196,8 +196,8 @@ MXAnalyzer.initialize(
   "change file").
 - **Results are persisted in sqlite**, so reopening the sheet after an app restart still shows the
   previous run — tap refresh for the latest logs.
-- **Every refresh clears the database and re-parses** the `.mx/.log/.txt/.json` files under
-  `diskcachePath` from scratch; results are never merged with the previous run, so what you see is
+- **Every refresh clears the database and re-parses** the `.mx` files under `diskcachePath`
+  from scratch; results are never merged with the previous run, so what you see is
   exactly this scan.
 - **Deliberately few dependencies**: the embedded mode pulls in no KV-storage or file plugins such
   as shared_preferences / file_picker / desktop_drop — Key/IV arrive with each `showDebug` call and

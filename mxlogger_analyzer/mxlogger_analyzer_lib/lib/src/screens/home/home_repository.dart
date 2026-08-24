@@ -98,9 +98,9 @@ class HomeRepository {
     return files;
   }
 
-  /// 解析已读入内存的文件（不落库）：.mx 走二进制（解密+flatbuffer），
-  /// 其余扩展名尝试 JSON-lines。解析在独立 isolate 内执行，
-  /// [cryptPairs] 为多组解密参数，按顺序依次尝试（第一组解不开换下一组）。
+  /// 解析已读入内存的 `.mx` 文件（不落库）：AES 解密 + flatbuffer 反序列化，
+  /// 在独立 isolate 内执行。[cryptPairs] 为多组解密参数，
+  /// 按顺序依次尝试（第一组解不开换下一组）。
   /// [onProgress] 回报（文件下标, 该文件内 0.0-1.0 真实进度）。
   ///
   /// 注意：字节所有权会转移给解析 isolate（见 [ParseIsolate.run]），
@@ -116,7 +116,6 @@ class HomeRepository {
       onProgress?.call(i, 0);
       final MxParseResult? result = await ParseIsolate.run(
         bytes: file.bytes,
-        isMx: file.name.toLowerCase().endsWith(".mx"),
         cryptPairs: cryptPairs,
         onProgress: (double fraction) => onProgress?.call(i, fraction),
       );

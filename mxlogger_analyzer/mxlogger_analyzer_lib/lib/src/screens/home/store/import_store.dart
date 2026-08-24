@@ -13,8 +13,8 @@ const double _readEnd = 8;
 const double _parseEnd = 78;
 const double _insertEnd = 99;
 
-/// 可导入的日志扩展名（与桌面端文件选择器一致）
-const Set<String> mxImportableExtensions = {".mx", ".log", ".txt", ".json"};
+/// 可导入的日志扩展名：只有 MXLogger 写出的 `.mx` 二进制日志（与桌面端文件选择器一致）
+const String mxImportableExtension = ".mx";
 
 /// 导入任务（数据页 loading / 失败 toast 消费）。
 class ImportStore extends MXState<ImportState> {
@@ -145,11 +145,9 @@ class ImportStore extends MXState<ImportState> {
         .listSync()
         .whereType<File>()
         .map((File file) => file.path)
-        .where((String path) {
-      final int dot = path.lastIndexOf(".");
-      if (dot < 0) return false;
-      return mxImportableExtensions.contains(path.substring(dot).toLowerCase());
-    }).toList()
+        .where((String path) =>
+            path.toLowerCase().endsWith(mxImportableExtension))
+        .toList()
       ..sort();
     if (paths.isEmpty) return false;
     await importFiles(paths, clearExisting: true);

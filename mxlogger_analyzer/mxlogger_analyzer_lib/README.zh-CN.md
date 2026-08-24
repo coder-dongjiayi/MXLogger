@@ -1,17 +1,17 @@
-[English](README.md) | 简体中文
+[English](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/mxlogger_analyzer_lib/README.md) | 简体中文
 
 # mxlogger_analyzer_lib
 
 MXLogger 2.0 日志分析器内核：导入、解密（AES-CFB-128）、解析并检索 [MXLogger](https://github.com/coder-dongjiayi/MXLogger)
-产出的 `.mx` mmap 二进制日志，也支持 JSON-lines 文本日志（`.log/.txt/.json`）。
+产出的 `.mx` mmap 二进制日志。
 解析结果入 sqlite，提供搜索、等级/时间/Tag/Name 过滤与 JSON 语法树查看。
 
 两种使用方式，入口代码分别是仓库里的两个 `main`：
 
 | 方式 | 入口 | 说明 |
 | --- | --- | --- |
-| 独立 app | [`lib/main_desktop.dart`](../lib/main_desktop.dart) | macOS/Windows/Linux 桌面壳，拖入或选择日志文件后分析 |
-| 嵌入宿主 app | [`lib/main_package.dart`](../lib/main_package.dart) | iOS/Android app 内以「悬浮球 + 底部弹窗」查看本机日志 |
+| 独立 app | [`lib/main_desktop.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_desktop.dart) | macOS/Windows/Linux 桌面壳，拖入或选择日志文件后分析 |
+| 嵌入宿主 app | [`lib/main_package.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_package.dart) | iOS/Android app 内以「悬浮球 + 底部弹窗」查看本机日志 |
 
 ## 界面
 
@@ -19,26 +19,26 @@ MXLogger 2.0 日志分析器内核：导入、解密（AES-CFB-128）、解析�
 `@name` / `#tag` 点击即过滤、单条日志的信息 / 分享 / 全屏 / 复制。
 右上角可一键切浅色主题（深浅两套 tokens 全量对齐）。
 
-![桌面数据页](screenshots/desktop_dark.png)
+![桌面数据页](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/desktop_dark.png)
 
-**首次使用三步向导**：① 拖入/选择日志文件 → ② 配置解密 KEY/IV（可多组）→ ③ 真实进度解析导入。
+**首次使用三步向导**：① 拖入/选择 `.mx` 日志文件 → ② 配置解密 KEY/IV（可多组）→ ③ 真实进度解析导入。
 
-![首次引导向导](screenshots/desktop_wizard.png)
+![首次引导向导](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/desktop_wizard.png)
 
 **单条日志全屏详情**（Esc 关闭）：Name / Tags / 时间 / 类型 + 完整 JSON 树，可分享或整条复制。
 
-![日志全屏详情](screenshots/desktop_detail.png)
+![日志全屏详情](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/desktop_detail.png)
 
 **嵌入宿主 app**（手机）：占屏幕 85% 的底部弹窗，留白收窄、文案让位于图标、
 等级 chips 横向滚动、日志卡片默认折叠、操作收进「⋯」。
 
-![嵌入宿主 app 的底部弹窗](screenshots/mobile_embed.png)
+![嵌入宿主 app 的底部弹窗](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/mobile_embed.png)
 
 ## 独立 app：桌面壳入口
 
 内核不直接依赖 shared_preferences / file_picker / desktop_drop / share_plus，
 壳工程用这些插件实现 `MXHost`（设置落盘 / 选文件 / 拖入文件 / 系统分享）后注入，
-入口因此很薄 —— [`lib/main_desktop.dart`](../lib/main_desktop.dart) 全文：
+入口因此很薄 —— [`lib/main_desktop.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_desktop.dart) 全文：
 
 ```dart
 import 'package:flutter/material.dart';
@@ -58,7 +58,7 @@ Future<void> main() async {
 }
 ```
 
-`createDesktopHost()`（见 [`lib/src/host/desktop_host.dart`](../lib/src/host/desktop_host.dart)）返回的
+`createDesktopHost()`（见 [`lib/src/host/desktop_host.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/src/host/desktop_host.dart)）返回的
 `MXHost` 有四项能力，缺哪项就少哪个入口，不会报错：
 
 | 能力 | 桌面壳实现 | 不提供时 |
@@ -76,7 +76,7 @@ flutter run -t lib/main_desktop.dart -d macos   # 或 windows / linux
 
 ## 嵌入宿主 app：真机入口
 
-[`lib/main_package.dart`](../lib/main_package.dart) 是完整闭环的真机调试入口：
+[`lib/main_package.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_package.dart) 是完整闭环的真机调试入口：
 由 flutter_mxlogger 在本机真实写入加密 `.mx`，再用悬浮球打开分析器读取同一目录。
 
 ```bash
@@ -181,7 +181,7 @@ MXAnalyzer.initialize(
   刷新入口在 header 右上角（替代桌面端的「更换文件」）。
 - **解析结果持久化在 sqlite**，重启 app 打开弹窗仍是上次的结果（不重新解析）；
   要拿最新日志点刷新。
-- **每次刷新都清空数据库重新解析** `diskcachePath` 下的 `.mx/.log/.txt/.json`，
+- **每次刷新都清空数据库重新解析** `diskcachePath` 下的 `.mx` 文件，
   不与上次结果合并，所见即本次扫描的全量结果。
 - **依赖克制**：嵌入模式不依赖 shared_preferences / file_picker / desktop_drop
   之类的 KV 存储与文件插件——Key/IV 每次由 `showDebug` 传入，设置默认只存内存

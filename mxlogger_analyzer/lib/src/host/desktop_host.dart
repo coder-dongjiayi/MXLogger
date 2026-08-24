@@ -71,7 +71,7 @@ Future<List<String>> _pickLogFiles() async {
   final FilePickerResult? result = await FilePicker.platform.pickFiles(
     allowMultiple: true,
     type: FileType.custom,
-    allowedExtensions: ["mx", "log", "txt", "json"],
+    allowedExtensions: ["mx"],
   );
   return result?.files
           .map((PlatformFile file) => file.path)

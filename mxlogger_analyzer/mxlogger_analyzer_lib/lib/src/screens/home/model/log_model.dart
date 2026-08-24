@@ -48,7 +48,7 @@ class LogModel {
   String get levelName => mxLevelName(level);
 
   /// tag 列按逗号/空格分词：写入端多 tag 用逗号分隔（如 "net,login"），
-  /// JSON-lines 来源合并为空格分隔，两者都拆成独立 tag
+  /// 拆成独立 tag 后展示与点击过滤都按单个 tag 处理
   List<String> get tags {
     final String raw = tag?.trim() ?? "";
     if (raw.isEmpty) return const [];

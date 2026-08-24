@@ -3,8 +3,8 @@
 MXLogger 日志解析器（Flutter，自带基于 stream 的轻量状态管理，UI 对齐 Claude Design 设计稿 `MXLogger.dc.html`）。
 
 导入 [MXLogger](https://github.com/coder-dongjiayi/MXLogger) 产出的 `.mx` mmap 二进制日志
-（AES-CFB-128 解密 + flatbuffer 反序列化），也支持 JSON-lines 文本日志（`.log/.txt/.json`），
-sqlite 入库后提供检索、过滤与 JSON 语法树查看。
+（AES-CFB-128 解密 + flatbuffer 反序列化），sqlite 入库后提供检索、过滤与 JSON 语法树查看。
+只支持 `.mx`，不解析其他格式的日志文件。
 
 仿照 1.x 拆为两层（本目录是桌面壳，内核可单独发布嵌入 app）：
 
@@ -14,7 +14,7 @@ mxlogger_analyzer/            # 桌面壳（macOS/Windows/Linux 入口，薄 mai
 ```
 
 **嵌入宿主 app**（iOS/Android，悬浮球 + 底部弹窗，用法见 `mxlogger_analyzer_lib/README.md`）。
-打开弹窗不自动解析：先是空白页 + 「刷新日志」按钮，由用户主动触发；每次刷新清空数据库重新解析。
+打开弹窗不自动解析：先是空白页 + 「刷新日志」按钮，由用户主动触发；每次刷新清空数据库、重新解析目录下的 `.mx`。
 
 ```dart
 MXAnalyzer.showDebug(navigatorKey.currentState!.overlay!,
@@ -33,7 +33,7 @@ MXAnalyzer.dismiss();
 ## 页面
 
 **首次使用三步向导**（步骤间滑动转场）：
-① 拖入/选择日志文件（`.mx/.log/.txt/.json`，未选时「下一步」不可用）→
+① 拖入/选择 `.mx` 日志文件（未选时「下一步」不可用）→
 ② 配置解密 KEY/IV（持久化，未加密留空）：可添加多组并逐组勾选，
 勾选框里的序号即解密尝试顺序——第一组解不开自动换下一组 → 点「开始导入」→
 ③ 真实进度 loading（解析按字节偏移、写库按条数）→ 完成自动进入日志详情页。
@@ -63,7 +63,7 @@ mxlogger_analyzer_lib/lib/
 ├── mxlogger_analyzer_lib.dart  # 伞文件：导出 MXAnalyzer 嵌入 API / app 壳 / 核心 provider
 └── src/
     ├── app/            # App 入口、MXTokens 双主题 tokens、l10n（zh/en）
-    ├── data/           # .mx 二进制解析 / JSON-lines 解析 / sqlite 封装 / 示例数据
+    ├── data/           # .mx 二进制解析（解密 + flatbuffer） / sqlite 封装
     ├── dependencies/   # vendored 纯 Dart 依赖：aes_crypt、flat_buffers（排除 lint）
     ├── embed/          # MXAnalyzer：悬浮球 + 底部弹窗（嵌套 MaterialApp，自带主题/l10n/导航）
     ├── global/         # state（stream 状态管理内核）、store（主题/Key-IV/数据库状态）、host（宿主能力：MXPrefs 存储 / 选文件 / 拖入，桌面壳注入插件实现）、util、widget
@@ -131,5 +131,3 @@ flatbuffer 字段：`name / tag / msg / level(int8: 0-4) / threadId(int32) / isM
 首条 `name == "com.djy.mxlogger.fileHeader"` 为文件头（写入端环境信息）。
 `tag` 多值用逗号/空格分隔（如 `net,login`），展示与点击过滤均按分词处理。
 
-**JSON-lines 文本**：首行可为 header map，其后每行
-`{"ts": 毫秒或ISO时间, "level": "debug|info|warning|error|fatal", "name": "...", "tags": [...], "content": "..."}`。
