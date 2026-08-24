@@ -521,13 +521,6 @@ MXLogger roadmap.
   `removeExpireData` (automatic on entering background on iOS and Flutter; call it yourself on
   Android).
 
-# Reference
-
-- [MMKV](https://github.com/Tencent/MMKV)
-- [spdlog](https://github.com/gabime/spdlog)
-- [log4cplus](https://github.com/log4cplus/log4cplus)
-- [SDWebImage](https://github.com/SDWebImage/SDWebImage)
-- [KSCrash](https://github.com/kstenerud/KSCrash)
 
 # License
 

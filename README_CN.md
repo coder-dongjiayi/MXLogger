@@ -508,17 +508,7 @@ Logan 和 Xlog 对数据做了压缩，实际体积会小很多。日志压缩�
 - `maxDiskAge` / `maxDiskSize` 不是每次写入都校验：清理发生在 `removeExpireData`（iOS 与 Flutter 进入
   后台自动调用，Android 需自行调用）。
 
-# 后续版本迭代安排
-
-1. 日志文件压缩
-
-# 参考代码
-
-- [MMKV](https://github.com/Tencent/MMKV)
-- [spdlog](https://github.com/gabime/spdlog)
-- [log4cplus](https://github.com/log4cplus/log4cplus)
-- [SDWebImage](https://github.com/SDWebImage/SDWebImage)
-- [KSCrash](https://github.com/kstenerud/KSCrash)
+  
 
 # 开源协议
 
