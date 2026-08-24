@@ -54,14 +54,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cryptNote =>
-      'For encrypted logs, fill in Key and IV; add and check several sets if needed, or leave empty for plain logs';
+      'For encrypted logs add Key and IV — several checked sets are tried in order; plain logs need no key set at all';
 
   @override
   String get cryptConfirmTitle => 'Confirm decryption parameters';
 
   @override
   String get cryptConfirmNote =>
-      'Confirm the decryption parameters for this .mx file (prefilled with your last values); check several sets to try them in order, or leave empty for plain logs.';
+      'Confirm the decryption parameters for this .mx file (prefilled with your last values); checked sets are tried in order, and plain logs need no key set at all.';
 
   @override
   String get addCryptGroup => 'Add key set';
@@ -74,7 +74,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cryptGroupOrderHint =>
-      'Tried in the order shown in the checkboxes; falls through to the next set';
+      'Tried in the order shown in the checkboxes; falls through to the next set. Drag the handle to reorder';
+
+  @override
+  String get reorderCryptGroup => 'Drag to reorder';
+
+  @override
+  String get cryptGroupEmptyHint =>
+      'No key sets — logs are parsed as unencrypted; add a set on the left to decrypt';
 
   @override
   String get clearExistingData => 'Clear existing data before import';
@@ -430,23 +437,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortDesc => 'Newest first';
 
   @override
-  String get keyIvTip => 'View decryption KEY / IV';
+  String get keyIvTip => 'Manage decryption KEY / IV';
 
   @override
   String get keyIvDialogTitle => 'Decryption KEY / IV';
 
   @override
   String get keyIvNote =>
-      'Configured decryption keys; the number marks the try order.';
-
-  @override
-  String get keyIvEmpty => 'No decryption keys configured';
-
-  @override
-  String get keyIvDisabled => 'Disabled';
-
-  @override
-  String get clickToCopy => 'Click to copy';
+      'Add, remove, check or drag to reorder; the number marks the try order.';
 
   @override
   String get noLogRecords => 'No parsable log records';

@@ -92,12 +92,102 @@ class MxBinaryParser {
     if (binaryData.length < _sizeofUint32) {
       return const MxParseResult(records: []);
     }
+    final ByteData byteData = ByteData.sublistView(binaryData);
+    final int totalSize = byteData.getUint32(0, Endian.little);
+    return _parseFrom(
+      binaryData,
+      begin: _sizeofUint32,
+      limit: min(_sizeofUint32 + totalSize, binaryData.length),
+      allowFileHeader: true,
+      pairs: _resolvePairs(cryptPairs, cryptKey, iv),
+      onProgress: onProgress,
+    );
+  }
 
-    final List<MxCryptPair> pairs = cryptPairs.isNotEmpty
-        ? cryptPairs
-        : (cryptKey != null && cryptKey.isNotEmpty)
-            ? [MxCryptPair(key: cryptKey, iv: iv ?? "")]
-            : const <MxCryptPair>[];
+  /// 解析 [splitRanges] 切出的一段。段内是连续的 `[uint32 itemSize][item]`，
+  /// 不含文件开头那 4 字节 totalSize，所以从偏移 0 开始走。
+  /// [allowFileHeader] 只有段 0 传 true——文件头按约定是全文件首条记录。
+  static MxParseResult parseChunk(
+    Uint8List chunk, {
+    required bool allowFileHeader,
+    List<MxCryptPair> cryptPairs = const <MxCryptPair>[],
+    String? cryptKey,
+    String? iv,
+    void Function(int processed, int total)? onProgress,
+  }) {
+    return _parseFrom(
+      chunk,
+      begin: 0,
+      limit: chunk.length,
+      allowFileHeader: allowFileHeader,
+      pairs: _resolvePairs(cryptPairs, cryptKey, iv),
+      onProgress: onProgress,
+    );
+  }
+
+  /// 按记录边界把有效数据切成至多 [count] 段，供多 isolate 并行解密。
+  ///
+  /// 每条记录都是用同一 KEY/IV **各自独立**做 CFB 加密的（解密时反馈块每次
+  /// 重置为 IV），所以只要不在记录中间切开，各段就能完全独立解密。
+  /// 这里只走长度前缀、不解密，127 MiB / 77 万条实测 64ms——相对并行省下的
+  /// 近 30 秒可以忽略。
+  /// 返回的段两两相接、覆盖全部有效记录；数据不可用时返回空列表。
+  static List<({int start, int end})> splitRanges(
+      Uint8List binaryData, int count) {
+    const List<({int start, int end})> empty = <({int start, int end})>[];
+    if (binaryData.length < _sizeofUint32 || count < 1) return empty;
+
+    final ByteData byteData = ByteData.sublistView(binaryData);
+    final int totalSize = byteData.getUint32(0, Endian.little);
+    final int limit = min(_sizeofUint32 + totalSize, binaryData.length);
+
+    // 记录起点（指向各自的长度前缀）
+    final List<int> starts = <int>[];
+    int begin = _sizeofUint32;
+    while (begin + _sizeofUint32 <= limit) {
+      final int itemSize = byteData.getUint32(begin, Endian.little);
+      if (itemSize <= 0 ||
+          begin + _sizeofUint32 + itemSize > binaryData.length) {
+        break;
+      }
+      starts.add(begin);
+      begin = begin + _sizeofUint32 + itemSize;
+    }
+    if (starts.isEmpty) return empty;
+
+    final int end = begin;
+    final int perChunk = ((end - _sizeofUint32) / count).ceil();
+    final List<({int start, int end})> ranges = <({int start, int end})>[];
+    int chunkStart = starts.first;
+    for (int i = 1; i < starts.length; i++) {
+      // 段数留一个名额给收尾段，避免最后切出一个空段
+      if (ranges.length < count - 1 && starts[i] - chunkStart >= perChunk) {
+        ranges.add((start: chunkStart, end: starts[i]));
+        chunkStart = starts[i];
+      }
+    }
+    ranges.add((start: chunkStart, end: end));
+    return ranges;
+  }
+
+  static List<MxCryptPair> _resolvePairs(
+      List<MxCryptPair> cryptPairs, String? cryptKey, String? iv) {
+    if (cryptPairs.isNotEmpty) return cryptPairs;
+    if (cryptKey != null && cryptKey.isNotEmpty) {
+      return <MxCryptPair>[MxCryptPair(key: cryptKey, iv: iv ?? "")];
+    }
+    return const <MxCryptPair>[];
+  }
+
+  /// 从 [begin] 解析到 [limit]（不含），进度按该区间内已处理字节回报。
+  static MxParseResult _parseFrom(
+    Uint8List binaryData, {
+    required int begin,
+    required int limit,
+    required bool allowFileHeader,
+    required List<MxCryptPair> pairs,
+    void Function(int processed, int total)? onProgress,
+  }) {
     final List<AesCrypt> candidates =
         pairs.map(_buildCrypt).toList(growable: false);
     // 多组候选时，解出来「像不像一条日志」是判断有没有解错组的唯一依据；
@@ -107,14 +197,14 @@ class MxBinaryParser {
     int current = 0;
 
     final ByteData byteData = ByteData.sublistView(binaryData);
-    final int totalSize = byteData.getUint32(0, Endian.little);
+    final int origin = begin;
+    final int total = limit - origin;
 
     final List<LogRecord> records = [];
     String? fileHeader;
     int errorCount = 0;
 
-    int begin = _sizeofUint32;
-    while (begin <= totalSize && begin + _sizeofUint32 <= binaryData.length) {
+    while (begin + _sizeofUint32 <= limit) {
       final int itemSize = byteData.getUint32(begin, Endian.little);
       final int start = begin + _sizeofUint32;
       if (itemSize <= 0 || start + itemSize > binaryData.length) break;
@@ -138,7 +228,9 @@ class MxBinaryParser {
 
       if (record == null) {
         errorCount = errorCount + 1;
-      } else if (record.name == fileHeaderName && begin == _sizeofUint32) {
+      } else if (record.name == fileHeaderName &&
+          allowFileHeader &&
+          begin == origin) {
         // 首条且 name 为约定值时视为文件头，不计入日志记录
         fileHeader = record.msg;
       } else {
@@ -146,10 +238,11 @@ class MxBinaryParser {
       }
 
       begin = begin + _sizeofUint32 + itemSize;
-      onProgress?.call(begin > totalSize ? totalSize : begin, totalSize);
+      onProgress?.call(begin > limit ? total : begin - origin, total);
     }
 
-    return MxParseResult(records: records, fileHeader: fileHeader, errorCount: errorCount);
+    return MxParseResult(
+        records: records, fileHeader: fileHeader, errorCount: errorCount);
   }
 
   static AesCrypt _buildCrypt(MxCryptPair pair) {

@@ -68,11 +68,15 @@ void main() {
     await tester.tap(find.text("下一步"));
     await tester.pumpAndSettle();
 
-    // 第二步：KEY/IV + 开始导入
-    expect(find.text("KEY"), findsOneWidget);
-    expect(find.text("IV"), findsOneWidget);
+    // 第二步：默认一组都不配（未加密），点「添加一组」才出 KEY/IV
     expect(find.text("开始导入"), findsOneWidget);
     expect(find.text("下一步"), findsNothing);
+    expect(find.text("KEY"), findsNothing);
+
+    await tester.tap(find.text("添加一组"));
+    await tester.pumpAndSettle();
+    expect(find.text("KEY"), findsOneWidget);
+    expect(find.text("IV"), findsOneWidget);
 
     // 上一步回到文件页
     await tester.tap(find.text("← 上一步"));

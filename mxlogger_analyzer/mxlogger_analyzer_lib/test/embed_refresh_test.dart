@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,16 +34,33 @@ class _FakeHomeRepository extends EmptyRepository {
   Future<List<int>> fileSizes(List<String> paths) async =>
       List<int>.filled(paths.length, 1024);
 
+  /// 假路径不落磁盘，直接给出空字节并把进度走满。
+  /// 路径在这一层记录：parseFiles 收到的已经是读好的字节，看不到路径了
   @override
-  Future<List<ParsedFile>> parseFiles({
+  Future<List<LoadedFile>> readFiles({
     required List<String> paths,
-    List<MxCryptPair> cryptPairs = const <MxCryptPair>[],
-    void Function(int fileIndex, double fraction)? onProgress,
+    required List<int> sizes,
+    void Function(double fraction)? onProgress,
   }) async {
     parsedPaths.add(paths);
+    onProgress?.call(1);
     return paths
         .map((String path) => (
               name: path.split(Platform.pathSeparator).last,
+              bytes: Uint8List(0),
+            ))
+        .toList();
+  }
+
+  @override
+  Future<List<ParsedFile>> parseFiles({
+    required List<LoadedFile> files,
+    List<MxCryptPair> cryptPairs = const <MxCryptPair>[],
+    void Function(int fileIndex, double fraction)? onProgress,
+  }) async {
+    return files
+        .map((LoadedFile file) => (
+              name: file.name,
               result: const MxParseResult(
                 records: <LogRecord>[
                   LogRecord(
@@ -84,14 +102,13 @@ class _NoRecordsRepository extends _FakeHomeRepository {
 
   @override
   Future<List<ParsedFile>> parseFiles({
-    required List<String> paths,
+    required List<LoadedFile> files,
     List<MxCryptPair> cryptPairs = const <MxCryptPair>[],
     void Function(int fileIndex, double fraction)? onProgress,
   }) async {
-    parsedPaths.add(paths);
-    return paths
-        .map((String path) => (
-              name: path.split(Platform.pathSeparator).last,
+    return files
+        .map((LoadedFile file) => (
+              name: file.name,
               result: MxParseResult(records: const [], errorCount: errorCount),
             ))
         .toList();

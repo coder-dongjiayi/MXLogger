@@ -1,15 +1,19 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:mxlogger_analyzer_lib/src/app/l10n/l10n_extension.dart';
 import 'package:mxlogger_analyzer_lib/src/app/theme/mx_theme.dart';
 import 'package:mxlogger_analyzer_lib/src/global/state/mx_scope.dart';
 import 'package:mxlogger_analyzer_lib/src/global/store/settings_store.dart';
 import 'package:mxlogger_analyzer_lib/src/global/util/mx_responsive.dart';
+import 'package:mxlogger_analyzer_lib/src/global/widget/crypt_entry_list.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_toast.dart';
 
-/// 查看当前配置的解密 KEY / IV（桌面端 header 钥匙按钮入口）。
-/// 只读展示：勾选的组带解密尝试顺序编号，未勾选的灰显；点击值即复制。
+/// 管理当前配置的解密 KEY / IV（桌面端 header 钥匙按钮入口）：
+/// 与导入前的「确认解密参数」弹框共用同一张编辑表——可增删、勾选、拖动排序，
+/// 勾选的组按序号依次尝试解密。
+/// 「应用」保存参数；数据页已有导入过的文件时顺带用新参数重新解析它们
+/// （重解析的成功 / 失败提示由 MainScreen 统一消费）。取消则不动已保存的参数。
 Future<void> showKeyIvDialog(BuildContext context) {
   final MXTokens tokens = MXTokens.of(context);
   return showDialog<void>(
@@ -21,23 +25,44 @@ Future<void> showKeyIvDialog(BuildContext context) {
   );
 }
 
-class _KeyIvDialog extends MXConsumerWidget {
+class _KeyIvDialog extends MXConsumerStatefulWidget {
   const _KeyIvDialog();
 
   @override
-  Widget build(BuildContext context, MXRef ref) {
+  MXConsumerState<_KeyIvDialog> createState() => _KeyIvDialogState();
+}
+
+class _KeyIvDialogState extends MXConsumerState<_KeyIvDialog> {
+  /// 编辑中的解密参数组（应用时才落库，取消不改动设置）
+  late List<CryptEntry> _entries;
+
+  @override
+  void initState() {
+    super.initState();
+    _entries = store.crypt.value.entries;
+  }
+
+  /// 与 [CryptStore.saveEntries] 同样的清洗规则，用于和已保存的参数比对是否有改动
+  List<CryptEntry> _cleaned(List<CryptEntry> entries) => entries
+      .map((CryptEntry entry) => entry.trimmed())
+      .where((CryptEntry entry) => !entry.isEmpty)
+      .toList();
+
+  void _apply() {
+    final List<CryptEntry> next = _cleaned(_entries);
+    final bool changed = !listEquals(next, store.crypt.value.entries);
+    if (changed) store.crypt.saveEntries(next);
+    // 参数变了且手上还有上一批文件：直接用新参数重解析，省得用户再导一次
+    final bool reparse = changed && store.importer.canReparse;
+    // toast 落在宿主 root overlay 里，先弹再关弹框不影响它的显示
+    if (changed && !reparse) showMXToast(context, context.l10n.keyIvUpdated);
+    Navigator.of(context).pop();
+    if (reparse) store.importer.reparse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final MXTokens tokens = MXTokens.of(context);
-    final List<CryptEntry> entries = ref.watch(ref.store.crypt).entries;
-
-    // 编号只对勾选的组连续计（与设置表的顺序勾选框一致）
-    int order = 0;
-    final List<Widget> rows = [];
-    for (final CryptEntry entry in entries) {
-      if (entry.enabled) order = order + 1;
-      if (rows.isNotEmpty) rows.add(const SizedBox(height: 8));
-      rows.add(_EntryRow(entry: entry, order: entry.enabled ? order : null));
-    }
-
     return Dialog(
       backgroundColor: tokens.panel,
       elevation: 0,
@@ -80,41 +105,35 @@ class _KeyIvDialog extends MXConsumerWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              if (rows.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Center(
-                    child: Text(
-                      context.l10n.keyIvEmpty,
-                      style: TextStyle(fontSize: 12.5, color: tokens.faint),
-                    ),
+              Text(
+                context.l10n.keyIvNote,
+                style: TextStyle(fontSize: 12.5, height: 1.7, color: tokens.muted),
+              ),
+              const SizedBox(height: 14),
+              // 多组解密参数：勾选的组按序号依次尝试；组多了列表内部滚动
+              CryptEntryList(
+                initialEntries: _entries,
+                maxHeight: 300,
+                onChanged: (List<CryptEntry> entries) => _entries = entries,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _DialogButton(
+                    label: context.l10n.cancel,
+                    onTap: () => Navigator.of(context).pop(),
                   ),
-                )
-              else ...[
-                Text(
-                  context.l10n.keyIvNote,
-                  style: TextStyle(fontSize: 12.5, height: 1.7, color: tokens.muted),
-                ),
-                const SizedBox(height: 12),
-                // 组多时内部滚动，不把弹框撑出屏幕
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 300),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: rows,
-                    ),
+                  const SizedBox(width: 8),
+                  _DialogButton(
+                    // 有上一批文件才谈得上「重新解析」，否则只是保存参数
+                    label: store.importer.canReparse
+                        ? context.l10n.applyReparse
+                        : context.l10n.apply,
+                    primary: true,
+                    onTap: _apply,
                   ),
-                ),
-              ],
-              const SizedBox(height: 18),
-              Align(
-                alignment: Alignment.centerRight,
-                child: _CloseButton(
-                  label: context.l10n.close,
-                  onTap: () => Navigator.of(context).pop(),
-                ),
+                ],
               ),
             ],
           ),
@@ -124,146 +143,38 @@ class _KeyIvDialog extends MXConsumerWidget {
   }
 }
 
-/// 一组解密参数（只读）：顺序标记 + KEY / IV 两行，点击值复制。
-class _EntryRow extends StatelessWidget {
-  const _EntryRow({required this.entry, required this.order});
-
-  final CryptEntry entry;
-
-  /// 解密尝试顺序（1 起）；null 表示该组未勾选
-  final int? order;
-
-  @override
-  Widget build(BuildContext context) {
-    final MXTokens tokens = MXTokens.of(context);
-    final bool enabled = order != null;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(10, 9, 10, 9),
-      decoration: BoxDecoration(
-        color: enabled ? tokens.panel2 : Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: enabled ? tokens.accent.withValues(alpha: 0.35) : tokens.border,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // 顺序标记：与设置表的勾选框视觉一致（未勾选显示「未启用」灰标）
-          if (enabled)
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: tokens.accent,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                "$order",
-                style: TextStyle(
-                  fontSize: 11,
-                  height: 1,
-                  fontWeight: FontWeight.w700,
-                  color: tokens.onAccent,
-                ),
-              ),
-            )
-          else
-            Text(
-              context.l10n.keyIvDisabled,
-              style: TextStyle(fontSize: 10.5, color: tokens.faint),
-            ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _ValueLine(label: "KEY", value: entry.cryptKey, dimmed: !enabled),
-                const SizedBox(height: 4),
-                _ValueLine(label: "IV", value: entry.cryptIv, dimmed: !enabled),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// KEY / IV 单行值：等宽字体展示，点击复制到剪贴板。
-class _ValueLine extends StatelessWidget {
-  const _ValueLine({required this.label, required this.value, required this.dimmed});
-
-  final String label;
-  final String value;
-  final bool dimmed;
-
-  @override
-  Widget build(BuildContext context) {
-    final MXTokens tokens = MXTokens.of(context);
-    return Tooltip(
-      message: context.l10n.clickToCopy,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () async {
-            await Clipboard.setData(ClipboardData(text: value));
-            if (context.mounted) showMXToast(context, context.l10n.copied);
-          },
-          child: Row(
-            children: [
-              SizedBox(
-                width: 32,
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    letterSpacing: 0.55,
-                    color: tokens.faint,
-                    fontFamilyFallback: MXTheme.monoFontFallback,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    color: dimmed ? tokens.faint : tokens.text,
-                    fontFamilyFallback: MXTheme.monoFontFallback,
-                  ),
-                ),
-              ),
-              Icon(Icons.copy_outlined, size: 12, color: tokens.faint),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 底部关闭按钮（描边次级样式，与其它弹框按钮一致）。
-class _CloseButton extends StatefulWidget {
-  const _CloseButton({required this.label, required this.onTap});
+/// 弹框按钮：默认描边次级样式，[primary] 为强调色实底。
+class _DialogButton extends StatefulWidget {
+  const _DialogButton({required this.label, required this.onTap, this.primary = false});
 
   final String label;
   final VoidCallback onTap;
+  final bool primary;
 
   @override
-  State<_CloseButton> createState() => _CloseButtonState();
+  State<_DialogButton> createState() => _DialogButtonState();
 }
 
-class _CloseButtonState extends State<_CloseButton> {
+class _DialogButtonState extends State<_DialogButton> {
   bool _hovering = false;
 
   @override
   Widget build(BuildContext context) {
     final MXTokens tokens = MXTokens.of(context);
+    final Color bg;
+    final Color fg;
+    Color borderColor;
+    if (widget.primary) {
+      bg = _hovering
+          ? Color.alphaBlend(Colors.white.withValues(alpha: 0.1), tokens.accent)
+          : tokens.accent;
+      fg = Colors.white;
+      borderColor = Colors.transparent;
+    } else {
+      bg = _hovering ? tokens.panel2 : Colors.transparent;
+      fg = _hovering ? tokens.text : tokens.muted;
+      borderColor = _hovering ? tokens.faint : tokens.border;
+    }
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovering = true),
@@ -274,17 +185,13 @@ class _CloseButtonState extends State<_CloseButton> {
           duration: const Duration(milliseconds: 120),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: _hovering ? tokens.panel2 : Colors.transparent,
+            color: bg,
             borderRadius: BorderRadius.circular(9),
-            border: Border.all(color: _hovering ? tokens.faint : tokens.border),
+            border: Border.all(color: borderColor),
           ),
           child: Text(
             widget.label,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
-              color: _hovering ? tokens.text : tokens.muted,
-            ),
+            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: fg),
           ),
         ),
       ),

@@ -51,14 +51,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ivHint => '16位偏移向量';
 
   @override
-  String get cryptNote => '日志文件是加密的，请填写 Key 和 IV；可添加多组并勾选，未加密的文件留空即可';
+  String get cryptNote => '加密的日志请添加 Key 和 IV，可配多组并勾选，按序号依次尝试；未加密的日志无需配置，直接开始导入';
 
   @override
   String get cryptConfirmTitle => '确认解密参数';
 
   @override
   String get cryptConfirmNote =>
-      '请确认该 .mx 文件的解密参数，已代入上次填写的内容；可添加多组并勾选，解密时按序号依次尝试；未加密可留空。';
+      '请确认该 .mx 文件的解密参数，已代入上次填写的内容；可添加多组并勾选，解密时按序号依次尝试；未加密的日志可全部删除。';
 
   @override
   String get addCryptGroup => '添加一组';
@@ -70,7 +70,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cryptGroupToggleTip => '勾选后参与解密';
 
   @override
-  String get cryptGroupOrderHint => '按勾选框中的序号依次尝试，解不开自动换下一组';
+  String get cryptGroupOrderHint => '按勾选框中的序号依次尝试，解不开自动换下一组；拖动把手可调整顺序';
+
+  @override
+  String get reorderCryptGroup => '拖动调整尝试顺序';
+
+  @override
+  String get cryptGroupEmptyHint => '未配置解密参数，按未加密的日志解析；需要解密请点左侧按钮添加';
 
   @override
   String get clearExistingData => '导入前清空已有数据';
@@ -422,22 +428,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sortDesc => '时间倒序';
 
   @override
-  String get keyIvTip => '查看解密 KEY / IV';
+  String get keyIvTip => '管理解密 KEY / IV';
 
   @override
   String get keyIvDialogTitle => '解密 KEY / IV';
 
   @override
-  String get keyIvNote => '当前配置的解密参数，勾选编号为解密尝试顺序。';
-
-  @override
-  String get keyIvEmpty => '尚未配置解密参数';
-
-  @override
-  String get keyIvDisabled => '未启用';
-
-  @override
-  String get clickToCopy => '点击复制';
+  String get keyIvNote => '可增删、勾选与拖动排序，勾选编号为解密尝试顺序。';
 
   @override
   String get noLogRecords => '没有可解析的日志文件';

@@ -77,7 +77,7 @@ class DataHeader extends MXConsumerWidget {
                         size: buttonSize,
                         onTap: () => pickAndImportLogFiles(context, store),
                       ),
-                    // 桌面端：查看当前配置的解密 KEY / IV（只读，点值复制）
+                    // 桌面端：管理解密 KEY / IV（增删 / 勾选 / 排序，应用即重解析）
                     if (!store.isEmbedded)
                       MXIconButton(
                         tooltip: context.l10n.keyIvTip,

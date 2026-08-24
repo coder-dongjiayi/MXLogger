@@ -41,7 +41,8 @@ class ImportStore extends MXState<ImportState> {
 
     value = ImportState(status: ImportStatus.running, reparse: reparse);
 
-    // 读取阶段：按文件大小建立解析进度权重
+    // 先 stat 各文件大小：既是文件标签的信息，也是读取/解析两个阶段的进度权重。
+    // 只是 stat（127 MiB 实测 0.1ms），不占进度条份额
     final List<int> sizes;
     try {
       sizes = await repository.fileSizes(paths);
@@ -50,15 +51,29 @@ class ImportStore extends MXState<ImportState> {
       return;
     }
     final int totalBytes = sizes.fold(0, (int sum, int size) => sum + size);
-    value = value.copyWith(
-        fileLabel: _fileLabel(paths, totalBytes), percent: _readEnd.round());
+    value = value.copyWith(fileLabel: _fileLabel(paths, totalBytes));
+
+    // 读取阶段：分块读、按累计字节回报 0-8。
+    // 这里必须回报真实进度而不是读完直接跳到 8——127 MiB 读取约 350ms，
+    // 原先这段耗时藏在 parseFiles 里且不回报，进度条会先瞬间跳到 8% 再卡住半秒
+    List<LoadedFile> files;
+    try {
+      files = await repository.readFiles(
+        paths: paths,
+        sizes: sizes,
+        onProgress: (double fraction) => _setPercent(_readEnd * fraction),
+      );
+    } catch (_) {
+      _fail(ImportError.readFailed);
+      return;
+    }
 
     // 解析阶段：isolate 内按字节偏移回报进度
     List<ParsedFile> parsed;
     try {
       value = value.copyWith(step: ImportStep.decrypting);
       parsed = await repository.parseFiles(
-        paths: paths,
+        files: files,
         // 勾选的解密参数组，按顺序依次尝试
         cryptPairs: crypt.cryptPairs,
         onProgress: (int fileIndex, double fraction) {

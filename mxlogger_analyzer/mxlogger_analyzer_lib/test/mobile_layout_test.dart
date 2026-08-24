@@ -342,6 +342,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text("开始导入"), findsOneWidget);
+    // 空配置起步，先加一组
+    await tester.tap(find.text("添加一组"));
+    await tester.pumpAndSettle();
     // KEY/IV 各占一行并铺满剩余宽度（而非并排定宽 150）
     final List<Size> fieldSizes = tester
         .widgetList<TextField>(find.byType(TextField))

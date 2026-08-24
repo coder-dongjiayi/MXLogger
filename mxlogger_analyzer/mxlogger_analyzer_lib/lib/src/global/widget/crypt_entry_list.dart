@@ -7,8 +7,10 @@ import 'package:mxlogger_analyzer_lib/src/global/util/mx_responsive.dart';
 
 /// 多组解密参数编辑器（向导第二步与「确认解密参数」弹框共用）。
 ///
-/// 每组一行：勾选框 + KEY + IV + 删除。勾选的组按自上而下的顺序参与解密——
-/// 先用第一组解，解不开自动换下一组，依此类推（序号即尝试顺序，画在勾选框里）。
+/// 每组一行：勾选框 + KEY + IV + 拖拽把手 + 删除。勾选的组按自上而下的顺序
+/// 参与解密——先用第一组解，解不开自动换下一组，依此类推（序号即尝试顺序，
+/// 画在勾选框里），故「排序」就是调整尝试顺序，按住把手上下拖动即可。
+/// 可以全部删空：一组都没有就是「不解密」，用「添加一组」按钮再加回来。
 /// 内部持有输入控制器，变更即通过 [onChanged] 回吐整表，由调用方决定何时落库。
 class CryptEntryList extends StatefulWidget {
   const CryptEntryList({
@@ -36,11 +38,8 @@ class _CryptEntryListState extends State<CryptEntryList> {
   @override
   void initState() {
     super.initState();
-    // 没有历史配置时也给一行空的，用户直接就能填
-    final List<CryptEntry> initial = widget.initialEntries.isEmpty
-        ? const [CryptEntry()]
-        : widget.initialEntries;
-    _rows.addAll(initial.map(_EntryRow.new));
+    // 没有历史配置就一行都不给：空表即「日志未加密」，用户需要时自己加
+    _rows.addAll(widget.initialEntries.map(_EntryRow.new));
   }
 
   @override
@@ -65,6 +64,13 @@ class _CryptEntryListState extends State<CryptEntryList> {
     _emit();
   }
 
+  /// 拖拽排序：顺序即解密尝试顺序，故拖完要回吐整表
+  /// （onReorderItem 给的 newIndex 已按「移走 oldIndex 之后」折算过，直接插即可）
+  void _reorder(int oldIndex, int newIndex) {
+    setState(() => _rows.insert(newIndex, _rows.removeAt(oldIndex)));
+    _emit();
+  }
+
   void _toggle(int index) {
     setState(() => _rows[index].enabled = !_rows[index].enabled);
     _emit();
@@ -73,47 +79,92 @@ class _CryptEntryListState extends State<CryptEntryList> {
   @override
   Widget build(BuildContext context) {
     final MXTokens tokens = MXTokens.of(context);
-    // 勾选框里显示的是「第几个尝试」，故只对勾选的组连续编号
-    int order = 0;
-    final List<Widget> children = [];
-    for (int i = 0; i < _rows.length; i++) {
-      final _EntryRow row = _rows[i];
-      if (row.enabled) order = order + 1;
-      if (i > 0) children.add(const SizedBox(height: 8));
-      children.add(_row(tokens, i, row.enabled ? order : null));
-    }
+    final List<int?> orders = _orders();
 
-    final Widget list = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: children,
+    // 拖拽把手排序：itemBuilder 是惰性调用的，序号先整表算好再取用
+    final Widget list = ReorderableListView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.zero,
+      // 限高时列表自己滚，不限高时高度由内容决定、交给外层页面滚
+      physics: widget.maxHeight == null
+          ? const NeverScrollableScrollPhysics()
+          : const ClampingScrollPhysics(),
+      // 把手之外的地方（尤其是 KEY / IV 输入框）不该触发拖拽
+      buildDefaultDragHandles: false,
+      itemCount: _rows.length,
+      onReorderItem: _reorder,
+      proxyDecorator: _dragProxy,
+      itemBuilder: (BuildContext context, int index) => Padding(
+        key: ObjectKey(_rows[index]),
+        padding: EdgeInsets.only(top: index == 0 ? 0 : 8),
+        child: _row(tokens, index, orders[index]),
+      ),
     );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (widget.maxHeight != null)
+        if (_rows.isEmpty)
+          const SizedBox.shrink()
+        else if (widget.maxHeight != null)
           ConstrainedBox(
             constraints: BoxConstraints(maxHeight: widget.maxHeight!),
-            child: SingleChildScrollView(child: list),
+            child: list,
           )
         else
           list,
-        const SizedBox(height: 10),
+        if (_rows.isNotEmpty) const SizedBox(height: 10),
         Row(
           children: [
             _AddButton(label: context.l10n.addCryptGroup, onTap: _add),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                context.l10n.cryptGroupOrderHint,
+                // 一组都没有时说明「不解密」，否则讲清多组的尝试顺序
+                _rows.isEmpty
+                    ? context.l10n.cryptGroupEmptyHint
+                    : context.l10n.cryptGroupOrderHint,
                 style: TextStyle(fontSize: 11, height: 1.5, color: tokens.faint),
               ),
             ),
           ],
         ),
       ],
+    );
+  }
+
+  /// 每行在勾选框里显示的「第几个尝试」：只对勾选的组连续编号，未勾选为 null
+  List<int?> _orders() {
+    int order = 0;
+    return _rows.map((_EntryRow row) {
+      if (!row.enabled) return null;
+      order = order + 1;
+      return order;
+    }).toList(growable: false);
+  }
+
+  /// 拖起来的那一行：略微放大 + 投影，与静止的行区分开
+  Widget _dragProxy(Widget child, int index, Animation<double> animation) {
+    final MXTokens tokens = MXTokens.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: Transform.scale(
+        scale: 1.02,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: tokens.mask,
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
     );
   }
 
@@ -132,6 +183,15 @@ class _CryptEntryListState extends State<CryptEntryList> {
       controller: row.ivController,
       onChanged: (_) => _emit(),
     );
+    final Widget checkbox = _OrderCheckbox(
+      order: order,
+      onTap: () => _toggle(index),
+      tooltip: context.l10n.cryptGroupToggleTip,
+    );
+    // 顺序即解密尝试顺序：按住把手上下拖动调整（只有多于一组时才有意义）
+    final bool sortable = _rows.length > 1;
+    final Widget handle =
+        _DragHandle(index: index, tooltip: context.l10n.reorderCryptGroup);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(9, 9, 5, 9),
@@ -145,11 +205,14 @@ class _CryptEntryListState extends State<CryptEntryList> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _OrderCheckbox(
-            order: order,
-            onTap: () => _toggle(index),
-            tooltip: context.l10n.cryptGroupToggleTip,
-          ),
+          // 手机屏窄：把手竖着叠在勾选框下面，省出的横向空间留给 KEY / IV
+          if (mobile && sortable)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [checkbox, const SizedBox(height: 4), handle],
+            )
+          else
+            checkbox,
           const SizedBox(width: 9),
           Expanded(
             // 手机屏窄：KEY / IV 各占一行，并排会挤到不可用
@@ -167,9 +230,9 @@ class _CryptEntryListState extends State<CryptEntryList> {
                   ),
           ),
           const SizedBox(width: 2),
-          // 只剩一组时不给删（删光了没有可编辑的行，体验上等同于清空）
+          if (!mobile && sortable) handle,
+          // 任意一组都能删，删空即按未加密解析
           _RemoveButton(
-            enabled: _rows.length > 1,
             tooltip: context.l10n.removeCryptGroup,
             onTap: () => _remove(index),
           ),
@@ -373,15 +436,40 @@ class _AddButtonState extends State<_AddButton> {
   }
 }
 
-/// 组尾的删除按钮：hover 变错误色；只剩一组时灰显不可点
-class _RemoveButton extends StatefulWidget {
-  const _RemoveButton({
-    required this.enabled,
-    required this.tooltip,
-    required this.onTap,
-  });
+/// 组尾的拖拽把手：按住上下拖动调整该组的解密尝试顺序。
+/// 只在把手上响应拖拽（buildDefaultDragHandles: false），
+/// 免得拖动输入框选文字时把整行拖走。
+class _DragHandle extends StatelessWidget {
+  const _DragHandle({required this.index, required this.tooltip});
 
-  final bool enabled;
+  final int index;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final MXTokens tokens = MXTokens.of(context);
+    final double size = context.isMobileLayout ? 30 : 24;
+    return Tooltip(
+      message: tooltip,
+      child: ReorderableDragStartListener(
+        index: index,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.grab,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Icon(Icons.drag_indicator, size: 15, color: tokens.faint),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 组尾的删除按钮：hover 变错误色
+class _RemoveButton extends StatefulWidget {
+  const _RemoveButton({required this.tooltip, required this.onTap});
+
   final String tooltip;
   final VoidCallback onTap;
 
@@ -396,25 +484,25 @@ class _RemoveButtonState extends State<_RemoveButton> {
   Widget build(BuildContext context) {
     final MXTokens tokens = MXTokens.of(context);
     final double size = context.isMobileLayout ? 30 : 24;
-    final Widget button = MouseRegion(
-      cursor: widget.enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: GestureDetector(
-        onTap: widget.enabled ? widget.onTap : null,
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Icon(
-            Icons.close,
-            size: 14,
-            color: !widget.enabled
-                ? tokens.faint.withValues(alpha: 0.4)
-                : (_hovering ? tokens.lvError : tokens.faint),
+    return Tooltip(
+      message: widget.tooltip,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovering = true),
+        onExit: (_) => setState(() => _hovering = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Icon(
+              Icons.close,
+              size: 14,
+              color: _hovering ? tokens.lvError : tokens.faint,
+            ),
           ),
         ),
       ),
     );
-    return widget.enabled ? Tooltip(message: widget.tooltip, child: button) : button;
   }
 }

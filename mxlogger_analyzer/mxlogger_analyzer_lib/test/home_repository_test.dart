@@ -77,10 +77,25 @@ void main() {
       ].join("\n"));
 
 
+    // 真实读取进度：按累计字节 0→1 非递减
+    final List<String> paths = [mxFile.path, jsonFile.path];
+    final List<double> readProgress = [];
+    final List<LoadedFile> files = await repository.readFiles(
+      paths: paths,
+      sizes: await repository.fileSizes(paths),
+      onProgress: readProgress.add,
+    );
+    expect(readProgress.last, 1.0);
+    for (int i = 1; i < readProgress.length; i++) {
+      expect(readProgress[i], greaterThanOrEqualTo(readProgress[i - 1]));
+    }
+    expect(files.map((LoadedFile file) => file.name).toList(),
+        [mxFile.uri.pathSegments.last, jsonFile.uri.pathSegments.last]);
+
     // 真实解析进度：每个文件内 0→1 非递减
     final Map<int, List<double>> parseProgress = {};
     final List<ParsedFile> parsed = await repository.parseFiles(
-      paths: [mxFile.path, jsonFile.path],
+      files: files,
       cryptPairs: [MxCryptPair(key: key)],
       onProgress: (int fileIndex, double fraction) {
         parseProgress.putIfAbsent(fileIndex, () => []).add(fraction);
@@ -155,20 +170,32 @@ void main() {
             .toList(),
       ));
 
-    final List<ParsedFile> parsed =
-        await repository.parseFiles(
+    final List<ParsedFile> parsed = await repository.parseFiles(
+        files: await repository.readFiles(
             paths: [mxFile.path],
-            cryptPairs: const [MxCryptPair(key: "wrong-key")]);
+            sizes: await repository.fileSizes([mxFile.path])),
+        cryptPairs: const [MxCryptPair(key: "wrong-key")]);
     // 解密失败不再折叠成 null：上层靠 errorCount 区分 Key 错误与「文件里没日志」
     final MxParseResult result = parsed.single.result!;
     expect(result.records, isEmpty);
     expect(result.errorCount, items.length);
   });
 
-  test("parseFiles：文件不存在抛出 IO 异常", () async {
+  test("readFiles：文件不存在抛出 IO 异常", () async {
     expect(
-      () => repository.parseFiles(paths: ["${tempDir.path}/not_exist.mx"]),
+      () => repository.readFiles(
+          paths: ["${tempDir.path}/not_exist.mx"], sizes: const [1]),
       throwsA(isA<FileSystemException>()),
     );
+  });
+
+  test("readFiles：文件在 stat 之后被截短，按实际读到的长度收尾", () async {
+    final File file = File("${tempDir.path}/shrunk.mx")
+      ..writeAsBytesSync(List<int>.filled(64, 7));
+    // 谎报一个更大的 size，模拟 stat 之后文件被截短
+    final List<LoadedFile> files =
+        await repository.readFiles(paths: [file.path], sizes: const [4096]);
+    expect(files.single.bytes.length, 64);
+    expect(files.single.bytes.every((int byte) => byte == 7), isTrue);
   });
 }

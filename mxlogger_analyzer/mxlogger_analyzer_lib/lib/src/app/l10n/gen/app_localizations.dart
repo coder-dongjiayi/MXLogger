@@ -185,7 +185,7 @@ abstract class AppLocalizations {
   /// No description provided for @cryptNote.
   ///
   /// In zh, this message translates to:
-  /// **'日志文件是加密的，请填写 Key 和 IV；可添加多组并勾选，未加密的文件留空即可'**
+  /// **'加密的日志请添加 Key 和 IV，可配多组并勾选，按序号依次尝试；未加密的日志无需配置，直接开始导入'**
   String get cryptNote;
 
   /// No description provided for @cryptConfirmTitle.
@@ -197,7 +197,7 @@ abstract class AppLocalizations {
   /// No description provided for @cryptConfirmNote.
   ///
   /// In zh, this message translates to:
-  /// **'请确认该 .mx 文件的解密参数，已代入上次填写的内容；可添加多组并勾选，解密时按序号依次尝试；未加密可留空。'**
+  /// **'请确认该 .mx 文件的解密参数，已代入上次填写的内容；可添加多组并勾选，解密时按序号依次尝试；未加密的日志可全部删除。'**
   String get cryptConfirmNote;
 
   /// No description provided for @addCryptGroup.
@@ -221,8 +221,20 @@ abstract class AppLocalizations {
   /// No description provided for @cryptGroupOrderHint.
   ///
   /// In zh, this message translates to:
-  /// **'按勾选框中的序号依次尝试，解不开自动换下一组'**
+  /// **'按勾选框中的序号依次尝试，解不开自动换下一组；拖动把手可调整顺序'**
   String get cryptGroupOrderHint;
+
+  /// No description provided for @reorderCryptGroup.
+  ///
+  /// In zh, this message translates to:
+  /// **'拖动调整尝试顺序'**
+  String get reorderCryptGroup;
+
+  /// No description provided for @cryptGroupEmptyHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'未配置解密参数，按未加密的日志解析；需要解密请点左侧按钮添加'**
+  String get cryptGroupEmptyHint;
 
   /// No description provided for @clearExistingData.
   ///
@@ -881,7 +893,7 @@ abstract class AppLocalizations {
   /// No description provided for @keyIvTip.
   ///
   /// In zh, this message translates to:
-  /// **'查看解密 KEY / IV'**
+  /// **'管理解密 KEY / IV'**
   String get keyIvTip;
 
   /// No description provided for @keyIvDialogTitle.
@@ -893,26 +905,8 @@ abstract class AppLocalizations {
   /// No description provided for @keyIvNote.
   ///
   /// In zh, this message translates to:
-  /// **'当前配置的解密参数，勾选编号为解密尝试顺序。'**
+  /// **'可增删、勾选与拖动排序，勾选编号为解密尝试顺序。'**
   String get keyIvNote;
-
-  /// No description provided for @keyIvEmpty.
-  ///
-  /// In zh, this message translates to:
-  /// **'尚未配置解密参数'**
-  String get keyIvEmpty;
-
-  /// No description provided for @keyIvDisabled.
-  ///
-  /// In zh, this message translates to:
-  /// **'未启用'**
-  String get keyIvDisabled;
-
-  /// No description provided for @clickToCopy.
-  ///
-  /// In zh, this message translates to:
-  /// **'点击复制'**
-  String get clickToCopy;
 
   /// No description provided for @noLogRecords.
   ///

@@ -9,11 +9,19 @@ import 'package:mxlogger_analyzer_lib/src/dependencies/aes_crypt/aes_crypt_null_
 import 'package:mxlogger_analyzer_lib/src/dependencies/flat_buffers/flat_buffers.dart' as fb;
 
 /// 生成示例 .mx 日志文件用于手动验证：
-/// dart run tool/generate_sample_mx.dart [输出目录]
-/// 产出 sample_plain.mx（未加密）与 sample_encrypted.mx（key=mxlogger123）。
+/// dart run tool/generate_sample_mx.dart [输出目录] [--key=...] [--iv=...]
+/// 产出 sample_plain.mx（未加密）与 sample_encrypted.mx（默认 key=mxlogger123，iv 留空）。
+///
+/// key / iv 不足 16 字节时补 0x00、超出截断，与 MxBinaryParser._replenishByte 对齐；
+/// iv 留空时沿用 key 作为 iv，也和解析端 MxBinaryParser._buildCrypt 的行为一致。
 void main(List<String> args) {
-  final String outputDir = args.isNotEmpty ? args.first : ".";
-  const String cryptKey = "mxlogger123";
+  final List<String> positional =
+      args.where((String arg) => !arg.startsWith("--")).toList();
+  final Map<String, String> flags = _parseFlags(args);
+
+  final String outputDir = positional.isNotEmpty ? positional.first : ".";
+  final String cryptKey = flags["key"] ?? "zzmxlogger123";
+  final String cryptIv = flags["iv"] ?? "mmmxlogger123iv";
 
   final int base = DateTime.now().microsecondsSinceEpoch;
   final List<Uint8List> items = [
@@ -40,8 +48,8 @@ void main(List<String> args) {
   ];
 
   final Uint8List plain = _buildMxFile(items);
-  final Uint8List encrypted =
-      _buildMxFile(items.map((item) => _encrypt(item, cryptKey)).toList());
+  final Uint8List encrypted = _buildMxFile(
+      items.map((item) => _encrypt(item, cryptKey, cryptIv)).toList());
 
   final File plainFile = File("$outputDir/sample_plain.mx")..writeAsBytesSync(plain);
   final File encryptedFile = File("$outputDir/sample_encrypted.mx")
@@ -49,7 +57,23 @@ void main(List<String> args) {
 
   stdout.writeln("生成完成：");
   stdout.writeln("  ${plainFile.path}（未加密，共 ${_samples.length} 条）");
-  stdout.writeln("  ${encryptedFile.path}（AES-CFB 加密，key=$cryptKey，iv 留空）");
+  stdout.writeln("  ${encryptedFile.path}（AES-CFB 加密，key=$cryptKey，"
+      "iv=${cryptIv.isEmpty ? "留空（沿用 key）" : cryptIv}）");
+}
+
+/// 只认 --name=value 形式；--name 视为开关（值为 "true"）
+Map<String, String> _parseFlags(List<String> args) {
+  final Map<String, String> map = <String, String>{};
+  for (final String arg in args) {
+    if (!arg.startsWith("--")) continue;
+    final int eq = arg.indexOf("=");
+    if (eq < 0) {
+      map[arg.substring(2)] = "true";
+    } else {
+      map[arg.substring(2, eq)] = arg.substring(eq + 1);
+    }
+  }
+  return map;
 }
 
 const List<(String, int, String)> _samples = [
@@ -105,10 +129,10 @@ Uint8List _buildMxFile(List<Uint8List> items) {
   return bytes.takeBytes();
 }
 
-Uint8List _encrypt(Uint8List plain, String key) {
+Uint8List _encrypt(Uint8List plain, String key, String iv) {
   final AesCrypt crypt = AesCrypt();
-  final Uint8List keyBytes = _keyBytes(key);
-  crypt.aesSetKeys(keyBytes, keyBytes);
+  // iv 留空即沿用 key（与解析端 MxBinaryParser._buildCrypt 一致）
+  crypt.aesSetKeys(_keyBytes(key), _keyBytes(iv.isEmpty ? key : iv));
   crypt.aesSetMode(AesMode.cfb);
   final Uint8List padded = plain.length % 16 == 0
       ? plain

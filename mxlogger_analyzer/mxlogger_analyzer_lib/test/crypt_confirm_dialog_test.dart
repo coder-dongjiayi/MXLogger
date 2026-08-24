@@ -127,6 +127,24 @@ void main() {
     expect(store.crypt.value.cryptPairs, isEmpty);
   });
 
+  testWidgets("可以删空所有组，确认后按未加密解析", (WidgetTester tester) async {
+    final MXStore store = await pump(tester);
+    await tester.tap(find.text("open"));
+    await tester.pumpAndSettle();
+
+    // 唯一一组也能删（删除按钮即行尾的 X）
+    await tester.tap(find.byTooltip("移除这一组"));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsNothing);
+    expect(find.text("未配置解密参数，按未加密的日志解析；需要解密请点左侧按钮添加"), findsOneWidget);
+
+    await tester.tap(find.text("开始导入"));
+    await tester.pumpAndSettle();
+
+    expect(store.crypt.value.entries, isEmpty);
+    expect(store.crypt.value.cryptPairs, isEmpty);
+  });
+
   testWidgets("取消不修改 Key/IV，返回 null", (WidgetTester tester) async {
     final MXStore store = await pump(tester);
     await tester.tap(find.text("open"));
