@@ -82,7 +82,7 @@ mxlogger_analyzer_lib/lib/
 
 ```bash
 flutter pub get
-flutter run -d macos        # 或 windows / linux
+flutter run -t lib/main_desktop.dart -d macos   # 或 windows / linux
 
 # 真机验证嵌入效果（悬浮球 + 弹窗）：由 flutter_mxlogger 真实写入加密 .mx，再用分析器读取
 flutter run -t lib/main_package.dart -d <iOS/Android 设备>
@@ -103,6 +103,17 @@ dart run tool/generate_sample_mx.dart sample
 ```bash
 flutter test tool/generate_app_icon.dart
 ```
+
+打包桌面可执行文件（产物落到 `dist/`，命名带版本号与架构）：
+
+```bash
+dart run tool/build_desktop.dart          # 出当前系统的包（macOS zip / Windows zip / Linux tar.gz）
+dart run tool/build_desktop.dart --dmg    # macOS 额外出可拖拽安装的 .dmg
+dart run tool/build_desktop.dart --no-build   # 复用已有构建产物，只重新打包
+```
+
+Flutter 桌面不支持交叉编译（macOS 要 Xcode 工具链、Windows 要 MSVC、Linux 要 GTK），
+三端产物 = 在三台机器（或 CI 的 macos / windows / ubuntu 三个 runner）上各跑一次同一条命令。
 
 ## 日志格式
 

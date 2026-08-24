@@ -39,6 +39,9 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+# 打包产物（tool/build_desktop.dart 的输出目录）：二进制不入库
+/dist/
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile

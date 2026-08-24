@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # 构建 macOS 安装包（DMG）
 #
+# 三端通用的打包脚本见 tool/build_desktop.dart（含 --dmg），本脚本只保留 macOS 单端用法。
+#
 # 用法：
 #   ./tool/build_macos_dmg.sh            # 构建 release 并生成 DMG
 #   ./tool/build_macos_dmg.sh --no-build # 跳过 flutter build，直接用已有产物打包
@@ -20,8 +22,9 @@ SKIP_BUILD=false
 
 # 1. 构建 release 版 .app
 if [[ "$SKIP_BUILD" == false ]]; then
-  echo "==> flutter build macos --release"
-  flutter build macos --release
+  # 本工程没有 lib/main.dart，桌面壳入口是 main_desktop.dart，必须显式指定
+  echo "==> flutter build macos --release -t lib/main_desktop.dart"
+  flutter build macos --release -t lib/main_desktop.dart
 fi
 
 RELEASE_DIR="build/macos/Build/Products/Release"

@@ -1,0 +1,85 @@
+# mxlogger_analyzer 三端桌面产物打包。
+#
+# Flutter 桌面不支持交叉编译，所以这里用 macos / windows / ubuntu 三个 runner
+# 各跑一次 tool/build_desktop.dart —— 与本地打包完全同一条命令，产物命名也一致。
+#
+# 触发：
+#   - 手动：Actions 页面 → build-desktop → Run workflow
+#   - 推 v* tag：产物除了留在 Actions artifacts，还会挂到同名 Release 上
+name: build-desktop
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  # 打 tag 时要往 Release 里上传产物
+  contents: write
+
+defaults:
+  run:
+    # Windows runner 默认 pwsh，统一成 bash 让三端脚本写法一致
+    shell: bash
+    working-directory: mxlogger_analyzer
+
+jobs:
+  package:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # 一端失败不影响另两端出包
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            label: macos
+            # macOS 额外出可拖拽安装的 dmg
+            args: "--dmg"
+          - os: windows-latest
+            label: windows
+            args: ""
+          - os: ubuntu-latest
+            label: linux
+            args: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      # Linux 桌面构建需要 GTK / ninja；macOS（Xcode）与 Windows（MSVC）runner 自带工具链
+      - name: 安装 Linux 桌面构建依赖
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # 与本地 fvm 固定的版本一致（工程要求 Dart ^3.11.1）
+          flutter-version: 3.44.9
+          channel: stable
+          cache: true
+
+      # 桌面壳依赖同仓库的 flutter_mxlogger（pubspec 里是相对路径），
+      # 默认 checkout 路径下这个相对路径正好成立，不用额外拉取
+      - run: flutter pub get
+
+      - name: 打包（tool/build_desktop.dart）
+        run: dart run tool/build_desktop.dart ${{ matrix.args }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mxlogger_analyzer-${{ matrix.label }}
+          # path 相对仓库根目录（defaults.working-directory 只作用于 run 步骤）
+          path: mxlogger_analyzer/dist/*
+          if-no-files-found: error
+
+      - name: 挂到 Release（仅 v* tag）
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$GITHUB_REF_NAME"
+          # 三端并发跑，Release 可能已被另一端建好，建失败就当已存在
+          gh release view "$tag" >/dev/null 2>&1 || \
+            gh release create "$tag" --title "$tag" --generate-notes || true
+          gh release upload "$tag" dist/* --clobber
