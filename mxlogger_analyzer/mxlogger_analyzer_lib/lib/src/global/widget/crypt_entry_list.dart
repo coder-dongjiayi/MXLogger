@@ -12,6 +12,9 @@ import 'package:mxlogger_analyzer_lib/src/global/util/mx_responsive.dart';
 /// 画在勾选框里），故「排序」就是调整尝试顺序，按住把手上下拖动即可。
 /// 可以全部删空：一组都没有就是「不解密」，用「添加一组」按钮再加回来。
 /// 内部持有输入控制器，变更即通过 [onChanged] 回吐整表，由调用方决定何时落库。
+///
+/// 已保存过的组（初始值非空）只读：KEY / IV 掩码显示（如 bx******mk），
+/// 不可再编辑，只能删除后重新添加；新添加的行在本次填写时可输入。
 class CryptEntryList extends StatefulWidget {
   const CryptEntryList({
     super.key,
@@ -39,7 +42,10 @@ class _CryptEntryListState extends State<CryptEntryList> {
   void initState() {
     super.initState();
     // 没有历史配置就一行都不给：空表即「日志未加密」，用户需要时自己加
-    _rows.addAll(widget.initialEntries.map(_EntryRow.new));
+    // 已保存过的组（非空）锁定为只读掩码显示，改参数只能删掉重加
+    _rows.addAll(widget.initialEntries.map(
+      (CryptEntry entry) => _EntryRow(entry, locked: !entry.isEmpty),
+    ));
   }
 
   @override
@@ -171,18 +177,23 @@ class _CryptEntryListState extends State<CryptEntryList> {
   Widget _row(MXTokens tokens, int index, int? order) {
     final _EntryRow row = _rows[index];
     final bool mobile = context.isMobileLayout;
-    final Widget keyField = _CryptInput(
-      label: context.l10n.keyLabel,
-      hint: context.l10n.keyHint,
-      controller: row.keyController,
-      onChanged: (_) => _emit(),
-    );
-    final Widget ivField = _CryptInput(
-      label: context.l10n.ivLabel,
-      hint: context.l10n.ivHint,
-      controller: row.ivController,
-      onChanged: (_) => _emit(),
-    );
+    // 已保存的组不可编辑，掩码显示防止泄露；改参数只能删掉重加
+    final Widget keyField = row.locked
+        ? _MaskedValue(label: context.l10n.keyLabel, value: row.keyController.text)
+        : _CryptInput(
+            label: context.l10n.keyLabel,
+            hint: context.l10n.keyHint,
+            controller: row.keyController,
+            onChanged: (_) => _emit(),
+          );
+    final Widget ivField = row.locked
+        ? _MaskedValue(label: context.l10n.ivLabel, value: row.ivController.text)
+        : _CryptInput(
+            label: context.l10n.ivLabel,
+            hint: context.l10n.ivHint,
+            controller: row.ivController,
+            onChanged: (_) => _emit(),
+          );
     final Widget checkbox = _OrderCheckbox(
       order: order,
       onTap: () => _toggle(index),
@@ -244,7 +255,7 @@ class _CryptEntryListState extends State<CryptEntryList> {
 
 /// 一行的可变状态（输入控制器 + 勾选态）
 class _EntryRow {
-  _EntryRow(CryptEntry entry)
+  _EntryRow(CryptEntry entry, {this.locked = false})
       : keyController = TextEditingController(text: entry.cryptKey),
         ivController = TextEditingController(text: entry.cryptIv),
         enabled = entry.enabled;
@@ -252,6 +263,9 @@ class _EntryRow {
   final TextEditingController keyController;
   final TextEditingController ivController;
   bool enabled;
+
+  /// 已保存过的组只读：KEY / IV 掩码显示、不可编辑（新添加的行为 false）
+  final bool locked;
 
   CryptEntry toEntry() => CryptEntry(
         cryptKey: keyController.text,
@@ -307,6 +321,65 @@ class _OrderCheckbox extends StatelessWidget {
                 : null,
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 已保存组的 KEY / IV 只读展示：与 [_CryptInput] 同款外壳，
+/// 值掩码为「前 2 位 + ****** + 后 2 位」（如 bx******mk），不可编辑。
+class _MaskedValue extends StatelessWidget {
+  const _MaskedValue({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  /// 只露首尾各 2 位，中间固定 6 个星号（不暴露真实长度）；太短就全遮
+  static String _mask(String value) {
+    if (value.isEmpty) return "";
+    if (value.length <= 4) return "*" * value.length;
+    return "${value.substring(0, 2)}******${value.substring(value.length - 2)}";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final MXTokens tokens = MXTokens.of(context);
+    final double fontSize = context.mxInputFontSize(12.5);
+    return Container(
+      padding: const EdgeInsets.only(left: 9),
+      decoration: BoxDecoration(
+        color: tokens.bg,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: tokens.border),
+      ),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              letterSpacing: 0.55,
+              color: tokens.faint,
+              fontFamilyFallback: MXTheme.monoFontFallback,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 8, right: 9),
+              child: Text(
+                _mask(value),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: fontSize,
+                  color: tokens.muted,
+                  fontFamilyFallback: MXTheme.monoFontFallback,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -434,7 +434,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get keyIvDialogTitle => '解密 KEY / IV';
 
   @override
-  String get keyIvNote => '可增删、勾选与拖动排序，勾选编号为解密尝试顺序。';
+  String get keyIvNote => '已保存的组掩码显示、不可编辑，需修改请删除后重新添加；可勾选与拖动排序，勾选编号为解密尝试顺序。';
 
   @override
   String get noLogRecords => '没有可解析的日志文件';

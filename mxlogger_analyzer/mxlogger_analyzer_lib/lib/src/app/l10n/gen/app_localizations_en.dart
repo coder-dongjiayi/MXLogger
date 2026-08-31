@@ -444,7 +444,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keyIvNote =>
-      'Add, remove, check or drag to reorder; the number marks the try order.';
+      'Saved groups are masked and read-only; delete and re-add to change one. Check or drag to reorder; the number marks the try order.';
 
   @override
   String get noLogRecords => 'No parsable log records';

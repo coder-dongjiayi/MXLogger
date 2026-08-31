@@ -905,7 +905,7 @@ abstract class AppLocalizations {
   /// No description provided for @keyIvNote.
   ///
   /// In zh, this message translates to:
-  /// **'可增删、勾选与拖动排序，勾选编号为解密尝试顺序。'**
+  /// **'已保存的组掩码显示、不可编辑，需修改请删除后重新添加；可勾选与拖动排序，勾选编号为解密尝试顺序。'**
   String get keyIvNote;
 
   /// No description provided for @noLogRecords.

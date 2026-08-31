@@ -11,6 +11,7 @@ import 'dart:io';
 /// dart run tool/build_desktop.dart                  # 构建当前平台 → dist/
 /// dart run tool/build_desktop.dart --dmg            # macOS 额外产出 .dmg（拖拽安装）
 /// dart run tool/build_desktop.dart --installer      # Windows 额外产出安装版 setup.exe（需 Inno Setup）
+/// dart run tool/build_desktop.dart --appimage       # Linux 额外产出单文件 AppImage（需 appimagetool）
 /// dart run tool/build_desktop.dart --no-build       # 复用已有构建产物，只重新打包
 /// dart run tool/build_desktop.dart --clean          # 打包前先 flutter clean
 /// dart run tool/build_desktop.dart --out=/tmp/pkg   # 换输出目录
@@ -69,8 +70,11 @@ Future<void> main(List<String> args) async {
         appName: appName,
         version: version,
         installer: options.installer),
-    _Platform.linux =>
-      await _packageLinux(outDir: outDir, appName: appName, version: version),
+    _Platform.linux => await _packageLinux(
+        outDir: outDir,
+        appName: appName,
+        version: version,
+        appimage: options.appimage),
   };
 
   stdout.writeln("");
@@ -89,6 +93,7 @@ const String _usage = """
   --clean             打包前先 flutter clean
   --dmg               macOS 额外产出 .dmg（拖拽到 /Applications 安装）
   --installer         Windows 额外产出安装版 setup.exe（需要 Inno Setup / ISCC.exe）
+  --appimage          Linux 额外产出单文件 AppImage（需要 appimagetool）
   --out=<目录>        产物输出目录（默认 dist）
   --entry=<入口>      Dart 入口文件（默认 lib/main_desktop.dart）""";
 
@@ -122,6 +127,7 @@ class _Options {
     required this.clean,
     required this.dmg,
     required this.installer,
+    required this.appimage,
   });
 
   factory _Options.parse(List<String> args) {
@@ -145,7 +151,7 @@ class _Options {
           "不能指定目标平台：Flutter 桌面产物只能在对应系统上构建，请到那台机器上跑本脚本");
     }
     const Set<String> known = {
-      "out", "entry", "no-build", "clean", "dmg", "installer", "help"
+      "out", "entry", "no-build", "clean", "dmg", "installer", "appimage", "help"
     };
     for (final String key in map.keys) {
       if (!known.contains(key)) throw FormatException("无法识别的参数 --$key");
@@ -158,6 +164,10 @@ class _Options {
     if (installer && !Platform.isWindows) {
       throw const FormatException("--installer 只在 Windows 上可用（依赖 Inno Setup）");
     }
+    final bool appimage = map["appimage"] == "true";
+    if (appimage && !Platform.isLinux) {
+      throw const FormatException("--appimage 只在 Linux 上可用（依赖 appimagetool）");
+    }
     return _Options(
       out: map["out"] ?? "dist",
       entry: map["entry"] ?? "lib/main_desktop.dart",
@@ -165,6 +175,7 @@ class _Options {
       clean: map["clean"] == "true",
       dmg: dmg,
       installer: installer,
+      appimage: appimage,
     );
   }
 
@@ -174,6 +185,7 @@ class _Options {
   final bool clean;
   final bool dmg;
   final bool installer;
+  final bool appimage;
 }
 
 /// macOS：Release 目录下的 .app 打成 zip；`--dmg` 时再出一个可拖拽安装的 dmg。
@@ -359,11 +371,13 @@ String _findIscc() {
   exit(69);
 }
 
-/// Linux：bundle 目录（可执行文件 + lib + data）打成 tar.gz，保留可执行权限。
+/// Linux：bundle 目录（可执行文件 + lib + data）打成 tar.gz，保留可执行权限；
+/// `--appimage` 时再出一个单文件 AppImage（对标 macOS 的 dmg：双击即用，免安装）。
 Future<List<File>> _packageLinux({
   required Directory outDir,
   required String appName,
   required String version,
+  required bool appimage,
 }) async {
   final ({Directory dir, String arch}) bundle = _archBundle(
     (String arch) => "build/linux/$arch/release/bundle",
@@ -381,7 +395,94 @@ Future<List<File>> _packageLinux({
   } finally {
     staging.deleteSync(recursive: true);
   }
-  return [tar];
+
+  final List<File> artifacts = [tar];
+  if (appimage) {
+    artifacts.add(await _buildLinuxAppImage(
+      outDir: outDir,
+      appName: appName,
+      base: base,
+      bundleDir: bundle.dir,
+      arch: bundle.arch,
+    ));
+  }
+  return artifacts;
+}
+
+/// AppImage 的图标：Linux 构建产物里没有图标，直接复用 macOS 图标集里的 256px PNG。
+const String _linuxIconPng =
+    "macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png";
+
+/// 用 appimagetool 把 bundle 打成单文件 AppImage：
+/// AppDir = bundle 内容 + AppRun（入口脚本）+ .desktop + 图标（后三样是 AppImage 的硬性要求）。
+Future<File> _buildLinuxAppImage({
+  required Directory outDir,
+  required String appName,
+  required String base,
+  required Directory bundleDir,
+  required String arch,
+}) async {
+  final String tool = _findAppImageTool();
+  final File icon = File(_linuxIconPng);
+  if (!icon.existsSync()) {
+    stderr.writeln("未找到 AppImage 图标 $_linuxIconPng");
+    exit(66);
+  }
+
+  final File out = File("${outDir.path}/$base.AppImage");
+  if (out.existsSync()) out.deleteSync();
+
+  final Directory staging = Directory.systemTemp.createTempSync("mx_appdir_");
+  try {
+    final String appDir = "${staging.path}/AppDir";
+    await _run("cp", ["-R", bundleDir.path, appDir]);
+
+    // AppRun：双击 AppImage 后的入口，转发到 bundle 里的可执行文件
+    File("$appDir/AppRun").writeAsStringSync('#!/bin/sh\n'
+        'HERE="\$(dirname "\$(readlink -f "\$0")")"\n'
+        'exec "\$HERE/$appName" "\$@"\n');
+    await _run("chmod", ["+x", "$appDir/AppRun"]);
+
+    File("$appDir/$appName.desktop").writeAsStringSync([
+      "[Desktop Entry]",
+      "Type=Application",
+      "Name=$appName",
+      "Exec=$appName",
+      "Icon=$appName",
+      "Categories=Development;Utility;",
+      "",
+    ].join("\n"));
+    icon.copySync("$appDir/$appName.png");
+
+    await _run(tool, [appDir, out.absolute.path], environment: {
+      // appimagetool 要求显式给目标架构（Flutter 的 x64 在 AppImage 语境里叫 x86_64）
+      "ARCH": arch == "x64" ? "x86_64" : "aarch64",
+      // appimagetool 自身也是个 AppImage，CI runner 上没有 FUSE，让它自解压运行
+      "APPIMAGE_EXTRACT_AND_RUN": "1",
+    });
+  } finally {
+    staging.deleteSync(recursive: true);
+  }
+
+  if (!out.existsSync()) {
+    stderr.writeln("appimagetool 执行完但没找到 ${out.path}");
+    exit(70);
+  }
+  return out;
+}
+
+/// 找 appimagetool：只认 PATH。CI 里由 workflow 提前下载，本地按提示装一次即可。
+String _findAppImageTool() {
+  final ProcessResult which = Process.runSync("which", ["appimagetool"]);
+  if (which.exitCode == 0) {
+    final String path = (which.stdout as String).trim();
+    if (path.isNotEmpty) return path;
+  }
+  stderr.writeln("未找到 appimagetool。--appimage 需要先安装：\n"
+      "  sudo curl -L -o /usr/local/bin/appimagetool "
+      "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage\n"
+      "  sudo chmod +x /usr/local/bin/appimagetool");
+  exit(69);
 }
 
 /// Flutter 的桌面产物目录按架构分层（x64 / arm64），取存在的那一个
@@ -435,11 +536,17 @@ String _size(File file) {
 
 /// 子进程直接继承标准输出：flutter build 的进度条原样透传，失败就带着退出码停下。
 /// `shell: false` 用于直接执行带空格路径的 .exe（如 ISCC.exe），绕开 cmd 的引号解析。
-Future<void> _run(String executable, List<String> arguments, {bool? shell}) async {
+Future<void> _run(
+  String executable,
+  List<String> arguments, {
+  bool? shell,
+  Map<String, String>? environment,
+}) async {
   stdout.writeln("\$ $executable ${arguments.join(" ")}");
   final Process process = await Process.start(
     executable,
     arguments,
+    environment: environment,
     // Windows 上 flutter / powershell 是 .bat/.exe，走 shell 才能解析
     runInShell: shell ?? Platform.isWindows,
     mode: ProcessStartMode.inheritStdio,

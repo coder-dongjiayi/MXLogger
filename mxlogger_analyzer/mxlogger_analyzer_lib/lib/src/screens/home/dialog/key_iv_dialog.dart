@@ -11,7 +11,7 @@ import 'package:mxlogger_analyzer_lib/src/global/widget/mx_toast.dart';
 
 /// 管理当前配置的解密 KEY / IV（桌面端 header 钥匙按钮入口）：
 /// 与导入前的「确认解密参数」弹框共用同一张编辑表——可增删、勾选、拖动排序，
-/// 勾选的组按序号依次尝试解密。
+/// 勾选的组按序号依次尝试解密。已保存的组掩码显示且不可编辑，改参数删掉重加。
 /// 「应用」保存参数；数据页已有导入过的文件时顺带用新参数重新解析它们
 /// （重解析的成功 / 失败提示由 MainScreen 统一消费）。取消则不动已保存的参数。
 Future<void> showKeyIvDialog(BuildContext context) {

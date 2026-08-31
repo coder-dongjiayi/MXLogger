@@ -51,22 +51,25 @@ void main() {
     return store;
   }
 
-  testWidgets("弹框代入上次 Key/IV，修改并确认后保存；默认不清空", (WidgetTester tester) async {
+  testWidgets("弹框代入上次 Key/IV：掩码显示且不可编辑，确认后原值保留；默认不清空", (WidgetTester tester) async {
     final MXStore store = await pump(tester);
     await tester.tap(find.text("open"));
     await tester.pumpAndSettle();
 
-    // 代入上次值
-    expect(find.text("OLDKEY0000000000"), findsOneWidget);
-    expect(find.text("OLDIV00000000000"), findsOneWidget);
+    // 已保存的组掩码显示（前 2 位 + ****** + 后 2 位），不露明文
+    expect(find.text("OLDKEY0000000000"), findsNothing);
+    expect(find.text("OLDIV00000000000"), findsNothing);
+    // KEY 与 IV 恰好掩成同一串：OL******00
+    expect(find.text("OL******00"), findsNWidgets(2));
+    // 只读：没有可输入的文本框
+    expect(find.byType(TextField), findsNothing);
 
-    // 修改 KEY 后确认（「开始导入」按钮）
-    await tester.enterText(find.byType(TextField).first, "NEWKEY1234567890");
+    // 确认（「开始导入」按钮）后原值原样保留
     await tester.tap(find.text("开始导入"));
     await tester.pumpAndSettle();
 
     final CryptSettings crypt = store.crypt.value;
-    expect(crypt.cryptKey, "NEWKEY1234567890");
+    expect(crypt.cryptKey, "OLDKEY0000000000");
     expect(crypt.cryptIv, "OLDIV00000000000");
     // 未勾选 → 不清空（合并）
     expect(lastResult?.clearExisting, isFalse);
@@ -97,8 +100,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("2"), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField).at(2), "SECONDKEY0000000");
-    await tester.enterText(find.byType(TextField).at(3), "SECONDIV00000000");
+    // 已保存的第一组是只读掩码，可输入的文本框只有新增行的 KEY / IV 两个
+    expect(find.byType(TextField), findsNWidgets(2));
+    await tester.enterText(find.byType(TextField).at(0), "SECONDKEY0000000");
+    await tester.enterText(find.byType(TextField).at(1), "SECONDIV00000000");
     await tester.tap(find.text("开始导入"));
     await tester.pumpAndSettle();
 
@@ -150,11 +155,15 @@ void main() {
     await tester.tap(find.text("open"));
     await tester.pumpAndSettle();
 
+    // 已保存的组只读，改动只能来自新增行；取消后新增的组不落库
+    await tester.tap(find.text("添加一组"));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, "SHOULDNOTSAVE00");
     await tester.tap(find.text("取消"));
     await tester.pumpAndSettle();
 
     expect(store.crypt.value.cryptKey, "OLDKEY0000000000");
+    expect(store.crypt.value.entries.length, 1);
     expect(dialogReturned, isTrue);
     expect(lastResult, isNull);
   });
