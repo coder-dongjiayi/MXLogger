@@ -38,7 +38,8 @@ jobs:
             args: "--dmg"
           - os: windows-latest
             label: windows
-            args: ""
+            # Windows 除 zip（绿色版）外再出安装版 setup.exe；runner 预装了 Inno Setup
+            args: "--installer"
           - os: ubuntu-latest
             label: linux
             args: ""

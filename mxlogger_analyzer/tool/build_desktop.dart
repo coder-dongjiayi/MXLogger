@@ -10,6 +10,7 @@ import 'dart:io';
 /// ```
 /// dart run tool/build_desktop.dart                  # 构建当前平台 → dist/
 /// dart run tool/build_desktop.dart --dmg            # macOS 额外产出 .dmg（拖拽安装）
+/// dart run tool/build_desktop.dart --installer      # Windows 额外产出安装版 setup.exe（需 Inno Setup）
 /// dart run tool/build_desktop.dart --no-build       # 复用已有构建产物，只重新打包
 /// dart run tool/build_desktop.dart --clean          # 打包前先 flutter clean
 /// dart run tool/build_desktop.dart --out=/tmp/pkg   # 换输出目录
@@ -63,8 +64,11 @@ Future<void> main(List<String> args) async {
   final List<File> artifacts = switch (target) {
     _Platform.macos => await _packageMacos(
         outDir: outDir, appName: appName, version: version, dmg: options.dmg),
-    _Platform.windows =>
-      await _packageWindows(outDir: outDir, appName: appName, version: version),
+    _Platform.windows => await _packageWindows(
+        outDir: outDir,
+        appName: appName,
+        version: version,
+        installer: options.installer),
     _Platform.linux =>
       await _packageLinux(outDir: outDir, appName: appName, version: version),
   };
@@ -84,6 +88,7 @@ const String _usage = """
   --no-build          复用已有构建产物，只重新打包
   --clean             打包前先 flutter clean
   --dmg               macOS 额外产出 .dmg（拖拽到 /Applications 安装）
+  --installer         Windows 额外产出安装版 setup.exe（需要 Inno Setup / ISCC.exe）
   --out=<目录>        产物输出目录（默认 dist）
   --entry=<入口>      Dart 入口文件（默认 lib/main_desktop.dart）""";
 
@@ -116,6 +121,7 @@ class _Options {
     required this.build,
     required this.clean,
     required this.dmg,
+    required this.installer,
   });
 
   factory _Options.parse(List<String> args) {
@@ -138,7 +144,9 @@ class _Options {
       throw const FormatException(
           "不能指定目标平台：Flutter 桌面产物只能在对应系统上构建，请到那台机器上跑本脚本");
     }
-    const Set<String> known = {"out", "entry", "no-build", "clean", "dmg", "help"};
+    const Set<String> known = {
+      "out", "entry", "no-build", "clean", "dmg", "installer", "help"
+    };
     for (final String key in map.keys) {
       if (!known.contains(key)) throw FormatException("无法识别的参数 --$key");
     }
@@ -146,12 +154,17 @@ class _Options {
     if (dmg && !Platform.isMacOS) {
       throw const FormatException("--dmg 只在 macOS 上可用（hdiutil 是 macOS 自带工具）");
     }
+    final bool installer = map["installer"] == "true";
+    if (installer && !Platform.isWindows) {
+      throw const FormatException("--installer 只在 Windows 上可用（依赖 Inno Setup）");
+    }
     return _Options(
       out: map["out"] ?? "dist",
       entry: map["entry"] ?? "lib/main_desktop.dart",
       build: map["no-build"] != "true",
       clean: map["clean"] == "true",
       dmg: dmg,
+      installer: installer,
     );
   }
 
@@ -160,6 +173,7 @@ class _Options {
   final bool build;
   final bool clean;
   final bool dmg;
+  final bool installer;
 }
 
 /// macOS：Release 目录下的 .app 打成 zip；`--dmg` 时再出一个可拖拽安装的 dmg。
@@ -211,11 +225,13 @@ Future<List<File>> _packageMacos({
   return artifacts;
 }
 
-/// Windows：Release 目录（exe + dll + data）整个打成 zip，压缩包内带一层同名目录。
+/// Windows：Release 目录（exe + dll + data）整个打成 zip，压缩包内带一层同名目录；
+/// `--installer` 时再用 Inno Setup 出一个安装版 setup.exe（安装向导 + 开始菜单/桌面快捷方式）。
 Future<List<File>> _packageWindows({
   required Directory outDir,
   required String appName,
   required String version,
+  required bool installer,
 }) async {
   final ({Directory dir, String arch}) release = _archBundle(
     (String arch) => "build/windows/$arch/runner/Release",
@@ -239,7 +255,108 @@ Future<List<File>> _packageWindows({
   } finally {
     staging.deleteSync(recursive: true);
   }
-  return [zip];
+
+  final List<File> artifacts = [zip];
+  if (installer) {
+    artifacts.add(await _buildWindowsInstaller(
+      outDir: outDir,
+      appName: appName,
+      version: version,
+      base: base,
+      releaseDir: release.dir,
+    ));
+  }
+  return artifacts;
+}
+
+/// 固定的 AppId：Inno Setup 用它识别「同一个应用」，覆盖安装/卸载都靠它，不能变。
+const String _innoAppId = "{8C4A2F6E-1D3B-4E7A-9F05-B6C81D2A4E90}";
+
+/// 用 Inno Setup（ISCC.exe）把 Release 目录编译成单文件安装包 `<base>-setup.exe`。
+/// .iss 脚本按 pubspec 的版本号现场生成，不用手工维护一份配置文件。
+Future<File> _buildWindowsInstaller({
+  required Directory outDir,
+  required String appName,
+  required String version,
+  required String base,
+  required Directory releaseDir,
+}) async {
+  final String iscc = _findIscc();
+  final File icon = File("windows/runner/resources/app_icon.ico");
+
+  // Inno 的 {app}/{autopf} 等是它自己的占位符，这里全部来自字面拼接，不与 Dart 插值冲突
+  final String iss = [
+    "[Setup]",
+    // AppId 里的 { 在 .iss 中要写成 {{ 转义
+    "AppId={$_innoAppId",
+    "AppName=$appName",
+    "AppVersion=$version",
+    "DefaultDirName={autopf}\\$appName",
+    "DefaultGroupName=$appName",
+    "UninstallDisplayIcon={app}\\$appName.exe",
+    "OutputDir=${outDir.absolute.path}",
+    "OutputBaseFilename=$base-setup",
+    "Compression=lzma2",
+    "SolidCompression=yes",
+    "ArchitecturesInstallIn64BitMode=x64",
+    "WizardStyle=modern",
+    // 未签名的应用装到用户目录即可，不弹 UAC；想装到 Program Files 的用户可在向导里改
+    "PrivilegesRequired=lowest",
+    "PrivilegesRequiredOverridesAllowed=dialog",
+    if (icon.existsSync()) "SetupIconFile=${icon.absolute.path}",
+    "",
+    "[Tasks]",
+    'Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; '
+        'GroupDescription: "{cm:AdditionalIcons}"',
+    "",
+    "[Files]",
+    'Source: "${releaseDir.absolute.path}\\*"; DestDir: "{app}"; '
+        "Flags: recursesubdirs ignoreversion",
+    "",
+    "[Icons]",
+    'Name: "{group}\\$appName"; Filename: "{app}\\$appName.exe"',
+    'Name: "{autodesktop}\\$appName"; Filename: "{app}\\$appName.exe"; Tasks: desktopicon',
+    "",
+    "[Run]",
+    'Filename: "{app}\\$appName.exe"; Description: "{cm:LaunchProgram,$appName}"; '
+        "Flags: nowait postinstall skipifsilent",
+  ].join("\r\n");
+
+  final Directory staging = Directory.systemTemp.createTempSync("mx_iss_");
+  try {
+    final File script = File("${staging.path}\\installer.iss")
+      ..writeAsStringSync(iss);
+    // ISCC.exe 路径带空格（Program Files），不走 cmd 壳，避免二次引号解析
+    await _run(iscc, [script.path], shell: false);
+  } finally {
+    staging.deleteSync(recursive: true);
+  }
+
+  final File setup = File("${outDir.path}/$base-setup.exe");
+  if (!setup.existsSync()) {
+    stderr.writeln("Inno Setup 执行完但没找到 ${setup.path}");
+    exit(70);
+  }
+  return setup;
+}
+
+/// 找 ISCC.exe：先探常见安装路径，再问 PATH。GitHub Actions 的 windows runner 预装了 Inno Setup。
+String _findIscc() {
+  const List<String> candidates = [
+    r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+    r"C:\Program Files\Inno Setup 6\ISCC.exe",
+  ];
+  for (final String path in candidates) {
+    if (File(path).existsSync()) return path;
+  }
+  final ProcessResult which = Process.runSync("where", ["iscc"], runInShell: true);
+  if (which.exitCode == 0) {
+    final String path = (which.stdout as String).trim().split("\n").first.trim();
+    if (path.isNotEmpty) return path;
+  }
+  stderr.writeln("未找到 Inno Setup（ISCC.exe）。--installer 需要先安装："
+      "winget install JRSoftware.InnoSetup（GitHub Actions 的 windows runner 已预装）");
+  exit(69);
 }
 
 /// Linux：bundle 目录（可执行文件 + lib + data）打成 tar.gz，保留可执行权限。
@@ -316,14 +433,15 @@ String _size(File file) {
   return "${mb.toStringAsFixed(1)} MB";
 }
 
-/// 子进程直接继承标准输出：flutter build 的进度条原样透传，失败就带着退出码停下
-Future<void> _run(String executable, List<String> arguments) async {
+/// 子进程直接继承标准输出：flutter build 的进度条原样透传，失败就带着退出码停下。
+/// `shell: false` 用于直接执行带空格路径的 .exe（如 ISCC.exe），绕开 cmd 的引号解析。
+Future<void> _run(String executable, List<String> arguments, {bool? shell}) async {
   stdout.writeln("\$ $executable ${arguments.join(" ")}");
   final Process process = await Process.start(
     executable,
     arguments,
     // Windows 上 flutter / powershell 是 .bat/.exe，走 shell 才能解析
-    runInShell: Platform.isWindows,
+    runInShell: shell ?? Platform.isWindows,
     mode: ProcessStartMode.inheritStdio,
   );
   final int code = await process.exitCode;
