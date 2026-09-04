@@ -60,7 +60,7 @@
 		BD62872D27EB2BA900362E4C /* MXLoggerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MXLoggerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD62873227EB2BA900362E4C /* MXLoggerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MXLoggerTests.m; sourceTree = "<group>"; };
 		BD62873427EB2BA900362E4C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BD62874B27EB2C1700362E4C /* MXLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MXLogger.h; sourceTree = "<group>"; };
+		BD62874B27EB2C1700362E4C /* MXLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MXLogger.h; path = include/MXLogger/MXLogger.h; sourceTree = "<group>"; };
 		BD62874C27EB2C1700362E4C /* MXLogger.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MXLogger.mm; sourceTree = "<group>"; };
 		BD62875A27EB2F1800362E4C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/iOSSupport/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */

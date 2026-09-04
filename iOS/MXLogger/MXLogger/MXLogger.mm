@@ -5,7 +5,7 @@
 //  Created by 董家祎 on 2022/3/1.
 //
 
-#import "MXLogger.h"
+#import "include/MXLogger/MXLogger.h"
 #include <MXLoggerCore/mxlogger.hpp>
 #include <MXLoggerCore/mxlogger_util.hpp>
 

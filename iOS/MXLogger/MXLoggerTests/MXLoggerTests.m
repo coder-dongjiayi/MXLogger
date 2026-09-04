@@ -8,7 +8,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "MXLogger.h"
+#import <MXLogger/MXLogger.h>
 
 /// 与写入端约定的16字节加密参数
 static NSString *const kCryptKey = @"abcdefg123456789";

@@ -1,0 +1,52 @@
+# 把 Core + iOS/MXLogger 组装成 SwiftPM 包并推送到镜像仓库 coder-dongjiayi/MXLogger-Apple。
+#
+# 触发：
+#   - 推 v* tag：同步到镜像 main 分支，并在镜像上打同名 tag（SwiftPM 按 tag 解析版本）
+#   - 手动：Actions 页面 → publish-spm → Run workflow，只同步 main，不打 tag
+#
+# 依赖 Secret SPM_MIRROR_DEPLOY_KEY：镜像仓库 Deploy key 的私钥（需勾选写权限）。
+# 本地等价操作：scripts/sync_spm_mirror.sh ../MXLogger-Apple，然后在镜像目录 commit / tag / push。
+name: publish-spm
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
+      - name: Checkout mirror repository
+        uses: actions/checkout@v4
+        with:
+          repository: coder-dongjiayi/MXLogger-Apple
+          ssh-key: ${{ secrets.SPM_MIRROR_DEPLOY_KEY }}
+          path: mirror
+          fetch-depth: 0
+
+      - name: Assemble SwiftPM layout into mirror
+        run: scripts/sync_spm_mirror.sh "$GITHUB_WORKSPACE/mirror"
+
+      - name: Commit, tag and push mirror
+        working-directory: mirror
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "mirror already up to date"
+          else
+            git commit -m "Sync from coder-dongjiayi/MXLogger ${GITHUB_REF_NAME} (${GITHUB_SHA::7})"
+          fi
+          git push origin HEAD:main
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            git tag -f "${GITHUB_REF_NAME}"
+            git push -f origin "refs/tags/${GITHUB_REF_NAME}"
+          fi
