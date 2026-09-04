@@ -11,22 +11,34 @@
 #import <UIKit/UIKit.h>
 NS_ASSUME_NONNULL_BEGIN
 
+/// Swift 调用名通过 NS_SWIFT_NAME 单独指定(见各声明尾部)，Objective-C 接口名与行为均未改变:
+///   MXLogger.shared(namespace:) / destroy(namespace:) / logger(forKey:) / select(filePath:cryptKey:iv:)
+///   logger.info(name:message:tag:) / logger.isEnabled / logger.isConsoleEnabled
+/// Swift names are assigned separately via NS_SWIFT_NAME (see the end of each declaration);
+/// the Objective-C selectors and behavior are unchanged:
+///   MXLogger.shared(namespace:) / destroy(namespace:) / logger(forKey:) / select(filePath:cryptKey:iv:)
+///   logger.info(name:message:tag:) / logger.isEnabled / logger.isConsoleEnabled
+
 /// 日志文件存储策略
 /// Log file storage policy
+@class MXLogger;
+
+/// Swift 侧导入为 MXLogger.StoragePolicy，case 为 .daily/.hourly/.weekly/.monthly
+/// Imported into Swift as MXLogger.StoragePolicy with cases .daily/.hourly/.weekly/.monthly
 typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
     /// 按天存储，对应文件名: 2023-01-11_filename.mx
     /// One file per day, e.g. 2023-01-11_filename.mx
-    MXStoragePolicyYYYYMMDD = 0,
+    MXStoragePolicyYYYYMMDD NS_SWIFT_NAME(daily) = 0,
     /// 按小时存储，对应文件名: 2023-01-11-15_filename.mx
     /// One file per hour, e.g. 2023-01-11-15_filename.mx
-    MXStoragePolicyYYYYMMDDHH,
+    MXStoragePolicyYYYYMMDDHH NS_SWIFT_NAME(hourly),
     /// 按周存储，对应文件名: 2023-01-02w_filename.mx（02w 是指一年中的第 2 周）
     /// One file per week, e.g. 2023-01-02w_filename.mx (02w means the 2nd week of the year)
-    MXStoragePolicyYYYYWW,
+    MXStoragePolicyYYYYWW NS_SWIFT_NAME(weekly),
     /// 按月存储，对应文件名: 2023-01_filename.mx
     /// One file per month, e.g. 2023-01_filename.mx
-    MXStoragePolicyYYYYMM,
-};
+    MXStoragePolicyYYYYMM NS_SWIFT_NAME(monthly),
+} NS_SWIFT_NAME(MXLogger.StoragePolicy);
 
 @interface MXLogger : NSObject
 
@@ -35,13 +47,13 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// Create (or fetch) a logger instance: only one instance is created per nameSpace, stored in
 /// the default directory Library/com.mxlog.LoggerCache; call destroyWithNamespace to release it
 /// @param nameSpace 命名空间 / namespace
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace NS_SWIFT_NAME(shared(namespace:));
 
 /// 创建（或获取）logger 对象，并指定日志文件头信息
 /// Create (or fetch) a logger instance with a custom file header
 /// @param nameSpace 命名空间 / namespace
 /// @param fileHeder 日志文件头信息，文件创建时写入 / file header written when the log file is created
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace fileHeader:(nullable NSString*)fileHeder;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace fileHeader:(nullable NSString*)fileHeder NS_SWIFT_NAME(shared(namespace:fileHeader:));
 
 /// 创建（或获取）加密的 logger 对象
 /// Create (or fetch) an encrypted logger instance
@@ -49,7 +61,7 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// @param cryptKey AES-CFB 加密 key / AES-CFB encryption key
 /// @param iv 加密向量，为空时默认与 key 相同 / initialization vector, defaults to the key when nil
 /// @param fileHeder 日志文件头信息 / file header
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv fileHeader:(nullable NSString*)fileHeder;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv fileHeader:(nullable NSString*)fileHeder NS_SWIFT_NAME(shared(namespace:cryptKey:iv:fileHeader:));
 
 /// 创建（或获取）logger 对象（完整参数版本）
 /// Create (or fetch) a logger instance (full-parameter version)
@@ -63,29 +75,29 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 ///                 / AES-CFB-128 encryption key, no encryption when nil;
 ///                 16 bytes: truncated if longer, zero-padded if shorter
 /// @param iv 加密向量，为空时默认与 key 相同 / initialization vector, defaults to the key when nil
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(MXStoragePolicyType)storagePolicy fileName:(nullable NSString*) fileName  fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory  storagePolicy:(MXStoragePolicyType)storagePolicy fileName:(nullable NSString*) fileName  fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv NS_SWIFT_NAME(shared(namespace:diskCacheDirectory:storagePolicy:fileName:fileHeader:cryptKey:iv:));
 
 /// 创建（或获取）logger 对象，并指定存储策略和文件名（不加密）
 /// Create (or fetch) a logger instance with a storage policy and file name (no encryption)
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(MXStoragePolicyType)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(MXStoragePolicyType)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder NS_SWIFT_NAME(shared(namespace:storagePolicy:fileName:fileHeader:));
 
 /// 创建（或获取）logger 对象，并指定存储策略、文件名和加密信息
 /// Create (or fetch) a logger instance with a storage policy, file name and encryption settings
-+(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(MXStoragePolicyType)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
++(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(MXStoragePolicyType)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv NS_SWIFT_NAME(shared(namespace:storagePolicy:fileName:fileHeader:cryptKey:iv:));
 
 
 /// 通过 loggerKey 释放 logger 对象
 /// Release the logger identified by loggerKey
-+(void)destroyWithLoggerKey:(nonnull NSString*)loggerKey;
++(void)destroyWithLoggerKey:(nonnull NSString*)loggerKey NS_SWIFT_NAME(destroy(loggerKey:));
 
 /// 通过 nameSpace 释放 logger 对象（使用默认目录）
 /// Release the logger identified by nameSpace (with the default directory)
 /// @param nameSpace 命名空间 / namespace
-+(void)destroyWithNamespace:(nonnull NSString*)nameSpace;
++(void)destroyWithNamespace:(nonnull NSString*)nameSpace NS_SWIFT_NAME(destroy(namespace:));
 
 /// 通过 nameSpace + 磁盘缓存目录 释放 logger 对象
 /// Release the logger identified by nameSpace + disk-cache directory
-+(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory;
++(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory NS_SWIFT_NAME(destroy(namespace:diskCacheDirectory:));
 
 
 
@@ -143,11 +155,11 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// In Release/Profile builds the console path is stripped at compile time (not even the
 /// check runs), so setting YES prints nothing. To keep it in a Release build (QA/beta),
 /// define MXLOGGER_CONSOLE_ENABLED=1 in the host target's GCC_PREPROCESSOR_DEFINITIONS.
-@property (nonatomic,assign)BOOL consoleEnable;
+@property (nonatomic,assign)BOOL consoleEnable NS_SWIFT_NAME(isConsoleEnabled);
 
 /// 是否启用日志写入，设为 NO 时禁用日志
 /// Whether logging is enabled; set to NO to disable logging
-@property (nonatomic,assign)BOOL enable;
+@property (nonatomic,assign)BOOL enable NS_SWIFT_NAME(isEnabled);
 
 /// 日志文件磁盘缓存目录
 /// Disk-cache directory of the log files
@@ -192,7 +204,7 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// @param diskCacheFilePath 日志文件完整路径 / full path of the log file
 /// @param cryptKey 加密 key，未加密文件传 nil / encryption key, nil for unencrypted files
 /// @param iv 加密向量 / initialization vector
-+(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv;
++(NSArray<NSDictionary*>*)selectWithDiskCacheFilePath:(nonnull NSString*)diskCacheFilePath cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv NS_SWIFT_NAME(select(filePath:cryptKey:iv:));
 
 
 /// 获取存储的日志文件信息
@@ -216,7 +228,7 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 
 /// 通过 loggerKey 返回已存在的 logger 对象，如果不存在返回 nil
 /// Return the existing logger instance for the given loggerKey, or nil if none exists
-+(MXLogger*)valueForLoggerKey:(NSString*)loggerKey;
++(MXLogger*)valueForLoggerKey:(NSString*)loggerKey NS_SWIFT_NAME(logger(forKey:));
 
 /// 清理日志文件：先删除过期文件（最后修改时间超过 maxDiskAge），若总大小仍超过 maxDiskSize
 /// 则从最旧的文件开始继续删除；当前正在写入的文件不会被删除。
@@ -244,28 +256,28 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// @param name 日志名称 / logger name
 /// @param msg 日志信息 / log message
 /// @param tag 标记 / tag
--(NSInteger)logWithLevel:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(NSInteger)logWithLevel:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(log(level:name:message:tag:));
 
 
 /// 输出 debug 等级日志
 /// Write a debug-level log entry
--(NSInteger)debugWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(NSInteger)debugWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(debug(name:message:tag:));
 
 /// 输出 info 等级日志
 /// Write an info-level log entry
--(NSInteger)infoWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(NSInteger)infoWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(info(name:message:tag:));
 
 /// 输出 warn 等级日志
 /// Write a warn-level log entry
--(NSInteger)warnWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(NSInteger)warnWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(warn(name:message:tag:));
 
 /// 输出 error 等级日志
 /// Write an error-level log entry
--(NSInteger)errorWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(NSInteger)errorWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(error(name:message:tag:));
 
 /// 输出 fatal 等级日志
 /// Write a fatal-level log entry
--(NSInteger)fatalWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
+-(NSInteger)fatalWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(fatal(name:message:tag:));
 
 
 // 类方法：使用已存在的 loggerKey 写入日志（适用于模块化场景，无需持有 logger 对象）
@@ -273,23 +285,23 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 
 /// 通过 loggerKey 输出 debug 等级日志
 /// Write a debug-level log entry via loggerKey
-+(NSInteger)debugWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
++(NSInteger)debugWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(debug(loggerKey:name:message:tag:));
 
 /// 通过 loggerKey 输出 info 等级日志
 /// Write an info-level log entry via loggerKey
-+(NSInteger)infoWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
++(NSInteger)infoWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(info(loggerKey:name:message:tag:));
 
 /// 通过 loggerKey 输出 warn 等级日志
 /// Write a warn-level log entry via loggerKey
-+(NSInteger)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
++(NSInteger)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(warn(loggerKey:name:message:tag:));
 
 /// 通过 loggerKey 输出 error 等级日志
 /// Write an error-level log entry via loggerKey
-+(NSInteger)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
++(NSInteger)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(error(loggerKey:name:message:tag:));
 
 /// 通过 loggerKey 输出 fatal 等级日志
 /// Write a fatal-level log entry via loggerKey
-+(NSInteger)fatalWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag;
++(NSInteger)fatalWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(fatal(loggerKey:name:message:tag:));
 
 
 @end
