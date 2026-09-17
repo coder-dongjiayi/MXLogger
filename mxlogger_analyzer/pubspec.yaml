@@ -1,7 +1,7 @@
 name: mxlogger_analyzer
 description: "MXLogger 日志分析工具（桌面壳）：核心功能在 mxlogger_analyzer_lib，可嵌入任意 Flutter app。"
 publish_to: 'none'
-version: 2.0.0+1
+version: 2.0.1
 
 environment:
   sdk: ^3.11.1

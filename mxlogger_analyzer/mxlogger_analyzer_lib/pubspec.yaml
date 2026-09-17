@@ -1,6 +1,6 @@
 name: mxlogger_analyzer_lib
 description: MXLogger 2.0 log analyzer. Import, decrypt, parse and search .mx binary log files; embeddable in-app debugger.
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/coder-dongjiayi/MXLogger
 repository: https://github.com/coder-dongjiayi/MXLogger
 
