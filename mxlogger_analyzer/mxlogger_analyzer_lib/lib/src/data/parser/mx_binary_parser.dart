@@ -41,7 +41,7 @@ class MxParseResult {
   /// 文件首条 name 为 [MxBinaryParser.fileHeaderName] 的记录，msg 即写入端环境信息
   final String? fileHeader;
 
-  /// 解密/反序列化失败的条数
+  /// 解密/反序列化失败的条数；被跳过的一段损坏字节也各计一次
   final int errorCount;
 }
 
@@ -73,6 +73,9 @@ class MxBinaryParser {
   static const String fileHeaderName = "com.djy.mxlogger.fileHeader";
   static const int _sizeofUint32 = 4;
   static const int _aesBlockLength = 16;
+
+  /// 一条记录（flatbuffer 根偏移 + vtable + 表）不可能比这更短，重同步时据此过滤
+  static const int _minItemSize = 24;
 
   /// 纯 CPU 计算，无平台依赖，可放进 isolate 执行。
   ///
@@ -155,7 +158,9 @@ class MxBinaryParser {
     }
     if (starts.isEmpty) return empty;
 
-    final int end = begin;
+    // 长度链在 limit 之前断掉说明后面有损坏字节，这里不解密无法定位下一条
+    // 记录，把剩余部分整个交给末段——parseChunk 会在段内重新同步（见 _resync）
+    final int end = begin + _sizeofUint32 <= limit ? limit : begin;
     final int perChunk = ((end - _sizeofUint32) / count).ceil();
     final List<({int start, int end})> ranges = <({int start, int end})>[];
     int chunkStart = starts.first;
@@ -204,45 +209,132 @@ class MxBinaryParser {
     String? fileHeader;
     int errorCount = 0;
 
+    /// 逐组尝试解出 [start, start+itemSize) 这一条，都解不开返回 null
+    LogRecord? decodeAt(int start, int itemSize) {
+      final Uint8List buffer = binaryData.sublist(start, start + itemSize);
+      if (candidates.isEmpty) return _decode(buffer);
+      final Uint8List padded = _replenishDataByte(buffer);
+      for (int i = 0; i < candidates.length; i++) {
+        final int index = (current + i) % candidates.length;
+        final LogRecord? decoded = _decode(padded, crypt: candidates[index]);
+        if (decoded == null || (strict && !_isPlausible(decoded))) continue;
+        // 本组命中，下一条优先用它
+        current = index;
+        return decoded;
+      }
+      return null;
+    }
+
+    // 上一条被接受的记录的长度前缀位置及它是否被当作了文件头：长度链在它
+    // 后面断掉时，它自己很可能就是被另一段写入覆盖过的那条（见 _resync）
+    int lastAccepted = -1;
+    int lastAcceptedEnd = -1;
+    bool lastAcceptedIsHeader = false;
+
     while (begin + _sizeofUint32 <= limit) {
       final int itemSize = byteData.getUint32(begin, Endian.little);
       final int start = begin + _sizeofUint32;
-      if (itemSize <= 0 || start + itemSize > binaryData.length) break;
+      final bool chainOk = itemSize > 0 && start + itemSize <= binaryData.length;
 
-      final Uint8List buffer = binaryData.sublist(start, start + itemSize);
-      LogRecord? record;
-      if (candidates.isEmpty) {
-        record = _decode(buffer);
-      } else {
-        final Uint8List padded = _replenishDataByte(buffer);
-        for (int i = 0; i < candidates.length; i++) {
-          final int index = (current + i) % candidates.length;
-          final LogRecord? decoded = _decode(padded, crypt: candidates[index]);
-          if (decoded == null || (strict && !_isPlausible(decoded))) continue;
-          record = decoded;
-          // 本组命中，下一条优先用它
-          current = index;
-          break;
+      final LogRecord? record = chainOk ? decodeAt(start, itemSize) : null;
+      if (record != null) {
+        lastAcceptedIsHeader =
+            record.name == fileHeaderName && allowFileHeader && begin == origin;
+        if (lastAcceptedIsHeader) {
+          // 首条且 name 为约定值时视为文件头，不计入日志记录
+          fileHeader = record.msg;
+        } else {
+          records.add(record);
         }
+        lastAccepted = begin;
+        lastAcceptedEnd = start + itemSize;
+        begin = start + itemSize;
+        onProgress?.call(begin > limit ? total : begin - origin, total);
+        continue;
       }
 
-      if (record == null) {
+      // 解不开但长度链还连着（下一条前缀落在合理范围）：多半是这条用了未提供的
+      // Key/IV，按原语义只计一次失败、继续往后走
+      if (chainOk &&
+          _prefixLooksSane(byteData, start + itemSize, limit, binaryData.length)) {
         errorCount = errorCount + 1;
-      } else if (record.name == fileHeaderName &&
-          allowFileHeader &&
-          begin == origin) {
-        // 首条且 name 为约定值时视为文件头，不计入日志记录
-        fileHeader = record.msg;
-      } else {
-        records.add(record);
+        begin = start + itemSize;
+        onProgress?.call(begin > limit ? total : begin - origin, total);
+        continue;
       }
 
-      begin = begin + _sizeofUint32 + itemSize;
-      onProgress?.call(begin > limit ? total : begin - origin, total);
+      // 长度链断了：文件里这一段被改写过（典型场景是两个写入端各自持有偏移、
+      // 先后写进同一个文件），往后逐字节找下一条能解出来的记录。搜索从上一条
+      // 被接受的记录内部开始——覆盖发生在它中间时，它解出来的内容其实已经是
+      // 脏的，新链落在它范围内就把它撤掉
+      final int scanFrom =
+          (lastAccepted >= 0 ? lastAccepted : begin) + _sizeofUint32 + 1;
+      final int next = _resync(binaryData, byteData, scanFrom, limit, decodeAt);
+      errorCount = errorCount + 1;
+      if (next < 0) break;
+      if (lastAccepted >= 0 && next < lastAcceptedEnd) {
+        // 新链起点落在上一条记录内部：上一条是被覆盖的残片，撤掉并计一次失败
+        if (lastAcceptedIsHeader) {
+          fileHeader = null;
+        } else {
+          records.removeLast();
+        }
+        errorCount = errorCount + 1;
+      }
+      lastAccepted = -1;
+      begin = next;
+      onProgress?.call(begin - origin, total);
     }
 
     return MxParseResult(
         records: records, fileHeader: fileHeader, errorCount: errorCount);
+  }
+
+  /// [offset] 处的长度前缀是否落在合理范围内（只看长度，不解密）。
+  /// [offset] 已到或越过 [limit] 说明链正好走完，也算合理。
+  static bool _prefixLooksSane(
+      ByteData byteData, int offset, int limit, int length) {
+    if (offset >= limit) return true;
+    if (offset + _sizeofUint32 > limit) return false;
+    final int itemSize = byteData.getUint32(offset, Endian.little);
+    return _itemSizeSane(itemSize) && offset + _sizeofUint32 + itemSize <= length;
+  }
+
+  /// 一条记录的长度是否可信：flatbuffer 长度不会小于 [_minItemSize]，且按 4 对齐
+  static bool _itemSizeSane(int itemSize) =>
+      itemSize >= _minItemSize && itemSize % 4 == 0;
+
+  /// 从 [from] 起逐字节找下一条完整记录的长度前缀位置，找不到返回 -1。
+  ///
+  /// 为避免在随机字节里误认：长度前缀必须合理（flatbuffer 长度为 4 的倍数、
+  /// 不超出 [limit]），该条要解得出并且像一条日志（见 [_isPlausible]），
+  /// 且它的下一条要么恰好收在 [limit]，要么同样解得出来。
+  static int _resync(
+    Uint8List binaryData,
+    ByteData byteData,
+    int from,
+    int limit,
+    LogRecord? Function(int start, int itemSize) decodeAt,
+  ) {
+    for (int offset = from; offset + _sizeofUint32 + _minItemSize <= limit; offset++) {
+      final int itemSize = byteData.getUint32(offset, Endian.little);
+      final int start = offset + _sizeofUint32;
+      if (!_itemSizeSane(itemSize) || start + itemSize > limit) continue;
+      final LogRecord? record = decodeAt(start, itemSize);
+      if (record == null || !_isPlausible(record)) continue;
+
+      final int nextOffset = start + itemSize;
+      if (nextOffset == limit) return offset;
+      if (nextOffset + _sizeofUint32 > limit) continue;
+      final int nextSize = byteData.getUint32(nextOffset, Endian.little);
+      if (!_itemSizeSane(nextSize) ||
+          nextOffset + _sizeofUint32 + nextSize > limit) {
+        continue;
+      }
+      final LogRecord? next = decodeAt(nextOffset + _sizeofUint32, nextSize);
+      if (next != null && _isPlausible(next)) return offset;
+    }
+    return -1;
   }
 
   static AesCrypt _buildCrypt(MxCryptPair pair) {

@@ -355,4 +355,110 @@ void main() {
     expectSameResult(
         parseInChunks(truncated, 4), MxBinaryParser.parse(truncated));
   });
+
+  // ── 长度链损坏后的重同步 ─────────────────────────────────────────────
+  //
+  // 真实故障：两个写入端各自持有偏移先后写进同一个 .mx，后者从前者某条记录
+  // 中间开始覆盖。文件头 totalSize 指向后者的末尾，但从头顺着长度前缀走会在
+  // 被覆盖的那条之后读到一个乱码长度而断掉——不重同步就只剩前面几十条。
+
+  /// 拼出上述损坏文件：[first] 写完后，[second] 从 first 最后一条记录数据区
+  /// 内 [overlapAt] 字节处开始覆盖写入；totalSize 按 second 的末尾计
+  Uint8List buildOverlappedFile(
+      List<Uint8List> first, List<Uint8List> second, int overlapAt) {
+    final Uint8List base = buildMxFile(first);
+    final int lastStart = base.length - 4 - first.last.length;
+    final int secondStart = lastStart + 4 + overlapAt;
+    final Uint8List tail = buildMxFile(second); // 前 4 字节是它自己的 totalSize
+    final Uint8List tailItems = Uint8List.sublistView(tail, 4);
+    final int fileLength = secondStart + tailItems.length;
+    final Uint8List file = Uint8List(fileLength + 24); // 尾部留些 0，模拟页对齐
+    file.setRange(0, base.length, base);
+    file.setRange(secondStart, fileLength, tailItems);
+    ByteData.sublistView(file).setUint32(0, fileLength - 4, Endian.little);
+    return file;
+  }
+
+  test("重同步：后一段写入覆盖了前一段的末条，两段记录都能解出来（未加密）", () {
+    final List<Uint8List> first = manyItems(6);
+    final List<Uint8List> second = <Uint8List>[
+      for (int i = 0; i < 5; i++)
+        buildRecord(
+          name: "app",
+          tag: "second$i",
+          msg: "second session $i",
+          level: 1,
+          threadId: 7,
+          isMainThread: 1,
+          timestamp: baseTimestamp + 1000 + i,
+        ),
+    ];
+    final Uint8List file = buildOverlappedFile(first, second, 40);
+    final MxParseResult result = MxBinaryParser.parse(file);
+
+    expect(result.fileHeader, contains("iPhone"));
+    // 前段完好的 5 条 + 后段 5 条；被覆盖的第 6 条要么解不开要么被撤掉
+    expect(result.records.length, 10);
+    expect(result.records.map((LogRecord r) => r.tag).take(5),
+        <String>["tag0", "tag1", "tag2", "tag3", "tag4"]);
+    expect(result.records.map((LogRecord r) => r.tag).skip(5),
+        <String>["second0", "second1", "second2", "second3", "second4"]);
+    expect(result.errorCount, greaterThanOrEqualTo(1));
+  });
+
+  test("重同步：AES-CFB 加密文件同样能跨过损坏段", () {
+    const String key = "blxdfblingabckey";
+    const String iv = "blbxdfblingabciv";
+    final List<Uint8List> first = manyItems(6, key: key, iv: iv);
+    final List<Uint8List> second = <Uint8List>[
+      for (int i = 0; i < 5; i++)
+        encryptItem(
+          buildRecord(
+            name: "app",
+            tag: "second$i",
+            msg: "second session $i ${"y" * (i * 13)}",
+            level: 1,
+            threadId: 7,
+            isMainThread: 1,
+            timestamp: baseTimestamp + 1000 + i,
+          ),
+          key,
+          iv,
+        ),
+    ];
+    final Uint8List file = buildOverlappedFile(first, second, 24);
+    const List<MxCryptPair> pairs = [MxCryptPair(key: key, iv: iv)];
+    final MxParseResult whole = MxBinaryParser.parse(file, cryptPairs: pairs);
+
+    expect(whole.fileHeader, contains("iPhone"));
+    expect(whole.records.length, 10);
+    expect(whole.records[4].tag, "tag4");
+    expect(whole.records[5].tag, "second0");
+    expect(whole.records.last.tag, "second4");
+    expect(whole.errorCount, greaterThanOrEqualTo(1));
+
+    // 切段后末段接手损坏尾巴，结果与整体一致
+    for (final int count in <int>[2, 3]) {
+      expectSameResult(parseInChunks(file, count, cryptPairs: pairs), whole);
+    }
+  });
+
+  test("重同步：损坏段之后没有任何完整记录时不臆造数据", () {
+    final Uint8List file = buildMxFile(manyItems(4));
+    // 把最后一条的长度前缀改成乱码，并把 totalSize 抬高到一段全 0 的尾巴之后
+    final int lastStart = file.length - 4 - 60;
+    final Uint8List broken = Uint8List(file.length + 200);
+    broken.setRange(0, file.length, file);
+    ByteData.sublistView(broken)
+      ..setUint32(0, broken.length - 4, Endian.little)
+      ..setUint32(lastStart, 0xdeadbeef, Endian.little);
+
+    final MxParseResult result = MxBinaryParser.parse(broken);
+    expect(result.fileHeader, contains("iPhone"));
+    expect(result.records.length, lessThanOrEqualTo(4));
+    for (final LogRecord record in result.records) {
+      expect(record.tag, startsWith("tag"));
+    }
+    expect(result.errorCount, greaterThanOrEqualTo(1));
+  });
 }
