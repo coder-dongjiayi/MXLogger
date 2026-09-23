@@ -95,7 +95,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     final logger = await MXLogger.initialize(
         nameSpace: kDemoNamespace,
         consoleEnable: kConsoleAvailable,
-        storagePolicy: MXStoragePolicyType.yyyy_MM_dd_HH,
+        storagePolicy: MXStoragePolicyType.yyyyMMddHH,
         fileHeader: fileHeader,
         cryptKey: kDemoCryptKey,
         iv: kDemoIV);

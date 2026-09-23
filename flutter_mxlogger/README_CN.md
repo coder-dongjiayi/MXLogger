@@ -29,7 +29,7 @@ import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
 final logger = await MXLogger.initialize(
   nameSpace: "flutter.mxlogger",
-  storagePolicy: MXStoragePolicyType.yyyy_MM_dd_HH,
+  storagePolicy: MXStoragePolicyType.yyyyMMddHH,
   consoleEnable: true,
   cryptKey: "abcuioqbsdguijlk",   // 16 字节
   iv: "bccuioqbsdguijiv",         // 不传则与 cryptKey 相同
@@ -87,7 +87,7 @@ static Future<MXLogger> initialize({
   required String nameSpace,
   String? directory,
   bool consoleEnable = false,
-  MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
+  MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyyMMdd,
   String? fileName,
   String? fileHeader,
   String? cryptKey,
@@ -122,10 +122,10 @@ MXLogger({required String nameSpace, required String directory, ...})
 
 | 枚举值 | 切分粒度 | 文件名示例 |
 |---|---|---|
-| `yyyy_MM_dd`（默认） | 按天 | `2023-01-11_mxlog.mx` |
-| `yyyy_MM_dd_HH` | 按小时 | `2023-01-11-15_mxlog.mx` |
-| `yyyy_ww` | 按周 | `2023-01-02w_mxlog.mx`（`02w` = 当年第 2 周） |
-| `yyyy_MM` | 按月 | `2023-01_mxlog.mx` |
+| `yyyyMMdd`（默认） | 按天 | `2023-01-11_mxlog.mx` |
+| `yyyyMMddHH` | 按小时 | `2023-01-11-15_mxlog.mx` |
+| `yyyyWw` | 按周 | `2023-01-02w_mxlog.mx`（`02w` = 当年第 2 周） |
+| `yyyyMM` | 按月 | `2023-01_mxlog.mx` |
 
 ## 2.3 写日志
 

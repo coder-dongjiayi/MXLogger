@@ -29,7 +29,7 @@ import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
 final logger = await MXLogger.initialize(
   nameSpace: "flutter.mxlogger",
-  storagePolicy: MXStoragePolicyType.yyyy_MM_dd_HH,
+  storagePolicy: MXStoragePolicyType.yyyyMMddHH,
   consoleEnable: true,
   cryptKey: "abcuioqbsdguijlk",   // 16 bytes
   iv: "bccuioqbsdguijiv",         // defaults to cryptKey when omitted
@@ -85,7 +85,7 @@ static Future<MXLogger> initialize({
   required String nameSpace,
   String? directory,
   bool consoleEnable = false,
-  MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
+  MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyyMMdd,
   String? fileName,
   String? fileHeader,
   String? cryptKey,
@@ -120,10 +120,10 @@ MXLogger({required String nameSpace, required String directory, ...})
 
 | Value | Granularity | Example file name |
 |---|---|---|
-| `yyyy_MM_dd` (default) | per day | `2023-01-11_mxlog.mx` |
-| `yyyy_MM_dd_HH` | per hour | `2023-01-11-15_mxlog.mx` |
-| `yyyy_ww` | per week | `2023-01-02w_mxlog.mx` (`02w` = 2nd week of the year) |
-| `yyyy_MM` | per month | `2023-01_mxlog.mx` |
+| `yyyyMMdd` (default) | per day | `2023-01-11_mxlog.mx` |
+| `yyyyMMddHH` | per hour | `2023-01-11-15_mxlog.mx` |
+| `yyyyWw` | per week | `2023-01-02w_mxlog.mx` (`02w` = 2nd week of the year) |
+| `yyyyMM` | per month | `2023-01_mxlog.mx` |
 
 ## 2.3 Writing logs
 

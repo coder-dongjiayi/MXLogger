@@ -87,7 +87,14 @@ void main() {
       expect(MXStoragePolicyType.values, hasLength(4));
       expect(
           MXStoragePolicyType.values.map((e) => e.name),
-          containsAll(['yyyy_MM_dd', 'yyyy_MM_dd_HH', 'yyyy_ww', 'yyyy_MM']));
+          containsAll(['yyyyMMdd', 'yyyyMMddHH', 'yyyyWw', 'yyyyMM']));
+    });
+
+    test('nativeValue 与原生协议字符串一致', () {
+      expect(MXStoragePolicyType.yyyyMMdd.nativeValue, 'yyyy_MM_dd');
+      expect(MXStoragePolicyType.yyyyMMddHH.nativeValue, 'yyyy_MM_dd_HH');
+      expect(MXStoragePolicyType.yyyyWw.nativeValue, 'yyyy_ww');
+      expect(MXStoragePolicyType.yyyyMM.nativeValue, 'yyyy_MM');
     });
 
     test('MXFileEntity 默认值与时间戳换算', () {
@@ -169,7 +176,7 @@ void main() {
     final day = '${now.year}-${two(now.month)}-${two(now.day)}';
     final month = '${now.year}-${two(now.month)}';
 
-    test('yyyy_MM_dd(默认): 文件名为 日期_fileName.mx, 默认fileName=mxlog', () {
+    test('yyyyMMdd(默认): 文件名为 日期_fileName.mx, 默认fileName=mxlog', () {
       final logger =
           MXLogger(nameSpace: uniqueNs(), directory: newDir('sp1').path);
       logger.debug('hello');
@@ -177,22 +184,22 @@ void main() {
       expect(files.single.name, '${day}_mxlog.mx');
     });
 
-    test('yyyy_MM_dd_HH: 文件名含小时', () {
+    test('yyyyMMddHH: 文件名含小时', () {
       final logger = MXLogger(
           nameSpace: uniqueNs(),
           directory: newDir('sp2').path,
-          storagePolicy: MXStoragePolicyType.yyyy_MM_dd_HH,
+          storagePolicy: MXStoragePolicyType.yyyyMMddHH,
           fileName: 'hourly');
       logger.debug('hello');
       expect(logger.getLogFiles().single.name, startsWith('$day-'));
       expect(logger.getLogFiles().single.name, endsWith('_hourly.mx'));
     });
 
-    test('yyyy_ww: 文件名含周序号w', () {
+    test('yyyyWw: 文件名含周序号w', () {
       final logger = MXLogger(
           nameSpace: uniqueNs(),
           directory: newDir('sp3').path,
-          storagePolicy: MXStoragePolicyType.yyyy_ww);
+          storagePolicy: MXStoragePolicyType.yyyyWw);
       logger.debug('hello');
       final name = logger.getLogFiles().single.name!;
       expect(name, startsWith('${now.year}-'));
@@ -200,11 +207,11 @@ void main() {
       expect(name, endsWith('_mxlog.mx'));
     });
 
-    test('yyyy_MM: 文件名为 年月_fileName.mx', () {
+    test('yyyyMM: 文件名为 年月_fileName.mx', () {
       final logger = MXLogger(
           nameSpace: uniqueNs(),
           directory: newDir('sp4').path,
-          storagePolicy: MXStoragePolicyType.yyyy_MM);
+          storagePolicy: MXStoragePolicyType.yyyyMM);
       logger.debug('hello');
       expect(logger.getLogFiles().single.name, '${month}_mxlog.mx');
     });

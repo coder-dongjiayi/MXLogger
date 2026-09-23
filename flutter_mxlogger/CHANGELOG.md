@@ -1,5 +1,7 @@
 
 # MXLogger for Flutter Change Log
+# v2.1.0/2026-09-23
+* **Breaking** Rename `MXStoragePolicyType` values to lowerCamelCase to satisfy `constant_identifier_names` lint: `yyyy_MM_dd` → `yyyyMMdd`, `yyyy_MM_dd_HH` → `yyyyMMddHH`, `yyyy_ww` → `yyyyWw`, `yyyy_MM` → `yyyyMM`. The strings passed to the native layer are unchanged, so existing log files and file naming are unaffected.
 # v2.0.0/2026-08-22
 Keep up with MXLogger  native lib v2.0.0 on Android/iOS.
 * Fix incorrect week number in `yyyy_ww` file naming when a week spans the new year.

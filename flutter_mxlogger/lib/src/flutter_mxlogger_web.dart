@@ -2,18 +2,21 @@
 
 ///日志文件存储策略
 enum MXStoragePolicyType {
-  yyyy_MM_dd,
-
   /// 按天存储 对应文件名: 2023-01-11_filename.mx
-  yyyy_MM_dd_HH,
+  /// One file per day, e.g. 2023-01-11_filename.mx
+  yyyyMMdd,
 
   /// 按小时存储 对应文件名: 2023-01-11-15_filename.mx
-  yyyy_ww,
+  /// One file per hour, e.g. 2023-01-11-15_filename.mx
+  yyyyMMddHH,
 
   /// 按周存储 对应文件名: 2023-01-02w_filename.mx（02w是指一年中的第2周）
-  yyyy_MM
+  /// One file per week, e.g. 2023-01-02w_filename.mx (02w means the 2nd week of the year)
+  yyyyWw,
 
   /// 按月存储 对应文件名: 2023-01_filename.mx
+  /// One file per month, e.g. 2023-01_filename.mx
+  yyyyMM
 }
 
 class MXFileEntity {
@@ -90,7 +93,7 @@ class MXLogger {
   MXLogger(
       {required String nameSpace,
         required String directory,
-        MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
+        MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyyMMdd,
         String? fileName,
         String? fileHeader,
         String? cryptKey,
@@ -113,7 +116,7 @@ class MXLogger {
   static Future<MXLogger> initialize(
       {required String nameSpace,
         String? directory,
-        MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
+        MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyyMMdd,
         String? fileName,
         String? fileHeader,
         String? cryptKey,

@@ -15,19 +15,37 @@ List<String> _levelNames = ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"];
 enum MXStoragePolicyType {
   /// 按天存储 对应文件名: 2023-01-11_filename.mx
   /// One file per day, e.g. 2023-01-11_filename.mx
-  yyyy_MM_dd,
+  yyyyMMdd,
 
   /// 按小时存储 对应文件名: 2023-01-11-15_filename.mx
   /// One file per hour, e.g. 2023-01-11-15_filename.mx
-  yyyy_MM_dd_HH,
+  yyyyMMddHH,
 
   /// 按周存储 对应文件名: 2023-01-02w_filename.mx（02w是指一年中的第2周）
   /// One file per week, e.g. 2023-01-02w_filename.mx (02w means the 2nd week of the year)
-  yyyy_ww,
+  yyyyWw,
 
   /// 按月存储 对应文件名: 2023-01_filename.mx
   /// One file per month, e.g. 2023-01_filename.mx
-  yyyy_MM
+  yyyyMM
+}
+
+extension MXStoragePolicyTypeNative on MXStoragePolicyType {
+  /// 传给原生层的策略标识，原生协议固定为 yyyy_MM_dd 等下划线形式
+  /// Policy identifier passed to the native layer; the native protocol
+  /// uses the underscore form (e.g. yyyy_MM_dd) and must stay unchanged.
+  String get nativeValue {
+    switch (this) {
+      case MXStoragePolicyType.yyyyMMdd:
+        return "yyyy_MM_dd";
+      case MXStoragePolicyType.yyyyMMddHH:
+        return "yyyy_MM_dd_HH";
+      case MXStoragePolicyType.yyyyWw:
+        return "yyyy_ww";
+      case MXStoragePolicyType.yyyyMM:
+        return "yyyy_MM";
+    }
+  }
 }
 
 /// 日志文件信息实体
@@ -170,7 +188,7 @@ class MXLogger with WidgetsBindingObserver {
       {required String nameSpace,
       required String directory,
       bool consoleEnable = false,
-      MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
+      MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyyMMdd,
       String? fileName,
       String? fileHeader,
       String? cryptKey,
@@ -182,8 +200,7 @@ class MXLogger with WidgetsBindingObserver {
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
     Pointer<Utf8> drPtr = directory.toNativeUtf8();
 
-    String policy =
-        storagePolicy.toString().replaceAll("MXStoragePolicyType.", "");
+    String policy = storagePolicy.nativeValue;
 
     Pointer<Utf8> storagePolicyPtr = policy.toNativeUtf8();
     Pointer<Utf8> fileNamePtr =
@@ -271,7 +288,7 @@ class MXLogger with WidgetsBindingObserver {
       {required String nameSpace,
       String? directory,
       bool consoleEnable = false,
-      MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
+      MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyyMMdd,
       String? fileName,
       String? fileHeader,
       String? cryptKey,
