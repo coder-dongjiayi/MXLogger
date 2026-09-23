@@ -1,17 +1,20 @@
+## 2.0.2
+1. Add the ability to view the surrounding context of a log entry after filtering (anchored positioning).
+2. Add search to the log detail dialog.
 ## 2.0.1
-* 修复某些情况下日志文件无法完全解析的问题
+* Fix an issue where log files could not be fully parsed in some cases.
 ## 2.0.0
-* 移除 `flutter_riverpod` 依赖，改用内置的、基于 Stream 的轻量状态管理(`MXStore` / `MXAsyncStore` / `MXBuilder`)，避免作为插件集成到宿主工程时和宿主的状态管理库产生版本冲突。
-* 破坏性变更：不再导出 `flutter_riverpod`；`MXLoggerButton.onPressed` 由 `ValueChanged<WidgetRef>` 改为 `VoidCallback`。
-* 手机端嵌入不再内置 `share_plus`
+* Remove the `flutter_riverpod` dependency in favor of a built-in, lightweight Stream-based state management (`MXStore` / `MXAsyncStore` / `MXBuilder`), avoiding version conflicts with the host app's state management library when integrated as a plugin.
+* Breaking change: `flutter_riverpod` is no longer exported; `MXLoggerButton.onPressed` changed from `ValueChanged<WidgetRef>` to `VoidCallback`.
+* `share_plus` is no longer bundled when embedded on mobile.
 ## 1.2.2
 * update `share_plus`-> ^11.0.0
 ## 1.2.1
-* update `share_plus` `share_plus` `sqlite3`， support flutter 3.19.5 dart 3.3.0.
+* update `share_plus` `share_plus` `sqlite3`, support flutter 3.19.5 dart 3.3.0.
 ## 1.2.0
-* 重构搜索框,使用dialog弹出。
-* 支持同时搜索多个条件(tag,name,msg)。默认情况下会对关键词进行模糊匹配，在输入框输入tag: 可以单独搜索tag(name msg同理)。
-* 双击搜索结果取消该搜索选项。
+* Refactor the search box to open in a dialog.
+* Support searching multiple fields at once (tag, name, msg). Keywords are fuzzy-matched by default; type `tag:` in the input to search only the tag (same for name and msg).
+* Double-tap a search result to remove that search filter.
 ## 1.1.1
 * Support Android
 ## 1.1.0

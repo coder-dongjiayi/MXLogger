@@ -13,7 +13,7 @@ class LogFilterState {
     this.names = const <String>[],
     this.fromUs,
     this.toUs,
-    this.ascending = true,
+    this.ascending = false,
   });
 
   final String keyword;
@@ -28,7 +28,7 @@ class LogFilterState {
   final int? fromUs;
   final int? toUs;
 
-  /// 按日志时间正序（默认）/ 倒序排列。排序不算过滤条件（不参与 hasFilter），
+  /// 按日志时间倒序（默认，最新的在最前）/ 正序排列。排序不算过滤条件（不参与 hasFilter），
   /// 「全部清除」也不重置它。
   final bool ascending;
 

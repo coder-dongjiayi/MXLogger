@@ -17,6 +17,16 @@ typedef LoadedFile = ({String name, Uint8List bytes});
 /// 数据库连接的获取方式（由 MXStore 注入，测试可给内存/临时目录库）。
 typedef AnalyzerDatabaseLoader = Future<AnalyzerDatabase> Function();
 
+/// 某条日志在**全部日志**（忽略筛选）里的前后上下文。
+/// [older] / [newer] 均按「离锚点由近到远」排列；
+/// [olderCount] 为全局比锚点更早的条数，[total] 为全局总条数，二者用于算「第 N 条 / 共 M 条」。
+typedef LogContext = ({
+  List<LogModel> older,
+  List<LogModel> newer,
+  int olderCount,
+  int total,
+});
+
 /// 日志数据层：解析、替换入库、查询、统计，UI 不直接触达数据库。
 class HomeRepository {
   HomeRepository(this._loadDatabase);
@@ -188,6 +198,44 @@ class HomeRepository {
         final AnalyzerDatabase database = await _database;
         return database.countLogs(filter.toQuery());
       });
+
+  /// 锚点日志前后各 [limit] 条全局上下文（不受当前筛选影响），一次串行查询内取齐，
+  /// 保证条数与位置出自同一份数据快照。
+  ///
+  /// 日志以 timestamp（微秒）为唯一标识，所以「更早 / 更新」直接按 timestamp
+  /// 开区间取，复用 [AnalyzerDatabase.selectLogs] 的时间范围条件即可命中 timestamp 索引。
+  Future<LogContext> fetchContext(LogModel anchor, {int limit = 20}) =>
+      _serial(() async {
+        final AnalyzerDatabase database = await _database;
+        return (
+          older: _olderThan(database, anchor.timestamp, limit),
+          newer: _newerThan(database, anchor.timestamp, limit),
+          olderCount: database.countLogs(LogQuery(toUs: anchor.timestamp - 1)),
+          total: database.count(),
+        );
+      });
+
+  /// 比 [timestampUs] 更早的 [limit] 条（离它最近的在前），供上下文面板继续往前翻。
+  Future<List<LogModel>> fetchOlderThan(int timestampUs, {int limit = 20}) =>
+      _serial(() async => _olderThan(await _database, timestampUs, limit));
+
+  /// 比 [timestampUs] 更新的 [limit] 条（离它最近的在前），供上下文面板继续往后翻。
+  Future<List<LogModel>> fetchNewerThan(int timestampUs, {int limit = 20}) =>
+      _serial(() async => _newerThan(await _database, timestampUs, limit));
+
+  List<LogModel> _olderThan(AnalyzerDatabase database, int timestampUs, int limit) {
+    final List<Map<String, Object?>> rows = database.selectLogs(
+      LogQuery(toUs: timestampUs - 1, ascending: false, limit: limit),
+    );
+    return rows.map(LogModel.fromJson).toList();
+  }
+
+  List<LogModel> _newerThan(AnalyzerDatabase database, int timestampUs, int limit) {
+    final List<Map<String, Object?>> rows = database.selectLogs(
+      LogQuery(fromUs: timestampUs + 1, ascending: true, limit: limit),
+    );
+    return rows.map(LogModel.fromJson).toList();
+  }
 
   Future<Map<int, int>> fetchLevelCounts() => _serial(() async {
         final AnalyzerDatabase database = await _database;

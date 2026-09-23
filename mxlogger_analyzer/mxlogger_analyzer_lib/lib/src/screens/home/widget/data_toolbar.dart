@@ -256,12 +256,12 @@ class DataToolbarState extends MXConsumerState<DataToolbar> {
       badge: filter.timeActive ? "1" : null,
       onTap: () => store.timeOpen.value = !timeOpen,
     );
-    // 时间排序切换：默认正序（旧→新），点一下按时间倒序重排，再点切回
+    // 时间排序切换：默认倒序（新→旧），点一下按时间正序重排，再点切回
     final Widget sortButton = _ToolButton(
       icon: filter.ascending ? Icons.arrow_downward : Icons.arrow_upward,
       label: filter.ascending ? context.l10n.sortAsc : context.l10n.sortDesc,
       showLabel: !mobile,
-      active: !filter.ascending,
+      active: filter.ascending,
       onTap: () => store.filter.update(
           (LogFilterState state) => state.copyWith(ascending: !state.ascending)),
     );

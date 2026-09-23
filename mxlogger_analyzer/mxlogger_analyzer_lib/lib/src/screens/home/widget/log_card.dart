@@ -16,6 +16,7 @@ import 'package:mxlogger_analyzer_lib/src/global/widget/mx_toast.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/model/log_filter_state.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/model/log_model.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/widget/header_dialog.dart';
+import 'package:mxlogger_analyzer_lib/src/screens/home/widget/log_context_dialog.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/widget/log_detail_dialog.dart';
 
 /// 手机端卡片头部的紧凑尺寸：手机屏窄，折叠钮左边距、折叠钮宽度、
@@ -30,9 +31,21 @@ const double _bodyIndentMobile = _headPadXMobile + _foldSizeMobile + _headGapMob
 /// 日志卡片（对齐设计稿）：左侧等级色条 + 头部（折叠钮/等级/时间/@name/#tags/操作）
 /// + 折叠单行预览或展开正文（JSON 树 / 高亮文本）。FATAL 卡片带品红描边光。
 class LogCard extends MXConsumerWidget {
-  const LogCard({super.key, required this.log});
+  const LogCard({
+    super.key,
+    required this.log,
+    this.anchored = false,
+    this.showContext = true,
+  });
 
   final LogModel log;
+
+  /// 作为上下文面板的锚点高亮显示（加粗强调色描边 + 着色底 + 光晕 + 「当前日志」标签），
+  /// 让它在一屏长得都差不多的前后日志里一眼可辨
+  final bool anchored;
+
+  /// 是否提供「查看上下文」操作。上下文面板内的卡片本就处在上下文里，不再嵌套打开
+  final bool showContext;
 
   @override
   Widget build(BuildContext context, MXRef ref) {
@@ -59,14 +72,22 @@ class LogCard extends MXConsumerWidget {
     // 圆角容器内嵌左侧等级色条（非均匀 Border 不能与圆角共存）
     return Container(
       decoration: BoxDecoration(
-        color: tokens.panel,
+        // 锚点卡片底色向强调色偏一点，与周围普通卡片拉开
+        color: anchored
+            ? Color.alphaBlend(tokens.accent.withValues(alpha: 0.10), tokens.panel)
+            : tokens.panel,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: tokens.border),
+        border: anchored
+            ? Border.all(color: tokens.accent, width: 2)
+            : Border.all(color: tokens.border),
         boxShadow: [
           ...tokens.cardShadow,
           // FATAL 品红描边光（对齐设计稿 fatalGlow）
           if (log.level == 4)
             BoxShadow(color: tokens.lvFatal.withValues(alpha: 0.35), spreadRadius: 1),
+          // 上下文锚点：强调色光晕
+          if (anchored)
+            BoxShadow(color: tokens.accent.withValues(alpha: 0.55), spreadRadius: 2, blurRadius: 16),
         ],
       ),
       clipBehavior: Clip.antiAlias,
@@ -102,6 +123,7 @@ class LogCard extends MXConsumerWidget {
                       runSpacing: 6,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
+                        if (anchored) _AnchorBadge(),
                         LevelBadge(level: log.level),
                         Text.rich(
                           TextSpan(children: [
@@ -184,6 +206,15 @@ class LogCard extends MXConsumerWidget {
           ),
           const SizedBox(width: 5),
         ],
+        // 在全部日志（忽略筛选）里查看这条前后发生了什么
+        if (showContext) ...[
+          _RowIconButton(
+            tooltip: context.l10n.contextRowTip,
+            icon: Icons.unfold_more,
+            onTap: () => showLogContextDialog(context, log: log),
+          ),
+          const SizedBox(width: 5),
+        ],
         _RowIconButton(
           tooltip: context.l10n.shareRowTip,
           icon: Icons.share_outlined,
@@ -210,7 +241,7 @@ class LogCard extends MXConsumerWidget {
     );
   }
 
-  /// 手机端「⋮」的操作面板：Header / 分享 / 全屏 / 复制。
+  /// 手机端「⋮」的操作面板：Header / 上下文 / 分享 / 全屏 / 复制。
   /// 走就近 Navigator，嵌入模式下才留在分析器自己的主题与 MXScope 里。
   Future<void> _showActionsSheet(
     BuildContext context,
@@ -258,6 +289,12 @@ class LogCard extends MXConsumerWidget {
                   icon: Icons.info_outline,
                   label: context.l10n.headerRowTip,
                   onTap: () => run(() => showLogHeaderDialog(context, log: log)),
+                ),
+              if (showContext)
+                _SheetAction(
+                  icon: Icons.unfold_more,
+                  label: context.l10n.contextRowTip,
+                  onTap: () => run(() => showLogContextDialog(context, log: log)),
                 ),
               _SheetAction(
                 icon: Icons.share_outlined,
@@ -320,6 +357,38 @@ class LogCard extends MXConsumerWidget {
   }
 }
 
+/// 上下文面板锚点卡片头部的实心「当前日志」标签：强调色底 + 反色字，
+/// 是整张卡片上唯一的实心强调色块，扫一眼就能锁定。
+class _AnchorBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final MXTokens tokens = MXTokens.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: tokens.accent,
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.my_location, size: 11, color: tokens.onAccent),
+          const SizedBox(width: 4),
+          Text(
+            context.l10n.contextAnchorLabel,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: tokens.onAccent,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// 复制单条日志并短暂显示对勾（对齐设计稿 copyLog）。
 Future<void> copyLog(BuildContext context, MXStore store, LogModel log) async {
   await Clipboard.setData(ClipboardData(text: log.toShareText()));
@@ -335,13 +404,25 @@ Future<void> copyLog(BuildContext context, MXStore store, LogModel log) async {
 
 /// 日志正文：JSON → 徽标 + 语法树；纯文本 → 等宽 pre-wrap（带高亮）。
 class LogBody extends StatelessWidget {
-  const LogBody({super.key, required this.log, required this.query, this.fullExpand = false});
+  const LogBody({
+    super.key,
+    required this.log,
+    required this.query,
+    this.fullExpand = false,
+    this.activeMatch = -1,
+    this.activeKey,
+  });
 
   final LogModel log;
   final String query;
 
   /// 全屏弹窗中完整展开 JSON
   final bool fullExpand;
+
+  /// 全屏弹窗内搜索的「当前命中」序号（纯文本按出现顺序，JSON 见 [mxJsonMatchCount]）
+  /// 与其定位 key；-1 为无
+  final int activeMatch;
+  final GlobalKey? activeKey;
 
   @override
   Widget build(BuildContext context) {
@@ -356,7 +437,13 @@ class LogBody extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: tokens.border),
         ),
-        child: JsonTree(value: json, autoDepth: fullExpand ? 99 : 2, query: query),
+        child: JsonTree(
+          value: json,
+          autoDepth: fullExpand ? 99 : 2,
+          query: query,
+          activeMatch: activeMatch,
+          activeKey: activeKey,
+        ),
       );
     }
     return SelectableText.rich(
@@ -371,6 +458,8 @@ class LogBody extends StatelessWidget {
             fontFamilyFallback: MXTheme.monoFontFallback,
           ),
           tokens: tokens,
+          activeIndex: activeMatch,
+          activeKey: activeKey,
         ),
       ),
     );

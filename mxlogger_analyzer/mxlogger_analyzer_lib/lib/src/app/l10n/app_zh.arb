@@ -224,5 +224,54 @@
   "keyIvTip": "管理解密 KEY / IV",
   "keyIvDialogTitle": "解密 KEY / IV",
   "keyIvNote": "已保存的组掩码显示、不可编辑，需修改请删除后重新添加；可勾选与拖动排序，勾选编号为解密尝试顺序。",
-  "noLogRecords": "没有可解析的日志文件"
+  "noLogRecords": "没有可解析的日志文件",
+  "contextRowTip": "查看上下文（全局前后日志）",
+  "contextTitle": "日志上下文",
+  "contextIgnoresFilters": "不受当前筛选影响",
+  "contextPosition": "全局第 {index} 条 / 共 {total} 条",
+  "@contextPosition": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "contextLoadOlder": "加载更早的 {count} 条",
+  "@contextLoadOlder": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contextLoadNewer": "加载更新的 {count} 条",
+  "@contextLoadNewer": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contextNoOlder": "已是最早的日志",
+  "contextNoNewer": "已是最新的日志",
+  "contextLoadFailed": "加载上下文失败，请重试",
+  "retry": "重试",
+  "contextAnchorLabel": "当前日志",
+  "detailSearchHint": "在本条日志中搜索…",
+  "matchPosition": "{index} / {total}",
+  "@matchPosition": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "matchPrevTip": "上一处 (Shift+Enter)",
+  "matchNextTip": "下一处 (Enter)"
 }

@@ -36,12 +36,14 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
-  - flutter_mxlogger (0.0.1):
+  - flutter_mxlogger (2.0.0):
     - Flutter
-    - MXLogger
-  - MXLogger (1.2.14):
-    - MXLoggerCore (= 1.2.14)
-  - MXLoggerCore (1.2.14)
+    - MXLogger (= 2.0.0)
+  - integration_test (0.0.1):
+    - Flutter
+  - MXLogger (2.0.0):
+    - MXLoggerCore (= 2.0.0)
+  - MXLoggerCore (2.0.0)
   - SDWebImage (5.21.7):
     - SDWebImage/Core (= 5.21.7)
   - SDWebImage/Core (5.21.7)
@@ -82,6 +84,7 @@ DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
   - flutter_mxlogger (from `.symlinks/plugins/flutter_mxlogger/ios`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
@@ -105,6 +108,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_mxlogger:
     :path: ".symlinks/plugins/flutter_mxlogger/ios"
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
@@ -118,9 +123,10 @@ SPEC CHECKSUMS:
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_mxlogger: 98d9ba8e3094f5b443a3e5dbe257686e2743c996
-  MXLogger: 9376fe6c60006399d4c18f78def3a8091acb0631
-  MXLoggerCore: 924c7f8dc5b339713b1810af40d1ca06710ac662
+  flutter_mxlogger: 52819056915c4fb7688073735f56659829a5689b
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
+  MXLogger: 91d4a0ae08c5b34ccb1eeda9774fb6c0b66eb203
+  MXLoggerCore: 15583df065339f06f9cf3d2f57b07ef52e717127
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb

@@ -224,5 +224,54 @@
   "keyIvTip": "Manage decryption KEY / IV",
   "keyIvDialogTitle": "Decryption KEY / IV",
   "keyIvNote": "Saved groups are masked and read-only; delete and re-add to change one. Check or drag to reorder; the number marks the try order.",
-  "noLogRecords": "No parsable log records"
+  "noLogRecords": "No parsable log records",
+  "contextRowTip": "View context (surrounding logs)",
+  "contextTitle": "Log context",
+  "contextIgnoresFilters": "Ignores current filters",
+  "contextPosition": "#{index} of {total} overall",
+  "@contextPosition": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "contextLoadOlder": "Load {count} older",
+  "@contextLoadOlder": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contextLoadNewer": "Load {count} newer",
+  "@contextLoadNewer": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contextNoOlder": "No older logs",
+  "contextNoNewer": "No newer logs",
+  "contextLoadFailed": "Failed to load context, please retry",
+  "retry": "Retry",
+  "contextAnchorLabel": "Current",
+  "detailSearchHint": "Search within this log…",
+  "matchPosition": "{index} / {total}",
+  "@matchPosition": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "matchPrevTip": "Previous match (Shift+Enter)",
+  "matchNextTip": "Next match (Enter)"
 }

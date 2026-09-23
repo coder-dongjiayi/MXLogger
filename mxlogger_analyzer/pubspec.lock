@@ -313,7 +313,7 @@ packages:
       path: mxlogger_analyzer_lib
       relative: true
     source: path
-    version: "2.0.0"
+    version: "2.0.2"
   objective_c:
     dependency: transitive
     description:

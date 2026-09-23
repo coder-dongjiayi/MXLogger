@@ -438,4 +438,57 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noLogRecords => '没有可解析的日志文件';
+
+  @override
+  String get contextRowTip => '查看上下文（全局前后日志）';
+
+  @override
+  String get contextTitle => '日志上下文';
+
+  @override
+  String get contextIgnoresFilters => '不受当前筛选影响';
+
+  @override
+  String contextPosition(int index, int total) {
+    return '全局第 $index 条 / 共 $total 条';
+  }
+
+  @override
+  String contextLoadOlder(int count) {
+    return '加载更早的 $count 条';
+  }
+
+  @override
+  String contextLoadNewer(int count) {
+    return '加载更新的 $count 条';
+  }
+
+  @override
+  String get contextNoOlder => '已是最早的日志';
+
+  @override
+  String get contextNoNewer => '已是最新的日志';
+
+  @override
+  String get contextLoadFailed => '加载上下文失败，请重试';
+
+  @override
+  String get retry => '重试';
+
+  @override
+  String get contextAnchorLabel => '当前日志';
+
+  @override
+  String get detailSearchHint => '在本条日志中搜索…';
+
+  @override
+  String matchPosition(int index, int total) {
+    return '$index / $total';
+  }
+
+  @override
+  String get matchPrevTip => '上一处 (Shift+Enter)';
+
+  @override
+  String get matchNextTip => '下一处 (Enter)';
 }

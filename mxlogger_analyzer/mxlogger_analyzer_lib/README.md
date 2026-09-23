@@ -17,9 +17,14 @@ Two ways to use it, one `main` in this repository for each:
 ## Screens
 
 **Data page**: level distribution bar + level chips, search and time filters, syntax-colored JSON
-tree inside each log card, click-to-filter `@name` / `#tag`, and per-record info / share /
-fullscreen / copy. The top-right toggle switches to the light theme (both token sets are fully
+tree inside each log card, click-to-filter `@name` / `#tag`, and per-record info / context /
+share / fullscreen / copy. The top-right toggle switches to the light theme (both token sets are fully
 aligned).
+
+**Context panel**: anchored on one record, it shows the 20 records before and after it in the
+*whole* log (current filters are ignored), with load-more at both ends, the anchor outlined in the
+accent color and the order following the list's sort direction — so after filtering down to a pile
+of ERRORs you can see what happened around one without clearing the filters.
 
 ![Data page](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/desktop_dark.png)
 
@@ -29,7 +34,9 @@ aligned).
 ![First-run wizard](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/desktop_wizard.png)
 
 **Fullscreen detail of a single record** (Esc closes): Name / Tags / time / type plus the complete
-JSON tree, shareable or copyable as a whole.
+JSON tree, shareable or copyable as a whole. An in-record search box highlights every match, shows
+"N / M", jumps between matches with Enter / Shift+Enter (scrolling to the current one) and auto-expands
+collapsed JSON nodes that contain it.
 
 ![Fullscreen log detail](https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/mxlogger_analyzer/mxlogger_analyzer_lib/screenshots/desktop_detail.png)
 
@@ -216,8 +223,8 @@ breakpoints defined in `lib/src/global/util/mx_responsive.dart`
   takes a full row; Key/IV and time-range inputs stack full-width; action buttons grow
   (30→38 / 28→36 / floating 36→44); padding around the log area is squeezed to a minimum (list
   sides 2, card left 6, fold button 16, element gap 5 — on a narrow screen every margin eats body
-  width); log cards are collapsed by default (a single preview line) with the four actions folded
-  into "⋯" that opens a bottom panel; the log detail and Header dialogs go fullscreen (no rounded
+  width); log cards are collapsed by default (a single preview line) with the row actions folded
+  into "⋯" that opens a bottom panel; the log detail, context and Header dialogs go fullscreen (no rounded
   corners, footer buttons split evenly); input font size is unified at 16.
 - **≤480**: the Header scalar grid becomes a single column.
 

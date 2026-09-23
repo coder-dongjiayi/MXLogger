@@ -448,4 +448,57 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noLogRecords => 'No parsable log records';
+
+  @override
+  String get contextRowTip => 'View context (surrounding logs)';
+
+  @override
+  String get contextTitle => 'Log context';
+
+  @override
+  String get contextIgnoresFilters => 'Ignores current filters';
+
+  @override
+  String contextPosition(int index, int total) {
+    return '#$index of $total overall';
+  }
+
+  @override
+  String contextLoadOlder(int count) {
+    return 'Load $count older';
+  }
+
+  @override
+  String contextLoadNewer(int count) {
+    return 'Load $count newer';
+  }
+
+  @override
+  String get contextNoOlder => 'No older logs';
+
+  @override
+  String get contextNoNewer => 'No newer logs';
+
+  @override
+  String get contextLoadFailed => 'Failed to load context, please retry';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get contextAnchorLabel => 'Current';
+
+  @override
+  String get detailSearchHint => 'Search within this log…';
+
+  @override
+  String matchPosition(int index, int total) {
+    return '$index / $total';
+  }
+
+  @override
+  String get matchPrevTip => 'Previous match (Shift+Enter)';
+
+  @override
+  String get matchNextTip => 'Next match (Enter)';
 }

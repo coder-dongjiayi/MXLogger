@@ -913,6 +913,96 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'没有可解析的日志文件'**
   String get noLogRecords;
+
+  /// No description provided for @contextRowTip.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看上下文（全局前后日志）'**
+  String get contextRowTip;
+
+  /// No description provided for @contextTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'日志上下文'**
+  String get contextTitle;
+
+  /// No description provided for @contextIgnoresFilters.
+  ///
+  /// In zh, this message translates to:
+  /// **'不受当前筛选影响'**
+  String get contextIgnoresFilters;
+
+  /// No description provided for @contextPosition.
+  ///
+  /// In zh, this message translates to:
+  /// **'全局第 {index} 条 / 共 {total} 条'**
+  String contextPosition(int index, int total);
+
+  /// No description provided for @contextLoadOlder.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载更早的 {count} 条'**
+  String contextLoadOlder(int count);
+
+  /// No description provided for @contextLoadNewer.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载更新的 {count} 条'**
+  String contextLoadNewer(int count);
+
+  /// No description provided for @contextNoOlder.
+  ///
+  /// In zh, this message translates to:
+  /// **'已是最早的日志'**
+  String get contextNoOlder;
+
+  /// No description provided for @contextNoNewer.
+  ///
+  /// In zh, this message translates to:
+  /// **'已是最新的日志'**
+  String get contextNoNewer;
+
+  /// No description provided for @contextLoadFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载上下文失败，请重试'**
+  String get contextLoadFailed;
+
+  /// No description provided for @retry.
+  ///
+  /// In zh, this message translates to:
+  /// **'重试'**
+  String get retry;
+
+  /// No description provided for @contextAnchorLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前日志'**
+  String get contextAnchorLabel;
+
+  /// No description provided for @detailSearchHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'在本条日志中搜索…'**
+  String get detailSearchHint;
+
+  /// No description provided for @matchPosition.
+  ///
+  /// In zh, this message translates to:
+  /// **'{index} / {total}'**
+  String matchPosition(int index, int total);
+
+  /// No description provided for @matchPrevTip.
+  ///
+  /// In zh, this message translates to:
+  /// **'上一处 (Shift+Enter)'**
+  String get matchPrevTip;
+
+  /// No description provided for @matchNextTip.
+  ///
+  /// In zh, this message translates to:
+  /// **'下一处 (Enter)'**
+  String get matchNextTip;
 }
 
 class _AppLocalizationsDelegate
