@@ -27,8 +27,8 @@
 "home.write.network.subtitle" = "msg 为 JSON 字符串，tag = request";
 "home.write.custom.title" = "logWithLevel: 通用写入";
 "home.write.custom.subtitle" = "自定义等级写入，本例 level = 3 (error)";
-"home.write.key.title" = "通过 loggerKey 写入";
-"home.write.key.subtitle" = "组件化场景：只传 key 不传对象，+infoWithLoggerKey:";
+"home.write.key.title" = "通过 loggerToken 写入";
+"home.write.key.subtitle" = "组件化场景：只传 token 不传对象，+infoWithLoggerToken:";
 
 /* 主页 - 配置 */
 "home.section.config" = "配置";
@@ -67,7 +67,7 @@
 
 /* 主页 - 实例信息 */
 "home.section.info" = "实例信息";
-"home.section.info.footer" = "loggerKey = md5(namespace + directory)，跨模块通过 valueForLoggerKey: 找回实例。";
+"home.section.info.footer" = "loggerToken = md5(namespace + directory)，跨模块通过 valueForLoggerToken: 找回实例。";
 "home.info.path.title" = "缓存目录 diskCachePath";
 "home.info.error.title" = "查看最近错误 errorDesc";
 "home.info.error.subtitle" = "写入返回非 0 时的错误描述";
@@ -81,14 +81,14 @@
 "toast.enable.off" = "日志已禁用";
 "toast.expire.done" = "已清理过期文件";
 "toast.before.done" = "已清理历史文件";
-"toast.key.copied" = "loggerKey 已复制";
+"toast.key.copied" = "loggerToken 已复制";
 "toast.path.copied" = "路径已复制";
 "toast.rebuild.done" = "实例已重建";
 "toast.removeall.done" = "日志已清空";
 "toast.write.success" = "%@ 写入成功";
 "toast.network.success" = "网络日志写入成功";
 "toast.custom.success" = "logWithLevel: 写入成功";
-"toast.key.success" = "loggerKey 写入成功";
+"toast.key.success" = "loggerToken 写入成功";
 "toast.bench.done" = "10 万条写入耗时 %.0f ms";
 "toast.concurrent.running" = "并发写入中…";
 "toast.concurrent.verifying" = "写入完成，正在解析校验…";
@@ -121,7 +121,7 @@
 /* 演示日志内容 */
 "log.msg.fmt" = "这是第 %lu 条 %@ 日志，写于 %@";
 "log.pay.msg" = "订单支付失败: code=-1009 网络连接中断";
-"log.module.msg" = "子组件通过 loggerKey 写入的日志";
+"log.module.msg" = "子组件通过 loggerToken 写入的日志";
 
 /* 文件列表 */
 "filelist.title" = "日志文件";

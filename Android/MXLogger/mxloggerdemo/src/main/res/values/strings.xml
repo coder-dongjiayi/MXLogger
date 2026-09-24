@@ -35,8 +35,8 @@
     <string name="home_write_network_subtitle">msg is a JSON string, tag = request</string>
     <string name="home_write_custom_title">log() Generic Write</string>
     <string name="home_write_custom_subtitle">Write with a custom level, here level = 3 (error)</string>
-    <string name="home_write_key_title">Write via loggerKey</string>
-    <string name="home_write_key_subtitle">Modular scenario: pass only the key, MXLogger.log(loggerKey, …)</string>
+    <string name="home_write_key_title">Write via loggerToken</string>
+    <string name="home_write_key_subtitle">Modular scenario: pass only the token, MXLogger.log(loggerToken, …)</string>
 
     <!-- Home - config section -->
     <string name="home_section_config">Configuration</string>
@@ -72,7 +72,7 @@
 
     <!-- Home - info section -->
     <string name="home_section_info">Instance Info</string>
-    <string name="home_section_info_footer">loggerKey = md5(namespace + directory); other modules can write with just this key.</string>
+    <string name="home_section_info_footer">loggerToken = md5(namespace + directory); other modules can write with just this token.</string>
     <string name="home_info_path_title">Cache Directory (diskCachePath)</string>
     <string name="home_info_error_title">Last Error (errorDesc)</string>
     <string name="home_info_error_subtitle">Error description when a write returns non-zero</string>
@@ -86,14 +86,14 @@
     <string name="toast_enable_off">Logging disabled</string>
     <string name="toast_expire_done">Expired files removed</string>
     <string name="toast_before_done">Historical files removed</string>
-    <string name="toast_key_copied">loggerKey copied</string>
+    <string name="toast_key_copied">loggerToken copied</string>
     <string name="toast_path_copied">Path copied</string>
     <string name="toast_rebuild_done">Instance rebuilt</string>
     <string name="toast_removeall_done">All logs removed</string>
     <string name="toast_write_success">%1$s written</string>
     <string name="toast_network_success">Network log written</string>
     <string name="toast_custom_success">log() written</string>
-    <string name="toast_key_success">Written via loggerKey</string>
+    <string name="toast_key_success">Written via loggerToken</string>
     <string name="toast_bench_done">100,000 logs written in %1$d ms</string>
     <string name="toast_concurrent_running">Writing concurrently…</string>
     <string name="toast_concurrent_verifying">Write finished, verifying…</string>
@@ -124,7 +124,7 @@
     <!-- Demo log content -->
     <string name="log_msg_fmt">Log #%1$d at %2$s level, written at %3$s</string>
     <string name="log_pay_msg">Order payment failed: code=-1009 network connection lost</string>
-    <string name="log_module_msg">Log written by a sub-module via loggerKey</string>
+    <string name="log_module_msg">Log written by a sub-module via loggerToken</string>
 
     <!-- File list -->
     <string name="filelist_title">Log Files</string>

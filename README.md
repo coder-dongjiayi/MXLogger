@@ -199,9 +199,15 @@ debugPrint("logs live in ${logger.diskcachePath}");
 # API reference
 
 Common to all three platforms: a logger is identified by **nameSpace + diskCacheDirectory**, and the
-underlying C++ instance is deduplicated on that pair. The md5 of the pair is the **loggerKey** —
+underlying C++ instance is deduplicated on that pair. The md5 of the pair is the **loggerToken** —
 pass it around a modularized app and write logs through the class methods without holding the logger
 object.
+
+> **Deprecation notice.** `loggerToken` used to be called `loggerKey`, which was easy to confuse with
+> the encryption `cryptKey`. Every `loggerKey` API on iOS / Android / Flutter is still available and
+> forwards to its `loggerToken` counterpart, but it is marked deprecated and **will be removed in a
+> future release**. Please migrate: `loggerKey` → `loggerToken`, `xxxWithLoggerKey:` → `xxxWithLoggerToken:`,
+> `getLoggerKey()` → `getLoggerToken()`, `logLoggerKey` → `logLoggerToken`, `destroyWithLoggerKey` → `destroyWithLoggerToken`.
 
 <a name="ios-api"></a>
 ## iOS — `MXLogger` (Objective-C)
@@ -223,8 +229,9 @@ object.
 | `- initWithNamespace:diskCacheDirectory:storagePolicy:fileName:fileHeader:cryptKey:iv:` | designated initializer |
 | `+ destroyWithNamespace:` | release by nameSpace (default directory) |
 | `+ destroyWithNamespace:diskCacheDirectory:` | release by nameSpace + directory |
-| `+ destroyWithLoggerKey:` | release by loggerKey |
-| `+ valueForLoggerKey:` | fetch an existing logger, `nil` when none |
+| `+ destroyWithLoggerToken:` | release by loggerToken |
+| `+ valueForLoggerToken:` | fetch an existing logger, `nil` when none |
+| `+ destroyWithLoggerKey:` / `+ valueForLoggerKey:` | **deprecated**, forward to the `LoggerToken` versions above; will be removed in a future release |
 
 ### Properties
 
@@ -238,7 +245,8 @@ object.
 | `shouldRemoveExpiredDataWhenEnterBackground` | `BOOL` | auto cleanup on entering background, `YES` by default |
 | `diskCachePath` | `NSString` (readonly) | log directory |
 | `logSize` | `NSUInteger` (readonly) | bytes currently on disk |
-| `loggerKey` | `NSString` (readonly) | md5 of nameSpace + directory |
+| `loggerToken` | `NSString` (readonly) | md5 of nameSpace + directory |
+| `loggerKey` | `NSString` (readonly) | **deprecated**, same value as `loggerToken`; will be removed in a future release |
 
 ### Write
 
@@ -250,11 +258,12 @@ object.
 | `- warnWithName:msg:tag:` | level 2 |
 | `- errorWithName:msg:tag:` | level 3 |
 | `- fatalWithName:msg:tag:` | level 4 |
-| `+ debugWithLoggerKey:name:msg:tag:` | write via loggerKey, no logger object needed |
-| `+ infoWithLoggerKey:name:msg:tag:` | |
-| `+ warnWithLoggerKey:name:msg:tag:` | |
-| `+ errorWithLoggerKey:name:msg:tag:` | |
-| `+ fatalWithLoggerKey:name:msg:tag:` | |
+| `+ debugWithLoggerToken:name:msg:tag:` | write via loggerToken, no logger object needed |
+| `+ infoWithLoggerToken:name:msg:tag:` | |
+| `+ warnWithLoggerToken:name:msg:tag:` | |
+| `+ errorWithLoggerToken:name:msg:tag:` | |
+| `+ fatalWithLoggerToken:name:msg:tag:` | |
+| `+ xxxWithLoggerKey:name:msg:tag:` | **deprecated**, forward to `xxxWithLoggerToken:`; will be removed in a future release |
 
 ### Files, cleanup, parsing
 
@@ -287,7 +296,7 @@ object.
 | `static MXLogger initialize(Context, nameSpace, fileHeader)` | |
 | `static MXLogger initialize(Context, nameSpace, fileHeader, cryptKey, iv)` | |
 | `static void destroy(Context, String nameSpace, String diskCacheDirectory)` | release by nameSpace + directory |
-| `static void destroy(String loggerKey)` | release by loggerKey |
+| `static void destroy(String loggerToken)` | release by loggerToken |
 
 ### Configuration and state
 
@@ -303,7 +312,8 @@ truth (several Java wrappers can share one native instance).
 | `void setMaxDiskSize(long)` / `long getMaxDiskSize()` | max total size in bytes, 0 = unlimited |
 | `long getLogSize()` | bytes currently on disk |
 | `String getDiskCachePath()` | log directory |
-| `String getLoggerKey()` | md5 of nameSpace + directory |
+| `String getLoggerToken()` | md5 of nameSpace + directory |
+| `String getLoggerKey()` | **deprecated**, same value as `getLoggerToken()`; will be removed in a future release |
 | `String getErrorDesc()` | description of the last write failure |
 
 ### Write
@@ -318,7 +328,7 @@ Note the parameter order — **tag comes first** on Android.
 | `int error(String tag, String name, String msg)` | level 3 |
 | `int fatal(String tag, String name, String msg)` | level 4 |
 | `int log(String tag, int level, String name, String msg)` | returns 0 on success, -1 / -2 / -3 on failure |
-| `static int log(String loggerKey, String tag, int level, String name, String msg)` | write via loggerKey |
+| `static int log(String loggerToken, String tag, int level, String name, String msg)` | write via loggerToken |
 
 ### Files, cleanup, parsing
 
@@ -347,7 +357,8 @@ platform default directory during `initialize`.
 | `static Future<MXLogger> initialize({required String nameSpace, String? directory, bool consoleEnable = false, MXStoragePolicyType storagePolicy = yyyy_MM_dd, String? fileName, String? fileHeader, String? cryptKey, String? iv})` | recommended — resolves the platform default directory (iOS `Library/com.mxlog.LoggerCache/nameSpace`, Android `files/com.mxlog.LoggerCache/nameSpace`) |
 | `MXLogger({required String nameSpace, required String directory, ...})` | synchronous constructor, requires an explicit directory |
 | `static void destroy({required String nameSpace, String? directory})` | release; the matching Dart instances are invalidated first (no use-after-free) |
-| `static void destroyWithLoggerKey(String loggerKey)` | release by loggerKey |
+| `static void destroyWithLoggerToken(String loggerToken)` | release by loggerToken |
+| `static void destroyWithLoggerKey(String loggerKey)` | **deprecated**, forwards to `destroyWithLoggerToken`; will be removed in a future release |
 
 ### Getters
 
@@ -357,7 +368,8 @@ platform default directory during `initialize`.
 | `consoleEnable` | `bool` | whether console output is on |
 | `diskcachePath` | `String` | log directory (directory + nameSpace) |
 | `diskcacheErrorPath` | `String` | path of the local error file `error.txt` |
-| `loggerKey` | `String?` | md5 of nameSpace + directory |
+| `loggerToken` | `String?` | md5 of nameSpace + directory |
+| `loggerKey` | `String?` | **deprecated**, same value as `loggerToken`; will be removed in a future release |
 | `logSize` | `int` | bytes currently on disk |
 | `logFiles` | `List<MXFileEntity>` | stored log files |
 | `errorDesc` | `String?` | last native write error, `null` when none |
@@ -376,7 +388,7 @@ platform default directory during `initialize`.
 | `void removeExpireData()` | delete expired files, then the oldest ones while over the size limit |
 | `void removeAll()` | delete every log file |
 | `void removeBeforeAllData()` | delete every file except the one being written |
-| `int getLogSize()` / `String getDiskcachePath()` / `String? getLoggerKey()` / `List<MXFileEntity> getLogFiles()` | method forms of the getters above |
+| `int getLogSize()` / `String getDiskcachePath()` / `String? getLoggerToken()` / `List<MXFileEntity> getLogFiles()` | method forms of the getters above |
 
 ### Write
 
@@ -388,8 +400,9 @@ platform default directory during `initialize`.
 | `int error(String msg, {String? name, String? tag})` | level 3 |
 | `int fatal(String msg, {String? name, String? tag})` | level 4 |
 | `int log(int lvl, String msg, {String? name, String? tag})` | returns 0 on success, -1 expansion / -2 unmap / -3 mmap failed |
-| `static void logLoggerKey(String? loggerKey, int lvl, String msg, {String? name, String? tag})` | write via loggerKey |
-| `static void debugLog(String? loggerKey, String msg, {String? name, String? tag})` | and `infoLog` / `warnLog` / `errorLog` / `fatalLog`, same shape |
+| `static void logLoggerToken(String? loggerToken, int lvl, String msg, {String? name, String? tag})` | write via loggerToken |
+| `static void logLoggerKey(...)` | **deprecated**, forwards to `logLoggerToken`; will be removed in a future release |
+| `static void debugLog(String? loggerToken, String msg, {String? name, String? tag})` | and `infoLog` / `warnLog` / `errorLog` / `fatalLog`, same shape |
 
 ### Recording write failures and parsing
 
@@ -515,7 +528,7 @@ MXLogger roadmap.
 - One logger per **nameSpace + diskCacheDirectory**: repeated initialization returns wrappers around
   the same native instance, so a configuration change through one is visible through all of them.
 - Use a reverse-domain `nameSpace` to keep it unique.
-- In a modularized app, pass the **loggerKey** to sub-modules and write through the class methods —
+- In a modularized app, pass the **loggerToken** to sub-modules and write through the class methods —
   no need to pass the logger object around.
 - `maxDiskAge` / `maxDiskSize` are not enforced on every write: the cleanup runs in
   `removeExpireData` (automatic on entering background on iOS and Flutter; call it yourself on

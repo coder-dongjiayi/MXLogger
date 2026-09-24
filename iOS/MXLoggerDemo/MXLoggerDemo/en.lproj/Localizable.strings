@@ -27,8 +27,8 @@
 "home.write.network.subtitle" = "msg is a JSON string, tag = request";
 "home.write.custom.title" = "logWithLevel: Generic Write";
 "home.write.custom.subtitle" = "Write with a custom level, here level = 3 (error)";
-"home.write.key.title" = "Write via loggerKey";
-"home.write.key.subtitle" = "Modular scenario: pass only the key, +infoWithLoggerKey:";
+"home.write.key.title" = "Write via loggerToken";
+"home.write.key.subtitle" = "Modular scenario: pass only the token, +infoWithLoggerToken:";
 
 /* Home - config section */
 "home.section.config" = "Configuration";
@@ -67,7 +67,7 @@
 
 /* Home - info section */
 "home.section.info" = "Instance Info";
-"home.section.info.footer" = "loggerKey = md5(namespace + directory); retrieve the instance across modules via valueForLoggerKey:.";
+"home.section.info.footer" = "loggerToken = md5(namespace + directory); retrieve the instance across modules via valueForLoggerToken:.";
 "home.info.path.title" = "Cache Directory (diskCachePath)";
 "home.info.error.title" = "Last Error (errorDesc)";
 "home.info.error.subtitle" = "Error description when a write returns non-zero";
@@ -81,14 +81,14 @@
 "toast.enable.off" = "Logging disabled";
 "toast.expire.done" = "Expired files removed";
 "toast.before.done" = "Historical files removed";
-"toast.key.copied" = "loggerKey copied";
+"toast.key.copied" = "loggerToken copied";
 "toast.path.copied" = "Path copied";
 "toast.rebuild.done" = "Instance rebuilt";
 "toast.removeall.done" = "All logs removed";
 "toast.write.success" = "%@ written";
 "toast.network.success" = "Network log written";
 "toast.custom.success" = "logWithLevel: written";
-"toast.key.success" = "Written via loggerKey";
+"toast.key.success" = "Written via loggerToken";
 "toast.bench.done" = "100,000 logs written in %.0f ms";
 "toast.concurrent.running" = "Writing concurrently…";
 "toast.concurrent.verifying" = "Write finished, verifying…";
@@ -121,7 +121,7 @@
 /* Demo log content */
 "log.msg.fmt" = "Log #%lu at %@ level, written at %@";
 "log.pay.msg" = "Order payment failed: code=-1009 network connection lost";
-"log.module.msg" = "Log written by a sub-module via loggerKey";
+"log.module.msg" = "Log written by a sub-module via loggerToken";
 
 /* File list */
 "filelist.title" = "Log Files";

@@ -4,7 +4,7 @@
 //
 //  MXLogger ObjC API 单元测试
 //  覆盖: 初始化/实例复用/写入/解析往返(明文+AES加密)/等级过滤/开关/
-//       文件命名策略/清理策略/loggerKey类方法族/销毁/文件列表/错误信息
+//       文件命名策略/清理策略/loggerToken类方法族/销毁/文件列表/错误信息
 //
 
 #import <XCTest/XCTest.h>
@@ -102,26 +102,26 @@ static NSInteger ns_counter = 0;
 
 #pragma mark - 初始化与属性
 
-- (void)testLoggerKeyIs32CharMd5AndStable {
+- (void)testLoggerTokenIs32CharMd5AndStable {
     NSString *ns = [self uniqueNs];
     NSString *dir = [self newDir:@"key"];
     MXLogger *a = [MXLogger initializeWithNamespace:ns diskCacheDirectory:dir
                                       storagePolicy:MXStoragePolicyYYYYMMDD
                                            fileName:nil fileHeader:nil cryptKey:nil iv:nil];
-    XCTAssertEqual(a.loggerKey.length, (NSUInteger)32);
+    XCTAssertEqual(a.loggerToken.length, (NSUInteger)32);
 
     // 同namespace+directory 复用同一个实例(全局字典)
     MXLogger *b = [MXLogger initializeWithNamespace:ns diskCacheDirectory:dir
                                       storagePolicy:MXStoragePolicyYYYYMMDD
                                            fileName:nil fileHeader:nil cryptKey:nil iv:nil];
-    XCTAssertEqual(a, b, @"同key应返回同一实例");
+    XCTAssertEqual(a, b, @"同token应返回同一实例");
 
     // 不同namespace -> 不同key
     MXLogger *c = [MXLogger initializeWithNamespace:[self uniqueNs] diskCacheDirectory:dir
                                       storagePolicy:MXStoragePolicyYYYYMMDD
                                            fileName:nil fileHeader:nil cryptKey:nil iv:nil];
-    XCTAssertNotEqualObjects(c.loggerKey, a.loggerKey);
-    [MXLogger destroyWithLoggerKey:c.loggerKey];
+    XCTAssertNotEqualObjects(c.loggerToken, a.loggerToken);
+    [MXLogger destroyWithLoggerToken:c.loggerToken];
     [MXLogger destroyWithNamespace:ns diskCacheDirectory:dir];
 }
 
@@ -477,17 +477,17 @@ static NSInteger ns_counter = 0;
     XCTAssertTrue([f[@"last_timestamp"] longLongValue] >= [f[@"create_timestamp"] longLongValue]);
 }
 
-#pragma mark - loggerKey 类方法族
+#pragma mark - loggerToken 类方法族
 
-- (void)testClassMethodsWriteViaLoggerKey {
+- (void)testClassMethodsWriteViaLoggerToken {
     MXLogger *logger = [self newLogger];
-    NSString *key = logger.loggerKey;
+    NSString *token = logger.loggerToken;
 
-    XCTAssertEqual([MXLogger debugWithLoggerKey:key name:@"kn" msg:@"k0" tag:@"kt"], (NSInteger)0);
-    XCTAssertEqual([MXLogger infoWithLoggerKey:key name:nil msg:@"k1" tag:nil], (NSInteger)0);
-    XCTAssertEqual([MXLogger warnWithLoggerKey:key name:nil msg:@"k2" tag:nil], (NSInteger)0);
-    XCTAssertEqual([MXLogger errorWithLoggerKey:key name:nil msg:@"k3" tag:nil], (NSInteger)0);
-    XCTAssertEqual([MXLogger fatalWithLoggerKey:key name:nil msg:@"k4" tag:nil], (NSInteger)0);
+    XCTAssertEqual([MXLogger debugWithLoggerToken:token name:@"kn" msg:@"k0" tag:@"kt"], (NSInteger)0);
+    XCTAssertEqual([MXLogger infoWithLoggerToken:token name:nil msg:@"k1" tag:nil], (NSInteger)0);
+    XCTAssertEqual([MXLogger warnWithLoggerToken:token name:nil msg:@"k2" tag:nil], (NSInteger)0);
+    XCTAssertEqual([MXLogger errorWithLoggerToken:token name:nil msg:@"k3" tag:nil], (NSInteger)0);
+    XCTAssertEqual([MXLogger fatalWithLoggerToken:token name:nil msg:@"k4" tag:nil], (NSInteger)0);
 
     NSArray<NSDictionary *> *records = [self readBack:logger cryptKey:nil iv:nil];
     XCTAssertEqual(records.count, (NSUInteger)5);
@@ -501,19 +501,47 @@ static NSInteger ns_counter = 0;
     XCTAssertEqualObjects(records.firstObject[@"tag"], @"kt");
 }
 
-- (void)testValueForLoggerKey {
+- (void)testValueForLoggerToken {
     MXLogger *logger = [self newLogger];
-    XCTAssertEqual([MXLogger valueForLoggerKey:logger.loggerKey], logger);
-    XCTAssertNil([MXLogger valueForLoggerKey:@"ffffffffffffffffffffffffffffffff"],
-                 @"不存在的key应返回nil");
+    XCTAssertEqual([MXLogger valueForLoggerToken:logger.loggerToken], logger);
+    XCTAssertNil([MXLogger valueForLoggerToken:@"ffffffffffffffffffffffffffffffff"],
+                 @"不存在的token应返回nil");
 }
 
-- (void)testClassMethodWithUnknownLoggerKeyIsSafe {
+- (void)testClassMethodWithUnknownLoggerTokenIsSafe {
     // ObjC对nil发消息安全返回0, 不应崩溃
-    NSInteger r = [MXLogger infoWithLoggerKey:@"ffffffffffffffffffffffffffffffff"
-                                         name:nil msg:@"m" tag:nil];
+    NSInteger r = [MXLogger infoWithLoggerToken:@"ffffffffffffffffffffffffffffffff"
+                                           name:nil msg:@"m" tag:nil];
     XCTAssertEqual(r, (NSInteger)0);
 }
+
+#pragma mark - 已废弃的 loggerKey 系列（保证转发路径可用，移除前不可删）
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+- (void)testDeprecatedLoggerKeyApisForwardToLoggerToken {
+    MXLogger *logger = [self newLogger];
+    NSString *token = logger.loggerToken;
+
+    // 属性值完全相同
+    XCTAssertEqualObjects(logger.loggerKey, token);
+
+    // 查找
+    XCTAssertEqual([MXLogger valueForLoggerKey:token], logger);
+
+    // 五个等级写入
+    XCTAssertEqual([MXLogger debugWithLoggerKey:token name:@"kn" msg:@"k0" tag:@"kt"], (NSInteger)0);
+    XCTAssertEqual([MXLogger infoWithLoggerKey:token name:nil msg:@"k1" tag:nil], (NSInteger)0);
+    XCTAssertEqual([MXLogger warnWithLoggerKey:token name:nil msg:@"k2" tag:nil], (NSInteger)0);
+    XCTAssertEqual([MXLogger errorWithLoggerKey:token name:nil msg:@"k3" tag:nil], (NSInteger)0);
+    XCTAssertEqual([MXLogger fatalWithLoggerKey:token name:nil msg:@"k4" tag:nil], (NSInteger)0);
+    XCTAssertEqual([self readBack:logger cryptKey:nil iv:nil].count, (NSUInteger)5);
+
+    // 销毁
+    [MXLogger destroyWithLoggerKey:token];
+    XCTAssertNil([MXLogger valueForLoggerToken:token], @"旧接口销毁后新接口应查不到实例");
+}
+#pragma clang diagnostic pop
 
 #pragma mark - 销毁与重建
 
@@ -541,25 +569,25 @@ static NSInteger ns_counter = 0;
     [MXLogger destroyWithNamespace:ns diskCacheDirectory:dir];
 }
 
-- (void)testDestroyWithLoggerKey {
+- (void)testDestroyWithLoggerToken {
     NSString *ns = [self uniqueNs];
     NSString *dir = [self newDir:@"destroy2"];
     MXLogger *logger = [MXLogger initializeWithNamespace:ns diskCacheDirectory:dir
                                            storagePolicy:MXStoragePolicyYYYYMMDD
                                                 fileName:nil fileHeader:nil cryptKey:nil iv:nil];
-    NSString *key = logger.loggerKey;
+    NSString *token = logger.loggerToken;
     [logger infoWithName:nil msg:@"x" tag:nil];
 
-    [MXLogger destroyWithLoggerKey:key];
-    XCTAssertNil([MXLogger valueForLoggerKey:key], @"销毁后key应查不到实例");
+    [MXLogger destroyWithLoggerToken:token];
+    XCTAssertNil([MXLogger valueForLoggerToken:token], @"销毁后token应查不到实例");
 
     MXLogger *reopened = [MXLogger initializeWithNamespace:ns diskCacheDirectory:dir
                                              storagePolicy:MXStoragePolicyYYYYMMDD
                                                   fileName:nil fileHeader:nil cryptKey:nil iv:nil];
-    XCTAssertEqualObjects(reopened.loggerKey, key);
+    XCTAssertEqualObjects(reopened.loggerToken, token);
     [reopened infoWithName:nil msg:@"y" tag:nil];
     XCTAssertEqual([self readBack:reopened cryptKey:nil iv:nil].count, (NSUInteger)2);
-    [MXLogger destroyWithLoggerKey:key];
+    [MXLogger destroyWithLoggerToken:token];
 }
 
 #pragma mark - 多实例隔离

@@ -12,11 +12,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /// Swift 调用名通过 NS_SWIFT_NAME 单独指定(见各声明尾部)，Objective-C 接口名与行为均未改变:
-///   MXLogger.shared(namespace:) / destroy(namespace:) / logger(forKey:) / select(filePath:cryptKey:iv:)
+///   MXLogger.shared(namespace:) / destroy(namespace:) / logger(forToken:) / select(filePath:cryptKey:iv:)
 ///   logger.info(name:message:tag:) / logger.isEnabled / logger.isConsoleEnabled
 /// Swift names are assigned separately via NS_SWIFT_NAME (see the end of each declaration);
 /// the Objective-C selectors and behavior are unchanged:
-///   MXLogger.shared(namespace:) / destroy(namespace:) / logger(forKey:) / select(filePath:cryptKey:iv:)
+///   MXLogger.shared(namespace:) / destroy(namespace:) / logger(forToken:) / select(filePath:cryptKey:iv:)
 ///   logger.info(name:message:tag:) / logger.isEnabled / logger.isConsoleEnabled
 
 /// 日志文件存储策略
@@ -86,9 +86,13 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace storagePolicy:(MXStoragePolicyType)storagePolicy fileName:(nullable NSString*) fileName fileHeader:(nullable NSString*)fileHeder cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv NS_SWIFT_NAME(shared(namespace:storagePolicy:fileName:fileHeader:cryptKey:iv:));
 
 
-/// 通过 loggerKey 释放 logger 对象
-/// Release the logger identified by loggerKey
-+(void)destroyWithLoggerKey:(nonnull NSString*)loggerKey NS_SWIFT_NAME(destroy(loggerKey:));
+/// 通过 loggerToken 释放 logger 对象
+/// Release the logger identified by loggerToken
++(void)destroyWithLoggerToken:(nonnull NSString*)loggerToken NS_SWIFT_NAME(destroy(loggerToken:));
+
+/// 已废弃：请改用 destroyWithLoggerToken:，后续版本将移除
+/// Deprecated: use destroyWithLoggerToken: instead; this method will be removed in a future release
++(void)destroyWithLoggerKey:(nonnull NSString*)loggerKey NS_SWIFT_NAME(destroy(loggerKey:)) DEPRECATED_MSG_ATTRIBUTE("destroyWithLoggerKey: 已废弃，后续版本将移除，请改用 destroyWithLoggerToken: / destroyWithLoggerKey: is deprecated and will be removed in a future release, use destroyWithLoggerToken: instead");
 
 /// 通过 nameSpace 释放 logger 对象（使用默认目录）
 /// Release the logger identified by nameSpace (with the default directory)
@@ -191,12 +195,17 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 
 /// nameSpace + diskCacheDirectory 做一次 md5 的值，唯一对应一个 logger 对象，可以通过它操作 logger。
 /// 业务场景：如果是一个大型的 app，你的 app 可能会模块化（组件化），但是你希望所有子模块（子组件）使用在主工程初始化的 log，
-/// 这个时候为了方便解耦业务你不需要传 logger 对象，只需要传入这个 key，然后通过 xxxWithLoggerKey 进行日志写入
+/// 这个时候为了方便解耦业务你不需要传 logger 对象，只需要传入这个 token，然后通过 xxxWithLoggerToken 进行日志写入
 /// The md5 of nameSpace + diskCacheDirectory, uniquely identifying this logger instance.
 /// Use case: in a large modularized app, sub-modules can share the logger initialized in the main
-/// project by passing this key around (instead of the logger object) and writing logs via the
-/// xxxWithLoggerKey class methods — keeping modules decoupled
-@property (nonatomic,copy,nonnull,readonly)NSString* loggerKey;
+/// project by passing this token around (instead of the logger object) and writing logs via the
+/// xxxWithLoggerToken class methods — keeping modules decoupled
+@property (nonatomic,copy,nonnull,readonly)NSString* loggerToken;
+
+/// 已废弃：请改用 loggerToken，后续版本将移除。值与 loggerToken 完全相同
+/// Deprecated: use loggerToken instead; this property will be removed in a future release.
+/// Its value is identical to loggerToken
+@property (nonatomic,copy,nonnull,readonly)NSString* loggerKey DEPRECATED_MSG_ATTRIBUTE("loggerKey 已废弃，后续版本将移除，请改用 loggerToken / loggerKey is deprecated and will be removed in a future release, use loggerToken instead");
 
 /// 解析指定路径的日志文件，返回日志条目列表（按时间倒序）；加密文件需传入对应的 cryptKey 和 iv
 /// Parse the log file at the given path and return its entries (newest first); pass the matching
@@ -226,9 +235,13 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// Return the description of the most recent write error
 -(NSString*)errorDesc;
 
-/// 通过 loggerKey 返回已存在的 logger 对象，如果不存在返回 nil
-/// Return the existing logger instance for the given loggerKey, or nil if none exists
-+(MXLogger*)valueForLoggerKey:(NSString*)loggerKey NS_SWIFT_NAME(logger(forKey:));
+/// 通过 loggerToken 返回已存在的 logger 对象，如果不存在返回 nil
+/// Return the existing logger instance for the given loggerToken, or nil if none exists
++(MXLogger*)valueForLoggerToken:(NSString*)loggerToken NS_SWIFT_NAME(logger(forToken:));
+
+/// 已废弃：请改用 valueForLoggerToken:，后续版本将移除
+/// Deprecated: use valueForLoggerToken: instead; this method will be removed in a future release
++(MXLogger*)valueForLoggerKey:(NSString*)loggerKey NS_SWIFT_NAME(logger(forKey:)) DEPRECATED_MSG_ATTRIBUTE("valueForLoggerKey: 已废弃，后续版本将移除，请改用 valueForLoggerToken: / valueForLoggerKey: is deprecated and will be removed in a future release, use valueForLoggerToken: instead");
 
 /// 清理日志文件：先删除过期文件（最后修改时间超过 maxDiskAge），若总大小仍超过 maxDiskSize
 /// 则从最旧的文件开始继续删除；当前正在写入的文件不会被删除。
@@ -280,28 +293,48 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 -(NSInteger)fatalWithName:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(fatal(name:message:tag:));
 
 
-// 类方法：使用已存在的 loggerKey 写入日志（适用于模块化场景，无需持有 logger 对象）
-// Class methods: write logs via an existing loggerKey (for modularized apps, no logger instance needed)
+// 类方法：使用已存在的 loggerToken 写入日志（适用于模块化场景，无需持有 logger 对象）
+// Class methods: write logs via an existing loggerToken (for modularized apps, no logger instance needed)
 
-/// 通过 loggerKey 输出 debug 等级日志
-/// Write a debug-level log entry via loggerKey
-+(NSInteger)debugWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(debug(loggerKey:name:message:tag:));
+/// 通过 loggerToken 输出 debug 等级日志
+/// Write a debug-level log entry via loggerToken
++(NSInteger)debugWithLoggerToken:(nonnull NSString*)loggerToken name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(debug(loggerToken:name:message:tag:));
 
-/// 通过 loggerKey 输出 info 等级日志
-/// Write an info-level log entry via loggerKey
-+(NSInteger)infoWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(info(loggerKey:name:message:tag:));
+/// 已废弃：请改用 debugWithLoggerToken:name:msg:tag:，后续版本将移除
+/// Deprecated: use debugWithLoggerToken:name:msg:tag: instead; this method will be removed in a future release
++(NSInteger)debugWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(debug(loggerKey:name:message:tag:)) DEPRECATED_MSG_ATTRIBUTE("debugWithLoggerKey:name:msg:tag: 已废弃，后续版本将移除，请改用 debugWithLoggerToken:name:msg:tag: / debugWithLoggerKey:name:msg:tag: is deprecated and will be removed in a future release, use debugWithLoggerToken:name:msg:tag: instead");
 
-/// 通过 loggerKey 输出 warn 等级日志
-/// Write a warn-level log entry via loggerKey
-+(NSInteger)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(warn(loggerKey:name:message:tag:));
+/// 通过 loggerToken 输出 info 等级日志
+/// Write an info-level log entry via loggerToken
++(NSInteger)infoWithLoggerToken:(nonnull NSString*)loggerToken name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(info(loggerToken:name:message:tag:));
 
-/// 通过 loggerKey 输出 error 等级日志
-/// Write an error-level log entry via loggerKey
-+(NSInteger)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(error(loggerKey:name:message:tag:));
+/// 已废弃：请改用 infoWithLoggerToken:name:msg:tag:，后续版本将移除
+/// Deprecated: use infoWithLoggerToken:name:msg:tag: instead; this method will be removed in a future release
++(NSInteger)infoWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(info(loggerKey:name:message:tag:)) DEPRECATED_MSG_ATTRIBUTE("infoWithLoggerKey:name:msg:tag: 已废弃，后续版本将移除，请改用 infoWithLoggerToken:name:msg:tag: / infoWithLoggerKey:name:msg:tag: is deprecated and will be removed in a future release, use infoWithLoggerToken:name:msg:tag: instead");
 
-/// 通过 loggerKey 输出 fatal 等级日志
-/// Write a fatal-level log entry via loggerKey
-+(NSInteger)fatalWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(fatal(loggerKey:name:message:tag:));
+/// 通过 loggerToken 输出 warn 等级日志
+/// Write a warn-level log entry via loggerToken
++(NSInteger)warnWithLoggerToken:(nonnull NSString*)loggerToken name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(warn(loggerToken:name:message:tag:));
+
+/// 已废弃：请改用 warnWithLoggerToken:name:msg:tag:，后续版本将移除
+/// Deprecated: use warnWithLoggerToken:name:msg:tag: instead; this method will be removed in a future release
++(NSInteger)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(warn(loggerKey:name:message:tag:)) DEPRECATED_MSG_ATTRIBUTE("warnWithLoggerKey:name:msg:tag: 已废弃，后续版本将移除，请改用 warnWithLoggerToken:name:msg:tag: / warnWithLoggerKey:name:msg:tag: is deprecated and will be removed in a future release, use warnWithLoggerToken:name:msg:tag: instead");
+
+/// 通过 loggerToken 输出 error 等级日志
+/// Write an error-level log entry via loggerToken
++(NSInteger)errorWithLoggerToken:(nonnull NSString*)loggerToken name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(error(loggerToken:name:message:tag:));
+
+/// 已废弃：请改用 errorWithLoggerToken:name:msg:tag:，后续版本将移除
+/// Deprecated: use errorWithLoggerToken:name:msg:tag: instead; this method will be removed in a future release
++(NSInteger)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(error(loggerKey:name:message:tag:)) DEPRECATED_MSG_ATTRIBUTE("errorWithLoggerKey:name:msg:tag: 已废弃，后续版本将移除，请改用 errorWithLoggerToken:name:msg:tag: / errorWithLoggerKey:name:msg:tag: is deprecated and will be removed in a future release, use errorWithLoggerToken:name:msg:tag: instead");
+
+/// 通过 loggerToken 输出 fatal 等级日志
+/// Write a fatal-level log entry via loggerToken
++(NSInteger)fatalWithLoggerToken:(nonnull NSString*)loggerToken name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(fatal(loggerToken:name:message:tag:));
+
+/// 已废弃：请改用 fatalWithLoggerToken:name:msg:tag:，后续版本将移除
+/// Deprecated: use fatalWithLoggerToken:name:msg:tag: instead; this method will be removed in a future release
++(NSInteger)fatalWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag NS_SWIFT_NAME(fatal(loggerKey:name:message:tag:)) DEPRECATED_MSG_ATTRIBUTE("fatalWithLoggerKey:name:msg:tag: 已废弃，后续版本将移除，请改用 fatalWithLoggerToken:name:msg:tag: / fatalWithLoggerKey:name:msg:tag: is deprecated and will be removed in a future release, use fatalWithLoggerToken:name:msg:tag: instead");
 
 
 @end

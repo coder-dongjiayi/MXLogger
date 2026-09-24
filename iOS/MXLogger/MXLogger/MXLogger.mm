@@ -21,7 +21,7 @@ static NSString * _defaultDiskCacheDirectory;
     
 }
 @property (nonatomic, copy, nonnull, readwrite) NSString *diskCachePath;
-@property (nonatomic,copy,nonnull,readwrite)NSString* loggerKey;
+@property (nonatomic,copy,nonnull,readwrite)NSString* loggerToken;
 
 /// 失效实例：移除通知监听并清空_logger，destroy后残留的实例调用任何方法都会安全短路
 /// Invalidate the instance: remove notification observers and clear _logger so that
@@ -71,9 +71,9 @@ static NSString * _defaultDiskCacheDirectory;
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace{
     [self destroyWithNamespace:nameSpace diskCacheDirectory:[MXLogger defaultDiskCacheDirectory]];
 }
-+(void)destroyWithLoggerKey:(nonnull NSString*)loggerKey{
++(void)destroyWithLoggerToken:(nonnull NSString*)loggerToken{
 
-    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
+    MXLogger * logger = [global_instanceDic objectForKey:loggerToken];
     if (logger != nil) {
         /// 先失效实例再销毁C++对象：业务可能仍持有这个OC实例，
         /// 置空_logger后后续调用会安全短路而不是使用已释放的指针
@@ -81,24 +81,32 @@ static NSString * _defaultDiskCacheDirectory;
         /// may still hold this OC instance, and a cleared _logger makes later calls
         /// short-circuit safely instead of touching freed memory
         [logger mx_invalidate];
-        [global_instanceDic removeObjectForKey:loggerKey];
+        [global_instanceDic removeObjectForKey:loggerToken];
     }
 
-    mx_logger::delete_namespace(loggerKey.UTF8String);
+    mx_logger::delete_namespace(loggerToken.UTF8String);
+}
+/// 已废弃，转发到 destroyWithLoggerToken: / Deprecated, forwards to destroyWithLoggerToken:
++(void)destroyWithLoggerKey:(nonnull NSString*)loggerKey{
+    [self destroyWithLoggerToken:loggerKey];
 }
 +(void)destroyWithNamespace:(nonnull NSString*)nameSpace diskCacheDirectory:(nullable NSString*) directory{
     
-    NSString * key =  [self mapKey:nameSpace diskCacheDirectory:directory];
+    NSString * token =  [self mapKey:nameSpace diskCacheDirectory:directory];
     
-    [self destroyWithLoggerKey:key];
+    [self destroyWithLoggerToken:token];
     
 }
-+(MXLogger*)valueForLoggerKey:(NSString*)loggerKey{
-    if(loggerKey == NULL || [loggerKey isKindOfClass:[NSNull class]]){
++(MXLogger*)valueForLoggerToken:(NSString*)loggerToken{
+    if(loggerToken == NULL || [loggerToken isKindOfClass:[NSNull class]]){
         return NULL;
     }
-    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
+    MXLogger * logger = [global_instanceDic objectForKey:loggerToken];
     return logger;
+}
+/// 已废弃，转发到 valueForLoggerToken: / Deprecated, forwards to valueForLoggerToken:
++(MXLogger*)valueForLoggerKey:(NSString*)loggerKey{
+    return [self valueForLoggerToken:loggerKey];
 }
 
 -(instancetype)initWithNamespace:(nonnull NSString*)nameSpace cryptKey:(nullable NSString*)cryptKey iv:(nullable NSString*)iv fileHeader:(nullable NSString*)fileHeder {
@@ -164,7 +172,7 @@ static NSString * _defaultDiskCacheDirectory;
         
       
         
-        self.loggerKey = [NSString stringWithUTF8String:_logger->logger_token()];
+        self.loggerToken = [NSString stringWithUTF8String:_logger->logger_token()];
         
 
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -180,7 +188,7 @@ static NSString * _defaultDiskCacheDirectory;
         _shouldRemoveExpiredDataWhenEnterBackground = YES;
       
        
-        [global_instanceDic setObject:self forKey:self.loggerKey];
+        [global_instanceDic setObject:self forKey:self.loggerToken];
         
     }
     return self;
@@ -193,12 +201,18 @@ static NSString * _defaultDiskCacheDirectory;
     _logger = nullptr;
 }
 
+/// 已废弃属性，值与 loggerToken 完全相同 / Deprecated property, identical to loggerToken
+- (NSString *)loggerKey
+{
+    return self.loggerToken;
+}
+
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    /// 实例只会在destroyWithLoggerKey移除字典强引用后走到这里，
+    /// 实例只会在destroyWithLoggerToken移除字典强引用后走到这里，
     /// 显式destroy的路径中C++对象已被删除，此调用查不到key时是安全的无操作
-    /// An instance only deallocs after destroyWithLoggerKey drops the dictionary's
+    /// An instance only deallocs after destroyWithLoggerToken drops the dictionary's
     /// strong reference; when the C++ object was already destroyed there, this call
     /// finds no key and is a safe no-op
     mx_logger::delete_namespace(_nameSpace.UTF8String, _directory.UTF8String);
@@ -344,38 +358,50 @@ static NSString * _defaultDiskCacheDirectory;
 }
 
 
++(NSInteger)debugWithLoggerToken:(nonnull NSString*)loggerToken name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    MXLogger * logger = [global_instanceDic objectForKey:loggerToken];
+    return [logger debugWithName:name msg:msg tag:tag];
+}
+/// 已废弃，转发到 debugWithLoggerToken: / Deprecated, forwards to debugWithLoggerToken:
 +(NSInteger)debugWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    
-    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
-  
-    return  [logger debugWithName:name msg:msg tag:tag];
+    return [self debugWithLoggerToken:loggerKey name:name msg:msg tag:tag];
 }
 
++(NSInteger)infoWithLoggerToken:(nonnull NSString*)loggerToken name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    MXLogger * logger = [global_instanceDic objectForKey:loggerToken];
+    return [logger infoWithName:name msg:msg tag:tag];
+}
+/// 已废弃，转发到 infoWithLoggerToken: / Deprecated, forwards to infoWithLoggerToken:
 +(NSInteger)infoWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
-  
-    return  [logger infoWithName:name msg:msg tag:tag];
+    return [self infoWithLoggerToken:loggerKey name:name msg:msg tag:tag];
 }
 
 
-+(NSInteger)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
-  
++(NSInteger)warnWithLoggerToken:(nonnull NSString*)loggerToken name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    MXLogger * logger = [global_instanceDic objectForKey:loggerToken];
     return [logger warnWithName:name msg:msg tag:tag];
 }
-
-+(NSInteger)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-  
-    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
-  
-    return [logger errorWithName:name msg:msg tag:tag];
+/// 已废弃，转发到 warnWithLoggerToken: / Deprecated, forwards to warnWithLoggerToken:
++(NSInteger)warnWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    return [self warnWithLoggerToken:loggerKey name:name msg:msg tag:tag];
 }
 
++(NSInteger)errorWithLoggerToken:(nonnull NSString*)loggerToken name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    MXLogger * logger = [global_instanceDic objectForKey:loggerToken];
+    return [logger errorWithName:name msg:msg tag:tag];
+}
+/// 已废弃，转发到 errorWithLoggerToken: / Deprecated, forwards to errorWithLoggerToken:
++(NSInteger)errorWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    return [self errorWithLoggerToken:loggerKey name:name msg:msg tag:tag];
+}
+
++(NSInteger)fatalWithLoggerToken:(nonnull NSString*)loggerToken name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
+    MXLogger * logger = [global_instanceDic objectForKey:loggerToken];
+    return [logger fatalWithName:name msg:msg tag:tag];
+}
+/// 已废弃，转发到 fatalWithLoggerToken: / Deprecated, forwards to fatalWithLoggerToken:
 +(NSInteger)fatalWithLoggerKey:(nonnull NSString*)loggerKey name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag{
-    
-    MXLogger * logger = [global_instanceDic objectForKey:loggerKey];
-  
-    return  [logger fatalWithName:name msg:msg tag:tag];
+    return [self fatalWithLoggerToken:loggerKey name:name msg:msg tag:tag];
 }
 
 

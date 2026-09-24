@@ -155,26 +155,28 @@ int log(int lvl, String msg, {String? name, String? tag});
 
 ### Class methods (modularized apps)
 
-In a large app split into modules, sub-modules often cannot conveniently hold the logger object. Pass the `loggerKey` string instead:
+In a large app split into modules, sub-modules often cannot conveniently hold the logger object. Pass the `loggerToken` string instead:
 
 ```dart
 // main project
-final key = logger.loggerKey;   // store it, or register it in a global service
+final token = logger.loggerToken;   // store it, or register it in a global service
 
 // sub-module — no dependency on the logger instance
-MXLogger.infoLog(key, "module message", name: "user_module", tag: "login");
+MXLogger.infoLog(token, "module message", name: "user_module", tag: "login");
 ```
 
 ```dart
-static void logLoggerKey(String? loggerKey, int lvl, String msg, {String? name, String? tag});
-static void debugLog(String? loggerKey, String msg, {String? name, String? tag});
-static void infoLog (String? loggerKey, String msg, {String? name, String? tag});
-static void warnLog (String? loggerKey, String msg, {String? name, String? tag});
-static void errorLog(String? loggerKey, String msg, {String? name, String? tag});
-static void fatalLog(String? loggerKey, String msg, {String? name, String? tag});
+static void logLoggerToken(String? loggerToken, int lvl, String msg, {String? name, String? tag});
+static void debugLog(String? loggerToken, String msg, {String? name, String? tag});
+static void infoLog (String? loggerToken, String msg, {String? name, String? tag});
+static void warnLog (String? loggerToken, String msg, {String? name, String? tag});
+static void errorLog(String? loggerToken, String msg, {String? name, String? tag});
+static void fatalLog(String? loggerToken, String msg, {String? name, String? tag});
 ```
 
-The same `loggerKey` works on the native side too — `FlutterMxloggerPlugin.info(...)` on Android, `[FlutterMxloggerPlugin info:...]` on iOS — writing into the same file.
+The same `loggerToken` works on the native side too — `FlutterMxloggerPlugin.info(...)` on Android, `[FlutterMxloggerPlugin info:...]` on iOS — writing into the same file.
+
+> **Deprecation notice.** `loggerToken` used to be called `loggerKey`, which was easy to confuse with the encryption `cryptKey`. `loggerKey`, `getLoggerKey()`, `logLoggerKey(...)` and `destroyWithLoggerKey(...)` still work and forward to the new APIs, but they are marked `@Deprecated` and **will be removed in a future release**. Please migrate to `loggerToken`, `getLoggerToken()`, `logLoggerToken(...)` and `destroyWithLoggerToken(...)`.
 
 ## 2.4 Switches and levels
 
@@ -211,7 +213,8 @@ It is called automatically once when the app enters background; turn that off wi
 |---|---|---|
 | `enable` | `bool` | Whether logging is available |
 | `consoleEnable` | `bool` | Console switch (global) |
-| `loggerKey` | `String?` | Unique key of the underlying logger, for passing between modules |
+| `loggerToken` | `String?` | Unique token of the underlying logger, for passing between modules |
+| `loggerKey` | `String?` | **Deprecated**, same value as `loggerToken`; will be removed in a future release |
 | `diskcachePath` | `String` | Log directory (`directory` + `nameSpace`) |
 | `diskcacheErrorPath` | `String` | Path of the error-record file, i.e. `diskcachePath/error.txt` |
 | `logSize` | `int` | Total size of stored logs in bytes |
@@ -303,7 +306,10 @@ Combined with `logFiles` this is enough to build an in-app log viewer — that i
 
 ```dart
 static void destroy({required String nameSpace, String? directory});
-static void destroyWithLoggerKey(String loggerKey);
+static void destroyWithLoggerToken(String loggerToken);
+
+@Deprecated('use destroyWithLoggerToken')
+static void destroyWithLoggerKey(String loggerKey);   // forwards to destroyWithLoggerToken, will be removed
 ```
 
 Destroying first invalidates the matching Dart instances (removes the lifecycle observer, closes the error-file sink, clears the native handle) and only then releases the native object.
@@ -320,7 +326,7 @@ The `.mx` binary files can be opened with [mxlogger_analyzer](https://github.com
 
 # Example
 
-`example/` is a complete demo app covering every API in this document: initialization, all five levels, loggerKey-based writes for modularized apps, storage policies, the file list, the log viewer and parsing, and destruction.
+`example/` is a complete demo app covering every API in this document: initialization, all five levels, loggerToken-based writes for modularized apps, storage policies, the file list, the log viewer and parsing, and destruction.
 
 ```bash
 cd example && flutter run

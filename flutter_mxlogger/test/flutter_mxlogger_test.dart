@@ -117,21 +117,31 @@ void main() {
 
   // ---------------------------------------------------------------
   group('构造与基础属性', () {
-    test('构造后 loggerKey 为32位md5 且同参数稳定、异参数不同', () {
-      final dir = newDir('key');
+    test('构造后 loggerToken 为32位md5 且同参数稳定、异参数不同', () {
+      final dir = newDir('token');
       final ns = uniqueNs();
       final a = MXLogger(nameSpace: ns, directory: dir.path);
-      expect(a.loggerKey, isNotNull);
-      expect(a.loggerKey!.length, 32);
-      expect(RegExp(r'^[0-9a-f]{32}$').hasMatch(a.loggerKey!), isTrue);
+      expect(a.loggerToken, isNotNull);
+      expect(a.loggerToken!.length, 32);
+      expect(RegExp(r'^[0-9a-f]{32}$').hasMatch(a.loggerToken!), isTrue);
+      expect(a.getLoggerToken(), a.loggerToken);
 
-      // 相同 namespace+directory -> 相同key
+      // 相同 namespace+directory -> 相同token
       final b = MXLogger(nameSpace: ns, directory: dir.path);
-      expect(b.loggerKey, a.loggerKey);
+      expect(b.loggerToken, a.loggerToken);
 
-      // 不同 namespace -> 不同key
+      // 不同 namespace -> 不同token
       final c = MXLogger(nameSpace: uniqueNs(), directory: dir.path);
-      expect(c.loggerKey, isNot(a.loggerKey));
+      expect(c.loggerToken, isNot(a.loggerToken));
+    });
+
+    test('已废弃的 loggerKey/getLoggerKey 与 loggerToken 返回同一个值', () {
+      final logger =
+          MXLogger(nameSpace: uniqueNs(), directory: newDir('depkey').path);
+      // ignore: deprecated_member_use_from_same_package
+      expect(logger.loggerKey, logger.loggerToken);
+      // ignore: deprecated_member_use_from_same_package
+      expect(logger.getLoggerKey(), logger.loggerToken);
     });
 
     test('diskcachePath = directory + nameSpace, diskcacheErrorPath 拼接正确',
@@ -551,17 +561,17 @@ void main() {
   });
 
   // ---------------------------------------------------------------
-  group('loggerKey 类方法族', () {
-    test('logLoggerKey/debugLog..fatalLog 通过key写入同一日志', () {
+  group('loggerToken 类方法族', () {
+    test('logLoggerToken/debugLog..fatalLog 通过token写入同一日志', () {
       final logger =
-          MXLogger(nameSpace: uniqueNs(), directory: newDir('lk').path);
-      final key = logger.loggerKey!;
+          MXLogger(nameSpace: uniqueNs(), directory: newDir('lt').path);
+      final token = logger.loggerToken!;
 
-      MXLogger.debugLog(key, 'k0', name: 'kn', tag: 'kt');
-      MXLogger.infoLog(key, 'k1');
-      MXLogger.warnLog(key, 'k2');
-      MXLogger.errorLog(key, 'k3');
-      MXLogger.fatalLog(key, 'k4');
+      MXLogger.debugLog(token, 'k0', name: 'kn', tag: 'kt');
+      MXLogger.infoLog(token, 'k1');
+      MXLogger.warnLog(token, 'k2');
+      MXLogger.errorLog(token, 'k3');
+      MXLogger.fatalLog(token, 'k4');
 
       final records = readBack(logger);
       expect(records, hasLength(5));
@@ -571,6 +581,26 @@ void main() {
       }
       expect(records.first['name'], 'kn');
       expect(records.first['tag'], 'kt');
+    });
+
+    test('logLoggerToken 直接调用可写入', () {
+      final logger =
+          MXLogger(nameSpace: uniqueNs(), directory: newDir('lt2').path);
+      MXLogger.logLoggerToken(logger.loggerToken, 2, 'raw', name: 'n', tag: 't');
+      final records = readBack(logger);
+      expect(records, hasLength(1));
+      expect(records.first['level'], '2');
+      expect(records.first['msg'], 'raw');
+    });
+
+    test('已废弃的 logLoggerKey 转发到 logLoggerToken', () {
+      final logger =
+          MXLogger(nameSpace: uniqueNs(), directory: newDir('dlk').path);
+      // ignore: deprecated_member_use_from_same_package
+      MXLogger.logLoggerKey(logger.loggerToken, 1, 'via-deprecated');
+      final records = readBack(logger);
+      expect(records, hasLength(1));
+      expect(records.first['msg'], 'via-deprecated');
     });
   });
 
@@ -596,20 +626,35 @@ void main() {
       MXLogger.destroy(nameSpace: ns, directory: dir.path);
     });
 
-    test('destroyWithLoggerKey 后重新初始化同样可用', () {
+    test('destroyWithLoggerToken 后重新初始化同样可用', () {
       final dir = newDir('destroy2');
       final ns = uniqueNs();
       final logger = MXLogger(nameSpace: ns, directory: dir.path);
       logger.info('x');
-      final key = logger.loggerKey!;
+      final token = logger.loggerToken!;
 
-      MXLogger.destroyWithLoggerKey(key);
+      MXLogger.destroyWithLoggerToken(token);
 
       final reopened = MXLogger(nameSpace: ns, directory: dir.path);
-      expect(reopened.loggerKey, key);
+      expect(reopened.loggerToken, token);
       reopened.info('y');
       expect(readBack(reopened), hasLength(2));
-      MXLogger.destroyWithLoggerKey(key);
+      MXLogger.destroyWithLoggerToken(token);
+    });
+
+    test('已废弃的 destroyWithLoggerKey 同样能失效实例并释放', () {
+      final dir = newDir('destroy3');
+      final ns = uniqueNs();
+      final logger = MXLogger(nameSpace: ns, directory: dir.path);
+      final token = logger.loggerToken!;
+
+      // ignore: deprecated_member_use_from_same_package
+      MXLogger.destroyWithLoggerKey(token);
+      expect(logger.loggerToken, isNull, reason: '失效后句柄应清空');
+
+      final reopened = MXLogger(nameSpace: ns, directory: dir.path);
+      expect(reopened.loggerToken, token);
+      MXLogger.destroyWithLoggerToken(token);
     });
 
     test('同参数重复构造出的多个实例 destroy后全部失效', () {
@@ -618,7 +663,7 @@ void main() {
       // 两个Dart实例共享同一个native对象(core按namespace+directory去重)
       final first = MXLogger(nameSpace: ns, directory: dir.path);
       final second = MXLogger(nameSpace: ns, directory: dir.path);
-      expect(first.loggerKey, second.loggerKey);
+      expect(first.loggerToken, second.loggerToken);
       first.info('a');
       second.info('b');
 

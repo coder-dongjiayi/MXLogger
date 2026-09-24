@@ -31,8 +31,8 @@
     <string name="home_write_network_subtitle">msg 为 JSON 字符串，tag = request</string>
     <string name="home_write_custom_title">log() 通用写入</string>
     <string name="home_write_custom_subtitle">自定义等级写入，本例 level = 3 (error)</string>
-    <string name="home_write_key_title">通过 loggerKey 写入</string>
-    <string name="home_write_key_subtitle">组件化场景：只传 key 不传对象，MXLogger.log(loggerKey, …)</string>
+    <string name="home_write_key_title">通过 loggerToken 写入</string>
+    <string name="home_write_key_subtitle">组件化场景：只传 token 不传对象，MXLogger.log(loggerToken, …)</string>
 
     <!-- 主页 - 配置 -->
     <string name="home_section_config">配置</string>
@@ -68,7 +68,7 @@
 
     <!-- 主页 - 实例信息 -->
     <string name="home_section_info">实例信息</string>
-    <string name="home_section_info_footer">loggerKey = md5(namespace + directory)，跨模块只传这个 key 即可写入。</string>
+    <string name="home_section_info_footer">loggerToken = md5(namespace + directory)，跨模块只传这个 token 即可写入。</string>
     <string name="home_info_path_title">缓存目录 diskCachePath</string>
     <string name="home_info_error_title">查看最近错误 errorDesc</string>
     <string name="home_info_error_subtitle">写入返回非 0 时的错误描述</string>
@@ -82,14 +82,14 @@
     <string name="toast_enable_off">日志已禁用</string>
     <string name="toast_expire_done">已清理过期文件</string>
     <string name="toast_before_done">已清理历史文件</string>
-    <string name="toast_key_copied">loggerKey 已复制</string>
+    <string name="toast_key_copied">loggerToken 已复制</string>
     <string name="toast_path_copied">路径已复制</string>
     <string name="toast_rebuild_done">实例已重建</string>
     <string name="toast_removeall_done">日志已清空</string>
     <string name="toast_write_success">%1$s 写入成功</string>
     <string name="toast_network_success">网络日志写入成功</string>
     <string name="toast_custom_success">log() 写入成功</string>
-    <string name="toast_key_success">loggerKey 写入成功</string>
+    <string name="toast_key_success">loggerToken 写入成功</string>
     <string name="toast_bench_done">10 万条写入耗时 %1$d ms</string>
     <string name="toast_concurrent_running">并发写入中…</string>
     <string name="toast_concurrent_verifying">写入完成，正在解析校验…</string>
@@ -120,7 +120,7 @@
     <!-- 演示日志内容 -->
     <string name="log_msg_fmt">这是第 %1$d 条 %2$s 日志，写于 %3$s</string>
     <string name="log_pay_msg">订单支付失败: code=-1009 网络连接中断</string>
-    <string name="log_module_msg">子组件通过 loggerKey 写入的日志</string>
+    <string name="log_module_msg">子组件通过 loggerToken 写入的日志</string>
 
     <!-- 文件列表 -->
     <string name="filelist_title">日志文件</string>

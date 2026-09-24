@@ -40,9 +40,9 @@ import java.util.concurrent.CountDownLatch;
  * MXLogger 全功能演示主页 (与 iOS demo 对齐)
  * 覆盖的 API:
  *  - 构造(namespace/storagePolicy/fileHeader/cryptKey/iv) 与 destroy
- *  - debug/info/warn/error/fatal/log 以及 loggerKey 静态写入
+ *  - debug/info/warn/error/fatal/log 以及 loggerToken 静态写入
  *  - setLevel / setConsoleEnable / setEnable / setMaxDiskAge / setMaxDiskSize
- *  - getLogSize / getDiskCachePath / getLoggerKey / getErrorDesc
+ *  - getLogSize / getDiskCachePath / getLoggerToken / getErrorDesc
  *  - logFiles / selectWithFilePath
  *  - removeExpireData / removeBeforeAllData / removeAll
  */
@@ -164,7 +164,7 @@ public class DemoHomeActivity extends BaseDemoActivity {
                 null, false, this::writeCustomLevelLog);
         addRow(write, R.drawable.ic_key, R.color.tint_brown,
                 getString(R.string.home_write_key_title), getString(R.string.home_write_key_subtitle),
-                null, false, this::writeByLoggerKey);
+                null, false, this::writeByLoggerToken);
         addSectionFooter(getString(R.string.home_section_write_footer));
 
         // ---------- 配置 ----------
@@ -233,8 +233,8 @@ public class DemoHomeActivity extends BaseDemoActivity {
         addSectionHeader(getString(R.string.home_section_info));
         LinearLayout info = addSectionCard();
         addRow(info, R.drawable.ic_hash, R.color.tint_indigo,
-                "loggerKey", logger.getLoggerKey(), null, false, () -> {
-                    copyToClipboard(logger.getLoggerKey());
+                "loggerToken", logger.getLoggerToken(), null, false, () -> {
+                    copyToClipboard(logger.getLoggerToken());
                     toast(getString(R.string.toast_key_copied));
                 });
         addRow(info, R.drawable.ic_gear, R.color.tint_gray,
@@ -300,10 +300,10 @@ public class DemoHomeActivity extends BaseDemoActivity {
         handleWriteResult(result, getString(R.string.toast_custom_success));
     }
 
-    private void writeByLoggerKey() {
-        // 业务组件不持有 logger 对象，只拿一个字符串 key 即可写入
-        String loggerKey = logger.getLoggerKey();
-        int result = MXLogger.log(loggerKey, "module", 1, "module.user", getString(R.string.log_module_msg));
+    private void writeByLoggerToken() {
+        // 业务组件不持有 logger 对象，只拿一个字符串 token 即可写入
+        String loggerToken = logger.getLoggerToken();
+        int result = MXLogger.log(loggerToken, "module", 1, "module.user", getString(R.string.log_module_msg));
         handleWriteResult(result, getString(R.string.toast_key_success));
     }
 

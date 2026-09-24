@@ -41,43 +41,43 @@
   }
 }
 
-+(NSInteger) debug:(NSString*) loggerKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
-    if([self isNull:loggerKey] == YES) return 0;
++(NSInteger) debug:(NSString*) loggerToken name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
+    if([self isNull:loggerToken] == YES) return 0;
     
-    return  [self log:loggerKey level:0 name:name msg:msg tag:tag];
+    return  [self log:loggerToken level:0 name:name msg:msg tag:tag];
    
 }
 
-+(NSInteger) info:(NSString*) loggerKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
-    if([self isNull:loggerKey] == YES) return 0;
++(NSInteger) info:(NSString*) loggerToken name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
+    if([self isNull:loggerToken] == YES) return 0;
     
-    return  [self log:loggerKey level:1 name:name msg:msg tag:tag];
+    return  [self log:loggerToken level:1 name:name msg:msg tag:tag];
    
 }
 
-+(NSInteger) warn:(NSString*) loggerKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
-    if([self isNull:loggerKey] == YES) return 0;
++(NSInteger) warn:(NSString*) loggerToken name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
+    if([self isNull:loggerToken] == YES) return 0;
     
-   return [self log:loggerKey level:2 name:name msg:msg tag:tag];
+   return [self log:loggerToken level:2 name:name msg:msg tag:tag];
    
 }
 
-+(NSInteger) error:(NSString*) loggerKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
-    if([self isNull:loggerKey] == YES) return 0;
++(NSInteger) error:(NSString*) loggerToken name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
+    if([self isNull:loggerToken] == YES) return 0;
     
-    return [self log:loggerKey level:3 name:name msg:msg tag:tag];
+    return [self log:loggerToken level:3 name:name msg:msg tag:tag];
    
 }
-+(NSInteger) fatal:(NSString*) loggerKey name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
-    if([self isNull:loggerKey] == YES) return 0;
++(NSInteger) fatal:(NSString*) loggerToken name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
+    if([self isNull:loggerToken] == YES) return 0;
     
-   return [self log:loggerKey level:4 name:name msg:msg tag:tag];
+   return [self log:loggerToken level:4 name:name msg:msg tag:tag];
    
 }
 
-+(NSInteger)log:(NSString*)loggerKey level:(NSInteger) level name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
++(NSInteger)log:(NSString*)loggerToken level:(NSInteger) level name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag{
    
-    MXLogger * logger =  [MXLogger valueForLoggerKey:loggerKey];
+    MXLogger * logger =  [MXLogger valueForLoggerToken:loggerToken];
     
     return  [logger logWithLevel:level name:name msg:msg tag:tag];
 }

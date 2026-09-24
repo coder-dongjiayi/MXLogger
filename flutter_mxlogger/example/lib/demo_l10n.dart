@@ -113,7 +113,7 @@ const Map<String, String> _en = {
   'home.write.network.subtitle': 'msg is a JSON string, tag = request',
   'home.write.custom.title': 'log() Generic Write',
   'home.write.custom.subtitle': 'Write with a custom level, here level = 3 (error)',
-  'home.write.key.title': 'Write via loggerKey',
+  'home.write.key.title': 'Write via loggerToken',
   'home.write.key.subtitle':
       'Modular scenario: pass only the key, MXLogger.infoLog',
 
@@ -165,12 +165,12 @@ const Map<String, String> _en = {
   // Home - info section
   'home.section.info': 'Instance Info',
   'home.section.info.footer':
-      'loggerKey = md5(namespace + directory); retrieve the instance across modules via loggerKey.',
+      'loggerToken = md5(namespace + directory); retrieve the instance across modules via loggerToken.',
   'home.info.path.title': 'Cache Directory (diskcachePath)',
   'home.info.error.title': 'Last Error (errorDesc)',
   'home.info.error.subtitle': 'Error description when a write returns non-zero',
   'home.info.rebuild.title': 'Destroy & Rebuild Instance',
-  'home.info.rebuild.subtitle': 'initialize again after destroyWithLoggerKey',
+  'home.info.rebuild.subtitle': 'initialize again after destroyWithLoggerToken',
 
   // Toasts
   'toast.console.on': 'Console output enabled',
@@ -179,14 +179,14 @@ const Map<String, String> _en = {
   'toast.enable.off': 'Logging disabled',
   'toast.expire.done': 'Expired files removed',
   'toast.before.done': 'Historical files removed',
-  'toast.key.copied': 'loggerKey copied',
+  'toast.key.copied': 'loggerToken copied',
   'toast.path.copied': 'Path copied',
   'toast.rebuild.done': 'Instance rebuilt',
   'toast.removeall.done': 'All logs removed',
   'toast.write.success': '{0} written',
   'toast.network.success': 'Network log written',
   'toast.custom.success': 'log() written',
-  'toast.key.success': 'Written via loggerKey',
+  'toast.key.success': 'Written via loggerToken',
   'toast.bench.done': '100,000 logs written in {0} ms',
   'toast.concurrent.running': 'Writing concurrently…',
   'toast.concurrent.verifying': 'Write finished, verifying…',
@@ -221,7 +221,7 @@ const Map<String, String> _en = {
   // Demo log content
   'log.msg.fmt': 'Log #{0} at {1} level, written at {2}',
   'log.pay.msg': 'Order payment failed: code=-1009 network connection lost',
-  'log.module.msg': 'Log written by a sub-module via loggerKey',
+  'log.module.msg': 'Log written by a sub-module via loggerToken',
 
   // File list
   'filelist.title': 'Log Files',
@@ -273,7 +273,7 @@ const Map<String, String> _zhHans = {
   'home.write.network.subtitle': 'msg 为 JSON 字符串，tag = request',
   'home.write.custom.title': 'log() 通用写入',
   'home.write.custom.subtitle': '自定义等级写入，本例 level = 3 (error)',
-  'home.write.key.title': '通过 loggerKey 写入',
+  'home.write.key.title': '通过 loggerToken 写入',
   'home.write.key.subtitle': '组件化场景：只传 key 不传对象，MXLogger.infoLog',
 
   // 主页 - 配置
@@ -315,12 +315,12 @@ const Map<String, String> _zhHans = {
 
   // 主页 - 实例信息
   'home.section.info': '实例信息',
-  'home.section.info.footer': 'loggerKey = md5(namespace + directory)，跨模块通过 loggerKey 找回实例。',
+  'home.section.info.footer': 'loggerToken = md5(namespace + directory)，跨模块通过 loggerToken 找回实例。',
   'home.info.path.title': '缓存目录 diskcachePath',
   'home.info.error.title': '查看最近错误 errorDesc',
   'home.info.error.subtitle': '写入返回非 0 时的错误描述',
   'home.info.rebuild.title': '销毁并重建实例',
-  'home.info.rebuild.subtitle': 'destroyWithLoggerKey 后重新 initialize',
+  'home.info.rebuild.subtitle': 'destroyWithLoggerToken 后重新 initialize',
 
   // Toast
   'toast.console.on': '已开启控制台打印',
@@ -329,14 +329,14 @@ const Map<String, String> _zhHans = {
   'toast.enable.off': '日志已禁用',
   'toast.expire.done': '已清理过期文件',
   'toast.before.done': '已清理历史文件',
-  'toast.key.copied': 'loggerKey 已复制',
+  'toast.key.copied': 'loggerToken 已复制',
   'toast.path.copied': '路径已复制',
   'toast.rebuild.done': '实例已重建',
   'toast.removeall.done': '日志已清空',
   'toast.write.success': '{0} 写入成功',
   'toast.network.success': '网络日志写入成功',
   'toast.custom.success': 'log() 写入成功',
-  'toast.key.success': 'loggerKey 写入成功',
+  'toast.key.success': 'loggerToken 写入成功',
   'toast.bench.done': '10 万条写入耗时 {0} ms',
   'toast.concurrent.running': '并发写入中…',
   'toast.concurrent.verifying': '写入完成，正在解析校验…',
@@ -370,7 +370,7 @@ const Map<String, String> _zhHans = {
   // 演示日志内容
   'log.msg.fmt': '这是第 {0} 条 {1} 日志，写于 {2}',
   'log.pay.msg': '订单支付失败: code=-1009 网络连接中断',
-  'log.module.msg': '子组件通过 loggerKey 写入的日志',
+  'log.module.msg': '子组件通过 loggerToken 写入的日志',
 
   // 文件列表
   'filelist.title': '日志文件',

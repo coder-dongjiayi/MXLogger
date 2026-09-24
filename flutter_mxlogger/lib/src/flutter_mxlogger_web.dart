@@ -64,11 +64,16 @@ class MXLogger {
   /// 获取错误文件路径
   String get diskcacheErrorPath => diskcachePath + "/error.txt";
 
-  /// 获取日志底层的唯一标识 可以通过这个key操作日志对象
+  /// 获取日志底层的唯一标识 可以通过这个token操作日志对象
   /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
   /// 但是你希望所有子模块(子组件)使用在主工程初始化的log，
-  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
-  String? get loggerKey => getLoggerKey();
+  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个token，然后通过logLoggerToken 进行日志写入
+  String? get loggerToken => getLoggerToken();
+
+  /// 已废弃：请改用 [loggerToken]，后续版本将移除
+  @Deprecated(
+      'loggerKey 已废弃，后续版本将移除，请改用 loggerToken / loggerKey is deprecated and will be removed in a future release, use loggerToken instead')
+  String? get loggerKey => getLoggerToken();
 
   /// 获取存储的日志大小 (byte)
   int get logSize => getLogSize();
@@ -142,41 +147,54 @@ class MXLogger {
 
   }
 
-  /// 通过key 释放log对象
-  static void destroyWithLoggerKey(String loggerKey) {
+  /// 通过token 释放log对象
+  static void destroyWithLoggerToken(String loggerToken) {
 
   }
 
-  /// 类方法 使用 mapKey操作日志
-  static void logLoggerKey(String? loggerKey, int lvl, String msg,
+  /// 已废弃：请改用 [destroyWithLoggerToken]，后续版本将移除
+  @Deprecated(
+      'destroyWithLoggerKey 已废弃，后续版本将移除，请改用 destroyWithLoggerToken / destroyWithLoggerKey is deprecated and will be removed in a future release, use destroyWithLoggerToken instead')
+  static void destroyWithLoggerKey(String loggerKey) =>
+      destroyWithLoggerToken(loggerKey);
+
+  /// 类方法 使用 loggerToken 操作日志
+  static void logLoggerToken(String? loggerToken, int lvl, String msg,
       {String? name, String? tag}) {
 
   }
+
+  /// 已废弃：请改用 [logLoggerToken]，后续版本将移除
+  @Deprecated(
+      'logLoggerKey 已废弃，后续版本将移除，请改用 logLoggerToken / logLoggerKey is deprecated and will be removed in a future release, use logLoggerToken instead')
+  static void logLoggerKey(String? loggerKey, int lvl, String msg,
+          {String? name, String? tag}) =>
+      logLoggerToken(loggerKey, lvl, msg, name: name, tag: tag);
 
   /// 类方法 方便调用
-  static void debugLog(String? loggerKey, String msg,
+  static void debugLog(String? loggerToken, String msg,
       {String? name, String? tag}) {
-    logLoggerKey(loggerKey, 0, msg, name: name, tag: tag);
+    logLoggerToken(loggerToken, 0, msg, name: name, tag: tag);
   }
 
-  static void infoLog(String? loggerKey, String msg,
+  static void infoLog(String? loggerToken, String msg,
       {String? name, String? tag}) {
-    logLoggerKey(loggerKey, 1, msg, name: name, tag: tag);
+    logLoggerToken(loggerToken, 1, msg, name: name, tag: tag);
   }
 
-  static void warnLog(String? loggerKey, String msg,
+  static void warnLog(String? loggerToken, String msg,
       {String? name, String? tag}) {
-    logLoggerKey(loggerKey, 2, msg, name: name, tag: tag);
+    logLoggerToken(loggerToken, 2, msg, name: name, tag: tag);
   }
 
-  static void errorLog(String? loggerKey, String msg,
+  static void errorLog(String? loggerToken, String msg,
       {String? name, String? tag}) {
-    logLoggerKey(loggerKey, 3, msg, name: name, tag: tag);
+    logLoggerToken(loggerToken, 3, msg, name: name, tag: tag);
   }
 
-  static void fatalLog(String? loggerKey, String msg,
+  static void fatalLog(String? loggerToken, String msg,
       {String? name, String? tag}) {
-    logLoggerKey(loggerKey, 4, msg, name: name, tag: tag);
+    logLoggerToken(loggerToken, 4, msg, name: name, tag: tag);
   }
 
   /// 程序进入后台的时候是否去清理过期文件 默认为YES
@@ -262,14 +280,19 @@ class MXLogger {
     return null;
   }
 
-  /// 获取日志底层的唯一标识 可以通过这个key操作日志对象
+  /// 获取日志底层的唯一标识 可以通过这个token操作日志对象
   /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)
   /// 但是你希望所有子模块(子组件)使用在主工程初始化的log，
-  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey 进行日志写入
-  String? getLoggerKey() {
+  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个token，然后通过logLoggerToken 进行日志写入
+  String? getLoggerToken() {
 
     return null;
   }
+
+  /// 已废弃：请改用 [getLoggerToken]，后续版本将移除
+  @Deprecated(
+      'getLoggerKey 已废弃，后续版本将移除，请改用 getLoggerToken / getLoggerKey is deprecated and will be removed in a future release, use getLoggerToken instead')
+  String? getLoggerKey() => getLoggerToken();
 
   int debug(String msg, {String? name, String? tag}) {
     return log(0, msg, name: name, tag: tag);

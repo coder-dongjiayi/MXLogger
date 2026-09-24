@@ -157,26 +157,28 @@ int log(int lvl, String msg, {String? name, String? tag});
 
 ### 类方法（组件化场景）
 
-大型 App 拆成多个模块时，子模块往往不方便持有 logger 对象。这时只需传递 `loggerKey` 字符串：
+大型 App 拆成多个模块时，子模块往往不方便持有 logger 对象。这时只需传递 `loggerToken` 字符串：
 
 ```dart
 // 主工程
-final key = logger.loggerKey;   // 保存起来，或注册到全局服务
+final token = logger.loggerToken;   // 保存起来，或注册到全局服务
 
 // 子模块，不依赖 logger 实例
-MXLogger.infoLog(key, "module message", name: "user_module", tag: "login");
+MXLogger.infoLog(token, "module message", name: "user_module", tag: "login");
 ```
 
 ```dart
-static void logLoggerKey(String? loggerKey, int lvl, String msg, {String? name, String? tag});
-static void debugLog(String? loggerKey, String msg, {String? name, String? tag});
-static void infoLog (String? loggerKey, String msg, {String? name, String? tag});
-static void warnLog (String? loggerKey, String msg, {String? name, String? tag});
-static void errorLog(String? loggerKey, String msg, {String? name, String? tag});
-static void fatalLog(String? loggerKey, String msg, {String? name, String? tag});
+static void logLoggerToken(String? loggerToken, int lvl, String msg, {String? name, String? tag});
+static void debugLog(String? loggerToken, String msg, {String? name, String? tag});
+static void infoLog (String? loggerToken, String msg, {String? name, String? tag});
+static void warnLog (String? loggerToken, String msg, {String? name, String? tag});
+static void errorLog(String? loggerToken, String msg, {String? name, String? tag});
+static void fatalLog(String? loggerToken, String msg, {String? name, String? tag});
 ```
 
-同一个 `loggerKey` 在原生侧也能用——Android 走 `FlutterMxloggerPlugin.info(...)`，iOS 走 `[FlutterMxloggerPlugin info:...]`，写进的是同一份文件。
+同一个 `loggerToken` 在原生侧也能用——Android 走 `FlutterMxloggerPlugin.info(...)`，iOS 走 `[FlutterMxloggerPlugin info:...]`，写进的是同一份文件。
+
+> **废弃说明。** `loggerToken` 之前叫 `loggerKey`，容易和加密用的 `cryptKey` 混淆。`loggerKey`、`getLoggerKey()`、`logLoggerKey(...)`、`destroyWithLoggerKey(...)` 仍然可用并转发到新接口，但已标记 `@Deprecated`，**后续版本一定会移除**。请尽早迁移到 `loggerToken`、`getLoggerToken()`、`logLoggerToken(...)`、`destroyWithLoggerToken(...)`。
 
 ## 2.4 开关与等级
 
@@ -213,7 +215,8 @@ App 进入后台时会自动调用一次，可通过 `shouldRemoveExpiredDataWhe
 |---|---|---|
 | `enable` | `bool` | 日志写入是否可用 |
 | `consoleEnable` | `bool` | 控制台开关（全局） |
-| `loggerKey` | `String?` | 底层唯一标识，用于组件化传递 |
+| `loggerToken` | `String?` | 底层唯一标识，用于组件化传递 |
+| `loggerKey` | `String?` | **已废弃**，值与 `loggerToken` 相同，后续版本将移除 |
 | `diskcachePath` | `String` | 日志目录（`directory` + `nameSpace`） |
 | `diskcacheErrorPath` | `String` | 错误记录文件路径，即 `diskcachePath/error.txt` |
 | `logSize` | `int` | 已存日志总字节数 |
@@ -305,7 +308,10 @@ final records = await Isolate.run(() => MXLogger.selectLogmsg(
 
 ```dart
 static void destroy({required String nameSpace, String? directory});
-static void destroyWithLoggerKey(String loggerKey);
+static void destroyWithLoggerToken(String loggerToken);
+
+@Deprecated('use destroyWithLoggerToken')
+static void destroyWithLoggerKey(String loggerKey);   // 转发到 destroyWithLoggerToken，后续版本将移除
 ```
 
 销毁会先失效对应的 Dart 实例（移除生命周期监听、关闭错误文件流、清空 native 句柄），再释放 native 对象。
@@ -322,7 +328,7 @@ static void destroyWithLoggerKey(String loggerKey);
 
 # 示例工程
 
-`example/` 是一个完整的演示 App，覆盖了本文档提到的全部 API：初始化、五个等级写入、loggerKey 组件化写入、磁盘策略、文件列表、日志查看与解析、销毁。
+`example/` 是一个完整的演示 App，覆盖了本文档提到的全部 API：初始化、五个等级写入、loggerToken 组件化写入、磁盘策略、文件列表、日志查看与解析、销毁。
 
 ```bash
 cd example && flutter run

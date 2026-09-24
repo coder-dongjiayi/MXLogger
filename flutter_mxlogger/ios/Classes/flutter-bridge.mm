@@ -65,12 +65,12 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroy)(const char* ns,const char* director
 }
 
 
-/// 通过loggerKey销毁logger对象
-/// Destroy the logger identified by loggerKey
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerKey)(const char* logger_token){
+/// 通过loggerToken销毁logger对象
+/// Destroy the logger identified by loggerToken
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerToken)(const char* logger_token){
     if(logger_token == nullptr)return;
 
-    [MXLogger destroyWithLoggerKey:[NSString stringWithUTF8String:logger_token]];
+    [MXLogger destroyWithLoggerToken:[NSString stringWithUTF8String:logger_token]];
 }
 
 
@@ -282,11 +282,11 @@ static char * mx_copy_string_(NSString *str){
     return utf8 == nullptr ? nullptr : strdup(utf8);
 }
 
-/// 获取logger的唯一标识loggerKey (nameSpace+diskCacheDirectory的md5值)
-/// Get the logger's unique key (the md5 of nameSpace + diskCacheDirectory)
-MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerKey)(const void *handle){
+/// 获取logger的唯一标识loggerToken (nameSpace+diskCacheDirectory的md5值)
+/// Get the logger's unique token (the md5 of nameSpace + diskCacheDirectory)
+MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerToken)(const void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
-    return mx_copy_string_(logger.loggerKey);
+    return mx_copy_string_(logger.loggerToken);
 }
 
 
@@ -304,8 +304,8 @@ MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_error_desc)(const void *handle){
     return mx_copy_string_([logger errorDesc]);
 }
 
-/// 释放get_loggerKey/get_diskcache_path/get_error_desc返回的字符串
-/// Free the strings returned by get_loggerKey / get_diskcache_path / get_error_desc
+/// 释放get_loggerToken/get_diskcache_path/get_error_desc返回的字符串
+/// Free the strings returned by get_loggerToken / get_diskcache_path / get_error_desc
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_string)(char *str){
     free(str);
 }
@@ -332,13 +332,13 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(const void *handle){
     [logger removeAllData];
 }
 
-/// 通过loggerKey写入日志: 查找已初始化的logger对象进行写入，不存在时向nil发消息返回0
-/// Write a log entry via loggerKey: looks up the already-initialized logger and writes
+/// 通过loggerToken写入日志: 查找已初始化的logger对象进行写入，不存在时向nil发消息返回0
+/// Write a log entry via loggerToken: looks up the already-initialized logger and writes
 /// to it; when no logger matches, the message goes to nil and 0 is returned
-MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerKey)(const char* logger_token,const char* name, int lvl,const char* msg,const char* tag){
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerToken)(const char* logger_token,const char* name, int lvl,const char* msg,const char* tag){
     if(logger_token == nullptr) return 0;
 
-    MXLogger *logger = [MXLogger valueForLoggerKey:[NSString stringWithUTF8String:logger_token]];
+    MXLogger *logger = [MXLogger valueForLoggerToken:[NSString stringWithUTF8String:logger_token]];
 
     NSString * _name = name == nullptr ? NULL : [NSString stringWithUTF8String:name];
     NSString * _msg = msg == nullptr ? NULL : [NSString stringWithUTF8String:msg];
