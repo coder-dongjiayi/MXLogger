@@ -12,8 +12,6 @@
   <a href="https://pub.dev/packages/flutter_mxlogger"><img src="https://img.shields.io/pub/v/flutter_mxlogger?style=flat-square&label=pub&logo=dart" alt="pub" /></a>
   <a href="https://pub.dev/packages/mxlogger_analyzer_lib"><img src="https://img.shields.io/pub/v/mxlogger_analyzer_lib?style=flat-square&label=analyzer%20lib&logo=dart" alt="pub analyzer" /></a>
 </p>
-# MXLogger
-
 MXLogger is a cross-platform logging library built on **mmap** memory mapping, with **AES-CFB-128**
 encryption. The core is written in C/C++ and serializes records with Google **FlatBuffers**; the
 Flutter side calls straight into it through `dart:ffi`, so performance is essentially identical to

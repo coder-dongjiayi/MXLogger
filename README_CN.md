@@ -17,8 +17,6 @@
 <img src="./icon/logo_400.png" alt="MXLogger"  title="MXLogger" width="180" />
 </p>
 
-# MXLogger
-
 MXLogger 是基于 **mmap** 内存映射机制的跨平台日志库，支持 **AES-CFB-128** 加密，支持 iOS / Android /
 Flutter。核心代码使用 C/C++ 实现，序列化使用 Google 开源的 **FlatBuffers**，Flutter 端通过 `dart:ffi`
 直接调用，性能几乎与原生一致。iPhone 11 上写入 10 万条（每条约 134 字节）耗时约 **0.13s**。
