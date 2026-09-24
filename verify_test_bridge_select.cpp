@@ -16,7 +16,7 @@ int64_t flutter_mxlogger_initialize(const char* ns, const char* directory,
 int flutter_mxlogger_log(void* handle, const char* name, int lvl, const char* msg,
                          const char* tag);
 char* flutter_mxlogger_get_diskcache_path(void* handle);
-char* flutter_mxlogger_get_loggerKey(void* handle);
+char* flutter_mxlogger_get_loggerToken(void* handle);
 char* flutter_mxlogger_get_error_desc(void* handle);
 void flutter_mxlogger_free_string(char* str);
 int flutter_mxlogger_select_logmsg(const char* diskcache_file_path, const char* crypt_key,
@@ -58,15 +58,15 @@ int main() {
     }
     CHECK(write_fail == 0, "write 50 encrypted logs");
 
-    // get_loggerKey/get_diskcache_path 返回strdup拷贝 由free_string配对释放
+    // get_loggerToken/get_diskcache_path 返回strdup拷贝 由free_string配对释放
     char* raw_path = flutter_mxlogger_get_diskcache_path(handle);
     CHECK(raw_path != nullptr && strlen(raw_path) > 0, "get_diskcache_path returns copy");
     std::string cache_path = raw_path;
     flutter_mxlogger_free_string(raw_path);
 
-    char* logger_key = flutter_mxlogger_get_loggerKey(handle);
-    CHECK(logger_key != nullptr && strlen(logger_key) == 32, "get_loggerKey returns md5 copy");
-    flutter_mxlogger_free_string(logger_key);
+    char* logger_token = flutter_mxlogger_get_loggerToken(handle);
+    CHECK(logger_token != nullptr && strlen(logger_token) == 32, "get_loggerToken returns md5 copy");
+    flutter_mxlogger_free_string(logger_token);
 
     char* err_desc = flutter_mxlogger_get_error_desc(handle);
     flutter_mxlogger_free_string(err_desc);  // 可能为nullptr free(NULL)安全

@@ -15,19 +15,37 @@ List<String> _levelNames = ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"];
 enum MXStoragePolicyType {
   /// 按天存储 对应文件名: 2023-01-11_filename.mx
   /// One file per day, e.g. 2023-01-11_filename.mx
-  yyyy_MM_dd,
+  yyyyMMdd,
 
   /// 按小时存储 对应文件名: 2023-01-11-15_filename.mx
   /// One file per hour, e.g. 2023-01-11-15_filename.mx
-  yyyy_MM_dd_HH,
+  yyyyMMddHH,
 
   /// 按周存储 对应文件名: 2023-01-02w_filename.mx（02w是指一年中的第2周）
   /// One file per week, e.g. 2023-01-02w_filename.mx (02w means the 2nd week of the year)
-  yyyy_ww,
+  yyyyWw,
 
   /// 按月存储 对应文件名: 2023-01_filename.mx
   /// One file per month, e.g. 2023-01_filename.mx
-  yyyy_MM
+  yyyyMM
+}
+
+extension MXStoragePolicyTypeNative on MXStoragePolicyType {
+  /// 传给原生层的策略标识，原生协议固定为 yyyy_MM_dd 等下划线形式
+  /// Policy identifier passed to the native layer; the native protocol
+  /// uses the underscore form (e.g. yyyy_MM_dd) and must stay unchanged.
+  String get nativeValue {
+    switch (this) {
+      case MXStoragePolicyType.yyyyMMdd:
+        return "yyyy_MM_dd";
+      case MXStoragePolicyType.yyyyMMddHH:
+        return "yyyy_MM_dd_HH";
+      case MXStoragePolicyType.yyyyWw:
+        return "yyyy_ww";
+      case MXStoragePolicyType.yyyyMM:
+        return "yyyy_MM";
+    }
+  }
 }
 
 /// 日志文件信息实体
@@ -113,15 +131,22 @@ class MXLogger with WidgetsBindingObserver {
   /// Get the path of the local error-record file
   String get diskcacheErrorPath => diskcachePath + "/error.txt";
 
-  /// 获取日志底层的唯一标识，可以通过这个key操作日志对象。
+  /// 获取日志底层的唯一标识，可以通过这个token操作日志对象。
   /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)，
   /// 但是你希望所有子模块(子组件)使用在主工程初始化的log，
-  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey进行日志写入
-  /// Get the unique key of the underlying logger, usable to operate on it.
+  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个token，然后通过logLoggerToken进行日志写入
+  /// Get the unique token of the underlying logger, usable to operate on it.
   /// Use case: in a large modularized app, sub-modules can share the logger initialized
-  /// in the main project by passing this key around (instead of the logger object) and
-  /// writing logs via [logLoggerKey] — keeping modules decoupled
-  String? get loggerKey => getLoggerKey();
+  /// in the main project by passing this token around (instead of the logger object) and
+  /// writing logs via [logLoggerToken] — keeping modules decoupled
+  String? get loggerToken => getLoggerToken();
+
+  /// 已废弃：请改用 [loggerToken]，后续版本将移除。值与 [loggerToken] 完全相同
+  /// Deprecated: use [loggerToken] instead; it will be removed in a future release.
+  /// Its value is identical to [loggerToken]
+  @Deprecated(
+      'loggerKey 已废弃，后续版本将移除，请改用 loggerToken / loggerKey is deprecated and will be removed in a future release, use loggerToken instead')
+  String? get loggerKey => getLoggerToken();
 
   /// 获取存储的日志大小(byte)
   /// Get the total size of stored logs in bytes
@@ -170,7 +195,7 @@ class MXLogger with WidgetsBindingObserver {
       {required String nameSpace,
       required String directory,
       bool consoleEnable = false,
-      MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
+      MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyyMMdd,
       String? fileName,
       String? fileHeader,
       String? cryptKey,
@@ -182,8 +207,7 @@ class MXLogger with WidgetsBindingObserver {
     Pointer<Utf8> nsPtr = nameSpace.toNativeUtf8();
     Pointer<Utf8> drPtr = directory.toNativeUtf8();
 
-    String policy =
-        storagePolicy.toString().replaceAll("MXStoragePolicyType.", "");
+    String policy = storagePolicy.nativeValue;
 
     Pointer<Utf8> storagePolicyPtr = policy.toNativeUtf8();
     Pointer<Utf8> fileNamePtr =
@@ -233,17 +257,17 @@ class MXLogger with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     /// 注册到实例表：destroy时据此失效对应实例，防止use-after-free。
-    /// 同一nameSpace+directory重复构造时底层native对象是同一个，注册表按key
+    /// 同一nameSpace+directory重复构造时底层native对象是同一个，注册表按token
     /// 保存全部Dart实例，destroy时逐一失效——只保留最后一个会让先前的实例
     /// 带着悬垂句柄和生命周期监听继续运行
     /// Register into the instance map so destroy can invalidate this instance.
     /// Duplicate constructions with the same nameSpace + directory share one native
-    /// object, so the registry keeps every Dart instance per key and destroy
+    /// object, so the registry keeps every Dart instance per token and destroy
     /// invalidates them all — keeping only the last one would leave earlier
     /// instances running with a dangling handle and lifecycle observer
-    final String? registerKey = getLoggerKey();
-    if (registerKey != null) {
-      _instanceMap.putIfAbsent(registerKey, () => <MXLogger>[]).add(this);
+    final String? registerToken = getLoggerToken();
+    if (registerToken != null) {
+      _instanceMap.putIfAbsent(registerToken, () => <MXLogger>[]).add(this);
     }
   }
 
@@ -271,7 +295,7 @@ class MXLogger with WidgetsBindingObserver {
       {required String nameSpace,
       String? directory,
       bool consoleEnable = false,
-      MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyy_MM_dd,
+      MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyyMMdd,
       String? fileName,
       String? fileHeader,
       String? cryptKey,
@@ -340,16 +364,23 @@ class MXLogger with WidgetsBindingObserver {
     calloc.free(drPtr);
   }
 
-  /// 通过loggerKey释放logger对象；同样会先失效对应的Dart实例
-  /// Release the logger identified by loggerKey; the matching Dart instance
+  /// 通过loggerToken释放logger对象；同样会先失效对应的Dart实例
+  /// Release the logger identified by loggerToken; the matching Dart instance
   /// is invalidated first
-  static void destroyWithLoggerKey(String loggerKey) {
-    final List<MXLogger>? loggers = _instanceMap.remove(loggerKey);
+  static void destroyWithLoggerToken(String loggerToken) {
+    final List<MXLogger>? loggers = _instanceMap.remove(loggerToken);
     loggers?.forEach((logger) => logger._invalidate());
-    Pointer<Utf8> keyPtr = loggerKey.toNativeUtf8();
-    _destroyWithLoggerKey(keyPtr);
-    calloc.free(keyPtr);
+    Pointer<Utf8> tokenPtr = loggerToken.toNativeUtf8();
+    _destroyWithLoggerToken(tokenPtr);
+    calloc.free(tokenPtr);
   }
+
+  /// 已废弃：请改用 [destroyWithLoggerToken]，后续版本将移除
+  /// Deprecated: use [destroyWithLoggerToken] instead; it will be removed in a future release
+  @Deprecated(
+      'destroyWithLoggerKey 已废弃，后续版本将移除，请改用 destroyWithLoggerToken / destroyWithLoggerKey is deprecated and will be removed in a future release, use destroyWithLoggerToken instead')
+  static void destroyWithLoggerKey(String loggerKey) =>
+      destroyWithLoggerToken(loggerKey);
 
   /// 控制台输出，格式与native端 mxlogger_console::gen_console_str 保持一致。
   /// iOS上native的printf写的是stdout，而flutter run/AndroidStudio控制台只从统一日志系统取日志，
@@ -411,67 +442,75 @@ class MXLogger with WidgetsBindingObserver {
     debugPrint(buffer.toString());
   }
 
-  /// 类方法：使用loggerKey写入日志（无需持有logger对象，适用于模块化场景）
-  /// Class method: write a log entry via loggerKey (no logger instance needed,
+  /// 类方法：使用loggerToken写入日志（无需持有logger对象，适用于模块化场景）
+  /// Class method: write a log entry via loggerToken (no logger instance needed,
   /// designed for modularized apps)
   ///
-  /// loggerKey: logger的唯一标识 / unique key of the logger
+  /// loggerToken: logger的唯一标识 / unique token of the logger
   /// lvl: 日志等级 0:debug 1:info 2:warn 3:error 4:fatal
   ///      log level: 0 debug, 1 info, 2 warn, 3 error, 4 fatal
   /// msg: 日志信息 / log message
   /// name: 日志名称 / logger name
   /// tag: 标记 / tag
-  static void logLoggerKey(String? loggerKey, int lvl, String msg,
+  static void logLoggerToken(String? loggerToken, int lvl, String msg,
       {String? name, String? tag}) {
     _consolePrint(lvl, msg, name: name, tag: tag);
-    Pointer<Utf8> loggerKeyPtr =
-        loggerKey != null ? loggerKey.toNativeUtf8() : nullptr;
+    Pointer<Utf8> loggerTokenPtr =
+        loggerToken != null ? loggerToken.toNativeUtf8() : nullptr;
 
     Pointer<Utf8> namePtr = name != null ? name.toNativeUtf8() : nullptr;
     Pointer<Utf8> tagPtr = tag != null ? tag.toNativeUtf8() : nullptr;
     Pointer<Utf8> msgPtr = msg.toNativeUtf8();
 
-    _logLoggerKey(loggerKeyPtr, namePtr, lvl, msgPtr, tagPtr);
+    _logLoggerToken(loggerTokenPtr, namePtr, lvl, msgPtr, tagPtr);
 
-    calloc.free(loggerKeyPtr);
+    calloc.free(loggerTokenPtr);
     calloc.free(namePtr);
     calloc.free(tagPtr);
     calloc.free(msgPtr);
   }
 
-  /// 类方法：通过loggerKey写入debug等级日志
-  /// Class method: write a debug-level log entry via loggerKey
-  static void debugLog(String? loggerKey, String msg,
+  /// 已废弃：请改用 [logLoggerToken]，后续版本将移除
+  /// Deprecated: use [logLoggerToken] instead; it will be removed in a future release
+  @Deprecated(
+      'logLoggerKey 已废弃，后续版本将移除，请改用 logLoggerToken / logLoggerKey is deprecated and will be removed in a future release, use logLoggerToken instead')
+  static void logLoggerKey(String? loggerKey, int lvl, String msg,
+          {String? name, String? tag}) =>
+      logLoggerToken(loggerKey, lvl, msg, name: name, tag: tag);
+
+  /// 类方法：通过loggerToken写入debug等级日志
+  /// Class method: write a debug-level log entry via loggerToken
+  static void debugLog(String? loggerToken, String msg,
       {String? name, String? tag}) {
-    logLoggerKey(loggerKey, 0, msg, name: name, tag: tag);
+    logLoggerToken(loggerToken, 0, msg, name: name, tag: tag);
   }
 
-  /// 类方法：通过loggerKey写入info等级日志
-  /// Class method: write an info-level log entry via loggerKey
-  static void infoLog(String? loggerKey, String msg,
+  /// 类方法：通过loggerToken写入info等级日志
+  /// Class method: write an info-level log entry via loggerToken
+  static void infoLog(String? loggerToken, String msg,
       {String? name, String? tag}) {
-    logLoggerKey(loggerKey, 1, msg, name: name, tag: tag);
+    logLoggerToken(loggerToken, 1, msg, name: name, tag: tag);
   }
 
-  /// 类方法：通过loggerKey写入warn等级日志
-  /// Class method: write a warn-level log entry via loggerKey
-  static void warnLog(String? loggerKey, String msg,
+  /// 类方法：通过loggerToken写入warn等级日志
+  /// Class method: write a warn-level log entry via loggerToken
+  static void warnLog(String? loggerToken, String msg,
       {String? name, String? tag}) {
-    logLoggerKey(loggerKey, 2, msg, name: name, tag: tag);
+    logLoggerToken(loggerToken, 2, msg, name: name, tag: tag);
   }
 
-  /// 类方法：通过loggerKey写入error等级日志
-  /// Class method: write an error-level log entry via loggerKey
-  static void errorLog(String? loggerKey, String msg,
+  /// 类方法：通过loggerToken写入error等级日志
+  /// Class method: write an error-level log entry via loggerToken
+  static void errorLog(String? loggerToken, String msg,
       {String? name, String? tag}) {
-    logLoggerKey(loggerKey, 3, msg, name: name, tag: tag);
+    logLoggerToken(loggerToken, 3, msg, name: name, tag: tag);
   }
 
-  /// 类方法：通过loggerKey写入fatal等级日志
-  /// Class method: write a fatal-level log entry via loggerKey
-  static void fatalLog(String? loggerKey, String msg,
+  /// 类方法：通过loggerToken写入fatal等级日志
+  /// Class method: write a fatal-level log entry via loggerToken
+  static void fatalLog(String? loggerToken, String msg,
       {String? name, String? tag}) {
-    logLoggerKey(loggerKey, 4, msg, name: name, tag: tag);
+    logLoggerToken(loggerToken, 4, msg, name: name, tag: tag);
   }
 
   /// 程序进入后台的时候是否去清理过期文件 默认为true
@@ -583,21 +622,28 @@ class MXLogger with WidgetsBindingObserver {
     return error;
   }
 
-  /// 获取日志底层的唯一标识，可以通过这个key操作日志对象。
+  /// 获取日志底层的唯一标识，可以通过这个token操作日志对象。
   /// 业务场景: 如果是一个大型的app 你的app可能会模块化(组件化)，
   /// 但是你希望所有子模块(子组件)使用在主工程初始化的log，
-  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个key，然后通过logLoggerKey进行日志写入
-  /// Get the unique key of the underlying logger, usable to operate on it.
+  /// 这个时候为了方便解耦业务你不需要传logger对象 只需要传入这个token，然后通过logLoggerToken进行日志写入
+  /// Get the unique token of the underlying logger, usable to operate on it.
   /// Use case: in a large modularized app, sub-modules can share the logger initialized
-  /// in the main project by passing this key around and writing logs via [logLoggerKey]
-  String? getLoggerKey() {
+  /// in the main project by passing this token around and writing logs via [logLoggerToken]
+  String? getLoggerToken() {
     if (_handle == nullptr) return null;
-    Pointer<Int8> result = _getLoggerKey(_handle);
+    Pointer<Int8> result = _getLoggerToken(_handle);
     if (result == nullptr) return null;
-    String loggerKey = result.cast<Utf8>().toDartString();
+    String loggerToken = result.cast<Utf8>().toDartString();
     _freeString(result);
-    return loggerKey;
+    return loggerToken;
   }
+
+  /// 已废弃：请改用 [getLoggerToken]，后续版本将移除。返回值与 [getLoggerToken] 完全相同
+  /// Deprecated: use [getLoggerToken] instead; it will be removed in a future release.
+  /// Its value is identical to [getLoggerToken]
+  @Deprecated(
+      'getLoggerKey 已废弃，后续版本将移除，请改用 getLoggerToken / getLoggerKey is deprecated and will be removed in a future release, use getLoggerToken instead')
+  String? getLoggerKey() => getLoggerToken();
 
   /// 写入debug等级日志
   /// Write a debug-level log entry
@@ -882,11 +928,11 @@ class MXLogger with WidgetsBindingObserver {
   String? _nameSpace;
   String? _directory;
 
-  /// loggerKey -> 实例注册表：destroy时据此找到并失效对应的Dart实例。
-  /// 值为列表：同一key重复构造出的多个Dart实例共享同一个native对象，必须全部失效
-  /// loggerKey -> instance registry; destroy uses it to locate and invalidate
+  /// loggerToken -> 实例注册表：destroy时据此找到并失效对应的Dart实例。
+  /// 值为列表：同一token重复构造出的多个Dart实例共享同一个native对象，必须全部失效
+  /// loggerToken -> instance registry; destroy uses it to locate and invalidate
   /// the matching Dart instances. The value is a list: duplicate constructions
-  /// under one key share a single native object, so every instance must be invalidated
+  /// under one token share a single native object, so every instance must be invalidated
   static final Map<String, List<MXLogger>> _instanceMap = {};
 
   /// 失效当前实例：移除生命周期监听、关闭错误文件流并清空native句柄。
@@ -940,11 +986,11 @@ final void Function(Pointer<Utf8>, Pointer<Utf8>) _destroy = _nativeLib
                 Pointer<Utf8>, Pointer<Utf8>)>>(_mxloggerFunction("destroy"))
     .asFunction();
 
-/// native函数: 通过loggerKey释放logger
-/// Native function: release the logger by loggerKey
-final void Function(Pointer<Utf8>) _destroyWithLoggerKey = _nativeLib
+/// native函数: 通过loggerToken释放logger
+/// Native function: release the logger by loggerToken
+final void Function(Pointer<Utf8>) _destroyWithLoggerToken = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Utf8>)>>(
-        _mxloggerFunction("destroyWithLoggerKey"))
+        _mxloggerFunction("destroyWithLoggerToken"))
     .asFunction();
 
 /// native函数: 通过logger句柄写入日志
@@ -963,12 +1009,12 @@ final int Function(
                     Pointer<Utf8>, Pointer<Utf8>)>>(_mxloggerFunction("log"))
         .asFunction();
 
-/// native函数: 通过loggerKey写入日志 (返回值Int32与native的int严格匹配，理由同_log)
-/// Native function: write a log entry via loggerKey
+/// native函数: 通过loggerToken写入日志 (返回值Int32与native的int严格匹配，理由同_log)
+/// Native function: write a log entry via loggerToken
 /// (the Int32 return exactly matches the native int, same rationale as _log)
 final int Function(
         Pointer<Utf8>, Pointer<Utf8>, int, Pointer<Utf8>, Pointer<Utf8>)
-    _logLoggerKey = _nativeLib
+    _logLoggerToken = _nativeLib
         .lookup<
             NativeFunction<
                 Int32 Function(
@@ -976,7 +1022,7 @@ final int Function(
                     Pointer<Utf8>,
                     Int32,
                     Pointer<Utf8>,
-                    Pointer<Utf8>)>>(_mxloggerFunction("log_loggerKey"))
+                    Pointer<Utf8>)>>(_mxloggerFunction("log_loggerToken"))
         .asFunction();
 
 /// native函数: 设置写入文件的日志等级
@@ -1006,11 +1052,11 @@ final Pointer<Int8> Function(Pointer<Void>) _getDiskcachePath = _nativeLib
         _mxloggerFunction("get_diskcache_path"))
     .asFunction();
 
-/// native函数: 获取logger的唯一标识loggerKey
-/// Native function: get the logger's unique key (loggerKey)
-final Pointer<Int8> Function(Pointer<Void>) _getLoggerKey = _nativeLib
+/// native函数: 获取logger的唯一标识loggerToken
+/// Native function: get the logger's unique token (loggerToken)
+final Pointer<Int8> Function(Pointer<Void>) _getLoggerToken = _nativeLib
     .lookup<NativeFunction<Pointer<Int8> Function(Pointer<Void>)>>(
-        _mxloggerFunction("get_loggerKey"))
+        _mxloggerFunction("get_loggerToken"))
     .asFunction();
 
 /// native函数: 获取最近一次写入失败的错误信息
@@ -1020,9 +1066,9 @@ final Pointer<Int8> Function(Pointer<Void>) _getErrorDesc = _nativeLib
         _mxloggerFunction("get_error_desc"))
     .asFunction();
 
-/// native函数: 释放get_loggerKey/get_diskcache_path/get_error_desc返回的native字符串
+/// native函数: 释放get_loggerToken/get_diskcache_path/get_error_desc返回的native字符串
 /// Native function: free the native strings returned by
-/// get_loggerKey / get_diskcache_path / get_error_desc
+/// get_loggerToken / get_diskcache_path / get_error_desc
 final void Function(Pointer<Int8>) _freeString = _nativeLib
     .lookup<NativeFunction<Void Function(Pointer<Int8>)>>(
         _mxloggerFunction("free_string"))

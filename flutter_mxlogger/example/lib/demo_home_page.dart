@@ -14,11 +14,11 @@ import 'log_file_list_page.dart';
 
 /// MXLogger 全功能演示主页(与 iOS / Android 原生 demo 保持一致)
 /// 覆盖的 API:
-///  - MXLogger.initialize / destroyWithLoggerKey
+///  - MXLogger.initialize / destroyWithLoggerToken
 ///  - debug / info / warn / error / fatal / log
-///  - MXLogger.infoLog 等通过 loggerKey 的类方法写入
+///  - MXLogger.infoLog 等通过 loggerToken 的类方法写入
 ///  - setLevel / setConsoleEnable / setEnable / shouldRemoveExpiredDataWhenEnterBackground
-///  - setMaxDiskAge / setMaxDiskSize / logSize / diskcachePath / loggerKey / errorDesc
+///  - setMaxDiskAge / setMaxDiskSize / logSize / diskcachePath / loggerToken / errorDesc
 ///  - getLogFiles / selectLogmsg
 ///  - removeExpireData / removeBeforeAllData / removeAll
 /// 控制台输出是否可用: 只有 debug 构建才有。
@@ -48,7 +48,7 @@ class DemoHomePage extends StatefulWidget {
 
 class _DemoHomePageState extends State<DemoHomePage> {
   MXLogger? _logger;
-  String _loggerKey = '';
+  String _loggerToken = '';
   String _diskCachePath = '';
 
   int _level = 0;
@@ -74,8 +74,8 @@ class _DemoHomePageState extends State<DemoHomePage> {
 
   @override
   void dispose() {
-    if (_loggerKey.isNotEmpty) {
-      MXLogger.destroyWithLoggerKey(_loggerKey);
+    if (_loggerToken.isNotEmpty) {
+      MXLogger.destroyWithLoggerToken(_loggerToken);
     }
     super.dispose();
   }
@@ -95,7 +95,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     final logger = await MXLogger.initialize(
         nameSpace: kDemoNamespace,
         consoleEnable: kConsoleAvailable,
-        storagePolicy: MXStoragePolicyType.yyyy_MM_dd_HH,
+        storagePolicy: MXStoragePolicyType.yyyyMMddHH,
         fileHeader: fileHeader,
         cryptKey: kDemoCryptKey,
         iv: kDemoIV);
@@ -108,7 +108,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     if (!mounted) return;
     setState(() {
       _logger = logger;
-      _loggerKey = logger.loggerKey ?? '';
+      _loggerToken = logger.loggerToken ?? '';
       _diskCachePath = logger.diskcachePath;
       _level = 0;
       _consoleOn = kConsoleAvailable;
@@ -179,9 +179,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
     _handleWriteResult(result, tr('toast.custom.success'));
   }
 
-  void _writeByLoggerKey() {
-    // 业务组件不持有 logger 对象，只拿一个字符串 key 即可写入
-    MXLogger.infoLog(_loggerKey, tr('log.module.msg'),
+  void _writeByLoggerToken() {
+    // 业务组件不持有 logger 对象，只拿一个字符串 token 即可写入
+    MXLogger.infoLog(_loggerToken, tr('log.module.msg'),
         name: 'module.user', tag: 'module');
     _handleWriteResult(0, tr('toast.key.success'));
   }
@@ -208,8 +208,8 @@ class _DemoHomePageState extends State<DemoHomePage> {
     });
 
     // 写入放到后台 isolate 避免卡 UI。isolate 里没有实例对象，
-    // 通过 loggerKey 走类方法写入(与主 isolate 是底层同一个 logger)
-    final cost = await _spawnBenchmark(_loggerKey);
+    // 通过 loggerToken 走类方法写入(与主 isolate 是底层同一个 logger)
+    final cost = await _spawnBenchmark(_loggerToken);
 
     if (!mounted) return;
     _logger!.setConsoleEnable(consoleWasOn);
@@ -244,7 +244,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     showToast(context, tr('toast.concurrent.running'));
     await Future.wait([
       for (final source in sources.entries)
-        _spawnConcurrentWorker(_loggerKey, runName, source.key, source.value),
+        _spawnConcurrentWorker(_loggerToken, runName, source.key, source.value),
       _writeOnMainIsolate(runName, mainCount),
     ]);
 
@@ -400,8 +400,8 @@ class _DemoHomePageState extends State<DemoHomePage> {
   // ---------------- 实例信息 ----------------
 
   Future<void> _rebuildLogger() async {
-    // 通过 loggerKey 释放底层实例，再重新 initialize
-    MXLogger.destroyWithLoggerKey(_loggerKey);
+    // 通过 loggerToken 释放底层实例，再重新 initialize
+    MXLogger.destroyWithLoggerToken(_loggerToken);
     setState(() => _logger = null);
     await _setupLogger();
     if (!mounted) return;
@@ -584,7 +584,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
         tint: const Color(0xFFA2845E),
         title: tr('home.write.key.title'),
         subtitle: tr('home.write.key.subtitle'),
-        onTap: _writeByLoggerKey,
+        onTap: _writeByLoggerToken,
       ),
     ];
   }
@@ -729,9 +729,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
       _actionRow(
         icon: Icons.tag,
         tint: kBrandColor,
-        title: 'loggerKey',
-        subtitle: _loggerKey,
-        onTap: () => _copyText(_loggerKey, tr('toast.key.copied')),
+        title: 'loggerToken',
+        subtitle: _loggerToken,
+        onTap: () => _copyText(_loggerToken, tr('toast.key.copied')),
       ),
       _actionRow(
         icon: Icons.folder_open,
@@ -973,12 +973,12 @@ class _DemoHomePageState extends State<DemoHomePage> {
 // 这里的顶层函数只捕获自己的参数(字符串/整数)，可以安全跨 isolate。
 
 /// 后台 isolate 执行 10 万条写入基准测试，返回耗时(ms)
-Future<int> _spawnBenchmark(String loggerKey) {
+Future<int> _spawnBenchmark(String loggerToken) {
   return Isolate.run(() {
     final watch = Stopwatch()..start();
     for (var i = 1; i <= 100000; i++) {
       // 每条日志带序号，方便在查看器里核对写入顺序和完整性
-      MXLogger.infoLog(loggerKey,
+      MXLogger.infoLog(loggerToken,
           '[${'$i'.padLeft(6, '0')}] This is a benchmark loooooooooooooooooooooooooooooog',
           name: 'benchmark', tag: 'perf');
     }
@@ -987,9 +987,9 @@ Future<int> _spawnBenchmark(String loggerKey) {
 }
 
 /// 启动一个后台 isolate 写入来源。isolate 之间共享的是 native 侧同一个
-/// logger(通过 loggerKey 寻址)，与原生端多线程写同一个 logger 的场景等价。
+/// logger(通过 loggerToken 寻址)，与原生端多线程写同一个 logger 的场景等价。
 Future<void> _spawnConcurrentWorker(
-    String loggerKey, String runName, String tag, int total) {
+    String loggerToken, String runName, String tag, int total) {
   return Isolate.run(() {
     final random = Random();
     for (var i = 1; i <= total; i++) {
@@ -1001,7 +1001,7 @@ Future<void> _spawnConcurrentWorker(
       } else {
         msg = '#$seq $tag concurrent write';
       }
-      MXLogger.infoLog(loggerKey, msg, name: runName, tag: tag);
+      MXLogger.infoLog(loggerToken, msg, name: runName, tag: tag);
       // 随机让出 CPU，拉长并发重叠窗口，让调度交错更接近真实
       if (i % 50 == 0) sleep(Duration(microseconds: random.nextInt(500)));
     }

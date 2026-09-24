@@ -1,1 +1,0 @@
-pod trunk push --allow-warnings --verbose --skip-import-validation MXLoggerCore.podspec

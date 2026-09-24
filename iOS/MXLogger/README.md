@@ -1,2 +1,2 @@
-# MXLogger-Apple
+# MXLogger-SwiftPM
 SPM Mirror image

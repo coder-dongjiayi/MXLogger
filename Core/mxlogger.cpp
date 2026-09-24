@@ -33,9 +33,9 @@ static std::mutex global_instance_mutex_;
  std::string mxlogger::md5(const char* ns,const char* directory){
      
      std::string diskcache_path = get_diskcache_path_(ns,directory);
-     std::string logger_key =  mxlogger_helper::mx_md5(diskcache_path);
+     std::string logger_token =  mxlogger_helper::mx_md5(diskcache_path);
 
-     return logger_key;
+     return logger_token;
 }
 
 
@@ -55,12 +55,12 @@ std::string mxlogger::get_diskcache_path_(const char* ns,const char* directory){
     return diskcache_path;
 }
 
-mxlogger *mxlogger::global_for_loggerKey(const char* logger_key){
+mxlogger *mxlogger::global_for_loggerToken(const char* logger_token){
 
-    if(logger_key == nullptr) return nullptr;
+    if(logger_token == nullptr) return nullptr;
 
     std::lock_guard<std::mutex> lock(global_instance_mutex_);
-    auto itr = global_instanceDic_ -> find(logger_key);
+    auto itr = global_instanceDic_ -> find(logger_token);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
         return logger;
@@ -86,26 +86,26 @@ mxlogger *mxlogger::initialize_namespace(const char* ns,
         return nullptr;
     }
     
-    std::string logger_key =  mxlogger_helper::mx_md5(diskcache_path);
+    std::string logger_token =  mxlogger_helper::mx_md5(diskcache_path);
 
     /// find和insert必须在同一把锁内，防止并发初始化同一namespace时创建出两个实例
     std::lock_guard<std::mutex> lock(global_instance_mutex_);
-    auto itr = global_instanceDic_ -> find(logger_key);
+    auto itr = global_instanceDic_ -> find(logger_token);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
         return logger;
     }
 
     auto logger = new mxlogger(diskcache_path.c_str(),storage_policy,file_name,file_header,cryptKey,iv);
-    logger -> logger_key_ = logger_key;
-    (*global_instanceDic_)[logger_key] = logger;
+    logger -> logger_token_ = logger_token;
+    (*global_instanceDic_)[logger_token] = logger;
     MXLoggerInfo("mxlogger Initialization succeeded.  storage_policy:%s file_name:%s is_crypt:%s",storage_policy,file_name == nullptr ? "mxlog" : file_name,cryptKey!=nullptr ? "true" : "false");
     
     return logger;
 }
 
-void mxlogger::delete_namespace(const char* logger_key){
-    delete_namespace_(logger_key);
+void mxlogger::delete_namespace(const char* logger_token){
+    delete_namespace_(logger_token);
 }
 
 void mxlogger::delete_namespace(const char* ns,const char* directory){
@@ -115,14 +115,14 @@ void mxlogger::delete_namespace(const char* ns,const char* directory){
     if (strcmp(diskcache_path.c_str(), "") == 0) {
         return;
     }
-    std::string logger_key =  mxlogger_helper::mx_md5(diskcache_path);
-    delete_namespace_(logger_key.c_str());
+    std::string logger_token =  mxlogger_helper::mx_md5(diskcache_path);
+    delete_namespace_(logger_token.c_str());
 }
 
 //释放指定的logger对象
-void mxlogger::delete_namespace_(const char* logger_key){
+void mxlogger::delete_namespace_(const char* logger_token){
     std::lock_guard<std::mutex> lock(global_instance_mutex_);
-    auto itr = global_instanceDic_ -> find(logger_key);
+    auto itr = global_instanceDic_ -> find(logger_token);
     if (itr != global_instanceDic_ -> end()) {
         mxlogger * logger = itr -> second;
         delete logger;
@@ -162,15 +162,15 @@ mxlogger::mxlogger(const char *diskcache_path,const char* storage_policy,const c
     
 
 mxlogger::~mxlogger(){
-    MXLoggerInfo("mxlogger delloc logger_key:%s",logger_key_.c_str());
+    MXLoggerInfo("mxlogger delloc logger_token:%s",logger_token_.c_str());
 }
 
 const char* mxlogger::diskcache_path() const{
     return diskcache_path_.c_str();
 }
 
-const char*  mxlogger::logger_key() const{
-    return logger_key_.c_str();
+const char*  mxlogger::logger_token() const{
+    return logger_token_.c_str();
 }
 const char* mxlogger:: error_desc() const{
     return  mmap_sink_ ->error_record.c_str();

@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 # pod lib lint --allow-warnings --verbose --skip-import-validation
   s.name         = "MXLoggerCore"
-  s.version      = "2.0.0"
+  s.version      = "2.1.0"
   s.summary      = "High-performance cross-platform logging core built on mmap, with AES-CFB-128 encryption."
 
   s.description  = <<-DESC

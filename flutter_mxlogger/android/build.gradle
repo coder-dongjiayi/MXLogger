@@ -45,7 +45,7 @@ android {
     dependencies {
 
         // 本地开发走本地 AAR；发布 pub 包时换回 maven 坐标:
-         implementation 'io.github.coder-dongjiayi:mxlogger:2.0.0'
+         implementation 'io.github.coder-dongjiayi:mxlogger:2.1.0'
 //        implementation(name: "mxlogger-DefaultCpp-release", ext: "aar")
 
     }

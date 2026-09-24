@@ -86,12 +86,12 @@ namespace mxlogger{
     }
 
 
-    /// 获取logger的唯一标识loggerKey (nameSpace+diskCacheDirectory的md5值)
+    /// 获取logger的唯一标识loggerToken (nameSpace+diskCacheDirectory的md5值)
     /// Get the logger's unique key (the md5 of nameSpace + diskCacheDirectory)
-    MXLOGGER_JNI jstring  native_loggerKey(JNIEnv *env, jobject obj,jlong handle){
+    MXLOGGER_JNI jstring  native_loggerToken(JNIEnv *env, jobject obj,jlong handle){
         if (handle == 0) return nullptr;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
-        return string2jstring(env,logger ->logger_key());
+        return string2jstring(env,logger ->logger_token());
     }
 
     /// 获取最近一次写入失败的错误信息
@@ -136,19 +136,19 @@ namespace mxlogger{
 
     }
 
-    /// 通过loggerKey写入日志: 查找已初始化的logger对象，不存在时静默返回0不报错
-    /// Write a log entry via loggerKey: looks up the already-initialized logger;
+    /// 通过loggerToken写入日志: 查找已初始化的logger对象，不存在时静默返回0不报错
+    /// Write a log entry via loggerToken: looks up the already-initialized logger;
     /// silently returns 0 (no error) when no logger matches the key
-    MXLOGGER_JNI jint native_log_loggerKey(JNIEnv *env, jobject obj,jstring loggerKey,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
+    MXLOGGER_JNI jint native_log_loggerToken(JNIEnv *env, jobject obj,jstring loggerToken,jstring name,jint level,jstring msg,jstring tag,jboolean mainThread){
         const char  * log_msg = msg == NULL ? nullptr : env->GetStringUTFChars(msg, nullptr);
 
         const char  * log_tag = tag == NULL ? nullptr : env->GetStringUTFChars(tag, nullptr);
 
         const char  * log_name = name == NULL ? nullptr : env->GetStringUTFChars(name, nullptr);
 
-        const char  * logger_key = env->GetStringUTFChars(loggerKey, nullptr);
+        const char  * logger_token = env->GetStringUTFChars(loggerToken, nullptr);
 
-        mx_logger *logger = mx_logger ::global_for_loggerKey(logger_key);
+        mx_logger *logger = mx_logger ::global_for_loggerToken(logger_token);
 
         int result = 0;
         if(logger != nullptr){
@@ -161,7 +161,7 @@ namespace mxlogger{
         if (log_msg != nullptr) env->ReleaseStringUTFChars(msg, log_msg);
         if (log_tag != nullptr) env->ReleaseStringUTFChars(tag, log_tag);
         if (log_name != nullptr) env->ReleaseStringUTFChars(name, log_name);
-        env->ReleaseStringUTFChars(loggerKey, logger_key);
+        env->ReleaseStringUTFChars(loggerToken, logger_token);
 
         return  result;
     }
@@ -286,17 +286,17 @@ namespace mxlogger{
         return array;
     }
 
-    /// 通过loggerKey销毁C++对象
+    /// 通过loggerToken销毁C++对象
     /// 注意: Java侧是static native方法, JNI第二个参数实际是jclass而非实例对象,
     /// 不能对其SetLongField实例字段(CheckJNI下会直接abort), 句柄失效由Java侧自行约束
-    /// Destroy the C++ instance by loggerKey.
+    /// Destroy the C++ instance by loggerToken.
     /// Note: the Java method is static native, so the second JNI parameter is a jclass,
     /// not an instance — calling SetLongField on it would abort under CheckJNI;
     /// invalidating the handle is the Java side's responsibility
-    MXLOGGER_JNI void native_destroy_loggerKey(JNIEnv *env, jclass cls,jstring loggerKey){
-        const char  * loggerKeyStr =env->GetStringUTFChars(loggerKey, nullptr);
-        mx_logger::delete_namespace(loggerKeyStr);
-        env->ReleaseStringUTFChars(loggerKey, loggerKeyStr);
+    MXLOGGER_JNI void native_destroy_loggerToken(JNIEnv *env, jclass cls,jstring loggerToken){
+        const char  * loggerTokenStr =env->GetStringUTFChars(loggerToken, nullptr);
+        mx_logger::delete_namespace(loggerTokenStr);
+        env->ReleaseStringUTFChars(loggerToken, loggerTokenStr);
     }
 
     /// 通过nameSpace+diskCacheDirectory销毁C++对象
@@ -321,9 +321,9 @@ namespace mxlogger{
        logger ->set_enable_console(enable);
     }
 
-    /// 开启/禁用日志写入功能: 同步到C++核心，使loggerKey静态写入路径同样受控
+    /// 开启/禁用日志写入功能: 同步到C++核心，使loggerToken静态写入路径同样受控
     /// Enable or disable logging: propagated to the C++ core so the static
-    /// loggerKey write path honors it too
+    /// loggerToken write path honors it too
     MXLOGGER_JNI void native_enable(JNIEnv *env, jobject obj,jlong handle,jboolean enable){
         if (handle == 0) return;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
@@ -376,12 +376,12 @@ namespace mxlogger{
         return (jlong)logger ->file_max_size();
     }
 
-    /// 计算nameSpace+diskCacheDirectory对应的loggerKey(md5)，不创建logger对象；
+    /// 计算nameSpace+diskCacheDirectory对应的loggerToken(md5)，不创建logger对象；
     /// 供Java侧在初始化/销毁前查实例注册表
-    /// Compute the loggerKey (md5) for nameSpace + diskCacheDirectory without creating
+    /// Compute the loggerToken (md5) for nameSpace + diskCacheDirectory without creating
     /// a logger; used by the Java side to consult its instance registry before
     /// initialize/destroy
-    MXLOGGER_JNI jstring native_loggerKey_for(JNIEnv *env, jclass cls,jstring ns,jstring directory){
+    MXLOGGER_JNI jstring native_loggerToken_for(JNIEnv *env, jclass cls,jstring ns,jstring directory){
         if (directory == nullptr) return nullptr;
         const char * nsStr = ns == nullptr ? nullptr : env->GetStringUTFChars(ns, nullptr);
         const char * directoryStr = env->GetStringUTFChars(directory, nullptr);
@@ -466,7 +466,7 @@ static JNINativeMethod g_methods[] = {
         {"native_getLevel","(J)I",(void *)mxlogger::native_getLevel},
         {"native_getMaxDiskAge","(J)J",(void *)mxlogger::native_getMaxDiskAge},
         {"native_getMaxDiskSize","(J)J",(void *)mxlogger::native_getMaxDiskSize},
-        {"native_loggerKey_for","(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",(void *)mxlogger::native_loggerKey_for},
+        {"native_loggerToken_for","(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",(void *)mxlogger::native_loggerToken_for},
         {"native_maxDiskAge","(JJ)V",(void *)mxlogger::native_maxDiskAge},
         {"native_maxDiskSize","(JJ)V",(void *)mxlogger::native_maxDiskSize},
         {"native_logSize","(J)J",(void *)mxlogger::native_logSize},
@@ -475,11 +475,11 @@ static JNINativeMethod g_methods[] = {
         {"native_removeAll","(J)V",(void *)mxlogger::native_removeAll},
         {"native_removeBeforeAll","(J)V",(void *)mxlogger::native_removeBeforeAll},
         {"native_errorDesc","(J)Ljava/lang/String;",(void*)mxlogger::native_errorDesc},
-        {"native_loggerKey","(J)Ljava/lang/String;",(void *)mxlogger::native_loggerKey},
+        {"native_loggerToken","(J)Ljava/lang/String;",(void *)mxlogger::native_loggerToken},
         {"native_log","(JLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)I",(void *)mxlogger::native_log},
-        {"native_log_loggerKey","(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)I",(void *)mxlogger::native_log_loggerKey},
+        {"native_log_loggerToken","(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Z)I",(void *)mxlogger::native_log_loggerToken},
         {"native_destroy","(Ljava/lang/String;Ljava/lang/String;)V",(void *)mxlogger::native_destroy},
-        {"native_destroy_loggerKey","(Ljava/lang/String;)V",(void *)mxlogger::native_destroy_loggerKey},
+        {"native_destroy_loggerToken","(Ljava/lang/String;)V",(void *)mxlogger::native_destroy_loggerToken},
         {"native_logFiles","(J)[Ljava/lang/String;",(void*)mxlogger::native_logFiles},
         {"native_selectLogMsg","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;",(void*)mxlogger::native_selectLogMsg}
 };

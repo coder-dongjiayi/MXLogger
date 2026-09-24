@@ -189,11 +189,11 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroy)(const char* ns,const char* director
     mx_logger ::delete_namespace(ns,directory);
 }
 
-/// 通过loggerKey销毁C++对象
-/// Destroy the C++ instance by loggerKey
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerKey)(const char* logger_key){
-    if(logger_key == nullptr)return;
-    mx_logger ::delete_namespace(logger_key);
+/// 通过loggerToken销毁C++对象
+/// Destroy the C++ instance by loggerToken
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerToken)(const char* logger_token){
+    if(logger_token == nullptr)return;
+    mx_logger ::delete_namespace(logger_token);
 }
 
 /// 开启/关闭native侧控制台输出
@@ -264,12 +264,12 @@ static char * mx_copy_string_(const char *str){
     return str == nullptr ? nullptr : strdup(str);
 }
 
-/// 获取logger的唯一标识loggerKey (nameSpace+directory的md5值)
+/// 获取logger的唯一标识loggerToken (nameSpace+directory的md5值)
 /// Get the logger's unique key (the md5 of nameSpace + directory)
-MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerKey)(void *handle){
+MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerToken)(void *handle){
     if (handle == nullptr) return nullptr;
     mx_logger *logger = static_cast<mx_logger*>(handle);
-    return mx_copy_string_(logger->logger_key());
+    return mx_copy_string_(logger->logger_token());
 }
 
 /// 获取日志文件磁盘缓存目录
@@ -288,8 +288,8 @@ MXLOGGER_EXPORT char * MXLOGGERR_FUNC(get_error_desc)(void *handle){
     return mx_copy_string_(logger->error_desc());
 }
 
-/// 释放get_loggerKey/get_diskcache_path/get_error_desc返回的字符串
-/// Free the strings returned by get_loggerKey / get_diskcache_path / get_error_desc
+/// 释放get_loggerToken/get_diskcache_path/get_error_desc返回的字符串
+/// Free the strings returned by get_loggerToken / get_diskcache_path / get_error_desc
 MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_string)(char *str){
     free(str);
 }
@@ -320,15 +320,15 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(void *handle){
     logger->remove_all();
 }
 
-/// 通过loggerKey写入日志: 查找已初始化的logger对象进行写入，
-/// 不存在时静默返回0不报错(与JNI侧native_log_loggerKey、iOS侧行为对齐)
-/// Write a log entry via loggerKey: looks up the already-initialized logger and writes
+/// 通过loggerToken写入日志: 查找已初始化的logger对象进行写入，
+/// 不存在时静默返回0不报错(与JNI侧native_log_loggerToken、iOS侧行为对齐)
+/// Write a log entry via loggerToken: looks up the already-initialized logger and writes
 /// to it; silently returns 0 (no error) when no logger matches the key — consistent
-/// with the JNI-side native_log_loggerKey and the iOS bridge
-MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const char* name, int lvl,const char* msg,const char* tag){
-    if(logger_key == nullptr) return 0;
+/// with the JNI-side native_log_loggerToken and the iOS bridge
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerToken)(const char* logger_token,const char* name, int lvl,const char* msg,const char* tag){
+    if(logger_token == nullptr) return 0;
 
-    mx_logger *logger = mx_logger::global_for_loggerKey(logger_key);
+    mx_logger *logger = mx_logger::global_for_loggerToken(logger_token);
     if(logger == nullptr) return 0;
 
     return logger->log(lvl,name,msg,tag,true);

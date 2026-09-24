@@ -17,8 +17,6 @@
 <img src="./icon/logo_400.png" alt="MXLogger"  title="MXLogger" width="180" />
 </p>
 
-# MXLogger
-
 MXLogger 是基于 **mmap** 内存映射机制的跨平台日志库，支持 **AES-CFB-128** 加密，支持 iOS / Android /
 Flutter。核心代码使用 C/C++ 实现，序列化使用 Google 开源的 **FlatBuffers**，Flutter 端通过 `dart:ffi`
 直接调用，性能几乎与原生一致。iPhone 11 上写入 10 万条（每条约 134 字节）耗时约 **0.13s**。
@@ -194,8 +192,13 @@ debugPrint("日志目录 ${logger.diskcachePath}");
 # API 一览
 
 三端共通的两个概念：一个 logger 由 **nameSpace + diskCacheDirectory** 唯一确定，底层 C++ 对象按这一对
-去重；这一对的 md5 就是 **loggerKey**——大型 app 组件化时把它传给子模块，子模块用类方法写日志，不必传
+去重；这一对的 md5 就是 **loggerToken**——大型 app 组件化时把它传给子模块，子模块用类方法写日志，不必传
 logger 对象。
+
+> **废弃说明。** `loggerToken` 之前叫 `loggerKey`，容易和加密用的 `cryptKey` 混淆。iOS / Android / Flutter
+> 三端所有 `loggerKey` 系列 API 仍然可用，内部直接转发到对应的 `loggerToken` 版本，但已标记为废弃，
+> **后续版本一定会移除**。请尽早迁移：`loggerKey` → `loggerToken`，`xxxWithLoggerKey:` → `xxxWithLoggerToken:`，
+> `getLoggerKey()` → `getLoggerToken()`，`logLoggerKey` → `logLoggerToken`，`destroyWithLoggerKey` → `destroyWithLoggerToken`。
 
 <a name="ios-api"></a>
 ## iOS —— `MXLogger`（Objective-C）
@@ -217,8 +220,9 @@ logger 对象。
 | `- initWithNamespace:diskCacheDirectory:storagePolicy:fileName:fileHeader:cryptKey:iv:` | 完整初始化方法，其他方法最终都调它 |
 | `+ destroyWithNamespace:` | 按 nameSpace 释放（默认目录） |
 | `+ destroyWithNamespace:diskCacheDirectory:` | 按 nameSpace + 目录释放 |
-| `+ destroyWithLoggerKey:` | 按 loggerKey 释放 |
-| `+ valueForLoggerKey:` | 取已存在的 logger，不存在返回 `nil` |
+| `+ destroyWithLoggerToken:` | 按 loggerToken 释放 |
+| `+ valueForLoggerToken:` | 取已存在的 logger，不存在返回 `nil` |
+| `+ destroyWithLoggerKey:` / `+ valueForLoggerKey:` | **已废弃**，转发到上面的 `LoggerToken` 版本，后续版本将移除 |
 
 ### 属性
 
@@ -232,7 +236,8 @@ logger 对象。
 | `shouldRemoveExpiredDataWhenEnterBackground` | `BOOL` | 进入后台是否自动清理，默认 `YES` |
 | `diskCachePath` | `NSString`（只读） | 日志目录 |
 | `logSize` | `NSUInteger`（只读） | 当前占用字节数 |
-| `loggerKey` | `NSString`（只读） | nameSpace + 目录的 md5 |
+| `loggerToken` | `NSString`（只读） | nameSpace + 目录的 md5 |
+| `loggerKey` | `NSString`（只读） | **已废弃**，值与 `loggerToken` 相同，后续版本将移除 |
 
 ### 写入
 
@@ -244,11 +249,12 @@ logger 对象。
 | `- warnWithName:msg:tag:` | 等级 2 |
 | `- errorWithName:msg:tag:` | 等级 3 |
 | `- fatalWithName:msg:tag:` | 等级 4 |
-| `+ debugWithLoggerKey:name:msg:tag:` | 通过 loggerKey 写入，无需持有 logger 对象 |
-| `+ infoWithLoggerKey:name:msg:tag:` | |
-| `+ warnWithLoggerKey:name:msg:tag:` | |
-| `+ errorWithLoggerKey:name:msg:tag:` | |
-| `+ fatalWithLoggerKey:name:msg:tag:` | |
+| `+ debugWithLoggerToken:name:msg:tag:` | 通过 loggerToken 写入，无需持有 logger 对象 |
+| `+ infoWithLoggerToken:name:msg:tag:` | |
+| `+ warnWithLoggerToken:name:msg:tag:` | |
+| `+ errorWithLoggerToken:name:msg:tag:` | |
+| `+ fatalWithLoggerToken:name:msg:tag:` | |
+| `+ xxxWithLoggerKey:name:msg:tag:` | **已废弃**，转发到 `xxxWithLoggerToken:`，后续版本将移除 |
 
 ### 文件、清理与解析
 
@@ -281,7 +287,7 @@ logger 对象。
 | `static MXLogger initialize(Context, nameSpace, fileHeader)` | |
 | `static MXLogger initialize(Context, nameSpace, fileHeader, cryptKey, iv)` | |
 | `static void destroy(Context, String nameSpace, String diskCacheDirectory)` | 按 nameSpace + 目录释放 |
-| `static void destroy(String loggerKey)` | 按 loggerKey 释放 |
+| `static void destroy(String loggerToken)` | 按 loggerToken 释放 |
 
 ### 配置与状态
 
@@ -297,7 +303,8 @@ native 是唯一事实源）。
 | `void setMaxDiskSize(long)` / `long getMaxDiskSize()` | 最大总字节数，0 不限制 |
 | `long getLogSize()` | 当前占用字节数 |
 | `String getDiskCachePath()` | 日志目录 |
-| `String getLoggerKey()` | nameSpace + 目录的 md5 |
+| `String getLoggerToken()` | nameSpace + 目录的 md5 |
+| `String getLoggerKey()` | **已废弃**，值与 `getLoggerToken()` 相同，后续版本将移除 |
 | `String getErrorDesc()` | 最近一次写入失败的错误信息 |
 
 ### 写入
@@ -312,7 +319,7 @@ native 是唯一事实源）。
 | `int error(String tag, String name, String msg)` | 等级 3 |
 | `int fatal(String tag, String name, String msg)` | 等级 4 |
 | `int log(String tag, int level, String name, String msg)` | 返回 0 成功，-1 / -2 / -3 失败 |
-| `static int log(String loggerKey, String tag, int level, String name, String msg)` | 通过 loggerKey 写入 |
+| `static int log(String loggerToken, String tag, int level, String name, String msg)` | 通过 loggerToken 写入 |
 
 ### 文件、清理与解析
 
@@ -340,7 +347,8 @@ native 是唯一事实源）。
 | `static Future<MXLogger> initialize({required String nameSpace, String? directory, bool consoleEnable = false, MXStoragePolicyType storagePolicy = yyyy_MM_dd, String? fileName, String? fileHeader, String? cryptKey, String? iv})` | 推荐用法，自动获取平台默认目录（iOS `Library/com.mxlog.LoggerCache/nameSpace`，Android `files/com.mxlog.LoggerCache/nameSpace`） |
 | `MXLogger({required String nameSpace, required String directory, ...})` | 同步构造方法，必须显式给目录 |
 | `static void destroy({required String nameSpace, String? directory})` | 释放；会先失效对应的 Dart 实例，避免 use-after-free |
-| `static void destroyWithLoggerKey(String loggerKey)` | 按 loggerKey 释放 |
+| `static void destroyWithLoggerToken(String loggerToken)` | 按 loggerToken 释放 |
+| `static void destroyWithLoggerKey(String loggerKey)` | **已废弃**，转发到 `destroyWithLoggerToken`，后续版本将移除 |
 
 ### Getter
 
@@ -350,7 +358,8 @@ native 是唯一事实源）。
 | `consoleEnable` | `bool` | 控制台输出是否开启 |
 | `diskcachePath` | `String` | 日志目录（directory + nameSpace） |
 | `diskcacheErrorPath` | `String` | 本地错误文件 `error.txt` 路径 |
-| `loggerKey` | `String?` | nameSpace + 目录的 md5 |
+| `loggerToken` | `String?` | nameSpace + 目录的 md5 |
+| `loggerKey` | `String?` | **已废弃**，值与 `loggerToken` 相同，后续版本将移除 |
 | `logSize` | `int` | 当前占用字节数 |
 | `logFiles` | `List<MXFileEntity>` | 日志文件列表 |
 | `errorDesc` | `String?` | 最近一次 native 写入错误，无错误返回 `null` |
@@ -369,7 +378,7 @@ native 是唯一事实源）。
 | `void removeExpireData()` | 先删过期文件，超出大小限制再从最旧的继续删 |
 | `void removeAll()` | 删除全部日志文件 |
 | `void removeBeforeAllData()` | 删除除当前正在写入外的所有文件 |
-| `int getLogSize()` / `String getDiskcachePath()` / `String? getLoggerKey()` / `List<MXFileEntity> getLogFiles()` | 上面几个 getter 的方法形式 |
+| `int getLogSize()` / `String getDiskcachePath()` / `String? getLoggerToken()` / `List<MXFileEntity> getLogFiles()` | 上面几个 getter 的方法形式 |
 
 ### 写入
 
@@ -381,8 +390,9 @@ native 是唯一事实源）。
 | `int error(String msg, {String? name, String? tag})` | 等级 3 |
 | `int fatal(String msg, {String? name, String? tag})` | 等级 4 |
 | `int log(int lvl, String msg, {String? name, String? tag})` | 返回 0 成功，-1 扩容失败 / -2 解除映射失败 / -3 映射失败 |
-| `static void logLoggerKey(String? loggerKey, int lvl, String msg, {String? name, String? tag})` | 通过 loggerKey 写入 |
-| `static void debugLog(String? loggerKey, String msg, {String? name, String? tag})` | 另有 `infoLog` / `warnLog` / `errorLog` / `fatalLog`，签名一致 |
+| `static void logLoggerToken(String? loggerToken, int lvl, String msg, {String? name, String? tag})` | 通过 loggerToken 写入 |
+| `static void logLoggerKey(...)` | **已废弃**，转发到 `logLoggerToken`，后续版本将移除 |
+| `static void debugLog(String? loggerToken, String msg, {String? name, String? tag})` | 另有 `infoLog` / `warnLog` / `errorLog` / `fatalLog`，签名一致 |
 
 ### 写入失败记录与解析
 
@@ -504,7 +514,7 @@ Logan 和 Xlog 对数据做了压缩，实际体积会小很多。日志压缩�
 - 一个 **nameSpace + diskCacheDirectory** 只对应一个 logger：重复初始化拿到的是同一个 native 对象的
   包装，通过任意一个改配置对其他实例同样生效。
 - `nameSpace` 建议使用域名反转保证唯一性。
-- 组件化工程把 **loggerKey** 传给子模块，子模块用类方法写日志，不必传 logger 对象。
+- 组件化工程把 **loggerToken** 传给子模块，子模块用类方法写日志，不必传 logger 对象。
 - `maxDiskAge` / `maxDiskSize` 不是每次写入都校验：清理发生在 `removeExpireData`（iOS 与 Flutter 进入
   后台自动调用，Android 需自行调用）。
 

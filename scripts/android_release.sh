@@ -1,11 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
+# 发布 Android 库 mxlogger：构建 AAR，打包 sources/javadoc/pom，GPG 签名后压成 Maven Central 上传用的 ZIP，
+# 输出到 scripts/release/<version>_mxlogger.zip。
+#
 # 用法:
-#   ./release.sh 1.2.15
+#   scripts/android_release.sh 1.2.15
 #
 # 脚本会自己跑 gradle 构建，改完源码（Java / Kotlin / C++）直接执行即可。
-# 如果确认产物已是最新、想跳过构建，用: SKIP_BUILD=1 ./release.sh 1.2.15
+# 如果确认产物已是最新、想跳过构建，用: SKIP_BUILD=1 scripts/android_release.sh 1.2.15
 
 VERSION="${1:-}"
 if [ -z "${VERSION}" ]; then
@@ -19,7 +22,10 @@ ARTIFACT_ID="mxlogger"
 GPG_KEY="99ECB1C655BCEDC6"    # 你的 GPG 主 KeyID
 
 # ===== 路径写死 =====
-PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# 本脚本在 scripts/，上一级即仓库根；Android 工程位于 Android/MXLogger
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/../Android/MXLogger" && pwd)"
+RELEASE_DIR="${SCRIPT_DIR}/release"   # 最终 ZIP 输出到 scripts/release/
 SRC_DIR="${PROJECT_DIR}/mxlogger"
 GRADLEW="${PROJECT_DIR}/gradlew"
 AAR_SRC="${SRC_DIR}/build/outputs/aar/mxlogger-DefaultCpp-release.aar"  # 固定 AAR 路径
@@ -62,7 +68,7 @@ if [ "${SKIP_BUILD:-0}" = "1" ]; then
 fi
 
 # ===== 输出目录 =====
-OUTPUT_DIR="${PROJECT_DIR}/release/${VERSION}"
+OUTPUT_DIR="${RELEASE_DIR}/${VERSION}"
 mkdir -p "${OUTPUT_DIR}"
 
 AAR_FILE="${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}.aar"
@@ -169,8 +175,8 @@ for f in "${AAR_FILE}" "${SRC_JAR_FILE}" "${DOC_JAR_FILE}" "${POM_FILE}"; do
   sign_and_hash "${f}"
 done
 
-# ===== 组装 staging 并打包 ZIP 到 release 目录 =====
-STAGING_ROOT="${PROJECT_DIR}/staging"
+# ===== 组装 staging 并打包 ZIP 到 scripts/release 目录 =====
+STAGING_ROOT="${RELEASE_DIR}/staging"
 STAGING_DIR="${STAGING_ROOT}/${GROUP_ID//.//}/${ARTIFACT_ID}/${VERSION}"
 rm -rf "${STAGING_ROOT}"
 mkdir -p "${STAGING_DIR}"
@@ -182,7 +188,7 @@ cp -f "${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}-javadoc.jar"*  "${STAGING_DIR}/"
 cp -f "${OUTPUT_DIR}/${ARTIFACT_ID}-${VERSION}.pom"*          "${STAGING_DIR}/"
 
 # 打包 staging 下所有文件为 ZIP 到 release 目录
-ZIP_FILE="${PROJECT_DIR}/release/${VERSION}_mxlogger.zip"
+ZIP_FILE="${RELEASE_DIR}/${VERSION}_mxlogger.zip"
 rm -f "${ZIP_FILE}"
 (
   cd "${STAGING_ROOT}"

@@ -5,12 +5,12 @@
 //  MXLogger 全功能演示主页
 //  覆盖的 API:
 //   - initializeWithNamespace:storagePolicy:fileName:fileHeader:cryptKey:iv:
-//   - destroyWithNamespace: / valueForLoggerKey:
+//   - destroyWithNamespace: / valueForLoggerToken:
 //   - debug/info/warn/error/fatal WithName:msg:tag:
 //   - logWithLevel:name:msg:tag:
-//   - +infoWithLoggerKey:... 等类方法写入
+//   - +infoWithLoggerToken:... 等类方法写入
 //   - level / consoleEnable / enable / shouldRemoveExpiredDataWhenEnterBackground
-//   - maxDiskAge / maxDiskSize / logSize / diskCachePath / loggerKey
+//   - maxDiskAge / maxDiskSize / logSize / diskCachePath / loggerToken
 //   - logFiles / errorDesc
 //   - removeExpireData / removeBeforeAllData / removeAllData
 //
@@ -248,7 +248,7 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     MXDemoRow *keyRow = [MXDemoRow rowWithIcon:@"key.fill" tint:UIColor.systemBrownColor
                                          title:MXDemoStr(@"home.write.key.title")
                                       subtitle:MXDemoStr(@"home.write.key.subtitle")];
-    keyRow.action = ^(MXDemoRow *r) { [weakSelf writeByLoggerKey]; };
+    keyRow.action = ^(MXDemoRow *r) { [weakSelf writeByLoggerToken]; };
     [writeRows addObject:keyRow];
     writeSection.rows = writeRows;
 
@@ -369,9 +369,9 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     infoSection.footer = MXDemoStr(@"home.section.info.footer");
 
     MXDemoRow *keyInfoRow = [MXDemoRow rowWithIcon:@"number" tint:UIColor.systemIndigoColor
-                                             title:@"loggerKey" subtitle:self.logger.loggerKey];
+                                             title:@"loggerToken" subtitle:self.logger.loggerToken];
     keyInfoRow.action = ^(MXDemoRow *r) {
-        UIPasteboard.generalPasteboard.string = weakSelf.logger.loggerKey;
+        UIPasteboard.generalPasteboard.string = weakSelf.logger.loggerToken;
         [weakSelf toast:MXDemoStr(@"toast.key.copied")];
     };
 
@@ -454,18 +454,18 @@ typedef NS_ENUM(NSInteger, MXDemoRowStyle) {
     [self handleWriteResult:result successText:MXDemoStr(@"toast.custom.success")];
 }
 
-- (void)writeByLoggerKey {
-    // 业务组件不持有 logger 对象，只拿一个字符串 key 即可写入
-    NSString *loggerKey = self.logger.loggerKey;
+- (void)writeByLoggerToken {
+    // 业务组件不持有 logger 对象，只拿一个字符串 token 即可写入
+    NSString *loggerToken = self.logger.loggerToken;
 
-    // 也可以通过 key 找回实例: [MXLogger valueForLoggerKey:loggerKey]
-    MXLogger *found = [MXLogger valueForLoggerKey:loggerKey];
-    NSAssert(found == self.logger, @"valueForLoggerKey 应返回同一实例");
+    // 也可以通过 token 找回实例: [MXLogger valueForLoggerToken:loggerToken]
+    MXLogger *found = [MXLogger valueForLoggerToken:loggerToken];
+    NSAssert(found == self.logger, @"valueForLoggerToken 应返回同一实例");
 
-    NSInteger result = [MXLogger infoWithLoggerKey:loggerKey
-                                              name:@"module.user"
-                                               msg:MXDemoStr(@"log.module.msg")
-                                               tag:@"module"];
+    NSInteger result = [MXLogger infoWithLoggerToken:loggerToken
+                                                name:@"module.user"
+                                                 msg:MXDemoStr(@"log.module.msg")
+                                                 tag:@"module"];
     [self handleWriteResult:result successText:MXDemoStr(@"toast.key.success")];
 }
 

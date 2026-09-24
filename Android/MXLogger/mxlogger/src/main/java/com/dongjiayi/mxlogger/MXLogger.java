@@ -32,12 +32,12 @@ public class MXLogger {
      */
 
     /**
-     * loggerKey -> 已创建的Java实例列表。
+     * loggerToken -> 已创建的Java实例列表。
      * destroy时据此把所有关联实例的句柄置0，销毁后的调用在JNI层安全短路
      * 而不是解引用悬垂指针(use-after-free)；同一key允许多个实例是因为
      * 直接new构造方法仍可能创建出共享同一native对象的多个Java包装
      * <p>
-     * loggerKey -> list of created Java instances.
+     * loggerToken -> list of created Java instances.
      * destroy uses it to zero the handle of every associated instance, so calls after
      * destruction short-circuit safely in the JNI layer instead of dereferencing a
      * dangling pointer (use-after-free); one key may map to several instances because
@@ -132,7 +132,7 @@ public class MXLogger {
             diskCacheDirectory = defaultDiskCacheDirectory(context);
         }
         synchronized (instanceMap) {
-            String key = native_loggerKey_for(nameSpace, diskCacheDirectory);
+            String key = native_loggerToken_for(nameSpace, diskCacheDirectory);
             if (key != null) {
                 List<MXLogger> exist = instanceMap.get(key);
                 if (exist != null && !exist.isEmpty()) {
@@ -179,7 +179,7 @@ public class MXLogger {
      */
     private static void registerInstance(@NonNull MXLogger logger) {
         if (logger.nativeHandle == 0) return;
-        String key = native_loggerKey(logger.nativeHandle);
+        String key = native_loggerToken(logger.nativeHandle);
         if (key == null) return;
         synchronized (instanceMap) {
             List<MXLogger> list = instanceMap.get(key);
@@ -201,10 +201,10 @@ public class MXLogger {
      * already in flight during destroy is a known gap of the core's lifetime design
      * that cannot be closed from the Java layer
      */
-    private static void invalidateInstances(@Nullable String loggerKey) {
-        if (loggerKey == null) return;
+    private static void invalidateInstances(@Nullable String loggerToken) {
+        if (loggerToken == null) return;
         synchronized (instanceMap) {
-            List<MXLogger> list = instanceMap.remove(loggerKey);
+            List<MXLogger> list = instanceMap.remove(loggerToken);
             if (list == null) return;
             for (MXLogger logger : list) {
                 logger.nativeHandle = 0;
@@ -416,11 +416,11 @@ public class MXLogger {
     /**
      * 设置是否开启日志写入功能，false时禁用日志。
      * 会同步到底层C++对象：其他模块通过 {@link #log(String, String, int, String, String)}
-     * 静态方法(loggerKey)写入同一logger时同样会被禁用，与iOS/Flutter端语义一致
+     * 静态方法(loggerToken)写入同一logger时同样会被禁用，与iOS/Flutter端语义一致
      * <p>
      * Enable or disable logging; pass false to disable.
      * The flag is propagated to the underlying C++ instance, so writes from other
-     * modules via the static {@link #log(String, String, int, String, String)} (loggerKey)
+     * modules via the static {@link #log(String, String, int, String, String)} (loggerToken)
      * path are disabled too — consistent with the iOS/Flutter semantics
      */
     public void setEnable(boolean enable) {
@@ -541,38 +541,56 @@ public class MXLogger {
         /// 先失效全部关联的Java实例再销毁C++对象，销毁后的调用安全短路
         /// Invalidate every associated Java instance before destroying the C++ object,
         /// so calls made after destruction short-circuit safely
-        invalidateInstances(native_loggerKey_for(nameSpace, diskCacheDirectory));
+        invalidateInstances(native_loggerToken_for(nameSpace, diskCacheDirectory));
         native_destroy(nameSpace,diskCacheDirectory);
     }
 
     /**
-     * 通过loggerKey销毁底层C++对象
+     * 通过loggerToken销毁底层C++对象
      * <p>
-     * Destroy the underlying C++ instance identified by loggerKey
+     * Destroy the underlying C++ instance identified by loggerToken
      */
-    public static void  destroy(@NonNull String loggerKey){
-        invalidateInstances(loggerKey);
-        native_destroy_loggerKey(loggerKey);
+    public static void  destroy(@NonNull String loggerToken){
+        invalidateInstances(loggerToken);
+        native_destroy_loggerToken(loggerToken);
     }
 
     /**
-     * 获取logger的唯一标识loggerKey（nameSpace+diskCacheDirectory的md5值）
+     * 获取logger的唯一标识loggerToken（nameSpace+diskCacheDirectory的md5值）。
+     * 组件化场景下把它传给子模块，子模块通过 {@link #log(String, String, int, String, String)}
+     * 写入，无需持有logger对象
      * <p>
-     * Get the logger's unique key (the md5 of nameSpace + diskCacheDirectory)
+     * Get the logger's unique token (the md5 of nameSpace + diskCacheDirectory).
+     * In a modularized app, pass it to sub-modules so they can write through
+     * {@link #log(String, String, int, String, String)} without holding the logger object
      */
+    public String getLoggerToken() {
+        return native_loggerToken(nativeHandle);
+    }
+
+    /**
+     * 已废弃：请改用 {@link #getLoggerToken()}，后续版本将移除。返回值与 getLoggerToken 完全相同
+     * <p>
+     * Deprecated: use {@link #getLoggerToken()} instead; this method will be removed in a future
+     * release. Its value is identical to getLoggerToken
+     *
+     * @deprecated loggerKey 已废弃，后续版本将移除，请改用 {@link #getLoggerToken()} /
+     *             loggerKey is deprecated and will be removed in a future release, use {@link #getLoggerToken()} instead
+     */
+    @Deprecated
     public String getLoggerKey() {
-        return native_loggerKey(nativeHandle);
+        return getLoggerToken();
     }
 
     /**
-     * 类方法：根据loggerKey获取已初始化的logger对象进行日志写入（适用于模块化场景，无需持有logger对象）。
+     * 类方法：根据loggerToken获取已初始化的logger对象进行日志写入（适用于模块化场景，无需持有logger对象）。
      * 如果没有获取到logger对象 则调用这个方法没有任何反应 也不会报错
      * <p>
-     * Class method: write a log entry via the loggerKey of an already-initialized logger
+     * Class method: write a log entry via the loggerToken of an already-initialized logger
      * (for modularized apps, no logger instance needed).
-     * If no logger matches the key, the call is a silent no-op — no error is thrown
+     * If no logger matches the token, the call is a silent no-op — no error is thrown
      *
-     * @param loggerKey logger的唯一标识 / unique key of the logger
+     * @param loggerToken logger的唯一标识 / unique token of the logger
      * @param tag       标记 / tag
      * @param level     日志等级 0:debug 1:info 2:warn 3:error 4:fatal
      *                  / log level: 0 debug, 1 info, 2 warn, 3 error, 4 fatal
@@ -580,9 +598,9 @@ public class MXLogger {
      * @param msg       日志信息 / log message
      * @return 0 成功 非0 失败 / 0 success, non-zero on failure
      */
-    public static int log(@NonNull String loggerKey, @Nullable String tag,@NonNull int level,@Nullable String name,@Nullable String msg){
+    public static int log(@NonNull String loggerToken, @Nullable String tag,@NonNull int level,@Nullable String name,@Nullable String msg){
         boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
-       return native_log_loggerKey(loggerKey,name,level,msg,tag,isMainThread);
+       return native_log_loggerToken(loggerToken,name,level,msg,tag,isMainThread);
     }
 
     /**
@@ -629,11 +647,11 @@ public class MXLogger {
     private  static  native int native_log(long nativeHandle,String name,int level,String msg,String tag,boolean mainThread);
 
     /**
-     * native方法: 通过loggerKey写入日志
+     * native方法: 通过loggerToken写入日志
      * <p>
-     * Native method: write a log entry via loggerKey
+     * Native method: write a log entry via loggerToken
      */
-    private  static  native int native_log_loggerKey(String loggerKey,String name,int level,String msg,String tag,boolean mainThread);
+    private  static  native int native_log_loggerToken(String loggerToken,String name,int level,String msg,String tag,boolean mainThread);
 
     /**
      * native方法: 设置写入文件的日志等级
@@ -692,12 +710,12 @@ public class MXLogger {
     private  static  native  long native_getMaxDiskSize(long nativeHandle);
 
     /**
-     * native方法: 计算nameSpace+diskCacheDirectory对应的loggerKey(md5)，不创建logger对象
+     * native方法: 计算nameSpace+diskCacheDirectory对应的loggerToken(md5)，不创建logger对象
      * <p>
-     * Native method: compute the loggerKey (md5) for nameSpace + diskCacheDirectory
+     * Native method: compute the loggerToken (md5) for nameSpace + diskCacheDirectory
      * without creating a logger instance
      */
-    private  static  native  String native_loggerKey_for(String nameSpace,String diskCacheDirectory);
+    private  static  native  String native_loggerToken_for(String nameSpace,String diskCacheDirectory);
 
     /**
      * native方法: 设置日志文件最大存储时长(秒)
@@ -756,11 +774,11 @@ public class MXLogger {
     private static  native  void  native_removeBeforeAll(long nativeHandle);
 
     /**
-     * native方法: 获取logger的唯一标识loggerKey
+     * native方法: 获取logger的唯一标识loggerToken
      * <p>
-     * Native method: get the logger's unique key (loggerKey)
+     * Native method: get the logger's unique key (loggerToken)
      */
-    private static native  String native_loggerKey(long nativeHandle);
+    private static native  String native_loggerToken(long nativeHandle);
 
     /**
      * native方法: 通过nameSpace+diskCacheDirectory销毁C++对象
@@ -770,11 +788,11 @@ public class MXLogger {
     private  static native  void native_destroy(String nameSpace,String diskCacheDirectory);
 
     /**
-     * native方法: 通过loggerKey销毁C++对象
+     * native方法: 通过loggerToken销毁C++对象
      * <p>
-     * Native method: destroy the C++ instance by loggerKey
+     * Native method: destroy the C++ instance by loggerToken
      */
-    private static native void native_destroy_loggerKey(String loggerKey);
+    private static native void native_destroy_loggerToken(String loggerToken);
 
     /**
      * native方法: 获取日志文件列表 每个元素为一个JSON字符串

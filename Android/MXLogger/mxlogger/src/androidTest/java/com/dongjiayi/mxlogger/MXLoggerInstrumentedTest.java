@@ -142,22 +142,33 @@ public class MXLoggerInstrumentedTest {
     // 初始化与属性
 
     @Test
-    public void loggerKeyIs32CharsAndStable() {
+    public void loggerTokenIs32CharsAndStable() {
         String ns = uniqueNs();
-        String dir = newDir("key").getAbsolutePath();
+        String dir = newDir("token").getAbsolutePath();
         MXLogger a = new MXLogger(context, ns, dir,
                 MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
-        assertNotNull(a.getLoggerKey());
-        assertEquals(32, a.getLoggerKey().length());
+        assertNotNull(a.getLoggerToken());
+        assertEquals(32, a.getLoggerToken().length());
 
-        // 同 namespace+directory -> 同key
+        // 同 namespace+directory -> 同token
         MXLogger b = new MXLogger(context, ns, dir,
                 MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
-        assertEquals(a.getLoggerKey(), b.getLoggerKey());
+        assertEquals(a.getLoggerToken(), b.getLoggerToken());
 
-        // 不同 namespace -> 不同key
+        // 不同 namespace -> 不同token
         MXLogger c = newLogger();
-        assertNotEquals(a.getLoggerKey(), c.getLoggerKey());
+        assertNotEquals(a.getLoggerToken(), c.getLoggerToken());
+    }
+
+    /** 已废弃的 getLoggerKey 必须与 getLoggerToken 返回同一个值，移除前保留此用例 */
+    @Test
+    @SuppressWarnings("deprecation")
+    public void deprecatedGetLoggerKeyEqualsGetLoggerToken() {
+        MXLogger logger = newLogger();
+        assertEquals(logger.getLoggerToken(), logger.getLoggerKey());
+        // 旧值同样能走静态写入与销毁
+        assertEquals(0, MXLogger.log(logger.getLoggerKey(), "kt", 1, "kn", "via-deprecated-key"));
+        MXLogger.destroy(logger.getLoggerKey());
     }
 
     @Test
@@ -500,18 +511,18 @@ public class MXLoggerInstrumentedTest {
     }
 
     // ------------------------------------------------------------------
-    // loggerKey 静态写入
+    // loggerToken 静态写入
 
     @Test
-    public void staticLogViaLoggerKey() throws IOException {
+    public void staticLogViaLoggerToken() throws IOException {
         MXLogger logger = newLogger();
-        String key = logger.getLoggerKey();
+        String token = logger.getLoggerToken();
 
-        assertEquals(0, MXLogger.log(key, "kt", 1, "kn", "via-key"));
+        assertEquals(0, MXLogger.log(token, "kt", 1, "kn", "via-token"));
 
         File file = currentLogFile(logger);
         assertEquals(1, recordCount(file));
-        assertTrue(fileContains(file, "via-key"));
+        assertTrue(fileContains(file, "via-token"));
     }
 
     // ------------------------------------------------------------------
@@ -539,22 +550,22 @@ public class MXLoggerInstrumentedTest {
     }
 
     @Test
-    public void destroyByLoggerKeyAndReopen() throws IOException {
+    public void destroyByLoggerTokenAndReopen() throws IOException {
         String ns = uniqueNs();
         String dir = newDir("destroy2").getAbsolutePath();
         MXLogger logger = new MXLogger(context, ns, dir,
                 MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
-        String key = logger.getLoggerKey();
+        String token = logger.getLoggerToken();
         logger.info(null, null, "x");
 
-        MXLogger.destroy(key);
+        MXLogger.destroy(token);
 
         MXLogger reopened = new MXLogger(context, ns, dir,
                 MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
-        assertEquals(key, reopened.getLoggerKey());
+        assertEquals(token, reopened.getLoggerToken());
         reopened.info(null, null, "y");
         assertEquals(2, recordCount(currentLogFile(reopened)));
-        MXLogger.destroy(key);
+        MXLogger.destroy(token);
     }
 
     // ------------------------------------------------------------------

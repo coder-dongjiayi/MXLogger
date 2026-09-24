@@ -23,6 +23,8 @@ void main() {
       expect(logger.errorDesc, isNull);
       expect(logger.diskcachePath, '');
       expect(logger.diskcacheErrorPath, '/error.txt');
+      expect(logger.loggerToken, isNull);
+      // ignore: deprecated_member_use_from_same_package
       expect(logger.loggerKey, isNull);
       expect(logger.logSize, 0);
       expect(logger.logFiles, isEmpty);
@@ -61,19 +63,25 @@ void main() {
       logger.closeFailFile();
       expect(logger.getLogSize(), 0);
       expect(logger.getDiskcachePath(), '');
+      expect(logger.getLoggerToken(), isNull);
+      // ignore: deprecated_member_use_from_same_package
       expect(logger.getLoggerKey(), isNull);
       expect(logger.getLogFiles(), isEmpty);
     });
 
     test('静态方法可安全调用且返回空', () {
       web.MXLogger.destroy(nameSpace: 'ns');
-      web.MXLogger.destroyWithLoggerKey('key');
-      web.MXLogger.logLoggerKey('key', 1, 'msg');
-      web.MXLogger.debugLog('key', 'm');
-      web.MXLogger.infoLog('key', 'm');
-      web.MXLogger.warnLog('key', 'm');
-      web.MXLogger.errorLog('key', 'm');
-      web.MXLogger.fatalLog('key', 'm');
+      web.MXLogger.destroyWithLoggerToken('token');
+      web.MXLogger.logLoggerToken('token', 1, 'msg');
+      // ignore: deprecated_member_use_from_same_package
+      web.MXLogger.destroyWithLoggerKey('token');
+      // ignore: deprecated_member_use_from_same_package
+      web.MXLogger.logLoggerKey('token', 1, 'msg');
+      web.MXLogger.debugLog('token', 'm');
+      web.MXLogger.infoLog('token', 'm');
+      web.MXLogger.warnLog('token', 'm');
+      web.MXLogger.errorLog('token', 'm');
+      web.MXLogger.fatalLog('token', 'm');
       expect(web.MXLogger.selectLogfiles(directory: '/tmp'), isEmpty);
       expect(
           web.MXLogger.selectLogmsg(diskcacheFilePath: '/tmp/a.mx'), isEmpty);

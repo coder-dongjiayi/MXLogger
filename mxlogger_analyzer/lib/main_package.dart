@@ -103,7 +103,7 @@ class _MyAppState extends State<MyApp> {
     logger.setLevel(0);
 
     debugPrint("diskcachePath:${logger.diskcachePath}");
-    debugPrint("loggerKey:${logger.loggerKey}");
+    debugPrint("loggerToken:${logger.loggerToken}");
 
     if (!mounted) return;
     setState(() {

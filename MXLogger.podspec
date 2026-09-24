@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 # pod lib lint --allow-warnings --verbose --skip-import-validation
   s.name         = "MXLogger"
-  s.version      = "2.0.0"
+  s.version      = "2.1.0"
   s.summary      = "High-performance cross-platform logger built on mmap — the Objective-C API for iOS."
 
   s.description  = <<-DESC
@@ -33,13 +33,13 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/coder-dongjiayi/MXLogger.git", :tag => "v#{s.version}" }
 
-  s.source_files =  "iOS/MXLogger/MXLogger", "iOS/MXLogger/MXLogger/*.{h,mm}"
-  s.public_header_files = "iOS/MXLogger/MXLogger/MXLogger.h"
+  s.source_files =  "iOS/MXLogger/MXLogger/**/*.{h,mm}"
+  s.public_header_files = "iOS/MXLogger/MXLogger/include/MXLogger/MXLogger.h"
 
 
    s.framework    = "CoreFoundation"
 
-   s.dependency 'MXLoggerCore', "2.0.0"
+   s.dependency 'MXLoggerCore', "2.1.0"
    s.libraries    = "z", "c++"
    
   s.pod_target_xcconfig = {

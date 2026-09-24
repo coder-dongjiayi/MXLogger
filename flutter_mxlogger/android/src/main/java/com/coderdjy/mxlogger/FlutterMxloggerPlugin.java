@@ -53,25 +53,25 @@ public class FlutterMxloggerPlugin implements FlutterPlugin, MethodCallHandler {
     }
   }
 
-  public static  void debug(@NonNull String loggerKey, @Nullable String tag,@Nullable String name,@Nullable String msg){
-    log(loggerKey,tag,0,name,msg);
+  public static  void debug(@NonNull String loggerToken, @Nullable String tag,@Nullable String name,@Nullable String msg){
+    log(loggerToken,tag,0,name,msg);
   }
 
-  public static  void info(@NonNull String loggerKey, @Nullable String tag,@Nullable String name,@Nullable String msg){
-    log(loggerKey,tag,1,name,msg);
+  public static  void info(@NonNull String loggerToken, @Nullable String tag,@Nullable String name,@Nullable String msg){
+    log(loggerToken,tag,1,name,msg);
   }
-  public static  void warn(@NonNull String loggerKey, @Nullable String tag,@Nullable String name,@Nullable String msg){
-    log(loggerKey,tag,2,name,msg);
+  public static  void warn(@NonNull String loggerToken, @Nullable String tag,@Nullable String name,@Nullable String msg){
+    log(loggerToken,tag,2,name,msg);
   }
-  public static  void error(@NonNull String loggerKey, @Nullable String tag,@Nullable String name,@Nullable String msg){
-    log(loggerKey,tag,3,name,msg);
+  public static  void error(@NonNull String loggerToken, @Nullable String tag,@Nullable String name,@Nullable String msg){
+    log(loggerToken,tag,3,name,msg);
   }
-  public static  void fatal(@NonNull String loggerKey, @Nullable String tag,@Nullable String name,@Nullable String msg){
-    log(loggerKey,tag,4,name,msg);
+  public static  void fatal(@NonNull String loggerToken, @Nullable String tag,@Nullable String name,@Nullable String msg){
+    log(loggerToken,tag,4,name,msg);
   }
 
-  private static void log(@NonNull String loggerKey, @Nullable String tag,@NonNull int level,@Nullable String name,@Nullable String msg){
-    MXLogger.log(loggerKey,tag,level,name,msg);
+  private static void log(@NonNull String loggerToken, @Nullable String tag,@NonNull int level,@Nullable String name,@Nullable String msg){
+    MXLogger.log(loggerToken,tag,level,name,msg);
   }
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
