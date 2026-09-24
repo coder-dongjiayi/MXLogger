@@ -1,14 +1,43 @@
 # flutter_mxlogger
 
-English documentation is available [here](./README.md).
+[English](./README.md) | 简体中文 | [日本語](./README_JA.md) | [한국어](./README_KO.md)
 
 MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB 128 位加密。核心用 C/C++ 实现，序列化使用 Google FlatBuffers，Flutter 端通过 `dart:ffi` 直接调用，性能几乎与原生一致。
 
 更多说明见 [MXLogger 主仓库](https://github.com/coder-dongjiayi/MXLogger)。
 
-- **当前版本**：2.0.0
+- **当前版本**：2.1.0
 - **环境要求**：Dart SDK `>=2.18.0 <4.0.0`、Flutter `>=3.3.0`
 - **平台支持**：iOS（>= 9.0）、Android（minSdk 21）
+
+## 目录
+
+- [安装](#安装)
+- [快速开始](#快速开始)
+- [一、各平台运行机制](#一各平台运行机制)
+  - [1.1 整体结构](#11-整体结构)
+- [二、Dart API](#二dart-api)
+  - [2.1 初始化](#21-初始化)
+  - [2.2 存储策略 `MXStoragePolicyType`](#22-存储策略-mxstoragepolicytype)
+  - [2.3 写日志](#23-写日志)
+  - [2.4 开关与等级](#24-开关与等级)
+  - [2.5 磁盘管理](#25-磁盘管理)
+  - [2.6 状态查询](#26-状态查询)
+  - [2.7 写入失败的兜底记录](#27-写入失败的兜底记录)
+  - [2.8 解析日志文件](#28-解析日志文件)
+  - [2.9 销毁](#29-销毁)
+- [三、`loggerToken`：跨模块、跨语言共用一个 logger](#三loggertoken跨模块跨语言共用一个-logger)
+  - [3.1 它是什么](#31-它是什么)
+  - [3.2 子模块写日志（Dart）](#32-子模块写日志dart)
+  - [3.3 原生代码写日志（Android / iOS）](#33-原生代码写日志android--ios)
+  - [3.4 生命周期](#34-生命周期)
+- [四、解析 `.mx` 日志文件](#四解析-mx-日志文件)
+  - [4.1 文件在哪](#41-文件在哪)
+  - [4.2 桌面解析器（macOS / Windows / Linux）](#42-桌面解析器macos--windows--linux)
+  - [4.3 App 内嵌解析器（`mxlogger_analyzer_lib`）](#43-app-内嵌解析器mxlogger_analyzer_lib)
+  - [4.4 用 Dart 解析](#44-用-dart-解析)
+- [示例工程](#示例工程)
+- [License](#license)
 
 ## 安装
 
@@ -177,9 +206,7 @@ static void errorLog(String? loggerToken, String msg, {String? name, String? tag
 static void fatalLog(String? loggerToken, String msg, {String? name, String? tag});
 ```
 
-同一个 `loggerToken` 在原生侧也能用——Android 走 `FlutterMxloggerPlugin.info(...)`，iOS 走 `[FlutterMxloggerPlugin info:...]`，写进的是同一份文件。
-
-> **废弃说明。** `loggerToken` 之前叫 `loggerKey`，容易和加密用的 `cryptKey` 混淆。`loggerKey`、`getLoggerKey()`、`logLoggerKey(...)`、`destroyWithLoggerKey(...)` 仍然可用并转发到新接口，但已标记 `@Deprecated`，**后续版本一定会移除**。请尽早迁移到 `loggerToken`、`getLoggerToken()`、`logLoggerToken(...)`、`destroyWithLoggerToken(...)`。
+同一个 `loggerToken` 在原生侧也能用——Android 走 `FlutterMxloggerPlugin.info(...)`，iOS 走 `[FlutterMxloggerPlugin info:...]`，写进的是同一份文件。token 是什么、有效期多长、原生侧怎么用，见[第三章](#三loggertoken跨模块跨语言共用一个-logger)。
 
 ## 2.4 开关与等级
 
@@ -217,7 +244,6 @@ App 进入后台时会自动调用一次，可通过 `shouldRemoveExpiredDataWhe
 | `enable` | `bool` | 日志写入是否可用 |
 | `consoleEnable` | `bool` | 控制台开关（全局） |
 | `loggerToken` | `String?` | 底层唯一标识，用于组件化传递 |
-| `loggerKey` | `String?` | **已废弃**，值与 `loggerToken` 相同，后续版本将移除 |
 | `diskcachePath` | `String` | 日志目录（`directory` + `nameSpace`） |
 | `diskcacheErrorPath` | `String` | 错误记录文件路径，即 `diskcachePath/error.txt` |
 | `logSize` | `int` | 已存日志总字节数 |
@@ -301,7 +327,7 @@ final records = await Isolate.run(() => MXLogger.selectLogmsg(
     ));
 ```
 
-配合 `logFiles` 就能在 App 内做一个日志查看器（example 里的 `log_viewer_page.dart` 就是这么实现的）。
+配合 `logFiles` 就能在 App 内做一个日志查看器（example 里的 `log_viewer_page.dart` 就是这么实现的）。不想自己写界面的话，[第四章](#四解析-mx-日志文件)介绍了现成的桌面解析器和 App 内嵌解析器。
 
 > `selectLogfiles({required String directory})` 目前是未实现的占位接口，所有平台都返回空列表，请勿使用。
 
@@ -310,9 +336,6 @@ final records = await Isolate.run(() => MXLogger.selectLogmsg(
 ```dart
 static void destroy({required String nameSpace, String? directory});
 static void destroyWithLoggerToken(String loggerToken);
-
-@Deprecated('use destroyWithLoggerToken')
-static void destroyWithLoggerKey(String loggerKey);   // 转发到 destroyWithLoggerToken，后续版本将移除
 ```
 
 销毁会先失效对应的 Dart 实例（移除生命周期监听、关闭错误文件流、清空 native 句柄），再释放 native 对象。
@@ -323,9 +346,149 @@ static void destroyWithLoggerKey(String loggerKey);   // 转发到 destroyWithLo
 
 ---
 
-# 解析日志文件（桌面工具）
+# 三、`loggerToken`：跨模块、跨语言共用一个 logger
 
-产出的 `.mx` 二进制文件可以用 [mxlogger_analyzer](https://github.com/coder-dongjiayi/MXLogger/releases) 打开，支持按等级、name、tag 过滤和关键字检索。加密日志需要在工具里填入对应的 `cryptKey` / `iv`。
+## 3.1 它是什么
+
+`loggerToken` 是一个标识底层 logger 的字符串，由 C++ 核心根据日志目录算出：`md5(directory/nameSpace)`，也就是 `diskcachePath` 的 MD5。由此带来三个特性：
+
+- 同样的 `nameSpace` + `directory` 永远得到同一个 token，每次启动一样，iOS 和 Android 也一样；目录不同 token 就不同。
+- 核心维护一张全局表 `token → logger`，所有接受 token 的接口都从这张表里查 logger，所以 token 只在该 logger 已在当前进程初始化时才有效。
+- 它不是密钥，和 `cryptKey` / `iv` 没有任何关系，可以随意保存、传递、打印。
+
+通过 `logger.loggerToken`（或 `getLoggerToken()`）读取。实例已失效时返回 `null`，例如初始化失败（2.1）。
+
+## 3.2 子模块写日志（Dart）
+
+组件化 App 里 logger 由主工程创建，目录和加密参数只有主工程知道，子模块不应该依赖这些。把 token 交给子模块，用 2.3 列出的类方法写即可：
+
+```dart
+// 主工程：初始化一次，把 token 发布出去
+final logger = await MXLogger.initialize(nameSpace: "com.example.app", cryptKey: key, iv: iv);
+AppServices.loggerToken = logger.loggerToken;   // 任意服务定位器 / DI 容器都行
+
+// 子模块：完全不知道 MXLogger 是怎么配置的
+MXLogger.infoLog(AppServices.loggerToken, "user tapped pay", name: "pay", tag: "ui");
+MXLogger.errorLog(AppServices.loggerToken, "payment failed: $error", name: "pay", tag: "order");
+```
+
+所有日志写进同一个文件，等级过滤、加密、控制台开关都跟主工程的实例保持一致。token 为 `null` 或查不到时类方法直接丢弃这条日志，不会抛异常。
+
+## 3.3 原生代码写日志（Android / iOS）
+
+token 是在共用的 C++ 核心里算出来的，所以原生层认的是同一个字符串。用你自己的通道（MethodChannel、Pigeon、原生单例……）把它传过去，就能直接写进 Flutter 这个 logger 的文件：
+
+```java
+// Android：com.coderdjy.mxlogger.FlutterMxloggerPlugin
+FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*msg*/ "GET /user 200");
+```
+
+```objc
+// iOS：FlutterMxloggerPlugin.h
+[FlutterMxloggerPlugin info:loggerToken name:@"URLSession" msg:@"GET /user 200" tag:@"network"];
+```
+
+注意参数顺序不同：Android 是 `(token, tag, name, msg)`，iOS 是 `(token, name, msg, tag)`。两端都有 `debug` / `info` / `warn` / `error` / `fatal`。如果原生代码本来就集成了 MXLogger SDK，也可以直接用 SDK 自己的 token 接口：Android `MXLogger.log(token, tag, level, name, msg)`，iOS `[MXLogger infoWithLoggerToken:name:msg:tag:]`（Swift：`MXLogger.info(loggerToken:name:message:tag:)`）。
+
+## 3.4 生命周期
+
+- token 从 `MXLogger.initialize` 起有效，到 `destroy` / `destroyWithLoggerToken`（2.9）失效。同样的 `nameSpace` + `directory` 构造两次会复用同一个底层 logger，两个 Dart 实例拿到的 token 相同。
+- `MXLogger.destroyWithLoggerToken(token)` 是给只持有字符串的代码用的销毁方式：先失效该 token 对应的全部 Dart 实例（`enable` 变为 `false`，之后的调用都是空操作），再释放底层对象；此后用这个 token 写的日志会被丢弃。
+- 用同样参数重新初始化后 token 字符串完全一样，写入随即恢复。所以保存下来的 token 跨启动不会过期，但必须等主工程在本进程里初始化过 logger 才能用。
+
+速查：
+
+| 需求 | 接口 |
+|---|---|
+| 获取 token | `logger.loggerToken` |
+| Dart 写日志 | `MXLogger.debugLog / infoLog / warnLog / errorLog / fatalLog(token, msg, name:, tag:)`、`MXLogger.logLoggerToken(token, lvl, msg, name:, tag:)` |
+| Android 写日志 | `FlutterMxloggerPlugin.debug / info / warn / error / fatal(token, tag, name, msg)` |
+| iOS 写日志 | `[FlutterMxloggerPlugin debug / info / warn / error / fatal:token name: msg: tag:]` |
+| 按 token 销毁 | `MXLogger.destroyWithLoggerToken(token)` |
+
+# 四、解析 `.mx` 日志文件
+
+`.mx` 不是文本文件：每条记录是一个 flatbuffer，初始化时传了 `cryptKey` / `iv` 的话整个文件还经过 AES-CFB-128 加密，用编辑器打开只能看到乱码。有三种读取方式，按场景选：
+
+| 场景 | 用哪个 |
+|---|---|
+| 从设备导出或用户上传的日志文件，在电脑上分析 | [4.2 桌面解析器](#42-桌面解析器macos--windows--linux) |
+| 测试时直接在手机上看日志，不连电脑 | [4.3 App 内嵌解析器](#43-app-内嵌解析器mxlogger_analyzer_lib) |
+| 自己用 Dart 做查看界面或上传管道 | [4.4 用 Dart 解析](#44-用-dart-解析) |
+
+## 4.1 文件在哪
+
+- **目录**：`logger.diskcachePath`，即 `directory/nameSpace`。使用默认目录时，iOS 是 `<Library>/com.mxlog.LoggerCache/<nameSpace>`，Android 是 `<filesDir>/com.mxlog.LoggerCache/<nameSpace>`（`/data/data/<package>/files/...`）。
+- **文件名**由存储策略决定（2.2），如 `2023-01-11_mxlog.mx`。同目录下的 `error.txt`（2.7）是纯文本，不需要解析器。
+- **在 Dart 里列出**：`logger.logFiles` 返回 `MXFileEntity(name, size)`，完整路径是 `"${logger.diskcachePath}/${file.name}"`。
+
+把文件拿到电脑上：
+
+- **iOS 真机**：Xcode > Window > Devices and Simulators > 选中设备和 App > ⚙︎ > *Download Container…*。右键 `.xcappdata` > *显示包内容* > `AppData/Library/com.mxlog.LoggerCache/<nameSpace>/`。
+- **iOS 模拟器**：
+
+  ```bash
+  open "$(xcrun simctl get_app_container booted <bundle id> data)/Library/com.mxlog.LoggerCache/<nameSpace>"
+  ```
+
+- **Android**（debug 包；该目录是 App 私有目录）：
+
+  ```bash
+  adb shell run-as <package> ls files/com.mxlog.LoggerCache/<nameSpace>
+  adb exec-out run-as <package> cat files/com.mxlog.LoggerCache/<nameSpace>/2023-01-11_mxlog.mx > 2023-01-11_mxlog.mx
+  ```
+
+- **Release 包 / 真实用户**：需要 App 自己把文件交出来，例如用 `share_plus` 分享，或上传到你的服务器，路径来自 `logFiles`。logger 仍在写入时也可以直接拷贝文件，下面的内嵌解析器就是这样读取当前目录的。
+
+## 4.2 桌面解析器（macOS / Windows / Linux）
+
+到 [Releases](https://github.com/coder-dongjiayi/MXLogger/releases) 下载对应系统的 `mxlogger_analyzer`。首次打开是三步向导：
+
+1. **选文件**：把一个或多个 `.mx` 文件拖到窗口里，或点击选择。
+2. **解密**：填入初始化 logger 时用的 `cryptKey` / `iv`；未加密就都留空。中途换过密钥的话把每一组都加上，会按勾选框里的序号依次尝试，直到解开为止。填过的值会记住。
+3. **导入**：真实进度条（按字节解析、按条数写库），完成后自动进入数据页。
+
+数据页顶部显示总条数、起止时间和文件名；下面是可点击过滤的等级分布条和 DEBUG–FATAL 等级 chips、关键字搜索（全部 / 内容 / tag / name）加时间范围过滤、点任意卡片上的 `@name` 或 `#tag` 即可按其过滤、JSON 内容以语法着色树展示、单条全屏详情（Esc 关闭），分享按钮可导出 `.txt`。更换文件、修改密钥、清除数据都在顶部菜单里。
+
+解析失败会退回第 2 步，基本都是 `cryptKey` / `iv` 填错。v2.0.0 之前用不足 16 字节的密钥写出的日志可能解不开（见 2.1 的提示）。
+
+截图和完整功能列表见仓库 [README](https://github.com/coder-dongjiayi/MXLogger/blob/main/README_CN.md#日志解析器)。
+
+## 4.3 App 内嵌解析器（`mxlogger_analyzer_lib`）
+
+解析器内核同时也是一个 Flutter package。它在 App 的 `Overlay` 上挂一个可拖动的悬浮球，点一下弹出底部面板，按需解析 `diskcachePath`，测试同学不连电脑就能在手机上看日志。
+
+```yaml
+dependencies:
+  mxlogger_analyzer_lib: last
+```
+
+```dart
+import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
+
+final navigatorKey = GlobalKey<NavigatorState>();
+// MaterialApp(navigatorKey: navigatorKey, ...)
+
+await MXAnalyzer.showDebug(
+  navigatorKey.currentState!.overlay!,
+  diskcachePath: logger.diskcachePath,
+  // 所有解密参数组，按顺序尝试；未加密传 []
+  cryptPairs: [
+    MxCryptPair(key: logger.cryptKey ?? "", iv: logger.iv ?? ""),
+    // MxCryptPair(key: "legacy-key", iv: "legacy-iv"),
+  ],
+  // 分享由宿主接入（share_plus、自己的上传接口……），返回 false 则退化为复制到剪贴板
+  onShare: (MXShareRequest request) async => false,
+);
+
+MXAnalyzer.dismiss(); // 移除悬浮球并释放数据库
+```
+
+这是调试工具，建议只在 debug 开关打开时挂载，不要带给最终用户。完整 API 和移动端适配说明见 [mxlogger_analyzer_lib README](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/mxlogger_analyzer_lib/README.zh-CN.md)。
+
+## 4.4 用 Dart 解析
+
+`MXLogger.selectLogmsg`（2.8）把一个文件解成 `List<Map<String, dynamic>>`，字段与解析器展示的一致。想自己做界面，或者上传前转成 JSON / 文本，用它即可。它是同步 FFI 调用，请放在 isolate 里执行；example 里的 `log_viewer_page.dart` 是完整参考。
 
 # 示例工程
 

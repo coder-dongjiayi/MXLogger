@@ -2,8 +2,8 @@
 
 @interface FlutterMxloggerPlugin : NSObject<FlutterPlugin>
 
-/// loggerToken 需要业务层传过来（即 MXLogger.loggerToken，旧名 loggerToken）
-/// The business layer passes in the loggerToken (MXLogger.loggerToken, formerly loggerToken)
+/// loggerToken 需要业务层传过来（即 MXLogger.loggerToken）
+/// The business layer passes in the loggerToken (MXLogger.loggerToken)
 
 +(NSInteger) debug:(NSString*) loggerToken name:(NSString*)name msg:(NSString*)msg tag:(NSString*)tag;
 
