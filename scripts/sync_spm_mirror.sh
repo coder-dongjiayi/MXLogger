@@ -8,7 +8,7 @@
 #   输出目录省略时: 优先 ../MXLogger-SwiftPM (镜像仓库本地 clone)，不存在则 build/spm
 #
 # 输出目录若是 git 仓库，其 .git 会被保留，其余内容以主仓库为准整体覆盖(含删除)。
-# 之后在镜像目录里 commit / tag / push 即完成发版；也可交给 .github/workflows/publish-spm.yml。
+# 之后在镜像目录里 commit / tag / push 即完成发版。
 #
 # Assemble Core (C++) and iOS/MXLogger (Objective-C) into the standard SwiftPM layout and
 # write it to the working tree of the mirror repository coder-dongjiayi/MXLogger-SwiftPM.
@@ -18,8 +18,7 @@
 #   Without an argument: ../MXLogger-SwiftPM (local clone of the mirror) if present, else build/spm
 #
 # If the output directory is a git repository its .git is kept; everything else is replaced
-# (including deletions) to match the main repository. Then commit / tag / push in the mirror,
-# or let .github/workflows/publish-spm.yml do it.
+# (including deletions) to match the main repository.
 #
 set -euo pipefail
 
