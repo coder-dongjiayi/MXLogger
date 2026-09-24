@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_mxlogger'
-  s.version          = '2.0.0'
+  s.version          = '2.1.0'
   s.summary          = 'iOS platform side of the flutter_mxlogger plugin.'
   s.description      = <<-DESC
 iOS implementation of the flutter_mxlogger Flutter plugin. It exports the
@@ -17,10 +17,10 @@ flutter_mxlogger package to your pubspec instead.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'dongjiayi' => 'dongjiayi' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
-  s.public_header_files = 'Classes/**/*.h'
+  s.source_files = 'flutter_mxlogger/Sources/flutter_mxlogger/**/*.{h,mm}'
+  s.public_header_files = 'flutter_mxlogger/Sources/flutter_mxlogger/include/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'MXLogger' ,'2.0.0'
+  s.dependency 'MXLogger' ,'2.1.0'
   s.platform = :ios, '9.0'
 
   # Flutter.framework does not contain a i386 slice.

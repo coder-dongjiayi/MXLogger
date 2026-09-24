@@ -1,5 +1,8 @@
-#import "FlutterMxloggerPlugin.h"
+#import "./include/flutter_mxlogger/FlutterMxloggerPlugin.h"
 #import <MXLogger/MXLogger.h>
+/// 定义在 flutter-bridge.mm，见该文件末尾的说明 / Defined in flutter-bridge.mm, see the note at its end
+extern "C" void flutter_mxlogger_ffi_anchor(void);
+
 @interface FlutterMxloggerPlugin()
 {
    
@@ -10,6 +13,9 @@
 
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
+  // 引用一次 FFI 桥接文件的符号，防止静态链接(SwiftPM)时整个 .o 被链接器丢弃
+  // Touch the FFI bridge once so the linker keeps its object file under static linking (SwiftPM)
+  flutter_mxlogger_ffi_anchor();
  
   FlutterMethodChannel* channel = [FlutterMethodChannel
       methodChannelWithName:@"flutter_mxlogger"

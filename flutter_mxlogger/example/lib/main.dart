@@ -92,7 +92,7 @@ class LandingPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              Text('Flutter Demo · flutter_mxlogger 2.0.0',
+              Text('Flutter Demo · flutter_mxlogger 2.1.0',
                   style: TextStyle(fontSize: 12, color: tertiaryText(context))),
               const SizedBox(height: 48),
             ],

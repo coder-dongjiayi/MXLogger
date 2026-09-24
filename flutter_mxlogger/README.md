@@ -14,13 +14,14 @@ See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) 
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.0.0
+  flutter_mxlogger: ^2.1.0
 ```
 
 The native dependencies are pulled in automatically — no manual setup required:
 
-- iOS: CocoaPods depends on `MXLogger 2.0.0` → `MXLoggerCore 2.0.0`
-- Android: Gradle depends on `io.github.coder-dongjiayi:mxlogger:2.0.0`
+- iOS (CocoaPods, default): depends on `MXLogger 2.1.0` → `MXLoggerCore 2.1.0`
+- iOS (Swift Package Manager): when the host app has enabled Flutter's SwiftPM support (`flutter config --enable-swift-package-manager`), the plugin is integrated via `ios/flutter_mxlogger/Package.swift` and depends on [MXLogger-SwiftPM](https://github.com/coder-dongjiayi/MXLogger-SwiftPM) `2.1.0` instead
+- Android: Gradle depends on `io.github.coder-dongjiayi:mxlogger:2.1.0`
 
 ## Quick start
 
@@ -322,7 +323,7 @@ Multiple Dart instances constructed with the same `nameSpace + directory` share 
 
 # Desktop analyzer
 
-The `.mx` binary files can be opened with [mxlogger_analyzer](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer.dmg), which supports filtering by level, name and tag, plus keyword search. For encrypted logs, enter the matching `cryptKey` / `iv` in the tool.
+The `.mx` binary files can be opened with [mxlogger_analyzer](https://github.com/coder-dongjiayi/MXLogger/releases), which supports filtering by level, name and tag, plus keyword search. For encrypted logs, enter the matching `cryptKey` / `iv` in the tool.
 
 # Example
 

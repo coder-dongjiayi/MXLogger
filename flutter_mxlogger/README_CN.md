@@ -14,13 +14,14 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.0.0
+  flutter_mxlogger: ^2.1.0
 ```
 
 原生依赖会自动引入，无需手动配置：
 
-- iOS：CocoaPods 依赖 `MXLogger 2.0.0` → `MXLoggerCore 2.0.0`
-- Android：Gradle 依赖 `io.github.coder-dongjiayi:mxlogger:2.0.0`
+- iOS（CocoaPods，默认）：依赖 `MXLogger 2.1.0` → `MXLoggerCore 2.1.0`
+- iOS（Swift Package Manager）：宿主 App 开启了 Flutter 的 SwiftPM 支持（`flutter config --enable-swift-package-manager`）时，插件通过 `ios/flutter_mxlogger/Package.swift` 接入，改为依赖 [MXLogger-SwiftPM](https://github.com/coder-dongjiayi/MXLogger-SwiftPM) `2.1.0`
+- Android：Gradle 依赖 `io.github.coder-dongjiayi:mxlogger:2.1.0`
 
 ## 快速开始
 
@@ -324,7 +325,7 @@ static void destroyWithLoggerKey(String loggerKey);   // 转发到 destroyWithLo
 
 # 解析日志文件（桌面工具）
 
-产出的 `.mx` 二进制文件可以用 [mxlogger_analyzer](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer.dmg) 打开，支持按等级、name、tag 过滤和关键字检索。加密日志需要在工具里填入对应的 `cryptKey` / `iv`。
+产出的 `.mx` 二进制文件可以用 [mxlogger_analyzer](https://github.com/coder-dongjiayi/MXLogger/releases) 打开，支持按等级、name、tag 过滤和关键字检索。加密日志需要在工具里填入对应的 `cryptKey` / `iv`。
 
 # 示例工程
 

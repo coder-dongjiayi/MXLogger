@@ -375,3 +375,12 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(log)(const void *handle,const char* name, int
 
 @implementation MXLoggerDummy
 @end
+
+/// 锚点函数: 由 FlutterMxloggerPlugin +registerWithRegistrar: 调用。
+/// 上面的 MXLoggerDummy 依赖 -ObjC 链接参数才生效；通过 SwiftPM 静态链接时不保证带该参数，
+/// 因此用一次真实的函数引用把本文件的 .o 拉进最终二进制，保证 Dart 侧 DynamicLibrary.process() 能查到导出符号。
+/// Anchor: called from FlutterMxloggerPlugin +registerWithRegistrar:.
+/// MXLoggerDummy above only helps when linking with -ObjC, which is not guaranteed under SwiftPM's
+/// static linking, so a real function reference pulls this object file into the final binary and keeps
+/// the exports visible to DynamicLibrary.process() on the Dart side.
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(ffi_anchor)(void) {}
