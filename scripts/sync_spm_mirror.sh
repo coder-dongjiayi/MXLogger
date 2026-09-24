@@ -1,21 +1,21 @@
 #!/bin/bash
 #
 # 把 Core (C++) 与 iOS/MXLogger (Objective-C) 组装成 SwiftPM 标准布局，
-# 输出到镜像仓库 coder-dongjiayi/MXLogger-Apple 的工作目录。
+# 输出到镜像仓库 coder-dongjiayi/MXLogger-SwiftPM 的工作目录。
 #
 # 用法:
 #   scripts/sync_spm_mirror.sh [输出目录]
-#   输出目录省略时: 优先 ../MXLogger-Apple (镜像仓库本地 clone)，不存在则 build/spm
+#   输出目录省略时: 优先 ../MXLogger-SwiftPM (镜像仓库本地 clone)，不存在则 build/spm
 #
 # 输出目录若是 git 仓库，其 .git 会被保留，其余内容以主仓库为准整体覆盖(含删除)。
 # 之后在镜像目录里 commit / tag / push 即完成发版；也可交给 .github/workflows/publish-spm.yml。
 #
 # Assemble Core (C++) and iOS/MXLogger (Objective-C) into the standard SwiftPM layout and
-# write it to the working tree of the mirror repository coder-dongjiayi/MXLogger-Apple.
+# write it to the working tree of the mirror repository coder-dongjiayi/MXLogger-SwiftPM.
 #
 # Usage:
 #   scripts/sync_spm_mirror.sh [output-dir]
-#   Without an argument: ../MXLogger-Apple (local clone of the mirror) if present, else build/spm
+#   Without an argument: ../MXLogger-SwiftPM (local clone of the mirror) if present, else build/spm
 #
 # If the output directory is a git repository its .git is kept; everything else is replaced
 # (including deletions) to match the main repository. Then commit / tag / push in the mirror,
@@ -26,8 +26,8 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 if [ $# -ge 1 ]; then
     OUT=$1
-elif [ -d "$ROOT/../MXLogger-Apple" ]; then
-    OUT=$ROOT/../MXLogger-Apple
+elif [ -d "$ROOT/../MXLogger-SwiftPM" ]; then
+    OUT=$ROOT/../MXLogger-SwiftPM
 else
     OUT=$ROOT/build/spm
 fi

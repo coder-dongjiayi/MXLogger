@@ -2,7 +2,7 @@
 //  test_mxlogger_api.cpp
 //  MXLoggerCore 单元测试
 //
-//  覆盖 mxlogger 门面: 多例注册表、logger_key/md5、日志写入默认值、
+//  覆盖 mxlogger 门面: 多例注册表、logger_token/md5、日志写入默认值、
 //  开关与等级、加密链路、释放接口、空参数安全
 //
 
@@ -26,15 +26,15 @@ MX_TEST(mxlogger_api, singleton_registry_and_keys) {
     auto* b = mx_logger::initialize_namespace("ns2", API_DIR, nullptr, nullptr, nullptr, nullptr, nullptr);
     EXPECT_TRUE(b != nullptr && b != a);
 
-    // logger_key == md5(目录+ns)，32位十六进制
-    std::string key = a->logger_key();
+    // logger_token == md5(目录+ns)，32位十六进制
+    std::string key = a->logger_token();
     EXPECT_EQ(key.size(), (size_t)32);
     EXPECT_EQ(key, mx_logger::md5("ns1", API_DIR));
 
     // 通过key能取回实例；未知key/空key返回null
-    EXPECT_TRUE(mx_logger::global_for_loggerKey(key.c_str()) == a);
-    EXPECT_TRUE(mx_logger::global_for_loggerKey("no_such_key") == nullptr);
-    EXPECT_TRUE(mx_logger::global_for_loggerKey(nullptr) == nullptr);
+    EXPECT_TRUE(mx_logger::global_for_loggerToken(key.c_str()) == a);
+    EXPECT_TRUE(mx_logger::global_for_loggerToken("no_such_key") == nullptr);
+    EXPECT_TRUE(mx_logger::global_for_loggerToken(nullptr) == nullptr);
 
     // diskcache_path = 目录/ns/
     EXPECT_TRUE(std::string(a->diskcache_path()).find("/ns1/") != std::string::npos);
@@ -42,7 +42,7 @@ MX_TEST(mxlogger_api, singleton_registry_and_keys) {
     // ns为null时使用"default"
     auto* d = mx_logger::initialize_namespace(nullptr, API_DIR, nullptr, nullptr, nullptr, nullptr, nullptr);
     EXPECT_TRUE(d != nullptr);
-    EXPECT_EQ(std::string(d->logger_key()), mx_logger::md5("default", API_DIR));
+    EXPECT_EQ(std::string(d->logger_token()), mx_logger::md5("default", API_DIR));
 
     mx_logger::destroy();
 }
@@ -162,23 +162,23 @@ MX_TEST(mxlogger_api, remove_and_dir_size) {
 
 MX_TEST(mxlogger_api, delete_and_destroy) {
     auto* a = mx_logger::initialize_namespace("del_a", API_DIR, nullptr, nullptr, nullptr, nullptr, nullptr);
-    std::string key_a = a->logger_key();
+    std::string key_a = a->logger_token();
 
     // 按ns+目录删除
     mx_logger::delete_namespace("del_a", API_DIR);
-    EXPECT_TRUE(mx_logger::global_for_loggerKey(key_a.c_str()) == nullptr);
+    EXPECT_TRUE(mx_logger::global_for_loggerToken(key_a.c_str()) == nullptr);
 
-    // 按logger_key删除
+    // 按logger_token删除
     auto* b = mx_logger::initialize_namespace("del_b", API_DIR, nullptr, nullptr, nullptr, nullptr, nullptr);
-    std::string key_b = b->logger_key();
+    std::string key_b = b->logger_token();
     mx_logger::delete_namespace(key_b.c_str());
-    EXPECT_TRUE(mx_logger::global_for_loggerKey(key_b.c_str()) == nullptr);
+    EXPECT_TRUE(mx_logger::global_for_loggerToken(key_b.c_str()) == nullptr);
 
     // destroy清空全部
     auto* c = mx_logger::initialize_namespace("del_c", API_DIR, nullptr, nullptr, nullptr, nullptr, nullptr);
-    std::string key_c = c->logger_key();
+    std::string key_c = c->logger_token();
     mx_logger::destroy();
-    EXPECT_TRUE(mx_logger::global_for_loggerKey(key_c.c_str()) == nullptr);
+    EXPECT_TRUE(mx_logger::global_for_loggerToken(key_c.c_str()) == nullptr);
 
     // 空参数安全: 不崩溃
     mx_logger::delete_namespace("ns", nullptr);

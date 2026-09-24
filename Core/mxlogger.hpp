@@ -32,9 +32,9 @@ private:
     /// Destructor: destroy the logger instance
     ~mxlogger();
 
-    /// 根据 logger_key 从全局实例表中查找并释放对应的 logger 对象
-    /// Find the logger in the global instance map by logger_key, then delete and remove it
-    static void delete_namespace_(const char* logger_key);
+    /// 根据 logger_token 从全局实例表中查找并释放对应的 logger 对象
+    /// Find the logger in the global instance map by logger_token, then delete and remove it
+    static void delete_namespace_(const char* logger_token);
 
     std::shared_ptr<sinks::mmap_sink> mmap_sink_;
 
@@ -50,7 +50,7 @@ private:
 
     std::string diskcache_path_;
 
-    std::string logger_key_;
+    std::string logger_token_;
 
 
 
@@ -83,18 +83,18 @@ public:
     /// Release the logger identified by ns + directory
     static void delete_namespace(const char* ns,const char* directory);
 
-    /// 根据 logger_key 释放对应的 logger 对象
-    /// Release the logger identified by logger_key
-    static void delete_namespace(const char* logger_key);
+    /// 根据 logger_token 释放对应的 logger 对象
+    /// Release the logger identified by logger_token
+    static void delete_namespace(const char* logger_token);
 
-    /// 计算 ns + directory 对应的 logger_key（对磁盘缓存路径做 md5）
-    /// Compute the logger_key for ns + directory (md5 of the disk-cache path)
+    /// 计算 ns + directory 对应的 logger_token（对磁盘缓存路径做 md5）
+    /// Compute the logger_token for ns + directory (md5 of the disk-cache path)
     static std::string md5(const char* ns,const char* directory);
 
 
-    /// 通过 logger_key 返回已存在的 mxlogger 对象，如果不存在则返回 nullptr
-    /// Return the existing mxlogger instance for the given logger_key, or nullptr if none exists
-    static mxlogger *global_for_loggerKey(const char* logger_key);
+    /// 通过 logger_token 返回已存在的 mxlogger 对象，如果不存在则返回 nullptr
+    /// Return the existing mxlogger instance for the given logger_token, or nullptr if none exists
+    static mxlogger *global_for_loggerToken(const char* logger_token);
 
     /// 释放全部的 logger 对象并清空全局实例表
     /// Release all logger instances and clear the global instance map
@@ -190,11 +190,11 @@ public:
     /// Return the disk-cache path where logs are stored
     const char* diskcache_path() const;
 
-    /// 返回 logger_key：由 nameSpace + diskCacheDirectory 做一次 md5 得到，唯一对应一个 logger 对象，
+    /// 返回 logger_token：由 nameSpace + diskCacheDirectory 做一次 md5 得到，唯一对应一个 logger 对象，
     /// 可通过它操作该 logger
-    /// Return the logger_key: the md5 of nameSpace + diskCacheDirectory, uniquely identifying
+    /// Return the logger_token: the md5 of nameSpace + diskCacheDirectory, uniquely identifying
     /// this logger instance and usable to operate on it
-    const char* logger_key() const;
+    const char* logger_token() const;
 
     /// 记录一条日志
     /// Write a log entry

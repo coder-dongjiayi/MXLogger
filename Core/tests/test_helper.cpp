@@ -36,8 +36,8 @@ MX_TEST(helper, policy_mapping) {
 MX_TEST(helper, md5_stable_hex_key) {
     // 注意: md5.h 中 UINT4 被定义为 unsigned long(64位平台上是8字节)，
     // 所以64位平台产出的并非RFC 1321标准MD5值，而是一个内部自洽的稳定哈希。
-    // logger_key 只依赖"稳定+唯一"，这里断言库实际提供的保证；
-    // 若未来改为标准MD5，会改变所有 logger_key 的取值，需评估兼容性。
+    // logger_token 只依赖"稳定+唯一"，这里断言库实际提供的保证；
+    // 若未来改为标准MD5，会改变所有 logger_token 的取值，需评估兼容性。
 
     // 输出恒为32个十六进制字符
     std::string h = mxlogger_helper::mx_md5(std::string("abc"));

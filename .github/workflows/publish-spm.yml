@@ -1,11 +1,11 @@
-# 把 Core + iOS/MXLogger 组装成 SwiftPM 包并推送到镜像仓库 coder-dongjiayi/MXLogger-Apple。
+# 把 Core + iOS/MXLogger 组装成 SwiftPM 包并推送到镜像仓库 coder-dongjiayi/MXLogger-SwiftPM。
 #
 # 触发：
 #   - 推 v* tag：同步到镜像 main 分支，并在镜像上打同名 tag（SwiftPM 按 tag 解析版本）
 #   - 手动：Actions 页面 → publish-spm → Run workflow，只同步 main，不打 tag
 #
 # 依赖 Secret SPM_MIRROR_DEPLOY_KEY：镜像仓库 Deploy key 的私钥（需勾选写权限）。
-# 本地等价操作：scripts/sync_spm_mirror.sh ../MXLogger-Apple，然后在镜像目录 commit / tag / push。
+# 本地等价操作：scripts/sync_spm_mirror.sh ../MXLogger-SwiftPM，然后在镜像目录 commit / tag / push。
 name: publish-spm
 
 on:
@@ -26,7 +26,7 @@ jobs:
       - name: Checkout mirror repository
         uses: actions/checkout@v4
         with:
-          repository: coder-dongjiayi/MXLogger-Apple
+          repository: coder-dongjiayi/MXLogger-SwiftPM
           ssh-key: ${{ secrets.SPM_MIRROR_DEPLOY_KEY }}
           path: mirror
           fetch-depth: 0

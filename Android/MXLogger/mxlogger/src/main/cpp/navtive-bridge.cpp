@@ -91,7 +91,7 @@ namespace mxlogger{
     MXLOGGER_JNI jstring  native_loggerKey(JNIEnv *env, jobject obj,jlong handle){
         if (handle == 0) return nullptr;
         mx_logger *logger = reinterpret_cast<mx_logger *>(handle);
-        return string2jstring(env,logger ->logger_key());
+        return string2jstring(env,logger ->logger_token());
     }
 
     /// 获取最近一次写入失败的错误信息
@@ -146,9 +146,9 @@ namespace mxlogger{
 
         const char  * log_name = name == NULL ? nullptr : env->GetStringUTFChars(name, nullptr);
 
-        const char  * logger_key = env->GetStringUTFChars(loggerKey, nullptr);
+        const char  * logger_token = env->GetStringUTFChars(loggerKey, nullptr);
 
-        mx_logger *logger = mx_logger ::global_for_loggerKey(logger_key);
+        mx_logger *logger = mx_logger ::global_for_loggerToken(logger_token);
 
         int result = 0;
         if(logger != nullptr){
@@ -161,7 +161,7 @@ namespace mxlogger{
         if (log_msg != nullptr) env->ReleaseStringUTFChars(msg, log_msg);
         if (log_tag != nullptr) env->ReleaseStringUTFChars(tag, log_tag);
         if (log_name != nullptr) env->ReleaseStringUTFChars(name, log_name);
-        env->ReleaseStringUTFChars(loggerKey, logger_key);
+        env->ReleaseStringUTFChars(loggerKey, logger_token);
 
         return  result;
     }

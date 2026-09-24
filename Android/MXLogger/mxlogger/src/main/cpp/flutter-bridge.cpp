@@ -191,9 +191,9 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroy)(const char* ns,const char* director
 
 /// 通过loggerKey销毁C++对象
 /// Destroy the C++ instance by loggerKey
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerKey)(const char* logger_key){
-    if(logger_key == nullptr)return;
-    mx_logger ::delete_namespace(logger_key);
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerKey)(const char* logger_token){
+    if(logger_token == nullptr)return;
+    mx_logger ::delete_namespace(logger_token);
 }
 
 /// 开启/关闭native侧控制台输出
@@ -269,7 +269,7 @@ static char * mx_copy_string_(const char *str){
 MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerKey)(void *handle){
     if (handle == nullptr) return nullptr;
     mx_logger *logger = static_cast<mx_logger*>(handle);
-    return mx_copy_string_(logger->logger_key());
+    return mx_copy_string_(logger->logger_token());
 }
 
 /// 获取日志文件磁盘缓存目录
@@ -325,10 +325,10 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(void *handle){
 /// Write a log entry via loggerKey: looks up the already-initialized logger and writes
 /// to it; silently returns 0 (no error) when no logger matches the key — consistent
 /// with the JNI-side native_log_loggerKey and the iOS bridge
-MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const char* name, int lvl,const char* msg,const char* tag){
-    if(logger_key == nullptr) return 0;
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerKey)(const char* logger_token,const char* name, int lvl,const char* msg,const char* tag){
+    if(logger_token == nullptr) return 0;
 
-    mx_logger *logger = mx_logger::global_for_loggerKey(logger_key);
+    mx_logger *logger = mx_logger::global_for_loggerToken(logger_token);
     if(logger == nullptr) return 0;
 
     return logger->log(lvl,name,msg,tag,true);

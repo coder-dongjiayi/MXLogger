@@ -164,7 +164,7 @@ static NSString * _defaultDiskCacheDirectory;
         
       
         
-        self.loggerKey = [NSString stringWithUTF8String:_logger->logger_key()];
+        self.loggerKey = [NSString stringWithUTF8String:_logger->logger_token()];
         
 
         [[NSNotificationCenter defaultCenter] addObserver:self

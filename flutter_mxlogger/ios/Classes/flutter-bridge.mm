@@ -67,10 +67,10 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroy)(const char* ns,const char* director
 
 /// 通过loggerKey销毁logger对象
 /// Destroy the logger identified by loggerKey
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerKey)(const char* logger_key){
-    if(logger_key == nullptr)return;
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerKey)(const char* logger_token){
+    if(logger_token == nullptr)return;
 
-    [MXLogger destroyWithLoggerKey:[NSString stringWithUTF8String:logger_key]];
+    [MXLogger destroyWithLoggerKey:[NSString stringWithUTF8String:logger_token]];
 }
 
 
@@ -335,10 +335,10 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(const void *handle){
 /// 通过loggerKey写入日志: 查找已初始化的logger对象进行写入，不存在时向nil发消息返回0
 /// Write a log entry via loggerKey: looks up the already-initialized logger and writes
 /// to it; when no logger matches, the message goes to nil and 0 is returned
-MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerKey)(const char* logger_key,const char* name, int lvl,const char* msg,const char* tag){
-    if(logger_key == nullptr) return 0;
+MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerKey)(const char* logger_token,const char* name, int lvl,const char* msg,const char* tag){
+    if(logger_token == nullptr) return 0;
 
-    MXLogger *logger = [MXLogger valueForLoggerKey:[NSString stringWithUTF8String:logger_key]];
+    MXLogger *logger = [MXLogger valueForLoggerKey:[NSString stringWithUTF8String:logger_token]];
 
     NSString * _name = name == nullptr ? NULL : [NSString stringWithUTF8String:name];
     NSString * _msg = msg == nullptr ? NULL : [NSString stringWithUTF8String:msg];

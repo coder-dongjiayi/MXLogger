@@ -75,7 +75,7 @@ MX_TEST(concurrency, parallel_init_and_lookup_mixed) {
                                                                nullptr, nullptr, nullptr, nullptr, nullptr);
                 shared_results[i] = logger;
                 logger->log(1, "mix", "hello", nullptr, false);
-                mx_logger::global_for_loggerKey(logger->logger_key());
+                mx_logger::global_for_loggerToken(logger->logger_token());
             } else {
                 std::string ns = "mix_own_" + std::to_string(i);
                 auto* logger = mx_logger::initialize_namespace(ns.c_str(), CC_DIR,

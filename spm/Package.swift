@@ -1,12 +1,12 @@
 // swift-tools-version: 5.9
 //
 // MXLogger Swift Package 清单。此文件的源在主仓库 coder-dongjiayi/MXLogger 的 spm/ 目录，
-// 由 scripts/sync_spm_mirror.sh 复制到镜像仓库 coder-dongjiayi/MXLogger-Apple 根目录。
+// 由 scripts/sync_spm_mirror.sh 复制到镜像仓库 coder-dongjiayi/MXLogger-SwiftPM 根目录。
 // 请勿直接在镜像仓库修改。
 //
 // Swift Package manifest for MXLogger. The source of truth is spm/ in the main repository
 // coder-dongjiayi/MXLogger; scripts/sync_spm_mirror.sh copies it to the root of the mirror
-// repository coder-dongjiayi/MXLogger-Apple. Do not edit it in the mirror directly.
+// repository coder-dongjiayi/MXLogger-SwiftPM. Do not edit it in the mirror directly.
 //
 import PackageDescription
 
