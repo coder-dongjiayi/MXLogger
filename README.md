@@ -12,11 +12,6 @@
   <a href="https://pub.dev/packages/flutter_mxlogger"><img src="https://img.shields.io/pub/v/flutter_mxlogger?style=flat-square&label=pub&logo=dart" alt="pub" /></a>
   <a href="https://pub.dev/packages/mxlogger_analyzer_lib"><img src="https://img.shields.io/pub/v/mxlogger_analyzer_lib?style=flat-square&label=analyzer%20lib&logo=dart" alt="pub analyzer" /></a>
 </p>
-
-<p align="center" >
-<img src="./icon/logo_400.png" alt="MXLogger"  title="MXLogger" width="180" />
-</p>
-
 # MXLogger
 
 MXLogger is a cross-platform logging library built on **mmap** memory mapping, with **AES-CFB-128**
