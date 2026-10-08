@@ -91,7 +91,7 @@ class _MyAppState extends State<MyApp> {
 
     final MXLogger logger = await MXLogger.initialize(
       nameSpace: "flutter.mxlogger",
-      storagePolicy: MXStoragePolicyType.yyyy_MM_dd,
+      storagePolicy: MXStoragePolicyType.yyyyMMdd,
       fileHeader: jsonEncode(header),
       consoleEnable: true,
       cryptKey: _cryptKey,

@@ -106,7 +106,7 @@ expands it into a compact scalar grid plus a JSON tree:
 ```dart
 final MXLogger logger = await MXLogger.initialize(
   nameSpace: "flutter.mxlogger",
-  storagePolicy: MXStoragePolicyType.yyyy_MM_dd,
+  storagePolicy: MXStoragePolicyType.yyyyMMdd,
   fileHeader: jsonEncode(header),      // writer-side environment info
   consoleEnable: true,
   cryptKey: "bnijioijuojiuoju",        // 16 bytes

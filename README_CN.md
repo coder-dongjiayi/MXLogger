@@ -167,7 +167,7 @@ Log.d("MXLogger", "日志目录 " + logger.getDiskCachePath());
 ```dart
 final MXLogger logger = await MXLogger.initialize(
   nameSpace: "flutter.mxlogger",
-  storagePolicy: MXStoragePolicyType.yyyy_MM_dd,
+  storagePolicy: MXStoragePolicyType.yyyyMMdd,
   fileHeader: jsonEncode(deviceInfo),
   consoleEnable: true,
   cryptKey: "abcuioqbsdguijlk",   // 16 字节
@@ -344,7 +344,7 @@ native 是唯一事实源）。
 
 | API | 说明 |
 | --- | --- |
-| `static Future<MXLogger> initialize({required String nameSpace, String? directory, bool consoleEnable = false, MXStoragePolicyType storagePolicy = yyyy_MM_dd, String? fileName, String? fileHeader, String? cryptKey, String? iv})` | 推荐用法，自动获取平台默认目录（iOS `Library/com.mxlog.LoggerCache/nameSpace`，Android `files/com.mxlog.LoggerCache/nameSpace`） |
+| `static Future<MXLogger> initialize({required String nameSpace, String? directory, bool consoleEnable = false, MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyyMMdd, String? fileName, String? fileHeader, String? cryptKey, String? iv})` | 推荐用法，自动获取平台默认目录（iOS `Library/com.mxlog.LoggerCache/nameSpace`，Android `files/com.mxlog.LoggerCache/nameSpace`） |
 | `MXLogger({required String nameSpace, required String directory, ...})` | 同步构造方法，必须显式给目录 |
 | `static void destroy({required String nameSpace, String? directory})` | 释放；会先失效对应的 Dart 实例，避免 use-after-free |
 | `static void destroyWithLoggerToken(String loggerToken)` | 按 loggerToken 释放 |
@@ -411,7 +411,7 @@ native 是唯一事实源）。
 
 ### `MXStoragePolicyType`
 
-`yyyy_MM_dd`（按天，默认）· `yyyy_MM_dd_HH`（按小时）· `yyyy_ww`（按周）· `yyyy_MM`（按月）
+`yyyyMMdd`（按天，默认）· `yyyyMMddHH`（按小时）· `yyyyWw`（按周）· `yyyyMM`（按月）
 
 <a name="analyzer-api"></a>
 ## 解析器 —— `mxlogger_analyzer_lib`

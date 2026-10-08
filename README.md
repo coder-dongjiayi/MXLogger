@@ -167,7 +167,7 @@ Log.d("MXLogger", "logs live in " + logger.getDiskCachePath());
 ```dart
 final MXLogger logger = await MXLogger.initialize(
   nameSpace: "flutter.mxlogger",
-  storagePolicy: MXStoragePolicyType.yyyy_MM_dd,
+  storagePolicy: MXStoragePolicyType.yyyyMMdd,
   fileHeader: jsonEncode(deviceInfo),
   consoleEnable: true,
   cryptKey: "abcuioqbsdguijlk",   // 16 bytes
@@ -347,7 +347,7 @@ platform default directory during `initialize`.
 
 | API | Notes |
 | --- | --- |
-| `static Future<MXLogger> initialize({required String nameSpace, String? directory, bool consoleEnable = false, MXStoragePolicyType storagePolicy = yyyy_MM_dd, String? fileName, String? fileHeader, String? cryptKey, String? iv})` | recommended — resolves the platform default directory (iOS `Library/com.mxlog.LoggerCache/nameSpace`, Android `files/com.mxlog.LoggerCache/nameSpace`) |
+| `static Future<MXLogger> initialize({required String nameSpace, String? directory, bool consoleEnable = false, MXStoragePolicyType storagePolicy = MXStoragePolicyType.yyyyMMdd, String? fileName, String? fileHeader, String? cryptKey, String? iv})` | recommended — resolves the platform default directory (iOS `Library/com.mxlog.LoggerCache/nameSpace`, Android `files/com.mxlog.LoggerCache/nameSpace`) |
 | `MXLogger({required String nameSpace, required String directory, ...})` | synchronous constructor, requires an explicit directory |
 | `static void destroy({required String nameSpace, String? directory})` | release; the matching Dart instances are invalidated first (no use-after-free) |
 | `static void destroyWithLoggerToken(String loggerToken)` | release by loggerToken |
@@ -414,7 +414,7 @@ platform default directory during `initialize`.
 
 ### `MXStoragePolicyType`
 
-`yyyy_MM_dd` (daily, default) · `yyyy_MM_dd_HH` (hourly) · `yyyy_ww` (weekly) · `yyyy_MM` (monthly)
+`yyyyMMdd` (daily, default) · `yyyyMMddHH` (hourly) · `yyyyWw` (weekly) · `yyyyMM` (monthly)
 
 <a name="analyzer-api"></a>
 ## Analyzer — `mxlogger_analyzer_lib`

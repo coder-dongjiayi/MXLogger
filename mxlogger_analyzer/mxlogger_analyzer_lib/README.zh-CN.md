@@ -90,7 +90,7 @@ flutter run -t lib/main_package.dart -d <iOS/Android 设备>
 ```dart
 final MXLogger logger = await MXLogger.initialize(
   nameSpace: "flutter.mxlogger",
-  storagePolicy: MXStoragePolicyType.yyyy_MM_dd,
+  storagePolicy: MXStoragePolicyType.yyyyMMdd,
   fileHeader: jsonEncode(header),      // 写入端环境信息
   consoleEnable: true,
   cryptKey: "bnijioijuojiuoju",        // 16 字节
