@@ -146,13 +146,21 @@ flutter test tool/generate_app_icon.dart
 打包桌面可执行文件（产物落到 `dist/`，命名带版本号与架构）：
 
 ```bash
-dart run tool/build_desktop.dart          # 出当前系统的包（macOS zip / Windows zip / Linux tar.gz）
-dart run tool/build_desktop.dart --dmg    # macOS 额外出可拖拽安装的 .dmg
+dart run tool/build_desktop.dart          # 当前系统的安装包（macOS DMG / Windows setup.exe / Linux AppImage）
 dart run tool/build_desktop.dart --no-build   # 复用已有构建产物，只重新打包
 ```
 
 Flutter 桌面不支持交叉编译（macOS 要 Xcode 工具链、Windows 要 MSVC、Linux 要 GTK），
 三端产物 = 在三台机器（或 CI 的 macos / windows / ubuntu 三个 runner）上各跑一次同一条命令。
+
+本地打包和 GitHub Actions 都只生成当前平台的一个安装包，不再额外生成 ZIP / tar.gz。
+Windows 需要 Inno Setup，Linux 需要 appimagetool（CI 会准备这些工具）。
+运行摘要会列出安装包的大小和下载链接；Actions 和 Release 都只上传安装包。
+Actions 使用直接文件上传，下载结果就是 DMG / setup.exe / AppImage，不会再套外层 ZIP。
+Linux 下载 AppImage 后先执行 `chmod +x <文件名>.AppImage`，再运行该文件。
+Release 构建会分离 Dart 调试符号，保存在 `build/desktop-symbols/<版本>/<平台>/`，
+不会打进安装包或作为 Artifact 上传。开发者需要用 `flutter symbolize` 还原堆栈时，
+应保留对应构建的符号目录。`--no-build` 仅重新打包，不改变已有二进制或生成新的符号。
 
 ## Chrome 扩展（第二阶段：完整页面）
 

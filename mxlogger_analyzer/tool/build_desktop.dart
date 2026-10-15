@@ -8,18 +8,15 @@ import 'dart:io';
 /// （或 CI 的 macos / windows / ubuntu 三个 runner）上各跑一次同一条命令。
 ///
 /// ```
-/// dart run tool/build_desktop.dart                  # 构建当前平台 → dist/
-/// dart run tool/build_desktop.dart --dmg            # macOS 额外产出 .dmg（拖拽安装）
-/// dart run tool/build_desktop.dart --installer      # Windows 额外产出安装版 setup.exe（需 Inno Setup）
-/// dart run tool/build_desktop.dart --appimage       # Linux 额外产出单文件 AppImage（需 appimagetool）
+/// dart run tool/build_desktop.dart                  # 当前平台安装包 → dist/
 /// dart run tool/build_desktop.dart --no-build       # 复用已有构建产物，只重新打包
 /// dart run tool/build_desktop.dart --clean          # 打包前先 flutter clean
 /// dart run tool/build_desktop.dart --out=/tmp/pkg   # 换输出目录
 /// dart run tool/build_desktop.dart --entry=lib/main_package.dart   # 换入口文件
 /// ```
 ///
-/// 产物命名：`<包名>-<版本>-<平台>-<架构>.<zip|tar.gz|dmg>`，
-/// 例如 `mxlogger_analyzer-2.0.0-macos-arm64.zip`。
+/// 每次只生成一个安装包：macOS .dmg / Windows -setup.exe / Linux .AppImage。
+/// Windows 需要 Inno Setup，Linux 需要 appimagetool。
 Future<void> main(List<String> args) async {
   final _Options options;
   try {
@@ -49,39 +46,36 @@ Future<void> main(List<String> args) async {
   if (options.clean) await _run("flutter", ["clean"]);
 
   if (options.build) {
+    // 符号单独保存，避免把 Dart 调试信息放进用户下载的应用；开发者可保留此目录供 symbolize 使用。
+    final Directory symbols =
+        Directory("build/desktop-symbols/$version/${target.buildCommand}");
     await _run("flutter", [
       "build",
       target.buildCommand,
       "--release",
+      "--split-debug-info=${symbols.absolute.path}",
       // 本工程没有 lib/main.dart，桌面壳入口是 main_desktop.dart，必须显式指定
       "-t",
       options.entry,
     ]);
+    stdout.writeln("==> 调试符号单独保存在 ${symbols.path}/");
   } else {
     stdout.writeln("==> 跳过构建（--no-build），直接打包已有产物");
   }
 
   final Directory outDir = Directory(options.out)..createSync(recursive: true);
-  final List<File> artifacts = switch (target) {
+  final File artifact = switch (target) {
     _Platform.macos => await _packageMacos(
-        outDir: outDir, appName: appName, version: version, dmg: options.dmg),
+        outDir: outDir, appName: appName, version: version),
     _Platform.windows => await _packageWindows(
-        outDir: outDir,
-        appName: appName,
-        version: version,
-        installer: options.installer),
+        outDir: outDir, appName: appName, version: version),
     _Platform.linux => await _packageLinux(
-        outDir: outDir,
-        appName: appName,
-        version: version,
-        appimage: options.appimage),
+        outDir: outDir, appName: appName, version: version),
   };
 
   stdout.writeln("");
   stdout.writeln("✅ 完成，产物在 ${outDir.path}/");
-  for (final File file in artifacts) {
-    stdout.writeln("   ${file.path}  ${_size(file)}");
-  }
+  stdout.writeln("   ${artifact.path}  ${_size(artifact)}");
   stdout.writeln("");
   stdout.writeln("其余两端在对应系统上执行同一条命令即可"
       "（Flutter 桌面不支持交叉编译）。");
@@ -89,11 +83,12 @@ Future<void> main(List<String> args) async {
 
 const String _usage = """
 用法：dart run tool/build_desktop.dart [选项]
+  默认产物           macOS .dmg / Windows -setup.exe / Linux .AppImage
   --no-build          复用已有构建产物，只重新打包
   --clean             打包前先 flutter clean
-  --dmg               macOS 额外产出 .dmg（拖拽到 /Applications 安装）
-  --installer         Windows 额外产出安装版 setup.exe（需要 Inno Setup / ISCC.exe）
-  --appimage          Linux 额外产出单文件 AppImage（需要 appimagetool）
+  --dmg               macOS 兼容参数（默认即为 DMG）
+  --installer         Windows 兼容参数（默认即为 setup.exe，需 Inno Setup）
+  --appimage          Linux 兼容参数（默认即为 AppImage，需 appimagetool）
   --out=<目录>        产物输出目录（默认 dist）
   --entry=<入口>      Dart 入口文件（默认 lib/main_desktop.dart）""";
 
@@ -125,9 +120,6 @@ class _Options {
     required this.entry,
     required this.build,
     required this.clean,
-    required this.dmg,
-    required this.installer,
-    required this.appimage,
   });
 
   factory _Options.parse(List<String> args) {
@@ -173,9 +165,6 @@ class _Options {
       entry: map["entry"] ?? "lib/main_desktop.dart",
       build: map["no-build"] != "true",
       clean: map["clean"] == "true",
-      dmg: dmg,
-      installer: installer,
-      appimage: appimage,
     );
   }
 
@@ -183,17 +172,13 @@ class _Options {
   final String entry;
   final bool build;
   final bool clean;
-  final bool dmg;
-  final bool installer;
-  final bool appimage;
 }
 
-/// macOS：Release 目录下的 .app 打成 zip；`--dmg` 时再出一个可拖拽安装的 dmg。
-Future<List<File>> _packageMacos({
+/// macOS：Release 目录下的 .app 打成可拖拽安装的 DMG。
+Future<File> _packageMacos({
   required Directory outDir,
   required String appName,
   required String version,
-  required bool dmg,
 }) async {
   const String releaseDir = "build/macos/Build/Products/Release";
   final Directory app = _find(
@@ -202,83 +187,50 @@ Future<List<File>> _packageMacos({
     hint: "未找到 .app：先执行不带 --no-build 的打包，或检查 $releaseDir",
   );
   final String base = "$appName-$version-macos-${_hostArch()}";
-  final List<File> artifacts = [];
-
-  // 用 ditto 而不是 zip：保留符号链接、资源分叉与权限位，否则解压出来的 .app 签名会坏
-  final File zip = File("${outDir.path}/$base.zip");
-  if (zip.existsSync()) zip.deleteSync();
-  await _run("ditto", ["-c", "-k", "--keepParent", app.path, zip.path]);
-  artifacts.add(zip);
-
-  if (dmg) {
-    final Directory staging = Directory.systemTemp.createTempSync("mx_dmg_");
-    try {
-      // dmg 里放 .app + 指向 /Applications 的软链接：打开后直接拖过去安装
-      await _run("cp", ["-R", app.path, staging.path]);
-      Link("${staging.path}/Applications").createSync("/Applications");
-      final File file = File("${outDir.path}/$base.dmg");
-      if (file.existsSync()) file.deleteSync();
-      await _run("hdiutil", [
-        "create",
-        "-volname",
-        _appLabel(app.path),
-        "-srcfolder",
-        staging.path,
-        "-ov",
-        "-format",
-        "UDZO",
-        file.path,
-      ]);
-      artifacts.add(file);
-    } finally {
-      staging.deleteSync(recursive: true);
-    }
+  final File file = File("${outDir.path}/$base.dmg");
+  if (file.existsSync()) file.deleteSync();
+  final Directory staging = Directory.systemTemp.createTempSync("mx_dmg_");
+  try {
+    // dmg 里放 .app + 指向 /Applications 的软链接：打开后直接拖过去安装
+    await _run("cp", ["-R", app.path, staging.path]);
+    Link("${staging.path}/Applications").createSync("/Applications");
+    await _run("hdiutil", [
+      "create",
+      "-volname",
+      _appLabel(app.path),
+      "-srcfolder",
+      staging.path,
+      "-ov",
+      "-format",
+      "UDZO",
+      "-imagekey",
+      "zlib-level=9",
+      file.path,
+    ]);
+  } finally {
+    staging.deleteSync(recursive: true);
   }
-  return artifacts;
+  return file;
 }
 
-/// Windows：Release 目录（exe + dll + data）整个打成 zip，压缩包内带一层同名目录；
-/// `--installer` 时再用 Inno Setup 出一个安装版 setup.exe（安装向导 + 开始菜单/桌面快捷方式）。
-Future<List<File>> _packageWindows({
+/// Windows：用 Inno Setup 将 Release 目录打成安装程序。
+Future<File> _packageWindows({
   required Directory outDir,
   required String appName,
   required String version,
-  required bool installer,
 }) async {
   final ({Directory dir, String arch}) release = _archBundle(
     (String arch) => "build/windows/$arch/runner/Release",
     hint: "未找到 build/windows/<x64|arm64>/runner/Release",
   );
   final String base = "$appName-$version-windows-${release.arch}";
-  final File zip = File("${outDir.path}/$base.zip");
-  if (zip.existsSync()) zip.deleteSync();
-
-  final Directory staging = Directory.systemTemp.createTempSync("mx_zip_");
-  try {
-    final String top = "${staging.path}\\$base";
-    // Compress-Archive 只压目录本身，先把产物挪进一层同名目录，解压后不会散落一地
-    await _run("powershell", [
-      "-NoProfile",
-      "-Command",
-      "New-Item -ItemType Directory -Force -Path '$top' | Out-Null; "
-          "Copy-Item -Path '${release.dir.path}\\*' -Destination '$top' -Recurse -Force; "
-          "Compress-Archive -Path '$top' -DestinationPath '${zip.path}' -Force",
-    ]);
-  } finally {
-    staging.deleteSync(recursive: true);
-  }
-
-  final List<File> artifacts = [zip];
-  if (installer) {
-    artifacts.add(await _buildWindowsInstaller(
-      outDir: outDir,
-      appName: appName,
-      version: version,
-      base: base,
-      releaseDir: release.dir,
-    ));
-  }
-  return artifacts;
+  return _buildWindowsInstaller(
+    outDir: outDir,
+    appName: appName,
+    version: version,
+    base: base,
+    releaseDir: release.dir,
+  );
 }
 
 /// 固定的 AppId：Inno Setup 用它识别「同一个应用」，覆盖安装/卸载都靠它，不能变。
@@ -366,47 +318,29 @@ String _findIscc() {
     final String path = (which.stdout as String).trim().split("\n").first.trim();
     if (path.isNotEmpty) return path;
   }
-  stderr.writeln("未找到 Inno Setup（ISCC.exe）。--installer 需要先安装："
+  stderr.writeln("未找到 Inno Setup（ISCC.exe）。Windows 打包需要先安装："
       "winget install JRSoftware.InnoSetup（GitHub Actions 的 windows runner 已预装）");
   exit(69);
 }
 
-/// Linux：bundle 目录（可执行文件 + lib + data）打成 tar.gz，保留可执行权限；
-/// `--appimage` 时再出一个单文件 AppImage（对标 macOS 的 dmg：双击即用，免安装）。
-Future<List<File>> _packageLinux({
+/// Linux：bundle 目录打成单文件 AppImage（双击即用，免安装）。
+Future<File> _packageLinux({
   required Directory outDir,
   required String appName,
   required String version,
-  required bool appimage,
 }) async {
   final ({Directory dir, String arch}) bundle = _archBundle(
     (String arch) => "build/linux/$arch/release/bundle",
     hint: "未找到 build/linux/<x64|arm64>/release/bundle",
   );
   final String base = "$appName-$version-linux-${bundle.arch}";
-  final File tar = File("${outDir.path}/$base.tar.gz");
-  if (tar.existsSync()) tar.deleteSync();
-
-  final Directory staging = Directory.systemTemp.createTempSync("mx_tar_");
-  try {
-    // 先复制成 <base>/ 再打包：解压出来是一个带版本号的目录，而不是散落的 bundle 内容
-    await _run("cp", ["-R", bundle.dir.path, "${staging.path}/$base"]);
-    await _run("tar", ["-czf", tar.absolute.path, "-C", staging.path, base]);
-  } finally {
-    staging.deleteSync(recursive: true);
-  }
-
-  final List<File> artifacts = [tar];
-  if (appimage) {
-    artifacts.add(await _buildLinuxAppImage(
-      outDir: outDir,
-      appName: appName,
-      base: base,
-      bundleDir: bundle.dir,
-      arch: bundle.arch,
-    ));
-  }
-  return artifacts;
+  return _buildLinuxAppImage(
+    outDir: outDir,
+    appName: appName,
+    base: base,
+    bundleDir: bundle.dir,
+    arch: bundle.arch,
+  );
 }
 
 /// AppImage 的图标：Linux 构建产物里没有图标，直接复用 macOS 图标集里的 256px PNG。
@@ -478,7 +412,7 @@ String _findAppImageTool() {
     final String path = (which.stdout as String).trim();
     if (path.isNotEmpty) return path;
   }
-  stderr.writeln("未找到 appimagetool。--appimage 需要先安装：\n"
+  stderr.writeln("未找到 appimagetool。Linux 打包需要先安装：\n"
       "  sudo curl -L -o /usr/local/bin/appimagetool "
       "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage\n"
       "  sudo chmod +x /usr/local/bin/appimagetool");
