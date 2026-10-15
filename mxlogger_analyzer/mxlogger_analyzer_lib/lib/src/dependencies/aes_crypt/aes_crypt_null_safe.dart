@@ -13,8 +13,10 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'dart:async';
 
+import 'aes_bytes.dart';
+export 'aes_bytes.dart' show AesMode, AesCryptArgumentError;
+
 part 'src/aescrypt.dart';
 part 'src/cryptor.dart';
-part 'src/aes.dart';
 part 'src/exceptions.dart';
 part 'src/extentions.dart';

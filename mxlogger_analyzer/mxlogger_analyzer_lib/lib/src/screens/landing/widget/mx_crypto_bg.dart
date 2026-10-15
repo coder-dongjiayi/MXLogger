@@ -1,4 +1,5 @@
-import 'dart:io' show Platform;
+import 'package:mxlogger_analyzer_lib/src/global/util/mx_test_environment_stub.dart'
+    if (dart.library.io) 'package:mxlogger_analyzer_lib/src/global/util/mx_test_environment_native.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ class _MXCryptoBgState extends State<MXCryptoBg> with SingleTickerProviderStateM
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final bool static = Platform.environment.containsKey("FLUTTER_TEST") ||
+    final bool static = mxIsTestEnvironment ||
         MediaQuery.maybeDisableAnimationsOf(context) == true;
     if (static) {
       _ticker?.dispose();

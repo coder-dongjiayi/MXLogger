@@ -51,3 +51,20 @@ class ImportState {
     );
   }
 }
+
+/// Platform-independent progress sent by a native repository or browser worker.
+class ImportProgress {
+  const ImportProgress({
+    required this.step,
+    required this.percent,
+    required this.fileLabel,
+  });
+  final ImportStep step;
+  final int percent;
+  final String fileLabel;
+}
+
+class ImportFailure implements Exception {
+  const ImportFailure(this.error);
+  final ImportError error;
+}

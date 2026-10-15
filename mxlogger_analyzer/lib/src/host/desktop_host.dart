@@ -7,10 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_lib.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// 桌面壳的宿主能力实现：内核（mxlogger_analyzer_lib）不依赖这些插件，
 /// 选文件 / 拖入 / 设置落盘 / 系统分享统一在这里用 file_picker /
-/// desktop_drop / shared_preferences / share_plus 实现后注入 [MXHost]。
+/// desktop_drop / shared_preferences / share_plus / url_launcher 实现后注入 [MXHost]。
 Future<MXHost> createDesktopHost() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   return MXHost(
@@ -18,6 +19,7 @@ Future<MXHost> createDesktopHost() async {
     pickLogFiles: _pickLogFiles,
     dropTargetBuilder: _buildDropTarget,
     share: _share,
+    openExternalLink: (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
   );
 }
 

@@ -1,0 +1,63 @@
+{
+  "language": "en",
+  "screenshots": 5,
+  "promotionalImages": 2,
+  "assets": [
+    {
+      "file": "01-overview.png",
+      "width": 1280,
+      "height": 800,
+      "format": "PNG, 24-bit RGB, no alpha",
+      "bytes": 195612,
+      "sha256": "857d0d945b77552d6eaac57aed11c047f7ea3ace2f2e9163d9e8af4475066624"
+    },
+    {
+      "file": "02-search.png",
+      "width": 1280,
+      "height": 800,
+      "format": "PNG, 24-bit RGB, no alpha",
+      "bytes": 208854,
+      "sha256": "5b0ba3a16bab617786eec60819fb68e85da06f0a858d16cb7da764e835977a1c"
+    },
+    {
+      "file": "03-json-details.png",
+      "width": 1280,
+      "height": 800,
+      "format": "PNG, 24-bit RGB, no alpha",
+      "bytes": 191513,
+      "sha256": "c7e858114644b39b32c724703038fec01d1bd123bf53c24d19fb5571b3043d9f"
+    },
+    {
+      "file": "04-context.png",
+      "width": 1280,
+      "height": 800,
+      "format": "PNG, 24-bit RGB, no alpha",
+      "bytes": 245122,
+      "sha256": "de5c8c6c433f01ea824ff2cb1eee6a21bc998c26b6dbd4b989f9e1ef57ad5049"
+    },
+    {
+      "file": "05-local-decryption.png",
+      "width": 1280,
+      "height": 800,
+      "format": "PNG, 24-bit RGB, no alpha",
+      "bytes": 175121,
+      "sha256": "385b03974cfa47656f48f09ea994434983dfd179a3ea813f6018ba05d7adf9de"
+    },
+    {
+      "file": "promo-small-440x280.png",
+      "width": 440,
+      "height": 280,
+      "format": "PNG, 24-bit RGB, no alpha",
+      "bytes": 39376,
+      "sha256": "3bd75b3c80a137fa56d8cf493cba926e22d6f0e412a2b22c53de5247d484d254"
+    },
+    {
+      "file": "promo-marquee-1400x560.png",
+      "width": 1400,
+      "height": 560,
+      "format": "PNG, 24-bit RGB, no alpha",
+      "bytes": 221197,
+      "sha256": "f2a8ca89aabce5fe5940859bce5a021ab0b3c9185fc99c84896c3740dda6fc2e"
+    }
+  ]
+}

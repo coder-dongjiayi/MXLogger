@@ -102,6 +102,18 @@ class CryptSettingsStore extends MXState<CryptSettings> {
 
   final MXPrefs _prefs;
 
+  bool get canChoosePersistence => _prefs is MXCryptPersistencePrefs;
+
+  bool get persistEntries =>
+      _prefs is MXCryptPersistencePrefs &&
+      (_prefs as MXCryptPersistencePrefs).persistCrypt;
+
+  void setPersistEntries(bool enabled) {
+    if (_prefs case final MXCryptPersistencePrefs prefs) {
+      prefs.setPersistCrypt(enabled);
+    }
+  }
+
   /// 读取多组参数；老版本只存过一组时迁移为单组，保证升级后设置不丢。
   static CryptSettings _load(MXPrefs prefs) {
     final String? raw = prefs.getString(_cryptEntriesKey);

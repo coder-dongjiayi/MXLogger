@@ -54,7 +54,7 @@ class JsonTree extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SelectionArea(
-      child: DefaultTextStyle(
+      child: DefaultTextStyle.merge(
         style: TextStyle(
           fontSize: 12.5,
           height: 1.7,

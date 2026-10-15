@@ -273,8 +273,28 @@
       <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/flutter_mxlogger/example/windows/flutter/ephemeral/.plugin_symlinks/jni/example/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/flutter_mxlogger/example/windows/flutter/ephemeral/.plugin_symlinks/jni/example/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/flutter_mxlogger/example/windows/flutter/ephemeral/.plugin_symlinks/jni/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/chrome_extension/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/chrome_extension/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/chrome_extension/build" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/integration_test/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/integration_test/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/integration_test/build" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/integration_test/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/integration_test/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/integration_test/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/integration_test/integration_test_macos/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/integration_test/integration_test_macos/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/ios/.symlinks/plugins/integration_test/integration_test_macos/build" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/macos/Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/macos/Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/macos/Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/build" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/macos/Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/macos/Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/mxlogger_analyzer/macos/Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/example/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Dart SDK" level="project" />
+    <orderEntry type="library" name="Dart Packages" level="project" />
   </component>
 </module>

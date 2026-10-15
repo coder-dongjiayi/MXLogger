@@ -6,6 +6,13 @@ analyzer:
   exclude:
     - lib/src/dependencies/**
     - lib/src/app/l10n/gen/**
+    - build/**
+    - android/**
+    - ios/**
+    - windows/**
+    - macos/**
+    - linux/**
+    - web/**
 
 linter:
   rules:

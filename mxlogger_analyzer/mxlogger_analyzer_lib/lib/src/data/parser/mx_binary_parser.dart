@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:mxlogger_analyzer_lib/src/dependencies/aes_crypt/aes_crypt_null_safe.dart';
+import 'package:mxlogger_analyzer_lib/src/dependencies/aes_crypt/aes_bytes.dart';
 import 'package:mxlogger_analyzer_lib/src/data/parser/log_serialize.dart';
 
 /// 解析出的单条日志记录（纯数据，可跨 isolate 传输）。
@@ -136,7 +136,9 @@ class MxBinaryParser {
   /// 近 30 秒可以忽略。
   /// 返回的段两两相接、覆盖全部有效记录；数据不可用时返回空列表。
   static List<({int start, int end})> splitRanges(
-      Uint8List binaryData, int count) {
+    Uint8List binaryData,
+    int count,
+  ) {
     const List<({int start, int end})> empty = <({int start, int end})>[];
     if (binaryData.length < _sizeofUint32 || count < 1) return empty;
 
@@ -176,7 +178,10 @@ class MxBinaryParser {
   }
 
   static List<MxCryptPair> _resolvePairs(
-      List<MxCryptPair> cryptPairs, String? cryptKey, String? iv) {
+    List<MxCryptPair> cryptPairs,
+    String? cryptKey,
+    String? iv,
+  ) {
     if (cryptPairs.isNotEmpty) return cryptPairs;
     if (cryptKey != null && cryptKey.isNotEmpty) {
       return <MxCryptPair>[MxCryptPair(key: cryptKey, iv: iv ?? "")];
@@ -193,8 +198,9 @@ class MxBinaryParser {
     required List<MxCryptPair> pairs,
     void Function(int processed, int total)? onProgress,
   }) {
-    final List<AesCrypt> candidates =
-        pairs.map(_buildCrypt).toList(growable: false);
+    final List<AesBytes> candidates = pairs
+        .map(_buildCrypt)
+        .toList(growable: false);
     // 多组候选时，解出来「像不像一条日志」是判断有没有解错组的唯一依据；
     // 只有一组时无从选择，保持旧行为不额外过滤
     final bool strict = candidates.length > 1;
@@ -234,7 +240,8 @@ class MxBinaryParser {
     while (begin + _sizeofUint32 <= limit) {
       final int itemSize = byteData.getUint32(begin, Endian.little);
       final int start = begin + _sizeofUint32;
-      final bool chainOk = itemSize > 0 && start + itemSize <= binaryData.length;
+      final bool chainOk =
+          itemSize > 0 && start + itemSize <= binaryData.length;
 
       final LogRecord? record = chainOk ? decodeAt(start, itemSize) : null;
       if (record != null) {
@@ -256,7 +263,12 @@ class MxBinaryParser {
       // 解不开但长度链还连着（下一条前缀落在合理范围）：多半是这条用了未提供的
       // Key/IV，按原语义只计一次失败、继续往后走
       if (chainOk &&
-          _prefixLooksSane(byteData, start + itemSize, limit, binaryData.length)) {
+          _prefixLooksSane(
+            byteData,
+            start + itemSize,
+            limit,
+            binaryData.length,
+          )) {
         errorCount = errorCount + 1;
         begin = start + itemSize;
         onProgress?.call(begin > limit ? total : begin - origin, total);
@@ -287,17 +299,25 @@ class MxBinaryParser {
     }
 
     return MxParseResult(
-        records: records, fileHeader: fileHeader, errorCount: errorCount);
+      records: records,
+      fileHeader: fileHeader,
+      errorCount: errorCount,
+    );
   }
 
   /// [offset] 处的长度前缀是否落在合理范围内（只看长度，不解密）。
   /// [offset] 已到或越过 [limit] 说明链正好走完，也算合理。
   static bool _prefixLooksSane(
-      ByteData byteData, int offset, int limit, int length) {
+    ByteData byteData,
+    int offset,
+    int limit,
+    int length,
+  ) {
     if (offset >= limit) return true;
     if (offset + _sizeofUint32 > limit) return false;
     final int itemSize = byteData.getUint32(offset, Endian.little);
-    return _itemSizeSane(itemSize) && offset + _sizeofUint32 + itemSize <= length;
+    return _itemSizeSane(itemSize) &&
+        offset + _sizeofUint32 + itemSize <= length;
   }
 
   /// 一条记录的长度是否可信：flatbuffer 长度不会小于 [_minItemSize]，且按 4 对齐
@@ -316,7 +336,11 @@ class MxBinaryParser {
     int limit,
     LogRecord? Function(int start, int itemSize) decodeAt,
   ) {
-    for (int offset = from; offset + _sizeofUint32 + _minItemSize <= limit; offset++) {
+    for (
+      int offset = from;
+      offset + _sizeofUint32 + _minItemSize <= limit;
+      offset++
+    ) {
       final int itemSize = byteData.getUint32(offset, Endian.little);
       final int start = offset + _sizeofUint32;
       if (!_itemSizeSane(itemSize) || start + itemSize > limit) continue;
@@ -337,8 +361,8 @@ class MxBinaryParser {
     return -1;
   }
 
-  static AesCrypt _buildCrypt(MxCryptPair pair) {
-    final AesCrypt crypt = AesCrypt();
+  static AesBytes _buildCrypt(MxCryptPair pair) {
+    final AesBytes crypt = AesBytes();
     final String ivSource = pair.iv.isEmpty ? pair.key : pair.iv;
     crypt.aesSetKeys(_replenishByte(pair.key), _replenishByte(ivSource));
     crypt.aesSetMode(AesMode.cfb);
@@ -348,10 +372,11 @@ class MxBinaryParser {
   /// 解密（[crypt] 为空即明文）并还原一条记录，字节解不开时返回 null。
   /// flatbuffer 的字段是惰性读取的，取值必须一并放在这里的 try 内——
   /// 漏到外面会让整个文件的解析被判为失败。
-  static LogRecord? _decode(Uint8List bytes, {AesCrypt? crypt}) {
+  static LogRecord? _decode(Uint8List bytes, {AesBytes? crypt}) {
     try {
-      final LogSerialize serialize =
-          LogSerialize(crypt == null ? bytes : crypt.aesDecrypt(bytes));
+      final LogSerialize serialize = LogSerialize(
+        crypt == null ? bytes : crypt.aesDecrypt(bytes),
+      );
       return LogRecord(
         name: serialize.name,
         tag: serialize.tag,

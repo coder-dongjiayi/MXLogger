@@ -11,6 +11,7 @@ import 'package:mxlogger_analyzer_lib/src/global/util/mx_share.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_collapsible.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_icon_button.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_logo.dart';
+import 'package:mxlogger_analyzer_lib/src/global/widget/mx_support_button.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_toast.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/dialog/clear_data_dialog.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/dialog/key_iv_dialog.dart';
@@ -30,6 +31,7 @@ class DataHeader extends MXConsumerWidget {
     final MXStore store = ref.store;
     final HeaderInfo info = ref.watch(store.headerInfo).valueOrNull ?? const HeaderInfo();
     final bool isDark = ref.watch(store.themeMode) == ThemeMode.dark;
+    final bool headerCollapsed = ref.watch(store.headerCollapsed);
 
     final double buttonSize = context.mxTopButtonSize;
 
@@ -55,64 +57,100 @@ class DataHeader extends MXConsumerWidget {
                 Expanded(child: _brand(context, tokens)),
                 const SizedBox(width: 12),
                 // 窄屏放不下时按钮自动换行，不挤压品牌区
-                Wrap(
-                  spacing: 7,
-                  runSpacing: 7,
-                  alignment: WrapAlignment.end,
-                  children: [
-                    _ShareAllButton(info: info, size: buttonSize),
-                    // 嵌入模式日志来源固定为本机目录：给「刷新」重新扫描解析，
-                    // 而不是桌面端的「更换文件」
-                    if (store.isEmbedded)
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    // 留出品牌空间，让窄窗口的操作按钮确实能自动换行。
+                    maxWidth: context.isMobileLayout
+                        ? (MediaQuery.sizeOf(context).width -
+                                context.mxPadX * 2 - 64)
+                            .clamp(buttonSize, double.infinity)
+                            .toDouble()
+                        : double.infinity,
+                  ),
+                  child: Wrap(
+                    spacing: 7,
+                    runSpacing: 7,
+                    alignment: WrapAlignment.end,
+                    children: [
+                      _ShareAllButton(info: info, size: buttonSize),
+                      // 嵌入模式日志来源固定为本机目录：给「刷新」重新扫描解析，
+                      // 而不是桌面端的「更换文件」
+                      if (store.isEmbedded)
+                        MXIconButton(
+                          tooltip: context.l10n.refreshTip,
+                          icon: const Icon(Icons.refresh),
+                          size: buttonSize,
+                          onTap: () => refreshDeviceLogs(context, store),
+                        )
+                      else if (store.host.canPickFiles)
+                        MXIconButton(
+                          tooltip: context.l10n.changeFileTip,
+                          icon: const Icon(Icons.drive_folder_upload_outlined),
+                          size: buttonSize,
+                          onTap: () => pickAndImportLogFiles(context, store),
+                        ),
+                      // 桌面端：管理解密 KEY / IV（增删 / 勾选 / 排序，应用即重解析）
+                      if (!store.isEmbedded)
+                        MXIconButton(
+                          tooltip: context.l10n.keyIvTip,
+                          icon: const Icon(Icons.key_outlined, size: 15),
+                          size: buttonSize,
+                          onTap: () => showKeyIvDialog(context),
+                        ),
                       MXIconButton(
-                        tooltip: context.l10n.refreshTip,
-                        icon: const Icon(Icons.refresh),
+                        tooltip: context.l10n.clearDataTip,
+                        icon: const Icon(Icons.delete_outline),
                         size: buttonSize,
-                        onTap: () => refreshDeviceLogs(context, store),
-                      )
-                    else if (store.host.canPickFiles)
-                      MXIconButton(
-                        tooltip: context.l10n.changeFileTip,
-                        icon: const Icon(Icons.drive_folder_upload_outlined),
-                        size: buttonSize,
-                        onTap: () => pickAndImportLogFiles(context, store),
+                        onTap: () => _confirmClearData(context, store),
                       ),
-                    // 桌面端：管理解密 KEY / IV（增删 / 勾选 / 排序，应用即重解析）
-                    if (!store.isEmbedded)
                       MXIconButton(
-                        tooltip: context.l10n.keyIvTip,
-                        icon: const Icon(Icons.key_outlined, size: 15),
+                        tooltip: isDark ? context.l10n.themeToLight : context.l10n.themeToDark,
+                        icon: Icon(
+                            isDark ? Icons.wb_sunny_outlined : Icons.nightlight_outlined,
+                            size: 15),
                         size: buttonSize,
-                        onTap: () => showKeyIvDialog(context),
+                        onTap: store.themeMode.toggle,
                       ),
-                    MXIconButton(
-                      tooltip: context.l10n.clearDataTip,
-                      icon: const Icon(Icons.delete_outline),
-                      size: buttonSize,
-                      onTap: () => _confirmClearData(context, store),
-                    ),
-                    MXIconButton(
-                      tooltip: isDark ? context.l10n.themeToLight : context.l10n.themeToDark,
-                      icon: Icon(
-                          isDark ? Icons.wb_sunny_outlined : Icons.nightlight_outlined,
-                          size: 15),
-                      size: buttonSize,
-                      onTap: store.themeMode.toggle,
-                    ),
-                    MXIconButton(
-                      tooltip: context.l10n.languageTip,
-                      icon: const Icon(Icons.translate, size: 15),
-                      size: buttonSize,
-                      onTap: store.locale.toggle,
-                    ),
-                  ],
+                      MXIconButton(
+                        tooltip: context.l10n.languageTip,
+                        icon: const Icon(Icons.translate, size: 15),
+                        size: buttonSize,
+                        onTap: store.locale.toggle,
+                      ),
+                      if (!store.isEmbedded && !context.isMobileLayout)
+                        MXIconButton(
+                          tooltip: headerCollapsed
+                              ? context.l10n.expandFilters
+                              : context.l10n.collapseFilters,
+                          icon: Icon(headerCollapsed ? Icons.expand_more : Icons.expand_less),
+                          size: buttonSize,
+                          onTap: () => store.headerCollapsed.value = !headerCollapsed,
+                        ),
+                      if (!store.isEmbedded)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!context.isMobileLayout) ...[
+                              SizedBox(
+                                height: 18,
+                                child: VerticalDivider(width: 17, color: tokens.border),
+                              ),
+                            ],
+                            MXSupportButton(
+                              size: buttonSize,
+                              compact: context.isMobileLayout,
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
           // 手机端可由左下角悬浮按钮收起（品牌行与操作按钮始终保留）
           MXCollapsible(
-            collapsed: context.isMobileLayout && ref.watch(store.headerCollapsed),
+            collapsed: (context.isMobileLayout || !store.isEmbedded) && headerCollapsed,
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -130,10 +168,11 @@ class DataHeader extends MXConsumerWidget {
   /// 嵌入模式日志来源固定为本机目录，引导页无意义——留在数据页，
   /// 清空后自然落到带「刷新」按钮的空态。
   Future<void> _confirmClearData(BuildContext context, MXStore store) async {
-    final bool? confirmed = await showClearDataDialog(context);
-    if (confirmed != true || !context.mounted) return;
-    await store.importer.clearAll();
-    if (!context.mounted) return;
+    final bool? cleared = await showClearDataDialog(
+      context,
+      onClear: store.importer.clearAll,
+    );
+    if (cleared != true || !context.mounted) return;
     showMXToast(context, context.l10n.dataCleared);
     if (!store.isEmbedded) store.screen.resetToLanding();
   }

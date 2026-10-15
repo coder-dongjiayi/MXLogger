@@ -35,6 +35,9 @@ dev_dependencies:
 flutter:
   generate: true
   uses-material-design: true
+  assets:
+    - assets/support/wechat_qr.png
+    - assets/support/alipay_qr.png
 
 # pub.dev 上展示的界面截图（由桌面壳的 integration_test/generate_screenshots_test.dart 生成）
 screenshots:

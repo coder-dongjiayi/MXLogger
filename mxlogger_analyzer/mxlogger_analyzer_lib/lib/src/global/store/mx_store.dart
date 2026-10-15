@@ -106,8 +106,7 @@ class MXStore {
   /// 时间范围面板展开态
   late final MXState<bool> timeOpen;
 
-  /// 手机端筛选区（等级分布条+等级 chips+搜索/时间/折叠工具栏）收起态，
-  /// 由左下角悬浮按钮切换，收起后整屏都留给日志
+  /// 筛选区收起态：桌面/Web 顶部按钮切换，手机沿用左下角悬浮按钮。
   late final MXState<bool> headerCollapsed;
 
   /// 首次向导已选择的日志文件路径

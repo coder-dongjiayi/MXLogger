@@ -6,6 +6,7 @@ import 'package:mxlogger_analyzer_lib/src/global/state/mx_scope.dart';
 import 'package:mxlogger_analyzer_lib/src/global/store/settings_store.dart';
 import 'package:mxlogger_analyzer_lib/src/global/util/mx_responsive.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/crypt_entry_list.dart';
+import 'package:mxlogger_analyzer_lib/src/global/widget/crypt_storage_options.dart';
 
 /// 选择 .mx 文件后、解析前的解密参数确认弹框：
 /// 代入上次配置的各组 Key/IV（可增删、勾选，勾选的按序号依次尝试），
@@ -107,6 +108,7 @@ class _CryptConfirmDialogState extends MXConsumerState<_CryptConfirmDialog> {
                 maxHeight: 240,
                 onChanged: (List<CryptEntry> entries) => _entries = entries,
               ),
+              const CryptStorageOptions(),
               const SizedBox(height: 16),
               _clearOption(tokens),
               const SizedBox(height: 20),

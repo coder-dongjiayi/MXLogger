@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:mxlogger_analyzer_lib/src/app/l10n/gen/app_localizations.dart';
+import 'package:mxlogger_analyzer_lib/src/app/mx_scroll_behavior.dart';
 import 'package:mxlogger_analyzer_lib/src/app/theme/mx_theme.dart';
 import 'package:mxlogger_analyzer_lib/src/data/parser/mx_binary_parser.dart';
 import 'package:mxlogger_analyzer_lib/src/global/host/mx_host.dart';
@@ -228,6 +229,7 @@ class MXAnalyzerEmbedApp extends StatelessWidget {
       child: MXConsumer(builder: (BuildContext context, MXRef ref) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
+          scrollBehavior: const MXScrollBehavior(),
           theme: MXTheme.light(),
           darkTheme: MXTheme.dark(),
           themeMode: ref.watch(store.themeMode),

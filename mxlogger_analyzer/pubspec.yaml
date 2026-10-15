@@ -1,5 +1,5 @@
 name: mxlogger_analyzer
-description: "MXLogger 日志分析工具（桌面壳）：核心功能在 mxlogger_analyzer_lib，可嵌入任意 Flutter app。"
+description: "MXLogger 日志分析工具（桌面/Web 壳）：核心功能在 mxlogger_analyzer_lib，可嵌入任意 Flutter app。"
 publish_to: 'none'
 version: 2.0.2
 
@@ -14,12 +14,17 @@ dependencies:
   mxlogger_analyzer_lib:
     path: mxlogger_analyzer_lib
 
+  # Web 入口复用扩展的标准浏览器宿主（File / Worker / IndexedDB，无 Chrome API）。
+  mxlogger_chrome_prototype:
+    path: chrome_extension
+
   # 桌面壳注入内核的宿主能力（见 lib/src/host/desktop_host.dart）：
   # 设置落盘 / 选文件 / 拖入文件 / 系统分享。内核本身不依赖这些插件
   shared_preferences: ^2.3.3
   file_picker: ^8.3.7
   desktop_drop: ^0.4.4
   share_plus: ^11.0.0
+  url_launcher: ^6.3.2
 
   # 仅 lib/main_package.dart（真机嵌入调试入口）使用：写入真实 .mx 日志 + 设备信息文件头
   flutter_mxlogger:
@@ -39,3 +44,20 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # 为 Web 宿主注册同名界面字体，复用现有压缩资源。
+  fonts:
+    - family: NotoSansSC
+      fonts:
+        - asset: chrome_extension/assets/fonts/MXInterface.woff2
+    - family: MXMissingGlyph
+      fonts:
+        - asset: chrome_extension/assets/fonts/MXMissingGlyph.woff2
+    - family: NotoSansSymbols2
+      fonts:
+        - asset: chrome_extension/assets/fonts/MXSymbols.woff2
+    - family: NotoSansMath
+      fonts:
+        - asset: chrome_extension/assets/fonts/MXMath.woff2
+    - family: Roboto
+      fonts:
+        - asset: chrome_extension/assets/fonts/MXRoboto.woff2

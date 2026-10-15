@@ -1,4 +1,4 @@
-part of aes_crypt;
+part of aes_bytes;
 
 // This is the ported version of PHP phpAES library
 // http://www.phpaes.com
@@ -10,7 +10,7 @@ part of aes_crypt;
 // on 1 Mb data (1,4 vs 55-65 seconds), about 80 times faster on 2 Mb data
 // (2,7 vs 200-240 seconds), and so on.
 
-class _Aes {
+class AesBytes {
   // The S-Box substitution table.
   static final Uint8List _sBox = Uint8List.fromList([
     0x63,
@@ -1071,7 +1071,7 @@ class _Aes {
   // The initialization vector used in advanced cipher modes
   Uint8List? _aesIV;
 
-  _Aes() {
+  AesBytes() {
     _aesMode = AesMode.cbc;
     _aesIV = Uint8List(0);
     _aesKey = Uint8List(0);

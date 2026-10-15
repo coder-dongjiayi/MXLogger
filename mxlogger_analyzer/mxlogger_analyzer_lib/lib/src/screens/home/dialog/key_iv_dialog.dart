@@ -7,6 +7,7 @@ import 'package:mxlogger_analyzer_lib/src/global/state/mx_scope.dart';
 import 'package:mxlogger_analyzer_lib/src/global/store/settings_store.dart';
 import 'package:mxlogger_analyzer_lib/src/global/util/mx_responsive.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/crypt_entry_list.dart';
+import 'package:mxlogger_analyzer_lib/src/global/widget/crypt_storage_options.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_toast.dart';
 
 /// 管理当前配置的解密 KEY / IV（桌面端 header 钥匙按钮入口）：
@@ -116,6 +117,7 @@ class _KeyIvDialogState extends MXConsumerState<_KeyIvDialog> {
                 maxHeight: 300,
                 onChanged: (List<CryptEntry> entries) => _entries = entries,
               ),
+              const CryptStorageOptions(),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

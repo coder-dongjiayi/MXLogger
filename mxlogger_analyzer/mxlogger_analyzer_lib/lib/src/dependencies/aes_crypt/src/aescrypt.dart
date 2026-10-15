@@ -16,24 +16,9 @@ enum AesCryptOwMode {
   on,
 }
 
-/// Enum that specifies the mode of operation of the AES algorithm.
-enum AesMode {
-  /// ECB (Electronic Code Book)
-  ecb,
-
-  /// CBC (Cipher Block Chaining)
-  cbc,
-
-  /// CFB (Cipher Feedback)
-  cfb,
-
-  /// OFB (Output Feedback)
-  ofb,
-}
-
 /// Wraps encryption and decryption methods and algorithms.
 class AesCrypt {
-  final _aes = _Aes();
+  final _aes = AesBytes();
 
   String? _password;
   Uint8List? _passBytes;

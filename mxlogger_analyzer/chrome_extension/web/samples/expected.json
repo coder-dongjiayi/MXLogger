@@ -1,0 +1,114 @@
+{
+  "fileHeader": "{\"device\":\"iPhone 15 Pro\",\"os\":\"iOS 18.2\",\"app_version\":\"2.3.1\"}",
+  "errorCount": 0,
+  "records": [
+    {
+      "name": "com.djy.app",
+      "tag": "launch",
+      "msg": "app did finish launching, cold start 412ms",
+      "level": 1,
+      "threadId": 100,
+      "isMainThread": 1,
+      "timestamp": 1791860524657669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "network",
+      "msg": "GET https://api.example.com/v1/user/profile",
+      "level": 0,
+      "threadId": 101,
+      "isMainThread": 0,
+      "timestamp": 1791860524794669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "network",
+      "msg": "GET /v1/user/profile 200 in 182ms",
+      "level": 1,
+      "threadId": 102,
+      "isMainThread": 0,
+      "timestamp": 1791860524931669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "db",
+      "msg": "open database user_2233.db",
+      "level": 0,
+      "threadId": 100,
+      "isMainThread": 1,
+      "timestamp": 1791860525068669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "auth",
+      "msg": "token will expire in 300s, schedule refresh",
+      "level": 2,
+      "threadId": 101,
+      "isMainThread": 0,
+      "timestamp": 1791860525205669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "network",
+      "msg": "POST /v1/order timeout after 15s (attempt 2/3)",
+      "level": 3,
+      "threadId": 102,
+      "isMainThread": 0,
+      "timestamp": 1791860525342669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "db",
+      "msg": "insert order failed: UNIQUE constraint failed: order.id",
+      "level": 3,
+      "threadId": 100,
+      "isMainThread": 1,
+      "timestamp": 1791860525479669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "ui",
+      "msg": "HomeScreen build cost 9ms",
+      "level": 0,
+      "threadId": 101,
+      "isMainThread": 0,
+      "timestamp": 1791860525616669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "crash",
+      "msg": "unhandled exception: NoSuchMethodError: 'total' was called on null\n#0  OrderPage.build (order_page.dart:88)\n#1  StatelessElement.build",
+      "level": 4,
+      "threadId": 102,
+      "isMainThread": 0,
+      "timestamp": 1791860525753669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "network",
+      "msg": "websocket connected: wss://push.example.com",
+      "level": 1,
+      "threadId": 100,
+      "isMainThread": 1,
+      "timestamp": 1791860525890669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "auth",
+      "msg": "refresh token success",
+      "level": 1,
+      "threadId": 101,
+      "isMainThread": 0,
+      "timestamp": 1791860526027669
+    },
+    {
+      "name": "com.djy.app",
+      "tag": "ui",
+      "msg": "frame drop detected: 12 frames in scroll",
+      "level": 2,
+      "threadId": 102,
+      "isMainThread": 0,
+      "timestamp": 1791860526164669
+    }
+  ]
+}

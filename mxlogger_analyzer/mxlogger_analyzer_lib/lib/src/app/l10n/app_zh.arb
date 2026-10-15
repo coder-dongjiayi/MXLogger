@@ -219,6 +219,12 @@
   "cancel": "取消",
   "confirmClear": "清空",
   "dataCleared": "数据已清空",
+  "clearingData": "正在清空…",
+  "clearDataFailed": "清空失败，请重试",
+  "cryptPrivacySession": "KEY 和 IV 仅保存在当前浏览器会话中，解密在本地完成，不会上传到任何服务器。",
+  "cryptPrivacyLocal": "KEY 和 IV 仅保存在此浏览器中，解密在本地完成，不会上传到任何服务器。",
+  "rememberCrypt": "在此浏览器保存 KEY 和 IV",
+  "rememberCryptHint": "勾选后下次打开自动恢复；取消勾选会删除本地保存的密钥。",
   "sortAsc": "时间正序",
   "sortDesc": "时间倒序",
   "keyIvTip": "管理解密 KEY / IV",
@@ -273,5 +279,19 @@
     }
   },
   "matchPrevTip": "上一处 (Shift+Enter)",
-  "matchNextTip": "下一处 (Enter)"
+  "matchNextTip": "下一处 (Enter)",
+  "supportAuthor": "支持作者",
+  "supportTitle": "支持 MXLogger",
+  "supportMessage": "如果 MXLogger 帮到了你\n欢迎请作者喝杯咖啡，支持持续开发与维护。",
+  "supportWechat": "微信支付",
+  "supportAlipay": "支付宝",
+  "supportWechatHint": "使用微信扫一扫",
+  "supportAlipayHint": "使用支付宝扫一扫",
+  "supportEnlargeQr": "点击二维码放大",
+  "supportVoluntary": "支持完全自愿，不影响任何功能的使用。",
+  "supportPayPal": "Support via PayPal",
+  "supportPayPalHint": "海外用户可通过 PayPal 赞助",
+  "supportCopyLink": "复制收款链接",
+  "openLinkCopied": "浏览器未能打开，链接已复制",
+  "openLinkFailed": "无法打开或复制链接，请手动复制地址"
 }

@@ -422,6 +422,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dataCleared => '数据已清空';
 
   @override
+  String get clearingData => '正在清空…';
+
+  @override
+  String get clearDataFailed => '清空失败，请重试';
+
+  @override
+  String get cryptPrivacySession => 'KEY 和 IV 仅保存在当前浏览器会话中，解密在本地完成，不会上传到任何服务器。';
+
+  @override
+  String get cryptPrivacyLocal => 'KEY 和 IV 仅保存在此浏览器中，解密在本地完成，不会上传到任何服务器。';
+
+  @override
+  String get rememberCrypt => '在此浏览器保存 KEY 和 IV';
+
+  @override
+  String get rememberCryptHint => '勾选后下次打开自动恢复；取消勾选会删除本地保存的密钥。';
+
+  @override
   String get sortAsc => '时间正序';
 
   @override
@@ -491,4 +509,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get matchNextTip => '下一处 (Enter)';
+
+  @override
+  String get supportAuthor => '支持作者';
+
+  @override
+  String get supportTitle => '支持 MXLogger';
+
+  @override
+  String get supportMessage => '如果 MXLogger 帮到了你\n欢迎请作者喝杯咖啡，支持持续开发与维护。';
+
+  @override
+  String get supportWechat => '微信支付';
+
+  @override
+  String get supportAlipay => '支付宝';
+
+  @override
+  String get supportWechatHint => '使用微信扫一扫';
+
+  @override
+  String get supportAlipayHint => '使用支付宝扫一扫';
+
+  @override
+  String get supportEnlargeQr => '点击二维码放大';
+
+  @override
+  String get supportVoluntary => '支持完全自愿，不影响任何功能的使用。';
+
+  @override
+  String get supportPayPal => 'Support via PayPal';
+
+  @override
+  String get supportPayPalHint => '海外用户可通过 PayPal 赞助';
+
+  @override
+  String get supportCopyLink => '复制收款链接';
+
+  @override
+  String get openLinkCopied => '浏览器未能打开，链接已复制';
+
+  @override
+  String get openLinkFailed => '无法打开或复制链接，请手动复制地址';
 }

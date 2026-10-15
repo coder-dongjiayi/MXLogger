@@ -18,6 +18,14 @@ abstract interface class MXPrefs {
   void setBool(String key, bool value);
 }
 
+/// 宿主可选提供：允许用户决定解密参数仅存会话还是持久化。
+abstract interface class MXCryptPersistencePrefs {
+  bool get persistCrypt;
+
+  /// 开启时保存当前参数，关闭时删除已持久化的参数并保留会话内的值。
+  void setPersistCrypt(bool enabled);
+}
+
 /// 默认实现：只存在内存里。
 ///
 /// 不落盘意味着「重启后设置回到默认值」，这对嵌入模式是合理的：

@@ -3,6 +3,24 @@ import 'dart:convert';
 /// 时间四段式（对齐设计稿 fmtTs）：date / time / ms / full。
 typedef MxTimeParts = ({String date, String time, String ms, String full});
 
+/// 文件大小自动选择单位，最多保留一位小数。
+String mxFmtBytes(int bytes) {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  double size = bytes < 0 ? 0 : bytes.toDouble();
+  int unit = 0;
+  while (size >= 1024 && unit < units.length - 1) {
+    size /= 1024;
+    unit++;
+  }
+  // 舍入后达到下一单位时继续换算，避免显示 1024 KB。
+  if (unit > 0 && size >= 1023.95 && unit < units.length - 1) {
+    size /= 1024;
+    unit++;
+  }
+  final text = size.toStringAsFixed(unit == 0 ? 0 : 1);
+  return '${text.endsWith('.0') ? text.substring(0, text.length - 2) : text} ${units[unit]}';
+}
+
 MxTimeParts mxFmtTs(DateTime dt) {
   String pad(int n, [int w = 2]) => n.toString().padLeft(w, "0");
   final String date = "${dt.year}-${pad(dt.month)}-${pad(dt.day)}";

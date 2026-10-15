@@ -205,14 +205,28 @@ void main() {
     expect(tester.getTopLeft(list).dy, expandedTop);
   });
 
-  testWidgets("桌面端没有收起筛选区的悬浮按钮", (WidgetTester tester) async {
+  testWidgets("桌面端顶部按钮收起筛选区，展开后搜索和筛选保留", (WidgetTester tester) async {
     binding.platformDispatcher.views.first
       ..physicalSize = const Size(1280, 900)
       ..devicePixelRatio = 1.0;
-    await pumpDataPage(tester, logCount: 30);
+    final MXStore store = await pumpDataPage(tester, logCount: 30);
 
-    expect(find.byIcon(Icons.expand_less), findsNothing);
+    final Finder toggle = find.byIcon(Icons.expand_less);
+    expect(toggle, findsOneWidget);
+    expect(tester.getCenter(toggle).dy, lessThan(100));
     expect(find.byIcon(Icons.expand_more), findsNothing);
+    await tester.enterText(find.byType(TextField).first, 'network');
+    await tester.pumpAndSettle();
+    final String keyword = store.filter.value.keyword;
+    final double expandedTop = tester.getTopLeft(find.byType(ListView)).dy;
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byType(ListView)).dy, lessThan(expandedTop - 100));
+    expect(store.filter.value.keyword, keyword);
+    await tester.tap(find.byIcon(Icons.expand_more));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byType(ListView)).dy, expandedTop);
+    expect(tester.widget<TextField>(find.byType(TextField).first).controller!.text, 'network');
   });
 
   testWidgets("手机端日志卡片：4 个操作收进「⋯」，默认折叠，时间显示完整年月日", (WidgetTester tester) async {

@@ -1,0 +1,40 @@
+name: mxlogger_chrome_prototype
+description: Offline Chrome extension for the complete MXLogger analyzer.
+publish_to: none
+version: 0.3.1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mxlogger_analyzer_lib:
+    path: ../mxlogger_analyzer_lib
+  sqlite3: 2.9.4
+  web: 1.1.1
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/fonts/OFL.txt
+    - assets/fonts/Roboto-LICENSE.txt
+  fonts:
+    - family: NotoSansSC
+      fonts:
+        - asset: assets/fonts/MXInterface.woff2
+    - family: MXMissingGlyph
+      fonts:
+        - asset: assets/fonts/MXMissingGlyph.woff2
+    - family: NotoSansSymbols2
+      fonts:
+        - asset: assets/fonts/MXSymbols.woff2
+    - family: NotoSansMath
+      fonts:
+        - asset: assets/fonts/MXMath.woff2
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/MXRoboto.woff2

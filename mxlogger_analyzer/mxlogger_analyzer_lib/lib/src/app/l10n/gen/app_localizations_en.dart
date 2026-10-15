@@ -431,6 +431,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataCleared => 'Data cleared';
 
   @override
+  String get clearingData => 'Clearing data…';
+
+  @override
+  String get clearDataFailed => 'Failed to clear data. Please retry.';
+
+  @override
+  String get cryptPrivacySession =>
+      'KEY and IV stay in this browser session. Decryption runs locally; they are never uploaded to a server.';
+
+  @override
+  String get cryptPrivacyLocal =>
+      'KEY and IV stay in this browser. Decryption runs locally; they are never uploaded to a server.';
+
+  @override
+  String get rememberCrypt => 'Save KEY and IV in this browser';
+
+  @override
+  String get rememberCryptHint =>
+      'Restore them next time. Unchecking removes locally saved keys.';
+
+  @override
   String get sortAsc => 'Oldest first';
 
   @override
@@ -501,4 +522,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matchNextTip => 'Next match (Enter)';
+
+  @override
+  String get supportAuthor => 'Support the author';
+
+  @override
+  String get supportTitle => 'Support MXLogger';
+
+  @override
+  String get supportMessage =>
+      'If MXLogger has helped you,\nbuy the author a coffee to support ongoing development and maintenance.';
+
+  @override
+  String get supportWechat => 'WeChat Pay';
+
+  @override
+  String get supportAlipay => 'Alipay';
+
+  @override
+  String get supportWechatHint => 'Scan with WeChat';
+
+  @override
+  String get supportAlipayHint => 'Scan with Alipay';
+
+  @override
+  String get supportEnlargeQr => 'Click QR code to enlarge';
+
+  @override
+  String get supportVoluntary =>
+      'Support is entirely voluntary. All features remain free to use.';
+
+  @override
+  String get supportPayPal => 'Support via PayPal';
+
+  @override
+  String get supportPayPalHint => 'Support MXLogger with PayPal';
+
+  @override
+  String get supportCopyLink => 'Copy payment link';
+
+  @override
+  String get openLinkCopied => 'Couldn\'t open the browser. Link copied.';
+
+  @override
+  String get openLinkFailed =>
+      'Couldn\'t open or copy the link. Copy the address manually.';
 }

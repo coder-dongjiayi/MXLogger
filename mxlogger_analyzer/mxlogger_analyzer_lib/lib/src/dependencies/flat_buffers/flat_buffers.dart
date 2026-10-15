@@ -65,7 +65,20 @@ class BufferContext {
   int _getInt8(int offset) => _buffer.getInt8(offset);
 
   @pragma('vm:prefer-inline')
-  int _getUint64(int offset) => _buffer.getUint64(offset, Endian.little);
+  int _getUint64(int offset) {
+    // dart2js has no ByteData.getUint64 implementation. MXLogger microsecond
+    // timestamps fit exactly in JavaScript's 53-bit integer range. Combine
+    // two uint32 words with arithmetic (a JS bit shift would discard bits).
+    if (const bool.fromEnvironment('dart.library.js_interop')) {
+      final int low = _buffer.getUint32(offset, Endian.little);
+      final int high = _buffer.getUint32(offset + 4, Endian.little);
+      if (high > 0x1fffff) {
+        throw RangeError('uint64 exceeds the exact integer range on the web');
+      }
+      return high * 0x100000000 + low;
+    }
+    return _buffer.getUint64(offset, Endian.little);
+  }
 
   @pragma('vm:prefer-inline')
   int _getUint32(int offset) => _buffer.getUint32(offset, Endian.little);

@@ -149,7 +149,8 @@ class HomeScreenState extends MXConsumerState<HomeScreen> {
   Widget _dataBody() {
     final bool timeOpen = ref.watch(store.timeOpen);
     final bool mobile = context.isMobileLayout;
-    final bool headerCollapsed = mobile && ref.watch(store.headerCollapsed);
+    final bool headerCollapsed =
+        (mobile || !store.isEmbedded) && ref.watch(store.headerCollapsed);
     final double fabInset = mobile ? 16 : 18;
 
     return Stack(

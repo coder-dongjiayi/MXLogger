@@ -34,29 +34,37 @@ class _MXIconButtonState extends State<MXIconButton> {
     final MXTokens tokens = MXTokens.of(context);
     final bool highlight = _hovering || widget.active;
     final Color color = highlight ? tokens.accent : tokens.muted;
-    return Tooltip(
-      message: widget.tooltip,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovering = true),
-        onExit: (_) => setState(() => _hovering = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 120),
-            width: widget.size,
-            height: widget.size,
-            decoration: BoxDecoration(
-              color: tokens.panel,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: highlight ? tokens.accent : tokens.border),
-            ),
-            alignment: Alignment.center,
-            child: IconTheme(
-              data: IconThemeData(color: color, size: widget.iconSize),
-              child: DefaultTextStyle(
-                style: TextStyle(color: color, fontSize: widget.iconSize),
-                child: widget.icon,
+    return Semantics(
+      button: true,
+      label: widget.tooltip,
+      onTap: widget.onTap,
+      excludeSemantics: true,
+      child: Tooltip(
+        message: widget.tooltip,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovering = true),
+          onExit: (_) => setState(() => _hovering = false),
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 120),
+              width: widget.size,
+              height: widget.size,
+              decoration: BoxDecoration(
+                color: tokens.panel,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: highlight ? tokens.accent : tokens.border,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: IconTheme(
+                data: IconThemeData(color: color, size: widget.iconSize),
+                child: DefaultTextStyle(
+                  style: TextStyle(color: color, fontSize: widget.iconSize),
+                  child: widget.icon,
+                ),
               ),
             ),
           ),

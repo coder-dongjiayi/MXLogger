@@ -30,22 +30,6 @@ class AesCryptException implements Exception {
   String toString() => message;
 }
 
-/// Error thrown when a function is passed an unacceptable argument.
-class AesCryptArgumentError extends ArgumentError {
-  /// Creates a new AesCryptArgumentError with an error message [message]
-  /// describing the erroneous argument.
-  AesCryptArgumentError(String message) : super(message);
-
-  /// Throws [AesCryptArgumentError] if [argument] is: null [Object], empty [String] or empty [Iterable]
-  static void checkNullOrEmpty(Object? argument, String message) {
-    if (argument == null ||
-        ((argument is String) ? argument.isEmpty : false) ||
-        ((argument is Iterable) ? argument.isEmpty : false)) {
-      throw AesCryptArgumentError(message);
-    }
-  }
-}
-
 /// Exception thrown when the file system operation fails.
 class AesCryptFsException extends FileSystemException {
   /// Creates a new AesCryptFsException with an error message [message],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 /// 设计稿 MXLogger.dc.html 的双主题 design tokens，全工程唯一颜色来源。
 /// 业务代码通过 `MXTokens.of(context)` 取色，禁止散落 hex。
@@ -87,7 +88,9 @@ class MXTokens extends ThemeExtension<MXTokens> {
     jsonBool: Color(0xFFF0427C),
     nameText: Color(0xFFB48CF0),
     tagText: Color(0xFF4FC0B0),
-    cardShadow: [BoxShadow(color: Color(0x66000000), offset: Offset(0, 1), blurRadius: 3)],
+    cardShadow: [
+      BoxShadow(color: Color(0x66000000), offset: Offset(0, 1), blurRadius: 3),
+    ],
   );
 
   /// light: --bg:#F2F4F9 --panel:#FFFFFF --panel-2:#EAEEF5 --border:#D8DEE9 ...
@@ -116,7 +119,9 @@ class MXTokens extends ThemeExtension<MXTokens> {
     jsonBool: Color(0xFFC22566),
     nameText: Color(0xFF6E3BD1),
     tagText: Color(0xFF0E8578),
-    cardShadow: [BoxShadow(color: Color(0x14182A3A), offset: Offset(0, 1), blurRadius: 2)],
+    cardShadow: [
+      BoxShadow(color: Color(0x14182A3A), offset: Offset(0, 1), blurRadius: 2),
+    ],
   );
 
   static MXTokens of(BuildContext context) {
@@ -190,6 +195,13 @@ class MXTheme {
     "JetBrains Mono",
     "Consolas",
     "monospace",
+    // Browser UI, installed log fonts and bundled symbols, in that order.
+    if (kIsWeb) "NotoSansSC",
+    if (kIsWeb) "MXLogFont",
+    if (kIsWeb) "NotoSansSymbols2",
+    if (kIsWeb) "NotoSansMath",
+    if (kIsWeb) "Roboto",
+    if (kIsWeb) "MXMissingGlyph",
   ];
 
   static ThemeData dark() => _build(MXTokens.dark, Brightness.dark);
@@ -219,7 +231,11 @@ class MXTheme {
       scaffoldBackgroundColor: tokens.bg,
       splashFactory: NoSplash.splashFactory,
       fontFamilyFallback: const ["PingFang SC", "Microsoft YaHei"],
-      dividerTheme: DividerThemeData(color: tokens.border, thickness: 1, space: 1),
+      dividerTheme: DividerThemeData(
+        color: tokens.border,
+        thickness: 1,
+        space: 1,
+      ),
       tooltipTheme: TooltipThemeData(
         waitDuration: const Duration(milliseconds: 400),
         decoration: BoxDecoration(
@@ -236,7 +252,10 @@ class MXTheme {
     );
 
     return base.copyWith(
-      textTheme: base.textTheme.apply(bodyColor: tokens.text, displayColor: tokens.text),
+      textTheme: base.textTheme.apply(
+        bodyColor: tokens.text,
+        displayColor: tokens.text,
+      ),
       extensions: <ThemeExtension<dynamic>>[tokens],
     );
   }

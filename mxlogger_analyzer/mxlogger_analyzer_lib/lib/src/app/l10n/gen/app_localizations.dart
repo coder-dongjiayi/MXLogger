@@ -878,6 +878,42 @@ abstract class AppLocalizations {
   /// **'数据已清空'**
   String get dataCleared;
 
+  /// No description provided for @clearingData.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在清空…'**
+  String get clearingData;
+
+  /// No description provided for @clearDataFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空失败，请重试'**
+  String get clearDataFailed;
+
+  /// No description provided for @cryptPrivacySession.
+  ///
+  /// In zh, this message translates to:
+  /// **'KEY 和 IV 仅保存在当前浏览器会话中，解密在本地完成，不会上传到任何服务器。'**
+  String get cryptPrivacySession;
+
+  /// No description provided for @cryptPrivacyLocal.
+  ///
+  /// In zh, this message translates to:
+  /// **'KEY 和 IV 仅保存在此浏览器中，解密在本地完成，不会上传到任何服务器。'**
+  String get cryptPrivacyLocal;
+
+  /// No description provided for @rememberCrypt.
+  ///
+  /// In zh, this message translates to:
+  /// **'在此浏览器保存 KEY 和 IV'**
+  String get rememberCrypt;
+
+  /// No description provided for @rememberCryptHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'勾选后下次打开自动恢复；取消勾选会删除本地保存的密钥。'**
+  String get rememberCryptHint;
+
   /// No description provided for @sortAsc.
   ///
   /// In zh, this message translates to:
@@ -1003,6 +1039,90 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'下一处 (Enter)'**
   String get matchNextTip;
+
+  /// No description provided for @supportAuthor.
+  ///
+  /// In zh, this message translates to:
+  /// **'支持作者'**
+  String get supportAuthor;
+
+  /// No description provided for @supportTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'支持 MXLogger'**
+  String get supportTitle;
+
+  /// No description provided for @supportMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'如果 MXLogger 帮到了你\n欢迎请作者喝杯咖啡，支持持续开发与维护。'**
+  String get supportMessage;
+
+  /// No description provided for @supportWechat.
+  ///
+  /// In zh, this message translates to:
+  /// **'微信支付'**
+  String get supportWechat;
+
+  /// No description provided for @supportAlipay.
+  ///
+  /// In zh, this message translates to:
+  /// **'支付宝'**
+  String get supportAlipay;
+
+  /// No description provided for @supportWechatHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用微信扫一扫'**
+  String get supportWechatHint;
+
+  /// No description provided for @supportAlipayHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用支付宝扫一扫'**
+  String get supportAlipayHint;
+
+  /// No description provided for @supportEnlargeQr.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击二维码放大'**
+  String get supportEnlargeQr;
+
+  /// No description provided for @supportVoluntary.
+  ///
+  /// In zh, this message translates to:
+  /// **'支持完全自愿，不影响任何功能的使用。'**
+  String get supportVoluntary;
+
+  /// No description provided for @supportPayPal.
+  ///
+  /// In zh, this message translates to:
+  /// **'Support via PayPal'**
+  String get supportPayPal;
+
+  /// No description provided for @supportPayPalHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'海外用户可通过 PayPal 赞助'**
+  String get supportPayPalHint;
+
+  /// No description provided for @supportCopyLink.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制收款链接'**
+  String get supportCopyLink;
+
+  /// No description provided for @openLinkCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'浏览器未能打开，链接已复制'**
+  String get openLinkCopied;
+
+  /// No description provided for @openLinkFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法打开或复制链接，请手动复制地址'**
+  String get openLinkFailed;
 }
 
 class _AppLocalizationsDelegate

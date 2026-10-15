@@ -19,9 +19,12 @@ class MXLogo extends StatelessWidget {
 /// logo 几何绘制（48 单位视口，方框区 3..45）。
 /// 公开供 tool/generate_app_icon.dart 直绘生成 App 图标，保证与页面 logo 完全一致。
 class MXLogoPainter extends CustomPainter {
-  MXLogoPainter(this.tokens);
+  MXLogoPainter(this.tokens, {this.toolbar = false});
 
   final MXTokens tokens;
+
+  /// Small browser toolbar icons need larger cells and stronger contrast.
+  final bool toolbar;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -34,27 +37,36 @@ class MXLogoPainter extends CustomPainter {
       );
     }
 
-    canvas.drawRRect(box(3, 3, 42, 42, 11), Paint()..color = tokens.panel2);
+    canvas.drawRRect(
+      box(3, 3, 42, 42, 11),
+      Paint()..color = toolbar ? const Color(0xFF26334F) : tokens.panel2,
+    );
     canvas.drawRRect(
       box(3, 3, 42, 42, 11),
       Paint()
-        ..color = tokens.border
+        ..color = toolbar ? const Color(0xFF6B80A8) : tokens.border
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2 * s,
     );
 
-    final Paint faintFill = Paint()..color = tokens.faint.withValues(alpha: 0.45);
-    canvas.drawRRect(box(11, 11, 11, 11, 3), faintFill);
-    canvas.drawRRect(box(11, 26, 11, 11, 3), faintFill);
-    canvas.drawRRect(box(26, 26, 11, 11, 3), faintFill);
+    final Paint faintFill = Paint()
+      ..color = toolbar
+          ? const Color(0xFFBFC9E0)
+          : tokens.faint.withValues(alpha: 0.45);
+    final start = toolbar ? 9.0 : 11.0;
+    final cell = toolbar ? 13.0 : 11.0;
+    canvas.drawRRect(box(start, start, cell, cell, 3), faintFill);
+    canvas.drawRRect(box(start, 26, cell, cell, 3), faintFill);
+    canvas.drawRRect(box(26, 26, cell, cell, 3), faintFill);
 
-    final Paint accentFill = Paint()..color = tokens.accent;
-    canvas.drawRRect(box(26, 11, 11, 11, 3), accentFill);
+    final accent = toolbar ? const Color(0xFF5FACFF) : tokens.accent;
+    final Paint accentFill = Paint()..color = accent;
+    canvas.drawRRect(box(26, start, cell, cell, 3), accentFill);
     canvas.drawLine(
       Offset(31.5 * s, 16.5 * s),
       Offset(41 * s, 7 * s),
       Paint()
-        ..color = tokens.accent
+        ..color = accent
         ..strokeWidth = 2.4 * s
         ..strokeCap = StrokeCap.round,
     );
@@ -62,5 +74,6 @@ class MXLogoPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(MXLogoPainter oldDelegate) => oldDelegate.tokens != tokens;
+  bool shouldRepaint(MXLogoPainter oldDelegate) =>
+      oldDelegate.tokens != tokens || oldDelegate.toolbar != toolbar;
 }

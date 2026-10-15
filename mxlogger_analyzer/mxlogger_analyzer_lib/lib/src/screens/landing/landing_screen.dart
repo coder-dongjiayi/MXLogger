@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:mxlogger_analyzer_lib/src/global/util/mx_file_name.dart';
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
@@ -10,8 +10,10 @@ import 'package:mxlogger_analyzer_lib/src/global/state/mx_scope.dart';
 import 'package:mxlogger_analyzer_lib/src/global/store/settings_store.dart';
 import 'package:mxlogger_analyzer_lib/src/global/util/mx_responsive.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/crypt_entry_list.dart';
+import 'package:mxlogger_analyzer_lib/src/global/widget/crypt_storage_options.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_icon_button.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_logo.dart';
+import 'package:mxlogger_analyzer_lib/src/global/widget/mx_support_button.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/model/import_state.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/widget/import_loading_view.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/landing/widget/mx_crypto_bg.dart';
@@ -173,6 +175,14 @@ class LandingScreenState extends MXConsumerState<LandingScreen> {
                   icon: const Icon(Icons.translate, size: 15),
                   size: context.mxTopButtonSize,
                   onTap: store.locale.toggle,
+                ),
+                SizedBox(
+                  height: 18,
+                  child: VerticalDivider(width: 23, color: tokens.border),
+                ),
+                MXSupportButton(
+                  size: context.mxTopButtonSize,
+                  compact: context.isMobileLayout,
                 ),
               ],
             ),
@@ -358,22 +368,28 @@ class LandingScreenState extends MXConsumerState<LandingScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         // 点击图标即打开文件选择（拖入由外层 DropTarget 处理）
-        MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: _pickFiles,
-            child: Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: tokens.panel2,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: tokens.border),
-              ),
-              child: Icon(
-                Icons.upload_file_outlined,
-                size: 28,
-                color: tokens.accent,
+        Semantics(
+          button: true,
+          label: context.l10n.pickFile,
+          onTap: _pickFiles,
+          excludeSemantics: true,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: _pickFiles,
+              child: Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: tokens.panel2,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: tokens.border),
+                ),
+                child: Icon(
+                  Icons.upload_file_outlined,
+                  size: 28,
+                  color: tokens.accent,
+                ),
               ),
             ),
           ),
@@ -429,8 +445,12 @@ class LandingScreenState extends MXConsumerState<LandingScreen> {
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     constraints: const BoxConstraints(maxWidth: 240),
-                    padding:
-                        const EdgeInsets.only(left: 10, right: 5, top: 3, bottom: 3),
+                    padding: const EdgeInsets.only(
+                      left: 10,
+                      right: 5,
+                      top: 3,
+                      bottom: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: tokens.panel2,
                       borderRadius: BorderRadius.circular(999),
@@ -441,7 +461,7 @@ class LandingScreenState extends MXConsumerState<LandingScreen> {
                       children: [
                         Flexible(
                           child: Text(
-                            path.split(Platform.pathSeparator).last,
+                            mxFileName(path),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -502,10 +522,8 @@ class LandingScreenState extends MXConsumerState<LandingScreen> {
         ),
         const SizedBox(height: 20),
         // 多组 KEY/IV：勾选的组按序号依次尝试解密（组件内部已做移动端换行）
-        CryptEntryList(
-          initialEntries: _initialEntries,
-          onChanged: _saveCrypt,
-        ),
+        CryptEntryList(initialEntries: _initialEntries, onChanged: _saveCrypt),
+        const CryptStorageOptions(),
         const SizedBox(height: 24),
         _PrimaryButton(
           icon: Icons.play_arrow_rounded,
@@ -633,7 +651,9 @@ class _RemoveChipButtonState extends State<_RemoveChipButton> {
           height: 18,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _hovering ? tokens.lvError.withValues(alpha: 0.15) : Colors.transparent,
+            color: _hovering
+                ? tokens.lvError.withValues(alpha: 0.15)
+                : Colors.transparent,
           ),
           child: Icon(
             Icons.close,

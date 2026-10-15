@@ -1,4 +1,7 @@
-import 'package:sqlite3/sqlite3.dart';
+import 'package:sqlite3/common.dart';
+
+import 'package:mxlogger_analyzer_lib/src/data/database/open_database_unsupported.dart'
+    if (dart.library.io) 'package:mxlogger_analyzer_lib/src/data/database/open_database_native.dart';
 
 import 'package:mxlogger_analyzer_lib/src/data/parser/mx_binary_parser.dart';
 
@@ -46,28 +49,41 @@ class LogQuery {
 /// sqlite 封装：日志的唯一持久化入口。
 /// 以 timestamp（微秒）作为日志唯一标识，重复导入自动忽略。
 class AnalyzerDatabase {
-  AnalyzerDatabase(String directory) : _path = "$directory/mxlogger_analyzer.db";
+  AnalyzerDatabase(String directory)
+    : _path = "$directory/mxlogger_analyzer.db",
+      _injectedConnection = null,
+      _nativePragmas = true;
+
+  /// Browser hosts load WASM/VFS asynchronously, then inject the connection.
+  AnalyzerDatabase.fromConnection(CommonDatabase connection)
+    : _path = "",
+      _injectedConnection = connection,
+      _nativePragmas = false;
 
   final String _path;
-  Database? _db;
+  final CommonDatabase? _injectedConnection;
+  final bool _nativePragmas;
+  CommonDatabase? _db;
 
-  Database get _database {
-    final Database? db = _db;
+  CommonDatabase get _database {
+    final CommonDatabase? db = _db;
     if (db == null) throw StateError("database is not opened");
     return db;
   }
 
   void open() {
     if (_db != null) return;
-    final Database db = sqlite3.open(_path);
+    final CommonDatabase db = _injectedConnection ?? openNativeDatabase(_path);
     // 写库按批提交（见 insertRecordsWithProgress），默认的 delete journal +
     // synchronous=FULL 会让每批各 fsync 一次，50 万条实测从 4.3s 涨到 14s。
     // WAL 让提交只追加日志，synchronous=NORMAL 把 fsync 收敛到 checkpoint，
     // 断电最坏只丢最后几批（库不会损坏），而日志本来就能从源文件重导，
     // 这个权衡换回写入速度是值得的。journal_mode 写在库文件头里只需生效一次，
     // synchronous 是连接级设置，每次 open 都要重设。
-    db.execute("PRAGMA journal_mode=WAL");
-    db.execute("PRAGMA synchronous=NORMAL");
+    if (_nativePragmas) {
+      db.execute("PRAGMA journal_mode=WAL");
+      db.execute("PRAGMA synchronous=NORMAL");
+    }
     db.execute("""
       CREATE TABLE IF NOT EXISTS mxlog(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,23 +103,31 @@ class AnalyzerDatabase {
     // (level,timestamp) 让「等级过滤 + 按时间排序分页」免掉 TEMP B-TREE 全量排序；
     // name/tag 单列索引让 name 过滤、distinctNames、distinctTags 走覆盖索引。
     db.execute(
-        "CREATE INDEX IF NOT EXISTS idx_mxlog_level_ts ON mxlog(level,timestamp)");
+      "CREATE INDEX IF NOT EXISTS idx_mxlog_level_ts ON mxlog(level,timestamp)",
+    );
     db.execute("CREATE INDEX IF NOT EXISTS idx_mxlog_name ON mxlog(name)");
     db.execute("CREATE INDEX IF NOT EXISTS idx_mxlog_tag ON mxlog(tag)");
-    db.execute("CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT)");
+    db.execute(
+      "CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT)",
+    );
     _db = db;
   }
 
   /// 事务内批量插入，timestamp 冲突走 OR IGNORE 并计入重复数。
-  InsertSummary insertRecords(List<LogRecord> records, {String? fileHeader}) {
-    final Database db = _database;
-    final PreparedStatement stmt = db.prepare(
+  InsertSummary insertRecords(
+    List<LogRecord> records, {
+    String? fileHeader,
+    bool clearExisting = false,
+  }) {
+    final CommonDatabase db = _database;
+    final CommonPreparedStatement stmt = db.prepare(
       "INSERT OR IGNORE INTO mxlog (name,tag,msg,level,threadId,isMainThread,timestamp,fileHeader)"
       " VALUES (?,?,?,?,?,?,?,?)",
     );
     int inserted = 0;
     db.execute("BEGIN");
     try {
+      if (clearExisting) clear();
       for (final LogRecord record in records) {
         stmt.execute([
           record.name,
@@ -127,6 +151,98 @@ class AnalyzerDatabase {
     return (inserted: inserted, duplicated: records.length - inserted);
   }
 
+  /// Worker hosts can write an entire multi-file import synchronously in one
+  /// transaction. Failed writes retain both the previous rows and metadata.
+  InsertSummary importResults(
+    List<MxParseResult> results, {
+    required String fileName,
+    bool clearExisting = true,
+    void Function(int processed, int total)? onProgress,
+  }) {
+    final db = _database;
+    final stmt = db.prepare(
+      'INSERT OR IGNORE INTO mxlog '
+      '(name,tag,msg,level,threadId,isMainThread,timestamp,fileHeader) '
+      'VALUES (?,?,?,?,?,?,?,?)',
+    );
+    final total = results.fold(
+      0,
+      (int sum, result) => sum + result.records.length,
+    );
+    int processed = 0;
+    int inserted = 0;
+    db.execute('BEGIN');
+    try {
+      // Reparse / plaintext-to-encrypted reimports commonly produce identical
+      // rows. Compare every field in bounded pages before rewriting a large
+      // IndexedDB cache and its rollback journal; equality is exact, not hashed.
+      if (!(clearExisting && _sameImportedRecords(results, total))) {
+        if (clearExisting) clear();
+        for (final result in results) {
+          for (final record in result.records) {
+            stmt.execute([
+              record.name,
+              record.tag,
+              record.msg,
+              record.level,
+              record.threadId,
+              record.isMainThread,
+              record.timestamp,
+              result.fileHeader,
+            ]);
+            inserted += db.updatedRows;
+            processed++;
+            if (processed % 4000 == 0) onProgress?.call(processed, total);
+          }
+        }
+      }
+      setMeta('fileName', fileName);
+      db.execute('COMMIT');
+    } catch (_) {
+      db.execute('ROLLBACK');
+      rethrow;
+    } finally {
+      stmt.dispose();
+    }
+    onProgress?.call(total, total);
+    return (inserted: inserted, duplicated: total - inserted);
+  }
+
+  bool _sameImportedRecords(List<MxParseResult> results, int total) {
+    if (total == 0 || count() != total) return false;
+    final incoming = results
+        .expand(
+          (result) => result.records.map(
+            (record) => (record: record, header: result.fileHeader),
+          ),
+        )
+        .iterator;
+    int? fromUs;
+    int matched = 0;
+    while (matched < total) {
+      final rows = selectLogs(
+        LogQuery(fromUs: fromUs, ascending: true, limit: 1000),
+      );
+      if (rows.isEmpty) return false;
+      for (final row in rows) {
+        if (!incoming.moveNext()) return false;
+        final record = incoming.current.record;
+        if (row['timestamp'] != record.timestamp ||
+            row['name'] != record.name ||
+            row['tag'] != record.tag ||
+            row['msg'] != record.msg ||
+            row['level'] != record.level ||
+            row['threadId'] != record.threadId ||
+            row['isMainThread'] != record.isMainThread ||
+            row['fileHeader'] != incoming.current.header)
+          return false;
+        matched++;
+      }
+      fromUs = (rows.last['timestamp'] as int) + 1;
+    }
+    return !incoming.moveNext();
+  }
+
   /// 分批插入：**每批一个独立事务**，提交后才让出事件循环并回报真实进度
   /// （processed/total），大文件写库时 UI 仍可刷新 loading。
   ///
@@ -146,8 +262,8 @@ class AnalyzerDatabase {
     int batchSize = 4000,
     void Function(int processed, int total)? onProgress,
   }) async {
-    final Database db = _database;
-    final PreparedStatement stmt = db.prepare(
+    final CommonDatabase db = _database;
+    final CommonPreparedStatement stmt = db.prepare(
       "INSERT OR IGNORE INTO mxlog (name,tag,msg,level,threadId,isMainThread,timestamp,fileHeader)"
       " VALUES (?,?,?,?,?,?,?,?)",
     );
@@ -195,7 +311,8 @@ class AnalyzerDatabase {
   List<Map<String, Object?>> selectLogs(LogQuery query) {
     final ({String where, List<Object?> args}) clause = _whereClause(query);
     final String order = query.ascending ? "ASC" : "DESC";
-    String sql = "SELECT * FROM mxlog WHERE ${clause.where}"
+    String sql =
+        "SELECT * FROM mxlog WHERE ${clause.where}"
         " ORDER BY timestamp $order, id $order";
     final List<Object?> args = [...clause.args];
     if (query.limit != null) {
@@ -254,7 +371,9 @@ class AnalyzerDatabase {
     if (tags.isNotEmpty) {
       final List<String> ors = [];
       for (final String tag in tags) {
-        ors.add("instr(' ' || replace(COALESCE(tag,''), ',', ' ') || ' ', ?) > 0");
+        ors.add(
+          "instr(' ' || replace(COALESCE(tag,''), ',', ' ') || ' ', ?) > 0",
+        );
         args.add(" $tag ");
       }
       conditions.add("(${ors.join(" OR ")})");
@@ -283,14 +402,17 @@ class AnalyzerDatabase {
   }
 
   int count() {
-    final ResultSet resultSet = _database.select("SELECT COUNT(*) AS c FROM mxlog");
+    final ResultSet resultSet = _database.select(
+      "SELECT COUNT(*) AS c FROM mxlog",
+    );
     return resultSet.first["c"] as int? ?? 0;
   }
 
   /// 各等级条数统计，用于分布条与过滤 chip。
   Map<int, int> levelCounts() {
-    final ResultSet resultSet =
-        _database.select("SELECT level, COUNT(*) AS c FROM mxlog GROUP BY level");
+    final ResultSet resultSet = _database.select(
+      "SELECT level, COUNT(*) AS c FROM mxlog GROUP BY level",
+    );
     final Map<int, int> counts = {};
     for (final Row row in resultSet) {
       counts[row["level"] as int? ?? 0] = row["c"] as int? ?? 0;
@@ -302,8 +424,9 @@ class AnalyzerDatabase {
   List<String> distinctTags() {
     // DISTINCT 让 idx_mxlog_tag 成为覆盖索引，只取去重后的 tag 组合再分词，
     // 避免把全表 tag 逐行拉到 Dart 层。
-    final ResultSet resultSet = _database
-        .select("SELECT DISTINCT tag FROM mxlog WHERE tag IS NOT NULL AND tag != ''");
+    final ResultSet resultSet = _database.select(
+      "SELECT DISTINCT tag FROM mxlog WHERE tag IS NOT NULL AND tag != ''",
+    );
     final Set<String> tags = {};
     for (final Row row in resultSet) {
       final String raw = (row["tag"] as String?) ?? "";
@@ -325,8 +448,9 @@ class AnalyzerDatabase {
 
   /// 起始/结束时间（微秒），空库返回 null。
   ({int minUs, int maxUs})? timeBounds() {
-    final ResultSet resultSet =
-        _database.select("SELECT MIN(timestamp) AS a, MAX(timestamp) AS b FROM mxlog");
+    final ResultSet resultSet = _database.select(
+      "SELECT MIN(timestamp) AS a, MAX(timestamp) AS b FROM mxlog",
+    );
     final Row row = resultSet.first;
     final int? min = row["a"] as int?;
     final int? max = row["b"] as int?;
@@ -337,14 +461,17 @@ class AnalyzerDatabase {
   /// 首个非空文件头（写入端环境信息）。
   String? firstFileHeader() {
     final ResultSet resultSet = _database.select(
-        "SELECT fileHeader FROM mxlog WHERE fileHeader IS NOT NULL AND fileHeader != '' LIMIT 1");
+      "SELECT fileHeader FROM mxlog WHERE fileHeader IS NOT NULL AND fileHeader != '' LIMIT 1",
+    );
     if (resultSet.isEmpty) return null;
     return resultSet.first["fileHeader"] as String?;
   }
 
   String? getMeta(String key) {
-    final ResultSet resultSet =
-        _database.select("SELECT value FROM meta WHERE key = ?", [key]);
+    final ResultSet resultSet = _database.select(
+      "SELECT value FROM meta WHERE key = ?",
+      [key],
+    );
     if (resultSet.isEmpty) return null;
     return resultSet.first["value"] as String?;
   }
@@ -357,7 +484,7 @@ class AnalyzerDatabase {
   }
 
   void clear() {
-    final Database db = _database;
+    final CommonDatabase db = _database;
     db.execute("DELETE FROM mxlog");
     db.execute("DELETE FROM sqlite_sequence WHERE name='mxlog'");
     db.execute("DELETE FROM meta");

@@ -12,12 +12,17 @@ void showMXToast(BuildContext context, String message) {
   // 用宿主 root overlay 保证浮在弹窗之上；那里取不到分析器主题，
   // 故在调用点取好色值传进去（嵌入模式下宿主 app 没有 MXTokens）
   final MXTokens tokens = MXTokens.of(context);
+  final String? fontFamily = Theme.of(context).textTheme.bodyMedium?.fontFamily;
   final OverlayState overlay = Overlay.of(context, rootOverlay: true);
   _toastTimer?.cancel();
   _activeToast?.remove();
 
   final OverlayEntry entry = OverlayEntry(
-    builder: (BuildContext context) => _MXToast(message: message, tokens: tokens),
+    builder: (BuildContext overlayContext) => _MXToast(
+      message: message,
+      tokens: tokens,
+      fontFamily: fontFamily,
+    ),
   );
   _activeToast = entry;
   overlay.insert(entry);
@@ -28,9 +33,14 @@ void showMXToast(BuildContext context, String message) {
 }
 
 class _MXToast extends StatefulWidget {
-  const _MXToast({required this.message, required this.tokens});
+  const _MXToast({
+    required this.message,
+    required this.tokens,
+    this.fontFamily,
+  });
 
   final String message;
+  final String? fontFamily;
 
   /// 调用点（分析器组件树内）取到的色值
   final MXTokens tokens;
@@ -67,18 +77,26 @@ class _MXToastState extends State<_MXToast> {
             duration: const Duration(milliseconds: 200),
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: tokens.panel2,
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(color: tokens.border),
                   boxShadow: const [
-                    BoxShadow(color: Color(0x80000000), offset: Offset(0, 6), blurRadius: 20),
+                    BoxShadow(
+                      color: Color(0x80000000),
+                      offset: Offset(0, 6),
+                      blurRadius: 20,
+                    ),
                   ],
                 ),
                 child: Text(
                   widget.message,
                   style: TextStyle(
+                    fontFamily: widget.fontFamily,
                     fontSize: 12.5,
                     color: tokens.text,
                     decoration: TextDecoration.none,

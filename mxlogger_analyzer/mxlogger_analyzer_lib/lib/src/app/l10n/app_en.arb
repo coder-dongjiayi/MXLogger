@@ -219,6 +219,12 @@
   "cancel": "Cancel",
   "confirmClear": "Clear",
   "dataCleared": "Data cleared",
+  "clearingData": "Clearing data…",
+  "clearDataFailed": "Failed to clear data. Please retry.",
+  "cryptPrivacySession": "KEY and IV stay in this browser session. Decryption runs locally; they are never uploaded to a server.",
+  "cryptPrivacyLocal": "KEY and IV stay in this browser. Decryption runs locally; they are never uploaded to a server.",
+  "rememberCrypt": "Save KEY and IV in this browser",
+  "rememberCryptHint": "Restore them next time. Unchecking removes locally saved keys.",
   "sortAsc": "Oldest first",
   "sortDesc": "Newest first",
   "keyIvTip": "Manage decryption KEY / IV",
@@ -273,5 +279,19 @@
     }
   },
   "matchPrevTip": "Previous match (Shift+Enter)",
-  "matchNextTip": "Next match (Enter)"
+  "matchNextTip": "Next match (Enter)",
+  "supportAuthor": "Support the author",
+  "supportTitle": "Support MXLogger",
+  "supportMessage": "If MXLogger has helped you,\nbuy the author a coffee to support ongoing development and maintenance.",
+  "supportWechat": "WeChat Pay",
+  "supportAlipay": "Alipay",
+  "supportWechatHint": "Scan with WeChat",
+  "supportAlipayHint": "Scan with Alipay",
+  "supportEnlargeQr": "Click QR code to enlarge",
+  "supportVoluntary": "Support is entirely voluntary. All features remain free to use.",
+  "supportPayPal": "Support via PayPal",
+  "supportPayPalHint": "Support MXLogger with PayPal",
+  "supportCopyLink": "Copy payment link",
+  "openLinkCopied": "Couldn't open the browser. Link copied.",
+  "openLinkFailed": "Couldn't open or copy the link. Copy the address manually."
 }

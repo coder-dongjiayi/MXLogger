@@ -33,6 +33,19 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# 生成的大体量性能测试日志（tool/generate_large_mx.dart）。
+/mxlogger_*_records.mx
+
+# 普通 Web 入口的生成资源（../scripts/prepare_web.sh，源文件在 chrome_extension）。
+/web/bridge.js
+/web/font_bridge.js
+/web/font-manifest.json
+/web/sqlite3.wasm
+/web/shell.css
+/web/favicon.png
+/web/samples/
+/web/worker.js*
+
 # Symbolication related
 app.*.symbols
 

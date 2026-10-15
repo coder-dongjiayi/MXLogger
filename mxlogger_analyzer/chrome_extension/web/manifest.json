@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "MXLogger Analyzer",
+  "version": "0.3.1",
+  "description": "Import, decrypt and search local MXLogger .mx logs offline.",
+  "action": {
+    "default_title": "Open MXLogger Analyzer",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self' https://cdn.jsdelivr.net https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; object-src 'none'; base-uri 'self';"
+  }
+}

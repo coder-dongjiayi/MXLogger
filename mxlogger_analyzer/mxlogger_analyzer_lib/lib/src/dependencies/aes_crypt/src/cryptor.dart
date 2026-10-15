@@ -37,7 +37,7 @@ class _Cryptor {
   final Map<_Data, Uint8List> _dp = {}; // encrypted file data parts
 
   final _secureRandom = Random.secure();
-  final _aes = _Aes();
+  final _aes = AesBytes();
 
   Uint8List? _passBytes;
   AesCryptOwMode? _owMode;

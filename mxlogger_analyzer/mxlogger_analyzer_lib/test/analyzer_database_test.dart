@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sqlite3/sqlite3.dart';
 import 'package:mxlogger_analyzer_lib/src/data/database/analyzer_database.dart';
 import 'package:mxlogger_analyzer_lib/src/data/parser/mx_binary_parser.dart';
 
@@ -57,33 +58,187 @@ void main() {
     expect(database.count(), 4);
   });
 
+  test("注入数据库连接：替换写入失败时保留原数据和 meta", () {
+    final connection = sqlite3.openInMemory();
+    final injected = AnalyzerDatabase.fromConnection(connection)..open();
+    addTearDown(injected.dispose);
+    injected.insertRecords([record(timestamp: 10, msg: "original")]);
+    injected.setMeta("fileName", "original.mx");
+    connection.execute("""
+      CREATE TRIGGER reject_record BEFORE INSERT ON mxlog
+      WHEN NEW.msg = 'reject'
+      BEGIN SELECT RAISE(ABORT, 'test write failure'); END;
+    """);
+
+    expect(
+      () => injected.insertRecords([
+        record(timestamp: 20, msg: "new"),
+        record(timestamp: 21, msg: "reject"),
+      ], clearExisting: true),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(injected.count(), 1);
+    expect(injected.selectLogs(const LogQuery()).single["msg"], "original");
+    expect(injected.getMeta("fileName"), "original.mx");
+
+    injected.insertRecords([
+      record(timestamp: 30, msg: "replacement"),
+    ], clearExisting: true);
+    expect(injected.count(), 1);
+    expect(injected.selectLogs(const LogQuery()).single["timestamp"], 30);
+    expect(injected.getMeta("fileName"), isNull);
+  });
+
+  test("多文件原子导入保留各自文件头，合并去重并回报完成进度", () {
+    final first = MxParseResult(
+      records: [record(timestamp: 1), record(timestamp: 2)],
+      fileHeader: 'first',
+    );
+    final second = MxParseResult(
+      records: [record(timestamp: 2), record(timestamp: 3)],
+      fileHeader: 'second',
+    );
+    int processed = 0;
+    final summary = database.importResults(
+      [first, second],
+      fileName: 'first.mx +1',
+      onProgress: (done, total) {
+        processed = done;
+        expect(total, 4);
+      },
+    );
+    expect(summary, (inserted: 3, duplicated: 1));
+    expect(processed, 4);
+    expect(
+      database.selectLogs(const LogQuery()).map((row) => row['fileHeader']),
+      ['first', 'first', 'second'],
+    );
+    expect(database.getMeta('fileName'), 'first.mx +1');
+    database.importResults(
+      [
+        MxParseResult(records: [record(timestamp: 4)]),
+      ],
+      fileName: 'append.mx',
+      clearExisting: false,
+    );
+    expect(database.count(), 4);
+  });
+
+  test("相同内容重导只更新文件名，内容或 Header 变化仍完整替换", () {
+    final original = MxParseResult(
+      records: [record(timestamp: 1), record(timestamp: 2)],
+      fileHeader: 'header',
+    );
+    database.importResults([original], fileName: 'plain.mx');
+    final ids = database
+        .selectLogs(const LogQuery())
+        .map((row) => row['id'])
+        .toList();
+    final same = database.importResults([original], fileName: 'encrypted.mx');
+    expect(same, (inserted: 0, duplicated: 2));
+    expect(database.getMeta('fileName'), 'encrypted.mx');
+    expect(database.selectLogs(const LogQuery()).map((row) => row['id']), ids);
+    final changed = MxParseResult(
+      records: [
+        record(timestamp: 1),
+        record(timestamp: 2, msg: 'changed'),
+      ],
+      fileHeader: 'header',
+    );
+    expect(
+      database.importResults([changed], fileName: 'changed.mx').inserted,
+      2,
+    );
+    expect(database.selectLogs(const LogQuery()).last['msg'], 'changed');
+    expect(
+      database.importResults([
+        MxParseResult(records: changed.records, fileHeader: 'new header'),
+      ], fileName: 'header.mx').inserted,
+      2,
+    );
+    expect(database.firstFileHeader(), 'new header');
+  });
+
+  test("相同条数但无序或不同时间戳的数据不会被当成相同内容", () {
+    final first = MxParseResult(
+      records: [record(timestamp: 1), record(timestamp: 2)],
+    );
+    database.importResults([first], fileName: 'first.mx');
+    expect(
+      database.importResults([
+        MxParseResult(records: first.records.reversed.toList()),
+      ], fileName: 'reversed.mx').inserted,
+      2,
+    );
+    expect(
+      database.importResults([
+        MxParseResult(records: [record(timestamp: 2), record(timestamp: 3)]),
+      ], fileName: 'new.mx').inserted,
+      2,
+    );
+    expect(
+      database.selectLogs(const LogQuery()).map((row) => row['timestamp']),
+      [2, 3],
+    );
+  });
+
+  test("第二个文件写入失败会回滚整批导入和文件名", () {
+    final connection = sqlite3.openInMemory();
+    final injected = AnalyzerDatabase.fromConnection(connection)..open();
+    addTearDown(injected.dispose);
+    injected.insertRecords([record(timestamp: 1, msg: 'original')]);
+    injected.setMeta('fileName', 'original.mx');
+    connection.execute(
+      "CREATE TRIGGER reject_batch BEFORE INSERT ON mxlog WHEN NEW.msg = 'reject' BEGIN SELECT RAISE(ABORT, 'failed'); END;",
+    );
+    expect(
+      () => injected.importResults([
+        MxParseResult(records: [record(timestamp: 2, msg: 'new')]),
+        MxParseResult(records: [record(timestamp: 3, msg: 'reject')]),
+      ], fileName: 'replacement.mx'),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(injected.count(), 1);
+    expect(injected.selectLogs(const LogQuery()).single['msg'], 'original');
+    expect(injected.getMeta('fileName'), 'original.mx');
+  });
+
   test("关键词 scope + 等级 + 排序", () {
     database.insertRecords([
       record(timestamp: 1, msg: "user login success", level: 1, name: "Auth"),
       record(timestamp: 2, msg: "network timeout", level: 3, name: "Net"),
       record(timestamp: 3, msg: "user logout", level: 1, tag: "auth session"),
-      record(timestamp: 4, msg: "crash: 100% cpu", level: 4, name: "user-service"),
+      record(
+        timestamp: 4,
+        msg: "crash: 100% cpu",
+        level: 4,
+        name: "user-service",
+      ),
     ]);
 
     // 默认全范围搜索 + 时间升序（对齐设计稿文件顺序）
-    final List<Map<String, Object?>> all =
-        database.selectLogs(const LogQuery(keyword: "user"));
+    final List<Map<String, Object?>> all = database.selectLogs(
+      const LogQuery(keyword: "user"),
+    );
     expect(all.length, 3);
     expect(all.first["timestamp"], 1);
 
     // 仅内容
-    final List<Map<String, Object?>> content = database
-        .selectLogs(const LogQuery(keyword: "user", scope: MxSearchScope.content));
+    final List<Map<String, Object?>> content = database.selectLogs(
+      const LogQuery(keyword: "user", scope: MxSearchScope.content),
+    );
     expect(content.length, 2);
 
     // 仅 name
-    final List<Map<String, Object?>> byName =
-        database.selectLogs(const LogQuery(keyword: "user", scope: MxSearchScope.name));
+    final List<Map<String, Object?>> byName = database.selectLogs(
+      const LogQuery(keyword: "user", scope: MxSearchScope.name),
+    );
     expect(byName.length, 1);
     expect(byName.first["name"], "user-service");
 
-    final List<Map<String, Object?>> byLevel =
-        database.selectLogs(const LogQuery(levels: [1, 4]));
+    final List<Map<String, Object?>> byLevel = database.selectLogs(
+      const LogQuery(levels: [1, 4]),
+    );
     expect(byLevel.length, 3);
 
     // LIKE 通配符按字面匹配，不放大结果
@@ -100,37 +255,44 @@ void main() {
     ]);
 
     // "network" 只命中分词后的完整 tag（空格或逗号分隔），不命中 "networking"
-    final List<Map<String, Object?>> byTag =
-        database.selectLogs(const LogQuery(tags: ["network"]));
+    final List<Map<String, Object?>> byTag = database.selectLogs(
+      const LogQuery(tags: ["network"]),
+    );
     expect(byTag.length, 3);
 
     // 逗号分隔的第二个 tag 也可精确命中
-    final List<Map<String, Object?>> byCommaTag =
-        database.selectLogs(const LogQuery(tags: ["upload"]));
+    final List<Map<String, Object?>> byCommaTag = database.selectLogs(
+      const LogQuery(tags: ["upload"]),
+    );
     expect(byCommaTag.length, 1);
     expect(byCommaTag.first["timestamp"], 5);
 
     // 多个 tag 取「或」：network 命中 3 条、upload 命中的 ts5 已在其中，去重后仍 3 条
-    final List<Map<String, Object?>> byTagsOr =
-        database.selectLogs(const LogQuery(tags: ["network", "upload"]));
+    final List<Map<String, Object?>> byTagsOr = database.selectLogs(
+      const LogQuery(tags: ["network", "upload"]),
+    );
     expect(byTagsOr.length, 3);
 
     // networking 不被 network 命中，加入后并集为 4 条
-    final List<Map<String, Object?>> byTagsOr2 =
-        database.selectLogs(const LogQuery(tags: ["network", "networking"]));
+    final List<Map<String, Object?>> byTagsOr2 = database.selectLogs(
+      const LogQuery(tags: ["network", "networking"]),
+    );
     expect(byTagsOr2.length, 4);
 
-    final List<Map<String, Object?>> byName =
-        database.selectLogs(const LogQuery(names: ["NetworkClient"]));
+    final List<Map<String, Object?>> byName = database.selectLogs(
+      const LogQuery(names: ["NetworkClient"]),
+    );
     expect(byName.length, 2);
 
     // 多个 name 取「或」
-    final List<Map<String, Object?>> byNamesOr =
-        database.selectLogs(const LogQuery(names: ["NetworkClient", "Uploader"]));
+    final List<Map<String, Object?>> byNamesOr = database.selectLogs(
+      const LogQuery(names: ["NetworkClient", "Uploader"]),
+    );
     expect(byNamesOr.length, 3);
 
-    final List<Map<String, Object?>> byTime =
-        database.selectLogs(const LogQuery(fromUs: 15, toUs: 30));
+    final List<Map<String, Object?>> byTime = database.selectLogs(
+      const LogQuery(fromUs: 15, toUs: 30),
+    );
     expect(byTime.length, 2);
     expect(byTime.first["timestamp"], 20);
   });
@@ -142,18 +304,21 @@ void main() {
     ]);
 
     // 第一页/第二页按时间升序切片，末页不足一页只返回剩余
-    final List<Map<String, Object?>> page1 =
-        database.selectLogs(const LogQuery(limit: 50, offset: 0));
+    final List<Map<String, Object?>> page1 = database.selectLogs(
+      const LogQuery(limit: 50, offset: 0),
+    );
     expect(page1.length, 50);
     expect(page1.first["timestamp"], 1);
     expect(page1.last["timestamp"], 50);
 
-    final List<Map<String, Object?>> page2 =
-        database.selectLogs(const LogQuery(limit: 50, offset: 50));
+    final List<Map<String, Object?>> page2 = database.selectLogs(
+      const LogQuery(limit: 50, offset: 50),
+    );
     expect(page2.first["timestamp"], 51);
 
-    final List<Map<String, Object?>> page3 =
-        database.selectLogs(const LogQuery(limit: 50, offset: 100));
+    final List<Map<String, Object?>> page3 = database.selectLogs(
+      const LogQuery(limit: 50, offset: 100),
+    );
     expect(page3.length, 20);
 
     // countLogs 与过滤条件一致，忽略 limit/offset
@@ -161,8 +326,9 @@ void main() {
     expect(database.countLogs(const LogQuery(levels: [0], limit: 50)), 60);
 
     // 过滤 + 分页组合：等级过滤后再切片
-    final List<Map<String, Object?>> filteredPage =
-        database.selectLogs(const LogQuery(levels: [0], limit: 50, offset: 50));
+    final List<Map<String, Object?>> filteredPage = database.selectLogs(
+      const LogQuery(levels: [0], limit: 50, offset: 50),
+    );
     expect(filteredPage.length, 10);
   });
 

@@ -31,6 +31,9 @@ class MXShareRequest {
 /// 返回 false 或抛错表示当前环境不可用，内核降级复制到剪贴板。
 typedef MXShareHandler = Future<bool> Function(MXShareRequest request);
 
+/// 打开外部链接；返回 false 或抛错时，内核降级复制链接。
+typedef MXOpenExternalLink = Future<bool> Function(Uri uri);
+
 /// 把 [child] 包装成「拖入文件」目标：
 /// 文件落下时以绝对路径列表回调 `onDrop`，指针进出目标时回调 `onDragOver`
 /// （驱动虚线卡片的高亮）。
@@ -42,7 +45,7 @@ typedef MXDropTargetBuilder =
     });
 
 /// 宿主能力适配层：分析器内核不直接依赖任何平台插件，
-/// 需要「落盘设置 / 选文件 / 拖入文件 / 分享」时都经这里由外部注入实现。
+/// 需要「落盘设置 / 选文件 / 拖入文件 / 分享 / 外部链接」时都经这里由外部注入实现。
 ///
 /// - 嵌入宿主 app（`MXAnalyzer`）：全部走默认值 —— 设置存内存、
 ///   不提供选文件与拖入（日志来源固定为宿主的日志目录，由用户点「刷新」
@@ -52,8 +55,13 @@ typedef MXDropTargetBuilder =
 ///   这些宿主业务层可能已有或用不上的依赖。
 /// - 桌面壳：注入基于上述插件的实现（见壳工程 `lib/src/host/desktop_host.dart`）。
 class MXHost {
-  MXHost({MXPrefs? prefs, this.pickLogFiles, this.dropTargetBuilder, this.share})
-      : prefs = prefs ?? MXMemoryPrefs();
+  MXHost({
+    MXPrefs? prefs,
+    this.pickLogFiles,
+    this.dropTargetBuilder,
+    this.share,
+    this.openExternalLink,
+  }) : prefs = prefs ?? MXMemoryPrefs();
 
   /// 设置的本地存储，默认仅存内存
   final MXPrefs prefs;
@@ -66,6 +74,9 @@ class MXHost {
 
   /// 分享能力；null 表示宿主不提供，分享一律降级为复制到剪贴板
   final MXShareHandler? share;
+
+  /// 外部浏览器能力，由桌面壳或浏览器宿主提供。
+  final MXOpenExternalLink? openExternalLink;
 
   bool get canPickFiles => pickLogFiles != null;
 

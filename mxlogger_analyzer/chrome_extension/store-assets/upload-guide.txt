@@ -1,0 +1,12 @@
+MXLogger Analyzer — Chrome 网上应用店英文素材
+
+屏幕截图：上传 screenshots 文件夹中的 5 张图片，均为 1280×800。
+01 概览；02 搜索；03 JSON 详情；04 上下文；05 本地解密。
+
+小型宣传图块：promotional/promo-small-440x280.png，440×280。
+顶部宣传图块：promotional/promo-marquee-1400x560.png，1400×560。
+
+全部上传图片均为 24 位 RGB PNG，无透明通道。截图使用实际扩展界面和合成示例日志。
+
+product-description-en.txt 是可直接粘贴的英文产品说明。
+preview-contact-sheet.png 仅用于总览预览，不作为商店截图上传。
