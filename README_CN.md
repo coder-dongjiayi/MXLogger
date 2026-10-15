@@ -267,7 +267,7 @@ logger 对象。
 | `- removeBeforeAllData` | 删除除当前正在写入外的所有文件 |
 | `+ selectWithDiskCacheFilePath:cryptKey:iv:` | 解析日志文件（时间倒序）：`name` / `msg` / `tag` / `level` / `timestamp` / `thread_id` / `is_main_thread` / `error_code` |
 
-### `MXStoragePolicyType`
+### `MXStoragePolicyType`（iOS / Objective-C）
 
 `MXStoragePolicyYYYYMMDD`（按天，默认）· `MXStoragePolicyYYYYMMDDHH`（按小时）·
 `MXStoragePolicyYYYYWW`（按周）· `MXStoragePolicyYYYYMM`（按月）
@@ -331,9 +331,11 @@ native 是唯一事实源）。
 | `void removeBeforeAllData()` | 删除除当前正在写入外的所有文件 |
 | `static String[] selectWithFilePath(String diskCacheFilePath, String cryptKey, String iv)` | 解析日志文件，每个元素是一条日志的 JSON 字符串（时间倒序） |
 
-### `MXStoragePolicyType`
+### `MXStoragePolicyType`（Android / Java）
 
-`YYYY_MM_DD`（按天）· `YYYY_MM_DD_HH`（按小时）· `YYYY_WW`（按周）· `YYYY_MM`（按月）
+`YYYY_MM_DD`（按天，默认）· `YYYY_MM_DD_HH`（按小时）· `YYYY_WW`（按周）· `YYYY_MM`（按月）
+
+Android Java 仍使用以上大写枚举名。Flutter / Dart 使用 `yyyyMMdd`、`yyyyMMddHH`、`yyyyWw`、`yyyyMM`，详见 [Flutter API](#flutter-api)。
 
 <a name="flutter-api"></a>
 ## Flutter —— `flutter_mxlogger`
@@ -409,7 +411,7 @@ native 是唯一事实源）。
 `name`（`String?`）· `size`（`int`，字节）· `createTimeStamp` / `lastTimeStamp`（`int`，秒）·
 `createTime` / `lastTime`（`DateTime`，由时间戳换算）
 
-### `MXStoragePolicyType`
+### `MXStoragePolicyType`（Flutter / Dart）
 
 `yyyyMMdd`（按天，默认）· `yyyyMMddHH`（按小时）· `yyyyWw`（按周）· `yyyyMM`（按月）
 

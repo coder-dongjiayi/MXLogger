@@ -269,7 +269,7 @@ object.
 | `- removeBeforeAllData` | delete every file except the one being written |
 | `+ selectWithDiskCacheFilePath:cryptKey:iv:` | parse a file into entries (newest first): `name` / `msg` / `tag` / `level` / `timestamp` / `thread_id` / `is_main_thread` / `error_code` |
 
-### `MXStoragePolicyType`
+### `MXStoragePolicyType` (iOS / Objective-C)
 
 `MXStoragePolicyYYYYMMDD` (daily, default) · `MXStoragePolicyYYYYMMDDHH` (hourly) ·
 `MXStoragePolicyYYYYWW` (weekly) · `MXStoragePolicyYYYYMM` (monthly)
@@ -333,9 +333,11 @@ Note the parameter order — **tag comes first** on Android.
 | `void removeBeforeAllData()` | delete every file except the one being written |
 | `static String[] selectWithFilePath(String diskCacheFilePath, String cryptKey, String iv)` | parse a file, one JSON string per entry (newest first) |
 
-### `MXStoragePolicyType`
+### `MXStoragePolicyType` (Android / Java)
 
-`YYYY_MM_DD` (daily) · `YYYY_MM_DD_HH` (hourly) · `YYYY_WW` (weekly) · `YYYY_MM` (monthly)
+`YYYY_MM_DD` (daily, default) · `YYYY_MM_DD_HH` (hourly) · `YYYY_WW` (weekly) · `YYYY_MM` (monthly)
+
+Android Java still uses these uppercase enum names. Flutter / Dart uses `yyyyMMdd`, `yyyyMMddHH`, `yyyyWw`, and `yyyyMM`; see the [Flutter API](#flutter-api).
 
 <a name="flutter-api"></a>
 ## Flutter — `flutter_mxlogger`
@@ -412,7 +414,7 @@ platform default directory during `initialize`.
 `name` (`String?`) · `size` (`int`, bytes) · `createTimeStamp` / `lastTimeStamp` (`int`, seconds) ·
 `createTime` / `lastTime` (`DateTime`, derived)
 
-### `MXStoragePolicyType`
+### `MXStoragePolicyType` (Flutter / Dart)
 
 `yyyyMMdd` (daily, default) · `yyyyMMddHH` (hourly) · `yyyyWw` (weekly) · `yyyyMM` (monthly)
 
