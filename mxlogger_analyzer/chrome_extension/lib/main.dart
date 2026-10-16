@@ -32,6 +32,10 @@ class _BrowserAppState extends State<_BrowserApp> {
   final _fonts = BrowserFonts();
   MXStore? _store;
   String? _error;
+  String _startupStage = 'engine';
+  int _startupLoaded = 0;
+  int _startupTotal = 0;
+  bool _fontsReady = false;
   SemanticsHandle? _semantics;
   StreamSubscription<LogFilterState>? _fontFilterSubscription;
 
@@ -39,14 +43,27 @@ class _BrowserAppState extends State<_BrowserApp> {
   void initState() {
     super.initState();
     if (widget.verify) _semantics = SemanticsBinding.instance.ensureSemantics();
+    _client.onStartupProgress = (stage, loaded, total) {
+      if (!mounted) return;
+      setState(() {
+        _startupStage = stage == 'ready' && !_fontsReady ? 'fonts' : stage;
+        _startupLoaded = loaded;
+        _startupTotal = total;
+      });
+    };
     _start();
   }
 
   Future<void> _start() async {
     try {
-      final initial = await _client.open();
-      if (!mounted) return;
-      await _fonts.initialize();
+      late final Map<String, dynamic> initial;
+      await Future.wait<void>([
+        _client.open().then((value) => initial = value),
+        _fonts.initialize().then((_) => _fontsReady = true),
+      ]).timeout(
+        const Duration(seconds: 90),
+        onTimeout: () => throw StateError('本地缓存读取超时，请关闭分析器后重新打开。'),
+      );
       if (!mounted) return;
       _client.observeText = _fonts.observe;
       final browserHost = BrowserHost(observeText: _fonts.observe);
@@ -69,10 +86,12 @@ class _BrowserAppState extends State<_BrowserApp> {
       setState(() => _store = store);
       if (widget.verify) _diagnostics(store, browserHost);
     } catch (error) {
+      _client.dispose();
       if (mounted) {
         setState(
-          () =>
-              _error = error is StateError ? error.message : '分析器启动失败，请刷新页面后重试。',
+          () => _error = error is StateError
+              ? error.message
+              : '分析器启动失败，请刷新页面后重试。',
         );
       }
     }
@@ -180,6 +199,18 @@ class _BrowserAppState extends State<_BrowserApp> {
         ),
       );
     }
+    final progress = _startupStage == 'cache' && _startupTotal > 0
+        ? (_startupLoaded / _startupTotal).clamp(0.0, 1.0)
+        : null;
+    final message = switch (_startupStage) {
+      'cache' => '正在读取上次的日志缓存…',
+      'migrate' => '正在更新日志缓存，第一次打开可能需要几秒…',
+      'index' => '正在恢复日志索引…',
+      'save' => '正在保存日志缓存…',
+      'fonts' => '正在加载本地字体…',
+      'ready' => '正在打开日志列表…',
+      _ => '正在启动本地解析器…',
+    };
     return MaterialApp(
       title: 'MXLogger Analyzer',
       debugShowCheckedModeBanner: false,
@@ -189,7 +220,22 @@ class _BrowserAppState extends State<_BrowserApp> {
       home: Scaffold(
         body: Center(
           child: _error == null
-              ? const CircularProgressIndicator()
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(value: progress),
+                    const SizedBox(height: 16),
+                    Semantics(liveRegion: true, child: Text(message)),
+                    if (progress != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        '${(progress * 100).floor()}% · '
+                        '${(_startupLoaded / 1048576).toStringAsFixed(1)} / '
+                        '${(_startupTotal / 1048576).toStringAsFixed(1)} MiB',
+                      ),
+                    ],
+                  ],
+                )
               : Semantics(
                   liveRegion: true,
                   label: _error!,

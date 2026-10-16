@@ -13,7 +13,6 @@ import 'package:mxlogger_analyzer_lib/src/global/widget/crypt_entry_list.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/crypt_storage_options.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_icon_button.dart';
 import 'package:mxlogger_analyzer_lib/src/global/widget/mx_logo.dart';
-import 'package:mxlogger_analyzer_lib/src/global/widget/mx_support_button.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/model/import_state.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/widget/import_loading_view.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/landing/widget/mx_crypto_bg.dart';
@@ -175,14 +174,6 @@ class LandingScreenState extends MXConsumerState<LandingScreen> {
                   icon: const Icon(Icons.translate, size: 15),
                   size: context.mxTopButtonSize,
                   onTap: store.locale.toggle,
-                ),
-                SizedBox(
-                  height: 18,
-                  child: VerticalDivider(width: 23, color: tokens.border),
-                ),
-                MXSupportButton(
-                  size: context.mxTopButtonSize,
-                  compact: context.isMobileLayout,
                 ),
               ],
             ),

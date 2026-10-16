@@ -15,6 +15,7 @@ class BrowserClient {
   int _sequence = 0;
   String? lastError;
   void Function(String?)? observeText;
+  void Function(String stage, int loaded, int total)? onStartupProgress;
   final _pending = <int, Completer<Map<String, dynamic>>>{};
   final _progress = <int, void Function(ImportProgress)>{};
 
@@ -28,6 +29,15 @@ class BrowserClient {
       final message =
           jsonDecode((event.data as JSString).toDart) as Map<String, dynamic>;
       final id = message['id'] as int;
+      if (message.containsKey('startup')) {
+        final startup = message['startup'] as Map<String, dynamic>;
+        onStartupProgress?.call(
+          startup['stage'] as String,
+          startup['loaded'] as int,
+          startup['total'] as int,
+        );
+        return;
+      }
       if (message.containsKey('progress')) {
         final progress = message['progress'] as Map<String, dynamic>;
         observeText?.call(progress['fileLabel'] as String?);

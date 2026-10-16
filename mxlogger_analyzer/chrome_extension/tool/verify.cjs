@@ -10,7 +10,8 @@ const extension = path.join(root, 'dist/mxlogger-chrome-prototype');
 const fontManifest = JSON.parse(fs.readFileSync(path.join(root, 'web/font-manifest.json'), 'utf8'));
 const fontURL = fontManifest.pack.url;
 const fontURLs = fontManifest.pack.sources.map(source => source.url);
-const uiCharacters = [...new Set(JSON.stringify(JSON.parse(fs.readFileSync(path.join(root, '../mxlogger_analyzer_lib/lib/src/app/l10n/app_zh.arb'),'utf8'))))]
+const uiCharacters = [...new Set(JSON.stringify(JSON.parse(fs.readFileSync(path.join(root, '../mxlogger_analyzer_lib/lib/src/app/l10n/app_zh.arb'),'utf8')))
+  + fs.readFileSync(path.join(root, 'lib/main.dart'), 'utf8'))]
   .filter(character => /[\u3400-\u9fff]/.test(character)).join('');
 const executable = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'mxlogger-chrome-'));
@@ -154,6 +155,8 @@ async function fillText(session, hint, text, index = 0) {
     return center;
   }, 'text field ' + hint);
   for (const type of ['mousePressed','mouseReleased']) await send('Input.dispatchMouseEvent', {type,...center,button:'left',clickCount:1},session);
+  // Flutter moves its native editing input after the focus frame commits.
+  await delay(150);
   await key(session, 'a', 'KeyA', 65, 4);
   await key(session, 'Backspace', 'Backspace', 8);
   if (text) await send('Input.insertText', {text}, session);
@@ -216,6 +219,19 @@ async function verify() {
     offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0,
   }, session);
   const localeScript = await send('Page.addScriptToEvaluateOnNewDocument', { source: `localStorage.removeItem('mxlogger-locale'); Object.defineProperty(navigator, 'language', {get:()=> 'ja-JP'}); Object.defineProperty(navigator, 'languages', {get:()=> ['ja-JP']});` }, session);
+  await send('Page.addScriptToEvaluateOnNewDocument', {source: `
+    window.mxStartupEvents = [];
+    const OriginalWorker = Worker;
+    window.Worker = class extends OriginalWorker {
+      constructor(...args) {
+        super(...args);
+        this.addEventListener('message', event => {
+          const message = JSON.parse(event.data);
+          if (message.startup) window.mxStartupEvents.push(message.startup);
+        });
+      }
+    };
+  `}, session);
   await send('Page.navigate', { url: `chrome-extension://${id}/index.html?verify=1` }, session);
   await until(() => evaluate(session, 'Boolean(window.mxPrototype)'), 'Flutter and SQLite startup');
   await send('Page.removeScriptToEvaluateOnNewDocument', { identifier: localeScript.identifier }, session);
@@ -390,6 +406,18 @@ async function verify() {
   await until(async () => (await state(session)).locale === 'en', 'English locale');
   await send('Page.reload', { ignoreCache: true }, session);
   await until(() => evaluate(session, 'Boolean(window.mxPrototype)'), 'reload recovery');
+  const startup = await evaluate(session, 'window.mxStartupEvents');
+  const cacheReads = startup.filter(event => event.stage === 'cache' && event.total > 0);
+  assert(cacheReads.length >= 2, 'Cache restore must report its byte progress');
+  assert.strictEqual(cacheReads[0].loaded, 0);
+  const lastRead = cacheReads[cacheReads.length - 1];
+  assert.strictEqual(lastRead.loaded, lastRead.total);
+  for (let i = 1; i < cacheReads.length; i++) {
+    assert(cacheReads[i].loaded >= cacheReads[i - 1].loaded);
+  }
+  assert(startup.some(event => event.stage === 'index'));
+  assert(startup.some(event => event.stage === 'ready'));
+  check('Reopening reports real cache bytes from 0 to 100 percent and distinct startup stages');
   result = await query(session);
   assert.deepStrictEqual(rows(result), expected.records);
   assert.strictEqual(result.fileName, 'sample_encrypted.mx');

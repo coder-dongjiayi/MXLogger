@@ -5,12 +5,14 @@ import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_core.dart';
+import 'package:mxlogger_chrome_prototype/browser_cache.dart';
 import 'package:sqlite3/wasm.dart';
 import 'package:web/web.dart' as web;
 
 /// Compiled separately from Flutter: decoding and SQL never block rendering.
 void main() {
   final self = globalContext as web.DedicatedWorkerGlobalScope;
+  self.importScripts('bridge.js'.toJS);
   final database = _BrowserDatabase();
   Future<void> queue = Future<void>.value();
   void send(Map<String, Object?> message) =>
@@ -27,16 +29,27 @@ void main() {
         ?.toDart;
     queue = queue.then((_) async {
       try {
-        final result = await database.handle(request, bytes, files, (progress) {
-          send({
-            'id': id,
-            'progress': {
-              'step': progress.step.name,
-              'percent': progress.percent,
-              'fileLabel': progress.fileLabel,
-            },
-          });
-        });
+        final result = await database.handle(
+          request,
+          bytes,
+          files,
+          (progress) {
+            send({
+              'id': id,
+              'progress': {
+                'step': progress.step.name,
+                'percent': progress.percent,
+                'fileLabel': progress.fileLabel,
+              },
+            });
+          },
+          (stage, loaded, total) {
+            send({
+              'id': id,
+              'startup': {'stage': stage, 'loaded': loaded, 'total': total},
+            });
+          },
+        );
         send({'id': id, 'result': result});
       } catch (error) {
         send({
@@ -52,22 +65,30 @@ void main() {
 class _BrowserDatabase {
   WasmSqlite3? _sqlite;
   AnalyzerDatabase? _database;
-  IndexedDbFileSystem? _fileSystem;
+  BrowserCache? _cache;
 
-  Future<void> _open() async {
+  Future<void> _open(
+    void Function(String stage, int loaded, int total) startup,
+  ) async {
     if (_database != null) return;
+    startup('engine', 0, 0);
     final sqlite = await WasmSqlite3.loadFromUrl(Uri.parse('sqlite3.wasm'));
     _sqlite = sqlite;
-    final fileSystem = await IndexedDbFileSystem.open(
-      // Preserve caches imported by phase-one installations.
-      dbName: 'mxlogger-analyzer-prototype',
-    );
-    sqlite.registerVirtualFileSystem(fileSystem, makeDefault: true);
+    final cache = BrowserCache();
+    await cache.open(onProgress: startup);
+    startup('index', 0, 0);
+    sqlite.registerVirtualFileSystem(cache.fileSystem, makeDefault: true);
     final database = AnalyzerDatabase.fromConnection(
       sqlite.open('/mxlogger_analyzer.db'),
     )..open();
-    _fileSystem = fileSystem;
+    // Save only after SQLite has recovered any interrupted legacy transaction.
+    if (cache.needsSave) {
+      startup('save', 0, 0);
+      await cache.flush();
+    }
+    _cache = cache;
     _database = database;
+    startup('ready', 0, 0);
   }
 
   Future<Map<String, Object?>> handle(
@@ -75,8 +96,9 @@ class _BrowserDatabase {
     Uint8List? bytes,
     List<web.File>? files,
     void Function(ImportProgress) progress,
+    void Function(String stage, int loaded, int total) startup,
   ) async {
-    await _open();
+    await _open(startup);
     final database = _database!;
     switch (request['op']) {
       case 'importFiles':
@@ -87,14 +109,16 @@ class _BrowserDatabase {
         // row would journal a large previous database just to discard it.
         database.dispose();
         _database = null;
-        _fileSystem!.xDelete('/mxlogger_analyzer.db', 0);
-        await _fileSystem!.flush();
+        _cache!.fileSystem.xDelete('/mxlogger_analyzer.db', 0);
         _database = AnalyzerDatabase.fromConnection(
           _sqlite!.open('/mxlogger_analyzer.db'),
         )..open();
-        await _fileSystem!.flush();
+        await _cache!.flush();
         return _query(request);
       case 'init':
+        // Startup only chooses between the wizard and the data screen. The
+        // repository fetches the visible page and statistics when needed.
+        return {'total': database.count()};
       case 'query':
         return _query(request);
       case 'logs':
@@ -261,8 +285,8 @@ class _BrowserDatabase {
           }
         },
       );
-      // The VFS mirrors writes asynchronously. Success requires persistence.
-      await _fileSystem!.flush();
+      // Report success only after the committed snapshot reaches IndexedDB.
+      await _cache!.flush();
     } catch (_) {
       throw const ImportFailure(ImportError.writeFailed);
     }
