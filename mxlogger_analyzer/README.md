@@ -1,6 +1,6 @@
 # mxlogger_analyzer
 
-MXLogger 日志解析器（Flutter，自带基于 stream 的轻量状态管理，UI 对齐 Claude Design 设计稿 `MXLogger.dc.html`）。
+MXLogger 日志解析器（Flutter，自带基于 stream 的轻量状态管理）。
 
 导入 [MXLogger](https://github.com/coder-dongjiayi/MXLogger) 产出的 `.mx` mmap 二进制日志
 （AES-CFB-128 解密 + flatbuffer 反序列化），sqlite 入库后提供检索、过滤与 JSON 语法树查看。
