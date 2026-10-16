@@ -33,7 +33,7 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
   - [3.4 生命周期](#34-生命周期)
 - [四、解析 `.mx` 日志文件](#四解析-mx-日志文件)
   - [4.1 文件在哪](#41-文件在哪)
-  - [4.2 桌面解析器（macOS / Windows / Linux）](#42-桌面解析器macos--windows--linux)
+  - [4.2 Chrome 扩展与桌面解析器（macOS / Windows / Linux）](#42-chrome-扩展与桌面解析器macos--windows--linux)
   - [4.3 App 内嵌解析器（`mxlogger_analyzer_lib`）](#43-app-内嵌解析器mxlogger_analyzer_lib)
   - [4.4 用 Dart 解析](#44-用-dart-解析)
 - [示例工程](#示例工程)
@@ -327,7 +327,7 @@ final records = await Isolate.run(() => MXLogger.selectLogmsg(
     ));
 ```
 
-配合 `logFiles` 就能在 App 内做一个日志查看器（example 里的 `log_viewer_page.dart` 就是这么实现的）。不想自己写界面的话，[第四章](#四解析-mx-日志文件)介绍了现成的桌面解析器和 App 内嵌解析器。
+配合 `logFiles` 就能在 App 内做一个日志查看器（example 里的 `log_viewer_page.dart` 就是这么实现的）。不想自己写界面的话，[第四章](#四解析-mx-日志文件)介绍了 Chrome 扩展、桌面解析器和 App 内嵌解析器。
 
 > `selectLogfiles({required String directory})` 目前是未实现的占位接口，所有平台都返回空列表，请勿使用。
 
@@ -408,11 +408,12 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 # 四、解析 `.mx` 日志文件
 
-`.mx` 不是文本文件：每条记录是一个 flatbuffer，初始化时传了 `cryptKey` / `iv` 的话整个文件还经过 AES-CFB-128 加密，用编辑器打开只能看到乱码。有三种读取方式，按场景选：
+`.mx` 不是文本文件：每条记录是一个 flatbuffer，初始化时传了 `cryptKey` / `iv` 的话整个文件还经过 AES-CFB-128 加密，用编辑器打开只能看到乱码。有四种读取方式，按场景选：
 
 | 场景 | 用哪个 |
 |---|---|
-| 从设备导出或用户上传的日志文件，在电脑上分析 | [4.2 桌面解析器](#42-桌面解析器macos--windows--linux) |
+| 在 Chrome 浏览器中解析 `.mx` 日志 | [从 Chrome 应用商店安装 MXLogger Analyzer](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
+| 从设备导出或用户上传的日志文件，在电脑上分析 | [4.2 Chrome 扩展与桌面解析器](#42-chrome-扩展与桌面解析器macos--windows--linux) |
 | 测试时直接在手机上看日志，不连电脑 | [4.3 App 内嵌解析器](#43-app-内嵌解析器mxlogger_analyzer_lib) |
 | 自己用 Dart 做查看界面或上传管道 | [4.4 用 Dart 解析](#44-用-dart-解析) |
 
@@ -440,12 +441,17 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 - **Release 包 / 真实用户**：需要 App 自己把文件交出来，例如用 `share_plus` 分享，或上传到你的服务器，路径来自 `logFiles`。logger 仍在写入时也可以直接拷贝文件，下面的内嵌解析器就是这样读取当前目录的。
 
-## 4.2 桌面解析器（macOS / Windows / Linux）
+## 4.2 Chrome 扩展与桌面解析器（macOS / Windows / Linux）
 
-到 [Releases](https://github.com/coder-dongjiayi/MXLogger/releases) 下载对应系统的 `mxlogger_analyzer`。首次打开是三步向导：
+可选择以下方式安装解析器：
+
+- **Chrome 扩展**：[从 Chrome 应用商店安装 MXLogger Analyzer](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi)。在 Chrome 中打开链接，点击「添加至 Chrome」→「添加扩展程序」。
+- **桌面 app（macOS / Windows / Linux）**：到 [Releases](https://github.com/coder-dongjiayi/MXLogger/releases) 下载对应系统的 `mxlogger_analyzer`。
+
+从 Chrome 扩展菜单打开 **MXLogger Analyzer**，或启动桌面 app，两者均使用三步导入向导：
 
 1. **选文件**：把一个或多个 `.mx` 文件拖到窗口里，或点击选择。
-2. **解密**：填入初始化 logger 时用的 `cryptKey` / `iv`；未加密就都留空。中途换过密钥的话把每一组都加上，会按勾选框里的序号依次尝试，直到解开为止。填过的值会记住。
+2. **解密**：填入初始化 logger 时用的 `cryptKey` / `iv`；未加密就都留空。中途换过密钥的话把每一组都加上，会按勾选框里的序号依次尝试，直到解开为止。Chrome 扩展默认只在当前会话保留 KEY/IV，可勾选本地保存以便下次使用。
 3. **导入**：真实进度条（按字节解析、按条数写库），完成后自动进入数据页。
 
 数据页顶部显示总条数、起止时间和文件名；下面是可点击过滤的等级分布条和 DEBUG–FATAL 等级 chips、关键字搜索（全部 / 内容 / tag / name）加时间范围过滤、点任意卡片上的 `@name` 或 `#tag` 即可按其过滤、JSON 内容以语法着色树展示、单条全屏详情（Esc 关闭），分享按钮可导出 `.txt`。更换文件、修改密钥、清除数据都在顶部菜单里。

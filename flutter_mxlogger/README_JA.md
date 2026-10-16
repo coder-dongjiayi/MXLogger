@@ -32,7 +32,7 @@ MXLogger は mmap メモリマッピングを基盤とし、AES-CFB-128 暗号�
   - [3.4 ライフタイム](#34-ライフタイム)
 - [4. `.mx` ログファイルを読む](#4-mx-ログファイルを読む)
   - [4.1 ファイルの場所](#41-ファイルの場所)
-  - [4.2 デスクトップアナライザー（macOS / Windows / Linux）](#42-デスクトップアナライザーmacos--windows--linux)
+  - [4.2 Chrome 拡張機能とデスクトップアナライザー（macOS / Windows / Linux）](#42-chrome-拡張機能とデスクトップアナライザーmacos--windows--linux)
   - [4.3 アプリ内アナライザー（`mxlogger_analyzer_lib`）](#43-アプリ内アナライザーmxlogger_analyzer_lib)
   - [4.4 Dart で解析する](#44-dart-で解析する)
 - [Example](#example)
@@ -324,7 +324,7 @@ final records = await Isolate.run(() => MXLogger.selectLogmsg(
     ));
 ```
 
-`logFiles` と組み合わせれば、アプリ内ログビューアを作るには十分です。example の `log_viewer_page.dart` がまさにそれを実装しています。UI を自作したくない場合は、[第 4 章](#4-mx-ログファイルを読む)にある既製のデスクトップアナライザーとアプリ内アナライザーを参照してください。
+`logFiles` と組み合わせれば、アプリ内ログビューアを作るには十分です。example の `log_viewer_page.dart` がまさにそれを実装しています。UI を自作したくない場合は、[第 4 章](#4-mx-ログファイルを読む)にある Chrome 拡張機能、デスクトップアナライザー、アプリ内アナライザーを参照してください。
 
 > `selectLogfiles({required String directory})` は未実装のスタブで、すべてのプラットフォームで空リストを返します。使用しないでください。
 
@@ -405,11 +405,12 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 # 4. `.mx` ログファイルを読む
 
-`.mx` ファイルはテキストではありません。各レコードは flatbuffer で、ロガーが `cryptKey` / `iv` 付きで作成された場合はファイル全体が AES-CFB-128 で暗号化されているため、エディタで開いてもバイナリのノイズしか見えません。読み取り手段は 3 つあり、シナリオで選びます。
+`.mx` ファイルはテキストではありません。各レコードは flatbuffer で、ロガーが `cryptKey` / `iv` 付きで作成された場合はファイル全体が AES-CFB-128 で暗号化されているため、エディタで開いてもバイナリのノイズしか見えません。読み取り手段は 4 つあり、シナリオで選びます。
 
 | シナリオ | 使うもの |
 |---|---|
-| 端末から取り出した、またはユーザーがアップロードしたファイルを PC で分析する | [4.2 デスクトップアナライザー](#42-デスクトップアナライザーmacos--windows--linux) |
+| Chrome で `.mx` ログを分析する | [Chrome ウェブストアから MXLogger Analyzer をインストール](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
+| 端末から取り出した、またはユーザーがアップロードしたファイルを PC で分析する | [4.2 Chrome 拡張機能とデスクトップアナライザー](#42-chrome-拡張機能とデスクトップアナライザーmacos--windows--linux) |
 | テスト中に PC を使わず端末上でログを読む | [4.3 アプリ内アナライザー](#43-アプリ内アナライザーmxlogger_analyzer_lib) |
 | Dart で自前のビューアやアップロード経路を作る | [4.4 Dart で解析する](#44-dart-で解析する) |
 
@@ -437,12 +438,17 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 - **リリースビルド / 実ユーザー**: アプリ自身がファイルを外に出す必要があります。例えば `share_plus` で共有したり、`logFiles` のパスを使って自社サーバーにアップロードします。ロガーが開いたままでもファイルはコピーできます。後述のアプリ内アナライザーも同じ方法でライブなディレクトリを読んでいます。
 
-## 4.2 デスクトップアナライザー（macOS / Windows / Linux）
+## 4.2 Chrome 拡張機能とデスクトップアナライザー（macOS / Windows / Linux）
 
-[Releases](https://github.com/coder-dongjiayi/MXLogger/releases) から自分の OS 向けの `mxlogger_analyzer` をダウンロードします。初回起動は 3 ステップのウィザードです。
+インストール方法を選びます。
+
+- **Chrome 拡張機能**: [Chrome ウェブストアから MXLogger Analyzer をインストール](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi)。Chrome でリンクを開き、「Chrome に追加」→「拡張機能を追加」をクリックします。
+- **デスクトップアプリ（macOS / Windows / Linux）**: [Releases](https://github.com/coder-dongjiayi/MXLogger/releases) から自分の OS 向けの `mxlogger_analyzer` をダウンロードします。
+
+Chrome の拡張機能メニューから **MXLogger Analyzer** を開くか、デスクトップアプリを起動します。どちらも 3 ステップでログをインポートします。
 
 1. **ファイルを選ぶ**: 1 つ以上の `.mx` ファイルをウィンドウにドラッグするか、クリックして選択します。
-2. **復号**: ロガー作成時に使った `cryptKey` / `iv` を入力します。暗号化していないログは両方空欄のままにします。鍵をローテーションした場合はすべてのペアを追加してください。番号付きチェックボックスの順に、レコードが復号できるまで試行されます。値は次回のために記憶されます。
+2. **復号**: ロガー作成時に使った `cryptKey` / `iv` を入力します。暗号化していないログは両方空欄のままにします。鍵をローテーションした場合はすべてのペアを追加してください。番号付きチェックボックスの順に、レコードが復号できるまで試行されます。Chrome 拡張機能では KEY/IV は現在のセッションのみ保持され、必要に応じてローカル保存を選択できます。
 3. **インポート**: 実際の進捗バー（解析済みバイト数、書き込み済み行数）が表示され、その後データページが自動的に開きます。
 
 データページのヘッダーには合計件数、期間、ファイル名が表示されます。その下にはクリックで絞り込めるレベル分布バーと DEBUG–FATAL のチップ、時間範囲フィルター付きのキーワード検索（すべて / メッセージ / タグ / 名前）、任意のカードの `@name` や `#tag` をクリックしての絞り込み、JSON メッセージのシンタックスカラー付きツリー、1 レコードの全画面詳細（Esc で閉じる）、共有ボタンからの `.txt` エクスポートがあります。ファイル変更、鍵変更、データ消去はヘッダーメニューにあります。

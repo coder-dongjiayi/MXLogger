@@ -6,12 +6,16 @@ MXLogger 2.0 日志分析器内核：导入、解密（AES-CFB-128）、解析�
 产出的 `.mx` mmap 二进制日志。
 解析结果入 sqlite，提供搜索、等级/时间/Tag/Name 过滤与 JSON 语法树查看。
 
-两种使用方式，入口代码分别是仓库里的两个 `main`：
+支持 Chrome 扩展、独立桌面 app 和嵌入宿主 app 三种使用方式：
 
 | 方式 | 入口 | 说明 |
 | --- | --- | --- |
+| Chrome 扩展 | [从 Chrome 应用商店安装](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) | 在 Chrome 浏览器中解析 `.mx` 日志 |
 | 独立 app | [`lib/main_desktop.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_desktop.dart) | macOS/Windows/Linux 桌面壳，拖入或选择日志文件后分析 |
 | 嵌入宿主 app | [`lib/main_package.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_package.dart) | iOS/Android app 内以「悬浮球 + 底部弹窗」查看本机日志 |
+
+安装 Chrome 扩展：在 Chrome 中打开上方商店链接，点击「添加至 Chrome」→「添加扩展程序」。
+安装后从扩展菜单打开 **MXLogger Analyzer**，选择或拖入 `.mx` 文件，按需填写解密 KEY/IV，然后开始导入。
 
 ## 界面
 

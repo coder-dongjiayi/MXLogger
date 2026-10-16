@@ -3,6 +3,7 @@
   <img src="https://img.shields.io/badge/Android-minSdk%2021-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" />
   <img src="https://img.shields.io/badge/Flutter-3.3+-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
   <img src="https://img.shields.io/badge/Analyzer-macOS%20%7C%20Windows%20%7C%20Linux-6C5CE7?style=for-the-badge&logo=flutter&logoColor=white" alt="Analyzer desktop" />
+  <a href="https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi"><img src="https://img.shields.io/badge/Chrome-Install%20extension-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Install MXLogger Analyzer from the Chrome Web Store" /></a>
 </p>
 
 <p align="center">
@@ -18,8 +19,8 @@ Flutter side calls straight into it through `dart:ffi`, so performance is essent
 native. Writing 100,000 records (~134 bytes each) takes about **0.13s** on an iPhone 11.
 
 Along with the writers comes **mxlogger_analyzer**, an analyzer that imports, decrypts and searches
-the produced `.mx` binaries — as a desktop app (macOS/Windows/Linux) or embedded straight into your
-iOS/Android Flutter app as a floating ball.
+the produced `.mx` binaries — as a Chrome extension, a desktop app (macOS/Windows/Linux), or embedded
+straight into your iOS/Android Flutter app as a floating ball.
 
 中文说明请点击[这里](./README_CN.md)。
 
@@ -49,8 +50,13 @@ into sqlite, which backs full-text search, level/time/Tag/Name filtering and a J
 
 | Mode | What it is | How to get it |
 | --- | --- | --- |
+| Chrome extension | Analyze `.mx` files in Chrome | [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
 | Desktop app | macOS/Windows/Linux shell — drop or pick a log file | [Releases](https://github.com/coder-dongjiayi/MXLogger/releases) (built by CI for all three platforms) |
 | Embedded in your app | floating ball + bottom sheet inside an iOS/Android Flutter app | `mxlogger_analyzer_lib` from pub.dev |
+
+For the Chrome extension, open the store link in Chrome and click **Add to Chrome** → **Add extension**.
+Then open **MXLogger Analyzer** from the extensions menu, select or drop your `.mx` files,
+configure KEY/IV if encrypted, and start the import.
 
 **Data page** — level distribution bar plus level chips, search and time filters, a syntax-colored
 JSON tree inside every log card, click-to-filter `@name` / `#tag`, and per-record info / share /

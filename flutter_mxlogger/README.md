@@ -32,7 +32,7 @@ See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) 
   - [3.4 Lifetime](#34-lifetime)
 - [4. Parsing `.mx` log files](#4-parsing-mx-log-files)
   - [4.1 Where the files are](#41-where-the-files-are)
-  - [4.2 Desktop analyzer (macOS / Windows / Linux)](#42-desktop-analyzer-macos--windows--linux)
+  - [4.2 Chrome extension and desktop analyzer (macOS / Windows / Linux)](#42-chrome-extension-and-desktop-analyzer-macos--windows--linux)
   - [4.3 In-app analyzer (`mxlogger_analyzer_lib`)](#43-in-app-analyzer-mxlogger_analyzer_lib)
   - [4.4 Parsing in Dart](#44-parsing-in-dart)
 - [Example](#example)
@@ -324,7 +324,7 @@ final records = await Isolate.run(() => MXLogger.selectLogmsg(
     ));
 ```
 
-Combined with `logFiles` this is enough to build an in-app log viewer — that is exactly what `log_viewer_page.dart` in the example does. If you would rather not write a UI, [section 4](#4-parsing-mx-log-files) covers the ready-made desktop and in-app analyzers.
+Combined with `logFiles` this is enough to build an in-app log viewer — that is exactly what `log_viewer_page.dart` in the example does. If you would rather not write a UI, [section 4](#4-parsing-mx-log-files) covers the Chrome extension, desktop and in-app analyzers.
 
 > `selectLogfiles({required String directory})` is an unimplemented stub that returns an empty list on every platform. Do not use it.
 
@@ -405,11 +405,12 @@ Quick reference:
 
 # 4. Parsing `.mx` log files
 
-A `.mx` file is not text. Every record is a flatbuffer, and the whole file is AES-CFB-128 encrypted when the logger was created with `cryptKey` / `iv`, so an editor only shows binary noise. Three readers are available; pick by scenario:
+A `.mx` file is not text. Every record is a flatbuffer, and the whole file is AES-CFB-128 encrypted when the logger was created with `cryptKey` / `iv`, so an editor only shows binary noise. Four readers are available; pick by scenario:
 
 | Scenario | Use |
 |---|---|
-| A file pulled from a device or uploaded by a user, analyzed on a computer | [4.2 Desktop analyzer](#42-desktop-analyzer-macos--windows--linux) |
+| Analyze `.mx` files in Chrome | [Install MXLogger Analyzer from the Chrome Web Store](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
+| A file pulled from a device or uploaded by a user, analyzed on a computer | [4.2 Chrome extension and desktop analyzer](#42-chrome-extension-and-desktop-analyzer-macos--windows--linux) |
 | Read logs on the phone while testing, no computer involved | [4.3 In-app analyzer](#43-in-app-analyzer-mxlogger_analyzer_lib) |
 | Your own viewer or upload pipeline in Dart | [4.4 Parsing in Dart](#44-parsing-in-dart) |
 
@@ -437,12 +438,17 @@ Getting the files onto a computer:
 
 - **Release builds / real users**: the app has to hand the file out itself, for example share it with `share_plus` or upload it to your server, using the paths from `logFiles`. Files can be copied while the logger is still open; the in-app analyzer below reads the live directory the same way.
 
-## 4.2 Desktop analyzer (macOS / Windows / Linux)
+## 4.2 Chrome extension and desktop analyzer (macOS / Windows / Linux)
 
-Download `mxlogger_analyzer` for your OS from [Releases](https://github.com/coder-dongjiayi/MXLogger/releases). The first run is a three-step wizard:
+Choose how to install the analyzer:
+
+- **Chrome extension**: [Install MXLogger Analyzer from the Chrome Web Store](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi). Open the link in Chrome and click **Add to Chrome** → **Add extension**.
+- **Desktop app (macOS / Windows / Linux)**: download `mxlogger_analyzer` for your OS from [Releases](https://github.com/coder-dongjiayi/MXLogger/releases).
+
+Open **MXLogger Analyzer** from Chrome's extensions menu or launch the desktop app. Both use a three-step import wizard:
 
 1. **Pick the file**: drag one or more `.mx` files onto the window, or click to browse.
-2. **Decryption**: enter the `cryptKey` / `iv` the logger was created with. Leave both empty for unencrypted logs. If the key was rotated, add every pair; they are tried in the numbered checkbox order until one decodes the record. The values are remembered for next time.
+2. **Decryption**: enter the `cryptKey` / `iv` the logger was created with. Leave both empty for unencrypted logs. If the key was rotated, add every pair; they are tried in the numbered checkbox order until one decodes the record. In the Chrome extension, KEY/IV are kept for the current session unless you choose to save them locally.
 3. **Import**: a real progress bar (bytes parsed, rows written), then the data page opens automatically.
 
 On the data page the header shows total count, time span and file name; below it a clickable level-distribution bar plus DEBUG–FATAL chips, keyword search (all / message / tag / name) with a time-range filter, click `@name` or `#tag` on any card to filter by it, a syntax-colored JSON tree for JSON messages, fullscreen detail for one record (Esc closes), and export to `.txt` through the share button. Change file, change key and clear data live in the header menu.

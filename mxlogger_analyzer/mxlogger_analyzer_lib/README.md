@@ -7,12 +7,16 @@ mmap binary logs written by [MXLogger](https://github.com/coder-dongjiayi/MXLogg
 Records land in sqlite, which backs full-text search, level/time/Tag/Name filtering and a JSON
 syntax tree view.
 
-Two ways to use it, one `main` in this repository for each:
+Use the analyzer in Chrome, as a desktop app, or embedded in a host app:
 
 | Mode | Entry point | What it is |
 | --- | --- | --- |
+| Chrome extension | [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) | Analyze `.mx` files in Chrome |
 | Standalone app | [`lib/main_desktop.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_desktop.dart) | macOS/Windows/Linux desktop shell — drop or pick a log file to analyze |
 | Embedded in a host app | [`lib/main_package.dart`](https://github.com/coder-dongjiayi/MXLogger/blob/main/mxlogger_analyzer/lib/main_package.dart) | Inspect on-device logs inside an iOS/Android app via a floating ball + bottom sheet |
+
+To install the Chrome extension, open the store link in Chrome and click **Add to Chrome** → **Add extension**.
+Open **MXLogger Analyzer** from the extensions menu, select or drop `.mx` files, configure KEY/IV if encrypted, and import.
 
 ## Screens
 

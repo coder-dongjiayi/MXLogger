@@ -32,7 +32,7 @@ MXLogger는 mmap 메모리 매핑을 기반으로 하고 AES-CFB-128 암호화�
   - [3.4 수명](#34-수명)
 - [4. `.mx` 로그 파일 읽기](#4-mx-로그-파일-읽기)
   - [4.1 파일 위치](#41-파일-위치)
-  - [4.2 데스크톱 분석기(macOS / Windows / Linux)](#42-데스크톱-분석기macos--windows--linux)
+  - [4.2 Chrome 확장 프로그램과 데스크톱 분석기(macOS / Windows / Linux)](#42-chrome-확장-프로그램과-데스크톱-분석기macos--windows--linux)
   - [4.3 앱 내장 분석기(`mxlogger_analyzer_lib`)](#43-앱-내장-분석기mxlogger_analyzer_lib)
   - [4.4 Dart로 파싱하기](#44-dart로-파싱하기)
 - [Example](#example)
@@ -324,7 +324,7 @@ final records = await Isolate.run(() => MXLogger.selectLogmsg(
     ));
 ```
 
-`logFiles`와 함께 쓰면 앱 내 로그 뷰어를 만들기에 충분합니다. example의 `log_viewer_page.dart`가 바로 그렇게 구현되어 있습니다. UI를 직접 만들고 싶지 않다면 [4장](#4-mx-로그-파일-읽기)에 있는 데스크톱 분석기와 앱 내장 분석기를 참고하세요.
+`logFiles`와 함께 쓰면 앱 내 로그 뷰어를 만들기에 충분합니다. example의 `log_viewer_page.dart`가 바로 그렇게 구현되어 있습니다. UI를 직접 만들고 싶지 않다면 [4장](#4-mx-로그-파일-읽기)에 있는 Chrome 확장 프로그램, 데스크톱 분석기, 앱 내장 분석기를 참고하세요.
 
 > `selectLogfiles({required String directory})`는 구현되지 않은 스텁으로, 모든 플랫폼에서 빈 리스트를 반환합니다. 사용하지 마세요.
 
@@ -405,11 +405,12 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 # 4. `.mx` 로그 파일 읽기
 
-`.mx` 파일은 텍스트가 아닙니다. 모든 레코드는 flatbuffer이고, 로거가 `cryptKey` / `iv`로 생성되었다면 파일 전체가 AES-CFB-128로 암호화되어 있어 에디터로 열면 바이너리 잡음만 보입니다. 읽는 방법은 세 가지이며 상황에 따라 고릅니다.
+`.mx` 파일은 텍스트가 아닙니다. 모든 레코드는 flatbuffer이고, 로거가 `cryptKey` / `iv`로 생성되었다면 파일 전체가 AES-CFB-128로 암호화되어 있어 에디터로 열면 바이너리 잡음만 보입니다. 읽는 방법은 네 가지이며 상황에 따라 고릅니다.
 
 | 상황 | 사용할 것 |
 |---|---|
-| 기기에서 꺼낸 파일이나 사용자가 업로드한 파일을 컴퓨터에서 분석 | [4.2 데스크톱 분석기](#42-데스크톱-분석기macos--windows--linux) |
+| Chrome에서 `.mx` 로그 분석 | [Chrome 웹 스토어에서 MXLogger Analyzer 설치](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
+| 기기에서 꺼낸 파일이나 사용자가 업로드한 파일을 컴퓨터에서 분석 | [4.2 Chrome 확장 프로그램과 데스크톱 분석기](#42-chrome-확장-프로그램과-데스크톱-분석기macos--windows--linux) |
 | 테스트 중 컴퓨터 없이 휴대폰에서 로그 읽기 | [4.3 앱 내장 분석기](#43-앱-내장-분석기mxlogger_analyzer_lib) |
 | Dart로 직접 뷰어나 업로드 파이프라인 만들기 | [4.4 Dart로 파싱하기](#44-dart로-파싱하기) |
 
@@ -437,12 +438,17 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 - **릴리스 빌드 / 실제 사용자**: 앱이 직접 파일을 내보내야 합니다. 예를 들어 `share_plus`로 공유하거나 `logFiles`의 경로로 서버에 업로드합니다. 로거가 열려 있는 상태에서도 파일을 복사할 수 있습니다. 아래의 앱 내장 분석기도 같은 방식으로 실시간 디렉터리를 읽습니다.
 
-## 4.2 데스크톱 분석기(macOS / Windows / Linux)
+## 4.2 Chrome 확장 프로그램과 데스크톱 분석기(macOS / Windows / Linux)
 
-[Releases](https://github.com/coder-dongjiayi/MXLogger/releases)에서 자신의 OS용 `mxlogger_analyzer`를 다운로드합니다. 첫 실행은 3단계 마법사입니다.
+분석기 설치 방법을 선택하세요.
+
+- **Chrome 확장 프로그램**: [Chrome 웹 스토어에서 MXLogger Analyzer 설치](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi). Chrome에서 링크를 열고 **Chrome에 추가** → **확장 프로그램 추가**를 클릭하세요.
+- **데스크톱 앱(macOS / Windows / Linux)**: [Releases](https://github.com/coder-dongjiayi/MXLogger/releases)에서 자신의 OS용 `mxlogger_analyzer`를 다운로드하세요.
+
+Chrome 확장 프로그램 메뉴에서 **MXLogger Analyzer**를 열거나 데스크톱 앱을 실행하세요. 두 버전 모두 3단계로 로그를 가져옵니다.
 
 1. **파일 선택**: 하나 이상의 `.mx` 파일을 창으로 드래그하거나 클릭해서 선택합니다.
-2. **복호화**: 로거를 만들 때 쓴 `cryptKey` / `iv`를 입력합니다. 암호화하지 않은 로그는 둘 다 비워 둡니다. 키를 교체한 적이 있다면 모든 쌍을 추가하세요. 번호가 붙은 체크박스 순서대로 레코드가 디코딩될 때까지 시도합니다. 값은 다음을 위해 기억됩니다.
+2. **복호화**: 로거를 만들 때 쓴 `cryptKey` / `iv`를 입력합니다. 암호화하지 않은 로그는 둘 다 비워 둡니다. 키를 교체한 적이 있다면 모든 쌍을 추가하세요. 번호가 붙은 체크박스 순서대로 레코드가 디코딩될 때까지 시도합니다. Chrome 확장 프로그램은 기본적으로 현재 세션에만 KEY/IV를 유지하며, 필요하면 로컬 저장을 선택할 수 있습니다.
 3. **가져오기**: 실제 진행률 표시줄(파싱한 바이트, 기록한 행)이 표시되고 완료되면 데이터 페이지가 자동으로 열립니다.
 
 데이터 페이지 헤더에는 총 건수, 시간 범위, 파일 이름이 표시됩니다. 그 아래에는 클릭으로 필터링되는 레벨 분포 막대와 DEBUG–FATAL 칩, 시간 범위 필터가 있는 키워드 검색(전체 / 메시지 / 태그 / 이름), 카드의 `@name`이나 `#tag`를 클릭해 필터링, JSON 메시지의 구문 색상 트리, 한 레코드의 전체 화면 상세(Esc로 닫기), 공유 버튼을 통한 `.txt` 내보내기가 있습니다. 파일 변경, 키 변경, 데이터 삭제는 헤더 메뉴에 있습니다.

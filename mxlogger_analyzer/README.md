@@ -6,6 +6,8 @@ MXLogger 日志解析器（Flutter，自带基于 stream 的轻量状态管理�
 （AES-CFB-128 解密 + flatbuffer 反序列化），sqlite 入库后提供检索、过滤与 JSON 语法树查看。
 只支持 `.mx`，不解析其他格式的日志文件。
 
+**Chrome 扩展已上架：[点击前往 Chrome 应用商店安装 MXLogger Analyzer](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi)。**
+
 仿照 1.x 拆为两层（本目录是桌面/Web 壳，内核可单独发布嵌入 app）：
 
 ```
@@ -162,7 +164,15 @@ Release 构建会分离 Dart 调试符号，保存在 `build/desktop-symbols/<�
 不会打进安装包或作为 Artifact 上传。开发者需要用 `flutter symbolize` 还原堆栈时，
 应保留对应构建的符号目录。`--no-build` 仅重新打包，不改变已有二进制或生成新的符号。
 
-## Chrome 扩展（第二阶段：完整页面）
+## Chrome 扩展
+
+### 从 Chrome 应用商店安装
+
+1. 在 Chrome 中打开 [MXLogger Analyzer 商店页面](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi)。
+2. 点击「添加至 Chrome」，在提示框中选择「添加扩展程序」。
+3. 从 Chrome 扩展菜单打开 **MXLogger Analyzer**，选择或拖入 `.mx` 文件，按需填写解密 KEY/IV，然后开始导入。
+
+### 本地构建与调试
 
 独立工程在 `chrome_extension/`，复用内核完整页面、解析器和 SQLite 查询。
 浏览器 Worker 执行解密与查询，SQLite WASM 通过 IndexedDB 保存数据；
@@ -186,10 +196,10 @@ node chrome_extension/tool/verify.cjs
 它使用临时用户目录和 DevTools pipe，不接触日常浏览器配置。
 
 产物为 `chrome_extension/dist/mxlogger-chrome-prototype.zip` 和同名未压缩目录。
-打开 `chrome://extensions`，开启开发者模式，选择「加载已解压的扩展程序」并选中该目录，
+本地调试时打开 `chrome://extensions`，开启开发者模式，选择「加载已解压的扩展程序」并选中该目录，
 然后点击扩展图标打开分析器。首次使用依次选择日志、配置解密参数、开始导入。
 示例文件位于 `chrome_extension/web/samples/`，加密示例 KEY 是 `mxlogger123`，IV 留空。
-升级时保持原有加载目录，点击扩展卡片的重新加载按钮，再刷新分析器标签页。
+更新本地构建时保持原有加载目录，点击扩展卡片的重新加载按钮，再刷新分析器标签页。
 
 支持多文件选择/拖入、替换或合并去重、多组 KEY / IV、重新解析、日志卡片与 JSON 树、
 详情搜索、全局上下文、关键词/等级/Tag/Name/时间筛选、排序、滚动分页、复制与 TXT 下载。
