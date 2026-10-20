@@ -45,11 +45,37 @@ dependencies:
   flutter_mxlogger: ^2.1.0
 ```
 
-The native dependencies are pulled in automatically — no manual setup required:
+The native SDK dependencies are pulled in automatically:
 
 - iOS (CocoaPods, default): depends on `MXLogger 2.1.0` → `MXLoggerCore 2.1.0`
 - iOS (Swift Package Manager): when the host app has enabled Flutter's SwiftPM support (`flutter config --enable-swift-package-manager`), the plugin is integrated via `ios/flutter_mxlogger/Package.swift` and depends on [MXLogger-SwiftPM](https://github.com/coder-dongjiayi/MXLogger-SwiftPM) `2.1.0` instead
 - Android: Gradle depends on `io.github.coder-dongjiayi:mxlogger:2.1.0`
+
+
+### iOS release archives: preserve FFI symbols
+
+For the host **Runner** target, set **Build Settings > Strip Style** to
+**Non-Global Symbols** for Release and Profile (`STRIP_STYLE = non-global`).
+The example applies this in `example/ios/Flutter/Release.xcconfig`, which both
+configurations use. In another host app, add the setting to its corresponding
+release configuration or set it on the Runner target directly.
+
+With static SwiftPM integration, `DynamicLibrary.process()` resolves the
+`flutter_mxlogger_*` C functions from the app executable. The bridge already uses
+`extern "C"`, default visibility, `used`, and a plugin-registration anchor. These
+retain the functions during compilation and linking, but the final archive
+strip step can still remove their global symbol names when Strip Style is
+**All Symbols**. This can make Debug work while an installed IPA fails with
+`Failed to lookup symbol 'flutter_mxlogger_initialize'`.
+
+Check the archived app after a release build:
+
+```bash
+xcrun nm -gU build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Runner | rg ' _flutter_mxlogger_initialize$'
+```
+
+Rebuild and export the IPA after changing the host setting. See Flutter's
+[FFI symbol-stripping guidance](https://docs.flutter.dev/platform-integration/legacy-ffi-plugin#stripping-symbols).
 
 ## Quick start
 

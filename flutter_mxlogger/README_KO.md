@@ -45,11 +45,36 @@ dependencies:
   flutter_mxlogger: ^2.1.0
 ```
 
-네이티브 의존성은 자동으로 포함되므로 수동 설정이 필요하지 않습니다.
+네이티브 SDK 의존성은 자동으로 포함됩니다.
 
 - iOS(CocoaPods, 기본): `MXLogger 2.1.0` → `MXLoggerCore 2.1.0`에 의존
 - iOS(Swift Package Manager): 호스트 앱에서 Flutter의 SwiftPM 지원을 켠 경우(`flutter config --enable-swift-package-manager`) 플러그인은 `ios/flutter_mxlogger/Package.swift`로 통합되며, 대신 [MXLogger-SwiftPM](https://github.com/coder-dongjiayi/MXLogger-SwiftPM) `2.1.0`에 의존합니다
 - Android: Gradle이 `io.github.coder-dongjiayi:mxlogger:2.1.0`에 의존
+
+### iOS release 아카이브: FFI 심볼 유지
+
+호스트 앱의 **Runner** 타깃에서 Release와 Profile의
+**Build Settings > Strip Style**을 **Non-Global Symbols**
+(`STRIP_STYLE = non-global`)로 설정하세요. 예제는 두 빌드 구성이 함께 사용하는
+`example/ios/Flutter/Release.xcconfig`에 이 설정을 적용합니다. 다른 호스트 앱에서는
+해당 release 구성에 설정을 추가하거나 Runner 타깃에서 직접 설정하세요.
+
+SwiftPM으로 정적 링크하면 `DynamicLibrary.process()`가 앱 실행 파일에서
+`flutter_mxlogger_*` C 함수를 찾습니다. 브리지에는 이미 `extern "C"`, 기본 가시성,
+`used`, 플러그인 등록 시 호출하는 앵커 함수가 적용되어 있습니다. 이들은 컴파일과 링크
+단계에서 함수를 유지하지만, **Strip Style**이 **All Symbols**이면 최종 아카이브의
+strip 단계에서 전역 심볼 이름이 제거될 수 있습니다. 따라서 Debug에서는 정상이어도
+설치한 IPA에서 `Failed to lookup symbol 'flutter_mxlogger_initialize'` 오류가
+발생할 수 있습니다.
+
+release 빌드 후 아카이브 안의 앱을 확인할 수 있습니다:
+
+```bash
+xcrun nm -gU build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Runner | rg ' _flutter_mxlogger_initialize$'
+```
+
+호스트 설정을 변경한 뒤에는 다시 빌드하고 IPA를 내보내세요. Flutter 공식
+[FFI 심볼 strip 안내](https://docs.flutter.dev/platform-integration/legacy-ffi-plugin#stripping-symbols)도 참고하세요.
 
 ## 빠른 시작
 

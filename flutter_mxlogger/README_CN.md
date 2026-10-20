@@ -46,11 +46,35 @@ dependencies:
   flutter_mxlogger: ^2.1.0
 ```
 
-原生依赖会自动引入，无需手动配置：
+原生 SDK 依赖会自动引入：
 
 - iOS（CocoaPods，默认）：依赖 `MXLogger 2.1.0` → `MXLoggerCore 2.1.0`
 - iOS（Swift Package Manager）：宿主 App 开启了 Flutter 的 SwiftPM 支持（`flutter config --enable-swift-package-manager`）时，插件通过 `ios/flutter_mxlogger/Package.swift` 接入，改为依赖 [MXLogger-SwiftPM](https://github.com/coder-dongjiayi/MXLogger-SwiftPM) `2.1.0`
 - Android：Gradle 依赖 `io.github.coder-dongjiayi:mxlogger:2.1.0`
+
+### iOS release 归档：保留 FFI 符号
+
+在宿主应用的 **Runner** target 中，将 Release 和 Profile 的
+**Build Settings > Strip Style** 设置为 **Non-Global Symbols**
+（`STRIP_STYLE = non-global`）。示例已在 `example/ios/Flutter/Release.xcconfig`
+中设置，两个构建配置均使用该文件。其他宿主应用需在对应的 release 配置中添加该设置，
+或直接在 Runner target 上设置。
+
+使用 SwiftPM 静态链接时，`DynamicLibrary.process()` 会从应用可执行文件中查找
+`flutter_mxlogger_*` C 函数。桥接层已经使用 `extern "C"`、默认可见性、`used`
+以及插件注册时调用的锚点函数。这些措施会在编译和链接阶段保留函数，但如果
+**Strip Style** 为 **All Symbols**，最终归档的符号裁剪步骤仍可能删除全局符号名。
+因此可能出现 Debug 正常，而安装 IPA 后报
+`Failed to lookup symbol 'flutter_mxlogger_initialize'` 的情况。
+
+release 构建后，可检查归档中的应用：
+
+```bash
+xcrun nm -gU build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Runner | rg ' _flutter_mxlogger_initialize$'
+```
+
+修改宿主配置后，需要重新构建并导出 IPA。参见 Flutter 官方的
+[FFI 符号裁剪说明](https://docs.flutter.dev/platform-integration/legacy-ffi-plugin#stripping-symbols)。
 
 ## 快速开始
 

@@ -45,11 +45,37 @@ dependencies:
   flutter_mxlogger: ^2.1.0
 ```
 
-ネイティブ依存は自動的に取り込まれるため、手動設定は不要です。
+ネイティブ SDK の依存関係は自動的に取り込まれます。
 
 - iOS（CocoaPods、既定）: `MXLogger 2.1.0` → `MXLoggerCore 2.1.0` に依存
 - iOS（Swift Package Manager）: ホストアプリで Flutter の SwiftPM サポートを有効にしている場合（`flutter config --enable-swift-package-manager`）、プラグインは `ios/flutter_mxlogger/Package.swift` 経由で統合され、代わりに [MXLogger-SwiftPM](https://github.com/coder-dongjiayi/MXLogger-SwiftPM) `2.1.0` に依存します
 - Android: Gradle が `io.github.coder-dongjiayi:mxlogger:2.1.0` に依存
+
+### iOS の release アーカイブ：FFI シンボルの保持
+
+ホストアプリの **Runner** ターゲットで、Release と Profile の
+**Build Settings > Strip Style** を **Non-Global Symbols**
+（`STRIP_STYLE = non-global`）に設定してください。サンプルでは、両方の構成が使う
+`example/ios/Flutter/Release.xcconfig` に設定しています。ほかのホストアプリでは、
+対応する release 構成に設定を追加するか、Runner ターゲットで直接設定してください。
+
+SwiftPM で静的リンクする場合、`DynamicLibrary.process()` はアプリの実行ファイルから
+`flutter_mxlogger_*` C 関数を検索します。ブリッジではすでに `extern "C"`、
+デフォルトの可視性、`used`、プラグイン登録時に呼び出すアンカー関数を使用しています。
+これらはコンパイルとリンクの段階で関数を保持しますが、**Strip Style** が
+**All Symbols** の場合、最終的なアーカイブの strip 処理でグローバルシンボル名が
+削除されることがあります。そのため、Debug では正常でも、インストールした IPA では
+`Failed to lookup symbol 'flutter_mxlogger_initialize'` が発生する場合があります。
+
+release ビルド後に、アーカイブ内のアプリを確認できます：
+
+```bash
+xcrun nm -gU build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Runner | rg ' _flutter_mxlogger_initialize$'
+```
+
+ホスト側の設定を変更したら、再ビルドして IPA をエクスポートしてください。
+Flutter 公式の [FFI シンボルの strip に関する説明](https://docs.flutter.dev/platform-integration/legacy-ffi-plugin#stripping-symbols)
+も参照してください。
 
 ## クイックスタート
 
