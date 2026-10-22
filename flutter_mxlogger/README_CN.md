@@ -7,7 +7,7 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
 更多说明见 [MXLogger 主仓库](https://github.com/coder-dongjiayi/MXLogger)。
 
 - **当前版本**：2.1.0
-- **环境要求**：Dart SDK `>=2.18.0 <4.0.0`、Flutter `>=3.3.0`
+- **环境要求**：Dart SDK `>=2.19.0 <4.0.0`、Flutter `>=3.7.0`
 - **平台支持**：iOS（>= 9.0）、Android（minSdk 21）
 
 ## 目录

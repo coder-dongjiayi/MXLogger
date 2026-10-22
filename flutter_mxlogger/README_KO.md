@@ -7,7 +7,7 @@ MXLogger는 mmap 메모리 매핑을 기반으로 하고 AES-CFB-128 암호화�
 전체 프로젝트는 [MXLogger 메인 저장소](https://github.com/coder-dongjiayi/MXLogger)를 참고하세요.
 
 - **버전**: 2.1.0
-- **요구 사항**: Dart SDK `>=2.18.0 <4.0.0`, Flutter `>=3.3.0`
+- **요구 사항**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
 - **지원 플랫폼**: iOS(>= 9.0), Android(minSdk 21)
 
 ## 목차

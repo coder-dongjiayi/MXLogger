@@ -7,7 +7,7 @@ MXLogger is a cross-platform logging library built on mmap memory mapping, with 
 See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) for the full project.
 
 - **Version**: 2.1.0
-- **Requirements**: Dart SDK `>=2.18.0 <4.0.0`, Flutter `>=3.3.0`
+- **Requirements**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
 - **Platforms**: iOS (>= 9.0), Android (minSdk 21)
 
 ## Contents

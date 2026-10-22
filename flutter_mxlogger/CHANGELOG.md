@@ -1,6 +1,9 @@
 
 # MXLogger for Flutter Change Log
 
+# Unreleased
+* Raise the minimum supported Flutter version to 3.7.0 and Dart SDK to 2.19.0.
+
 # v2.1.0/2026-09-24
 * Support the Swift Package Manager
 * **Breaking** Rename `MXStoragePolicyType` values to lowerCamelCase to satisfy `constant_identifier_names` lint: `yyyy_MM_dd` → `yyyyMMdd`, `yyyy_MM_dd_HH` → `yyyyMMddHH`, `yyyy_ww` → `yyyyWw`, `yyyy_MM` → `yyyyMM`. The strings passed to the native layer are unchanged, so existing log files and file naming are unaffected.
