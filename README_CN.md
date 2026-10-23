@@ -21,7 +21,7 @@
 [English](./README.md) | [简体中文](./README_CN.md) | [日本語](./README_JA.md) | [한국어](./README_KO.md)
 
 <p align="center" >
-<img src="./icon/logo_400.png" alt="MXLogger"  title="MXLogger" width="180" />
+<img src="./flutter_mxlogger/example/assets/mxlogger_logo.png" alt="MXLogger"  title="MXLogger" width="180" />
 </p>
 
 MXLogger 是基于 **mmap** 内存映射机制的跨平台日志库，支持 **AES-CFB-128** 加密，支持 iOS / macOS / Android /

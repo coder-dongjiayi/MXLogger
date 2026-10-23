@@ -419,7 +419,7 @@ public class MXLoggerInstrumentedTest {
         MXLogger daily = new MXLogger(context, uniqueNs(), newDir("sp1").getAbsolutePath(),
                 MXStoragePolicyType.YYYY_MM_DD, null, null, null, null);
         daily.info(null, null, "x");
-        assertEquals(day + "_log.mx", currentLogFile(daily).getName());
+        assertEquals(day + "_mxlog.mx", currentLogFile(daily).getName());
 
         MXLogger hourly = new MXLogger(context, uniqueNs(), newDir("sp2").getAbsolutePath(),
                 MXStoragePolicyType.YYYY_MM_DD_HH, "hourly", null, null, null);
@@ -433,12 +433,12 @@ public class MXLoggerInstrumentedTest {
         weekly.info(null, null, "x");
         String weeklyName = currentLogFile(weekly).getName();
         assertTrue(weeklyName.contains("w"));
-        assertTrue(weeklyName.endsWith("_log.mx"));
+        assertTrue(weeklyName.endsWith("_mxlog.mx"));
 
         MXLogger monthly = new MXLogger(context, uniqueNs(), newDir("sp4").getAbsolutePath(),
                 MXStoragePolicyType.YYYY_MM, null, null, null, null);
         monthly.info(null, null, "x");
-        assertEquals(month + "_log.mx", currentLogFile(monthly).getName());
+        assertEquals(month + "_mxlog.mx", currentLogFile(monthly).getName());
     }
 
     // ------------------------------------------------------------------

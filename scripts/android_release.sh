@@ -132,8 +132,8 @@ cat > "${POM_FILE}" <<EOF
 
   <licenses>
     <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <name>BSD 3-Clause License</name>
+      <url>https://opensource.org/license/BSD-3-Clause</url>
     </license>
   </licenses>
 
