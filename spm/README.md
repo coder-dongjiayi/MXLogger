@@ -1,4 +1,4 @@
-# MXLogger-SwiftPM
+# mxlogger-spm
 
 Swift Package Manager distribution of [MXLogger](https://github.com/coder-dongjiayi/MXLogger),
 a high-performance cross-platform logger built on mmap with AES-CFB-128 encryption.
@@ -17,7 +17,7 @@ a high-performance cross-platform logger built on mmap with AES-CFB-128 encrypti
 Xcode: **File > Add Package Dependencies...**, paste
 
 ```
-https://github.com/coder-dongjiayi/MXLogger-SwiftPM.git
+https://github.com/coder-dongjiayi/mxlogger-spm.git
 ```
 
 and add the **MXLogger** product to your app target.
@@ -26,12 +26,12 @@ Package.swift:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/coder-dongjiayi/MXLogger-SwiftPM.git", from: "2.0.0"),
+    .package(url: "https://github.com/coder-dongjiayi/mxlogger-spm.git", from: "2.0.0"),
 ],
 targets: [
     .target(
         name: "YourApp",
-        dependencies: [.product(name: "MXLogger", package: "MXLogger-SwiftPM")]
+        dependencies: [.product(name: "MXLogger", package: "mxlogger-spm")]
     ),
 ]
 ```

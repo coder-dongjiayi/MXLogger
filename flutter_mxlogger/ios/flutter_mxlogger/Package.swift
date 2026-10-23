@@ -21,14 +21,14 @@ let package = Package(
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
         // 原生 MXLogger(OC + C++ Core)，与 podspec 中 MXLogger 2.1.0 对应
         // Native MXLogger (ObjC + C++ core), matches `MXLogger 2.1.0` in the podspec
-        .package(url: "https://github.com/coder-dongjiayi/MXLogger-SwiftPM.git", exact: "2.1.0"),
+        .package(url: "https://github.com/coder-dongjiayi/mxlogger-spm.git", exact: "2.1.0"),
     ],
     targets: [
         .target(
             name: "flutter_mxlogger",
             dependencies: [
                 .product(name: "FlutterFramework", package: "FlutterFramework"),
-                .product(name: "MXLogger", package: "MXLogger-SwiftPM"),
+                .product(name: "MXLogger", package: "mxlogger-spm"),
             ],
             cSettings: [
                 .headerSearchPath("include/flutter_mxlogger"),

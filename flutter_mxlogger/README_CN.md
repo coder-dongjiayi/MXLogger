@@ -49,7 +49,7 @@ dependencies:
 原生 SDK 依赖会自动引入：
 
 - iOS（CocoaPods，默认）：依赖 `MXLogger 2.1.0` → `MXLoggerCore 2.1.0`
-- iOS（Swift Package Manager）：宿主 App 开启了 Flutter 的 SwiftPM 支持（`flutter config --enable-swift-package-manager`）时，插件通过 `ios/flutter_mxlogger/Package.swift` 接入，改为依赖 [MXLogger-SwiftPM](https://github.com/coder-dongjiayi/MXLogger-SwiftPM) `2.1.0`
+- iOS（Swift Package Manager）：宿主 App 开启了 Flutter 的 SwiftPM 支持（`flutter config --enable-swift-package-manager`）时，插件通过 `ios/flutter_mxlogger/Package.swift` 接入，改为依赖 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.1.0`
 - Android：Gradle 依赖 `io.github.coder-dongjiayi:mxlogger:2.1.0`
 
 ### iOS release 归档：保留 FFI 符号

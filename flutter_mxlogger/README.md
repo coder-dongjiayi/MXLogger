@@ -48,7 +48,7 @@ dependencies:
 The native SDK dependencies are pulled in automatically:
 
 - iOS (CocoaPods, default): depends on `MXLogger 2.1.0` → `MXLoggerCore 2.1.0`
-- iOS (Swift Package Manager): when the host app has enabled Flutter's SwiftPM support (`flutter config --enable-swift-package-manager`), the plugin is integrated via `ios/flutter_mxlogger/Package.swift` and depends on [MXLogger-SwiftPM](https://github.com/coder-dongjiayi/MXLogger-SwiftPM) `2.1.0` instead
+- iOS (Swift Package Manager): when the host app has enabled Flutter's SwiftPM support (`flutter config --enable-swift-package-manager`), the plugin is integrated via `ios/flutter_mxlogger/Package.swift` and depends on [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.1.0` instead
 - Android: Gradle depends on `io.github.coder-dongjiayi:mxlogger:2.1.0`
 
 

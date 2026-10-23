@@ -1,2 +1,2 @@
-# MXLogger-SwiftPM
+# mxlogger-spm
 SPM Mirror image

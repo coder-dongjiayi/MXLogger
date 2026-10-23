@@ -3,6 +3,7 @@
 
 # Unreleased
 * Raise the minimum supported Flutter version to 3.7.0 and Dart SDK to 2.19.0.
+* Migrate the native SwiftPM dependency to `https://github.com/coder-dongjiayi/mxlogger-spm.git`.
 
 # v2.1.0/2026-09-24
 * Support the Swift Package Manager

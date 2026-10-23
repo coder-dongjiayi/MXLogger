@@ -48,7 +48,7 @@ dependencies:
 ネイティブ SDK の依存関係は自動的に取り込まれます。
 
 - iOS（CocoaPods、既定）: `MXLogger 2.1.0` → `MXLoggerCore 2.1.0` に依存
-- iOS（Swift Package Manager）: ホストアプリで Flutter の SwiftPM サポートを有効にしている場合（`flutter config --enable-swift-package-manager`）、プラグインは `ios/flutter_mxlogger/Package.swift` 経由で統合され、代わりに [MXLogger-SwiftPM](https://github.com/coder-dongjiayi/MXLogger-SwiftPM) `2.1.0` に依存します
+- iOS（Swift Package Manager）: ホストアプリで Flutter の SwiftPM サポートを有効にしている場合（`flutter config --enable-swift-package-manager`）、プラグインは `ios/flutter_mxlogger/Package.swift` 経由で統合され、代わりに [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.1.0` に依存します
 - Android: Gradle が `io.github.coder-dongjiayi:mxlogger:2.1.0` に依存
 
 ### iOS の release アーカイブ：FFI シンボルの保持
