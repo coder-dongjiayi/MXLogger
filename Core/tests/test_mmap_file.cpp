@@ -100,7 +100,7 @@ MX_TEST(mmap_sink, file_header_written_once) {
 }
 
 MX_TEST(mmap_sink, grows_beyond_page_size) {
-    // 写入量远超一页(4096)，触发多次truncate扩容后数据完整
+    // 写入量远超一页(4KB/16KB)，触发多次truncate扩容后数据完整
     std::string dir = mxtest::temp_dir("mmap_grow");
     mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
 
@@ -331,6 +331,9 @@ MX_TEST(file_sink, expire_by_max_size_only_oldest_first) {
     // 覆盖两个修复: 只设max_size(不设max_age)清理必须生效; 且先删最旧的文件
     std::string dir = mxtest::temp_dir("expire_size");
     mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+    EXPECT_EQ(write_log(sink, level::info, "current"), 0);
+    const long current_file_size = sink.dir_size();
+    EXPECT_TRUE(current_file_size > 0);
 
     // 创建间隔>1s保证birthtime可区分(秒级精度)
     mxtest::write_dummy_file(dir + "a_oldest.mx", 4096);
@@ -339,20 +342,26 @@ MX_TEST(file_sink, expire_by_max_size_only_oldest_first) {
     sleep(2);
     mxtest::write_dummy_file(dir + "c_newest.mx", 4096);
 
-    // 当前正在写入的mmap文件占4KB(一页)，总量 = 4+12 = 16KB
-    // 上限10KB: 应删a(→12KB)、删b(→8KB达标)，留c和当前文件
-    sink.set_max_disk_size(10 * 1024);
+    // 当前mmap文件按系统页大小分配，Apple Silicon上通常为16KB，不能假定为4KB。
+    // 上限 = 当前文件 + 6KB：应删a、b，只保留4KB的c和当前文件。
+    const long max_size = current_file_size + 6 * 1024;
+    sink.set_max_disk_size(max_size);
     sink.remove_expire_data();
 
     record_list files;
     mxlogger::get_files(&files, dir.c_str());
-    bool has_a = false, has_b = false, has_c = false;
+    bool has_a = false, has_b = false, has_c = false, has_current = false;
     for (auto& f : files) {
         if (f["name"] == "a_oldest.mx") has_a = true;
         if (f["name"] == "b_middle.mx") has_b = true;
         if (f["name"] == "c_newest.mx") has_c = true;
+        if (f["name"] == mxtest::today_prefix() + "_log.mx") has_current = true;
     }
     EXPECT_FALSE(has_a);
     EXPECT_FALSE(has_b);
     EXPECT_TRUE(has_c);
+    EXPECT_TRUE(has_current);
+    EXPECT_EQ(files.size(), (size_t)2);
+    EXPECT_TRUE(sink.dir_size() <= max_size);
+    EXPECT_EQ(write_log(sink, level::info, "after cleanup"), 0);
 }

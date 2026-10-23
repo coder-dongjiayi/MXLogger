@@ -38,6 +38,7 @@ echo ">> compiling C dependencies..."
 "$CC" $CFLAGS -w -c "$CORE/json/cJSON.c" -o "$BUILD/cJSON.o"
 
 echo ">> compiling core + tests..."
+# ARM AES 的实现位于汇编文件中；源码内的架构守卫会让它们在 x86 上编译为空。
 "$CXX" $CXXFLAGS \
     test_main.cpp \
     test_helper.cpp \
@@ -59,6 +60,8 @@ echo ">> compiling core + tests..."
     "$CORE/aes/aes_crypt.cpp" \
     "$CORE/aes/openssl/openssl_aes_core.cpp" \
     "$CORE/aes/openssl/openssl_cfb128.cpp" \
+    "$CORE/aes/openssl/openssl_aes-armv4.S" \
+    "$CORE/aes/openssl/openssl_aesv8-armx.S" \
     "$BUILD/md5.o" "$BUILD/cJSON.o" \
     -o "$BUILD/mxlogger_tests"
 

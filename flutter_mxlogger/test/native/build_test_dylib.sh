@@ -26,6 +26,7 @@ mkdir -p "$BUILD"
 "$CC" -w -O1 -fPIC -c "$CORE/md5/md5.c"    -o "$BUILD/md5.o"
 "$CC" -w -O1 -fPIC -c "$CORE/json/cJSON.c" -o "$BUILD/cJSON.o"
 
+# ARM AES 的实现位于汇编文件中；源码内的架构守卫会让它们在 x86 上编译为空。
 "$CXX" -std=c++17 -DFORCE_POSIX -pthread -O1 -fPIC -dynamiclib \
     -I"$CORE" \
     "$BRIDGE" \
@@ -41,6 +42,8 @@ mkdir -p "$BUILD"
     "$CORE/aes/aes_crypt.cpp" \
     "$CORE/aes/openssl/openssl_aes_core.cpp" \
     "$CORE/aes/openssl/openssl_cfb128.cpp" \
+    "$CORE/aes/openssl/openssl_aes-armv4.S" \
+    "$CORE/aes/openssl/openssl_aesv8-armx.S" \
     "$BUILD/md5.o" "$BUILD/cJSON.o" \
     -o "$OUT"
 
