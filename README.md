@@ -95,6 +95,23 @@ Full documentation for the analyzer: [mxlogger_analyzer_lib/README.md](./mxlogge
 pod 'MXLogger', '~> 2.0.0'
 ```
 
+## Native macOS
+
+The source podspecs now support macOS 10.13+. Before this version is published, use
+the local checkout:
+
+```ruby
+platform :osx, '10.13'
+pod 'MXLogger', :path => '/path/to/MXLogger'
+pod 'MXLoggerCore', :path => '/path/to/MXLogger'
+```
+
+SwiftPM uses [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm.git);
+the manifest in `spm/Package.swift` declares iOS 12+ and macOS 10.13+.
+Both platforms use the same native API. On macOS, call `removeExpireData` explicitly;
+`shouldRemoveExpiredDataWhenEnterBackground` has no effect. Flutter macOS integration
+is a separate step and is not enabled yet.
+
 ## Android
 
 ```groovy

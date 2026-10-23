@@ -22,6 +22,16 @@ https://github.com/coder-dongjiayi/mxlogger-spm.git
 
 and add the **MXLogger** product to your app target.
 
+Supported deployment targets: **iOS 12+** and **macOS 10.13+**. macOS uses the same
+Objective-C and Swift API as iOS. Its default directory is
+`Application Support/<bundle-id>/MXLogger` (the process name is used if the bundle ID is absent).
+On macOS, call `removeExpireData()` explicitly to apply age/size cleanup;
+`shouldRemoveExpiredDataWhenEnterBackground` has no effect.
+
+支持 **iOS 12+、macOS 10.13+**，两端共用 Objective-C / Swift API。macOS 默认写入
+`Application Support/<bundle-id>/MXLogger`，无 bundle ID 时使用进程名。
+macOS 需手动调用 `removeExpireData()` 清理；`shouldRemoveExpiredDataWhenEnterBackground` 不生效。
+
 Package.swift:
 
 ```swift

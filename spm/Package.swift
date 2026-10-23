@@ -14,6 +14,7 @@ let package = Package(
     name: "MXLogger",
     platforms: [
         .iOS(.v12),
+        .macOS(.v10_13),
     ],
     products: [
         // Objective-C API，Swift / Objective-C 工程使用这个产品
@@ -50,7 +51,7 @@ let package = Package(
             ],
             linkerSettings: [
                 .linkedFramework("Foundation"),
-                .linkedFramework("UIKit"),
+                .linkedFramework("UIKit", .when(platforms: [.iOS])),
             ]
         ),
     ],

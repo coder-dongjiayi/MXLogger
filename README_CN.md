@@ -93,6 +93,21 @@ mxlogger_analyzer 解析。
 pod 'MXLogger', '~> 2.0.0'
 ```
 
+## 原生 macOS
+
+当前源码的 podspec 已支持 macOS 10.13+。本版本发布前可通过本地仓库接入：
+
+```ruby
+platform :osx, '10.13'
+pod 'MXLogger', :path => '/path/to/MXLogger'
+pod 'MXLoggerCore', :path => '/path/to/MXLogger'
+```
+
+SwiftPM 使用 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm.git)，
+`spm/Package.swift` 已声明 iOS 12+、macOS 10.13+。两端共用原生 API；macOS 需显式调用
+`removeExpireData` 清理，`shouldRemoveExpiredDataWhenEnterBackground` 不生效。
+Flutter macOS 插件将在后续阶段接入，目前尚未启用。
+
 ## Android
 
 ```groovy

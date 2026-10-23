@@ -14,10 +14,10 @@ Pod::Spec.new do |s|
                      * FlatBuffers serialization: compact binary records, zero-copy reads
                      * File split policies: per hour, day, week or month
                      * Disk budget enforced by max file age and max total size
-                     * Shared by the iOS, Android and Flutter bindings, so the .mx file
+                     * Shared by the iOS, macOS, Android and Flutter bindings, so the .mx file
                        format is byte-identical on every platform
 
-                     This pod contains the core only. iOS projects should depend on the
+                     This pod contains the core only. iOS and macOS projects should depend on the
                      MXLogger pod, which provides the Objective-C API on top of it.
                    DESC
 
@@ -26,6 +26,7 @@ Pod::Spec.new do |s|
   s.author       = { "dongjiayi" => "dongjiayi" }
 
   s.ios.deployment_target = "9.0"
+  s.osx.deployment_target = "10.13"
 
   s.source       = { :git => "https://github.com/coder-dongjiayi/MXLogger.git", :tag => "v#{s.version}" }
   s.source_files = "Core", "Core/*.{h,cpp,hpp}", "Core/md5/*","Core/aes/*.{hpp,cpp}","Core/aes/openssl/*","Core/json/*","Core/flatbuffers/*","Core/sink/*"
@@ -33,7 +34,8 @@ Pod::Spec.new do |s|
    
 
   s.libraries    = "z", "c++"
-  s.framework    = "CoreFoundation","UIKit"
+  s.frameworks   = "CoreFoundation"
+  s.ios.frameworks = "UIKit"
 
   s.pod_target_xcconfig = {
   	 'VALID_ARCHS' => 'x86_64  arm64',

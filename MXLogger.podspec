@@ -2,12 +2,12 @@ Pod::Spec.new do |s|
 # pod lib lint --allow-warnings --verbose --skip-import-validation
   s.name         = "MXLogger"
   s.version      = "2.1.0"
-  s.summary      = "High-performance cross-platform logger built on mmap — the Objective-C API for iOS."
+  s.summary      = "High-performance cross-platform logger built on mmap — the Objective-C API for iOS and macOS."
 
   s.description  = <<-DESC
                      MXLogger is a cross-platform logging library built on mmap memory
                      mapping, with AES-CFB-128 encryption. This pod is the Objective-C API
-                     for iOS; the C/C++ engine lives in MXLoggerCore and is shared with the
+                     for iOS and macOS; the C/C++ engine lives in MXLoggerCore and is shared with the
                      Android and Flutter bindings, so log files are interchangeable across
                      platforms.
 
@@ -16,8 +16,8 @@ Pod::Spec.new do |s|
                        file-write threshold
                      * A name and comma-separated tags on every record, for filtering on read-back
                      * File split policies: yyyy_MM_dd_HH / yyyy_MM_dd / yyyy_ww / yyyy_MM
-                     * Disk budget by max age and max total size, cleaned up automatically
-                       when the app enters background
+                     * Disk budget by max age and max total size; automatic background cleanup
+                       on iOS, explicit cleanup on macOS
                      * Optional AES-CFB-128 encryption with a 16-byte key and IV
                      * Read logs back in-process, or open the .mx files with the desktop
                        mxlogger_analyzer
@@ -30,6 +30,7 @@ Pod::Spec.new do |s|
   s.author       = { "dongjiayi" => "dongjiayi" }
 
   s.ios.deployment_target = "9.0"
+  s.osx.deployment_target = "10.13"
 
   s.source       = { :git => "https://github.com/coder-dongjiayi/MXLogger.git", :tag => "v#{s.version}" }
 
@@ -37,7 +38,8 @@ Pod::Spec.new do |s|
   s.public_header_files = "iOS/MXLogger/MXLogger/include/MXLogger/MXLogger.h"
 
 
-   s.framework    = "CoreFoundation"
+   s.frameworks   = "Foundation", "CoreFoundation"
+   s.ios.frameworks = "UIKit"
 
    s.dependency 'MXLoggerCore', "2.1.0"
    s.libraries    = "z", "c++"

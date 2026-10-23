@@ -7,7 +7,7 @@
 #   scripts/sync_spm_mirror.sh [输出目录]
 #   输出目录省略时: 优先 ../mxlogger-spm (镜像仓库本地 clone)，不存在则 build/spm
 #
-# 输出目录若是 git 仓库，其 .git 会被保留，其余内容以主仓库为准整体覆盖(含删除)。
+# 保留输出目录的 .git、SwiftPM 缓存及本地 IDE 配置，分发源码以主仓库为准整体覆盖(含删除)。
 # 之后在镜像目录里 commit / tag / push 即完成发版。
 #
 # Assemble Core (C++) and iOS/MXLogger (Objective-C) into the standard SwiftPM layout and
@@ -17,8 +17,8 @@
 #   scripts/sync_spm_mirror.sh [output-dir]
 #   Without an argument: ../mxlogger-spm (local clone of the mirror) if present, else build/spm
 #
-# If the output directory is a git repository its .git is kept; everything else is replaced
-# (including deletions) to match the main repository.
+# Keep Git metadata, SwiftPM caches and local IDE settings. Replace generated distribution
+# files (including deletions) to match the main repository.
 #
 set -euo pipefail
 
@@ -57,8 +57,9 @@ cp "$ROOT/spm/README.md"     "$STAGE/README.md"
 cp "$ROOT/LICENSE.TXT"       "$STAGE/LICENSE"
 printf '.build/\n.swiftpm/\n.DS_Store\nxcuserdata/\n' > "$STAGE/.gitignore"
 
-# 整体覆盖输出目录，保留其 .git
-# Replace the output directory wholesale, keeping its .git
-rsync -a --delete --exclude .git "$STAGE/" "$OUT/"
+# 保留 Git、SwiftPM 构建状态及本地 IDE 配置。
+# Preserve Git metadata, SwiftPM build state and local IDE settings.
+rsync -a --delete --exclude .git --exclude .build --exclude .swiftpm \
+    --exclude .idea --exclude .vscode "$STAGE/" "$OUT/"
 
 echo "SwiftPM mirror assembled at: $OUT"
