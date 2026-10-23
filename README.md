@@ -18,6 +18,8 @@
   <a href="https://pub.dev/packages/flutter_mxlogger"><img src="https://img.shields.io/pub/v/flutter_mxlogger?style=flat-square&label=pub&logo=dart" alt="pub" /></a>
 </p>
 
+[English](./README.md) | [简体中文](./README_CN.md) | [日本語](./README_JA.md) | [한국어](./README_KO.md)
+
 MXLogger is a cross-platform logging library built on **mmap** memory mapping, with **AES-CFB-128**
 encryption. The core is written in C/C++ and serializes records with Google **FlatBuffers**; the
 Flutter side calls straight into it through `dart:ffi`, so performance is essentially identical to
@@ -26,8 +28,6 @@ native. Writing 100,000 records (~134 bytes each) takes about **0.13s** on an iP
 Along with the writers comes **mxlogger_analyzer**, an analyzer that imports, decrypts and searches
 the produced `.mx` binaries — as a Chrome extension, a desktop app (macOS/Windows/Linux), or embedded
 straight into your iOS/Android Flutter app as a floating ball.
-
-中文说明请点击[这里](./README_CN.md)。
 
 - [Log analyzer](#log-analyzer)
 - [Install](#install)
@@ -40,7 +40,7 @@ straight into your iOS/Android Flutter app as a floating ball.
 
 ## Structure
 
-<img src="./icon/jiegoutu.jpg" alt="structure" width="640" />
+<img src="./icon/jiegoutu.webp" alt="structure" width="640" />
 
 MXLogger solves log **writing** and log **analysis**. When to upload logs is a business decision —
 MXLogger exposes the log directory (`diskCachePath`), and you upload the files from the native

@@ -18,6 +18,8 @@
   <a href="https://pub.dev/packages/flutter_mxlogger"><img src="https://img.shields.io/pub/v/flutter_mxlogger?style=flat-square&label=pub&logo=dart" alt="pub" /></a>
 </p>
 
+[English](./README.md) | [简体中文](./README_CN.md) | [日本語](./README_JA.md) | [한국어](./README_KO.md)
+
 <p align="center" >
 <img src="./icon/logo_400.png" alt="MXLogger"  title="MXLogger" width="180" />
 </p>
@@ -28,8 +30,6 @@ Flutter。核心代码使用 C/C++ 实现，序列化使用 Google 开源的 **F
 
 配套提供 **mxlogger_analyzer** 日志解析器：导入、解密、检索产出的 `.mx` 二进制日志，支持 Chrome 扩展、
 桌面 app（macOS/Windows/Linux），也能以悬浮球的形式直接嵌进你的 iOS/Android Flutter app 里看端上日志。
-
-For English, click [here](./README.md).
 
 - [日志解析器](#日志解析器)
 - [安装引入](#安装引入)
@@ -42,7 +42,7 @@ For English, click [here](./README.md).
 
 ## 整体结构
 
-<img src="./icon/jiegoutu.jpg" alt="结构图" width="640" />
+<img src="./icon/jiegoutu.webp" alt="结构图" width="640" />
 
 MXLogger 主要解决日志**写入**和日志**分析**两件事。至于日志上报时机应该由业务决定：MXLogger 已经把日志目录
 （`diskCachePath`）暴露出来，由开发调用原生平台的文件上传代码传到自己的服务器，下载后再用
