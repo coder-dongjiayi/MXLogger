@@ -9,6 +9,11 @@
 
 #import <XCTest/XCTest.h>
 #import <MXLogger/MXLogger.h>
+#import <dispatch/dispatch.h>
+#import <TargetConditionals.h>
+#if TARGET_OS_OSX
+#import <AppKit/AppKit.h>
+#endif
 
 /// 与写入端约定的16字节加密参数
 static NSString *const kCryptKey = @"abcdefg123456789";
@@ -20,11 +25,13 @@ static NSInteger ns_counter = 0;
 
 @interface MXLoggerTests : XCTestCase
 @property (nonatomic, copy) NSString *rootDir;
+@property (nonatomic, strong) NSMutableArray<NSString *> *loggerTokens;
 @end
 
 @implementation MXLoggerTests
 
 - (void)setUp {
+    self.loggerTokens = [NSMutableArray array];
     self.rootDir = [NSTemporaryDirectory()
         stringByAppendingPathComponent:
             [NSString stringWithFormat:@"mxlogger_tests_%@", NSUUID.UUID.UUIDString]];
@@ -35,6 +42,9 @@ static NSInteger ns_counter = 0;
 }
 
 - (void)tearDown {
+    for (NSString *token in self.loggerTokens) {
+        [MXLogger destroyWithLoggerToken:token];
+    }
     [NSFileManager.defaultManager removeItemAtPath:self.rootDir error:nil];
 }
 
@@ -56,13 +66,15 @@ static NSInteger ns_counter = 0;
 }
 
 - (MXLogger *)newLogger {
-    return [MXLogger initializeWithNamespace:[self uniqueNs]
+    MXLogger *logger = [MXLogger initializeWithNamespace:[self uniqueNs]
                           diskCacheDirectory:[self newDir:@"d"]
                                storagePolicy:MXStoragePolicyYYYYMMDD
                                     fileName:nil
                                   fileHeader:nil
                                     cryptKey:nil
                                           iv:nil];
+    [self.loggerTokens addObject:logger.loggerToken];
+    return logger;
 }
 
 /// 当前正在写入的日志文件完整路径
@@ -137,21 +149,27 @@ static NSInteger ns_counter = 0;
 }
 
 - (void)testDefaultDirectoryInitializerVariants {
-    // 各简写工厂方法都能正常创建(默认Library目录)
+    // 各简写工厂方法都能正常创建，并使用当前平台的默认目录。
     NSString *ns1 = [self uniqueNs];
     MXLogger *l1 = [MXLogger initializeWithNamespace:ns1];
     XCTAssertNotNil(l1);
-    XCTAssertEqual([l1 debugWithName:@"n" msg:@"m" tag:@"t"], (NSInteger)0);
+    XCTAssertEqual([l1 debugWithName:@"n" msg:@"m" tag:@"t"], (NSInteger)0, @"%@", l1.errorDesc);
+    XCTAssertEqualObjects(l1.diskCachePath,
+                          [[[MXLogger defaultDiskCacheDirectory] stringByAppendingPathComponent:ns1]
+                           stringByAppendingString:@"/"]);
+    [l1 removeAllData];
     [MXLogger destroyWithNamespace:ns1];
 
     NSString *ns2 = [self uniqueNs];
     MXLogger *l2 = [MXLogger initializeWithNamespace:ns2 fileHeader:@"hdr"];
     XCTAssertNotNil(l2);
+    [l2 removeAllData];
     [MXLogger destroyWithNamespace:ns2];
 
     NSString *ns3 = [self uniqueNs];
     MXLogger *l3 = [MXLogger initializeWithNamespace:ns3 cryptKey:kCryptKey iv:kIv fileHeader:nil];
     XCTAssertNotNil(l3);
+    [l3 removeAllData];
     [MXLogger destroyWithNamespace:ns3];
 }
 
@@ -314,13 +332,13 @@ static NSInteger ns_counter = 0;
     NSString *day = [self dateStringWithFormat:@"yyyy-MM-dd"];
     NSString *month = [self dateStringWithFormat:@"yyyy-MM"];
 
-    // 按天(默认) 默认fileName=log
+    // 按天(默认) 默认fileName=mxlog
     MXLogger *daily = [MXLogger initializeWithNamespace:[self uniqueNs]
                                      diskCacheDirectory:[self newDir:@"sp1"]
                                           storagePolicy:MXStoragePolicyYYYYMMDD
                                                fileName:nil fileHeader:nil cryptKey:nil iv:nil];
     [daily infoWithName:nil msg:@"x" tag:nil];
-    NSString *expectedDaily = [NSString stringWithFormat:@"%@_log.mx", day];
+    NSString *expectedDaily = [NSString stringWithFormat:@"%@_mxlog.mx", day];
     XCTAssertEqualObjects([daily logFiles].firstObject[@"name"], expectedDaily);
 
     // 按小时 自定义fileName
@@ -341,7 +359,7 @@ static NSInteger ns_counter = 0;
     [weekly infoWithName:nil msg:@"x" tag:nil];
     NSString *weeklyName = [weekly logFiles].firstObject[@"name"];
     XCTAssertTrue([weeklyName containsString:@"w"]);
-    XCTAssertTrue([weeklyName hasSuffix:@"_log.mx"]);
+    XCTAssertTrue([weeklyName hasSuffix:@"_mxlog.mx"]);
 
     // 按月
     MXLogger *monthly = [MXLogger initializeWithNamespace:[self uniqueNs]
@@ -349,7 +367,7 @@ static NSInteger ns_counter = 0;
                                             storagePolicy:MXStoragePolicyYYYYMM
                                                  fileName:nil fileHeader:nil cryptKey:nil iv:nil];
     [monthly infoWithName:nil msg:@"x" tag:nil];
-    NSString *expectedMonthly = [NSString stringWithFormat:@"%@_log.mx", month];
+    NSString *expectedMonthly = [NSString stringWithFormat:@"%@_mxlog.mx", month];
     XCTAssertEqualObjects([monthly logFiles].firstObject[@"name"], expectedMonthly);
 }
 
@@ -603,6 +621,110 @@ static NSInteger ns_counter = 0;
     XCTAssertEqual([self readBack:a cryptKey:nil iv:nil].count, (NSUInteger)1);
     XCTAssertEqual([self readBack:b cryptKey:nil iv:nil].count, (NSUInteger)2);
 }
+
+- (void)testConcurrentWritesCompleteBeforeDestroy {
+    MXLogger *logger = [self newLogger];
+    dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0);
+    dispatch_apply(4, queue, ^(size_t writer) {
+        for (NSUInteger index = 0; index < 1000; index++) {
+            [logger infoWithName:@"concurrent" msg:@"write before destroy" tag:nil];
+        }
+    });
+    XCTAssertEqual([self readBack:logger cryptKey:nil iv:nil].count, (NSUInteger)4000);
+
+    // dispatch_apply 返回时所有写入均已结束，之后才允许销毁。
+    [MXLogger destroyWithLoggerToken:logger.loggerToken];
+    XCTAssertEqualObjects(logger.diskCachePath, @"");
+    XCTAssertEqual([logger logFiles].count, (NSUInteger)0);
+    XCTAssertEqual([logger infoWithName:nil msg:@"ignored after destroy" tag:nil], (NSInteger)0);
+}
+
+#if TARGET_OS_OSX
+#pragma mark - macOS 目录与手动清理
+
+- (void)testMacOSDefaultDirectoryUsesApplicationSupportAndAppIdentity {
+    NSString *support = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory,
+                                                           NSUserDomainMask, YES).firstObject;
+    NSString *identity = NSBundle.mainBundle.bundleIdentifier;
+    if (identity.length == 0) identity = NSProcessInfo.processInfo.processName;
+    NSString *expected = [[support stringByAppendingPathComponent:identity]
+                          stringByAppendingPathComponent:@"MXLogger"];
+    XCTAssertEqualObjects([MXLogger defaultDiskCacheDirectory], expected);
+}
+
+- (void)testMacOSSettingMaxAgeRequiresManualCleanup {
+    MXLogger *logger = [self newLogger];
+    NSString *old = [self fakeOldFileFor:logger size:100];
+    logger.maxDiskAge = 86400;
+    XCTAssertTrue([self fileExists:old], @"配置过期时长不会自动清理");
+    XCTAssertEqual([logger infoWithName:nil msg:@"write before cleanup" tag:nil], (NSInteger)0);
+    XCTAssertTrue([self fileExists:old], @"写日志不会自动清理");
+    [logger removeExpireData];
+    XCTAssertFalse([self fileExists:old]);
+}
+
+- (void)testMacOSSettingMaxSizeRequiresManualCleanup {
+    MXLogger *logger = [self newLogger];
+    NSString *old = [self fakeOldFileFor:logger size:1024 * 1024];
+    logger.maxDiskSize = 1024;
+    XCTAssertTrue([self fileExists:old], @"配置容量上限不会自动清理");
+    XCTAssertTrue(logger.logSize > logger.maxDiskSize);
+    XCTAssertEqual([logger infoWithName:nil msg:@"write while over limit" tag:nil], (NSInteger)0);
+    XCTAssertTrue([self fileExists:old]);
+    [logger removeExpireData];
+    XCTAssertFalse([self fileExists:old]);
+}
+
+- (void)testMacOSResigningActiveDoesNotCleanFiles {
+    MXLogger *logger = [self newLogger];
+    logger.maxDiskAge = 86400;
+    NSString *old = [self fakeOldFileFor:logger size:100];
+    [NSNotificationCenter.defaultCenter postNotificationName:NSApplicationDidResignActiveNotification
+                                                     object:nil];
+    XCTAssertTrue([self fileExists:old], @"应用失活不会自动清理");
+    XCTAssertEqual([logger infoWithName:nil msg:@"after resigning active" tag:nil], (NSInteger)0);
+}
+
+- (void)testMacOSBackgroundCleanupFlagHasNoEffectOnManualCleanup {
+    MXLogger *logger = [self newLogger];
+    logger.maxDiskAge = 86400;
+    for (NSNumber *enabled in @[@NO, @YES]) {
+        NSString *old = [self fakeOldFileFor:logger size:100];
+        logger.shouldRemoveExpiredDataWhenEnterBackground = enabled.boolValue;
+        [NSNotificationCenter.defaultCenter postNotificationName:NSApplicationDidResignActiveNotification
+                                                         object:nil];
+        XCTAssertTrue([self fileExists:old], @"macOS 忽略后台自动清理开关");
+        [logger removeExpireData];
+        XCTAssertFalse([self fileExists:old], @"手动清理不受后台开关影响");
+    }
+}
+
+- (void)testMacOSDestroyedInstanceCannotDestroyReplacement {
+    NSString *ns = [self uniqueNs];
+    NSString *dir = [self newDir:@"replacement"];
+    MXLogger *oldLogger = [[MXLogger alloc] initWithNamespace:ns diskCacheDirectory:dir fileHeader:nil];
+    oldLogger.maxDiskAge = 86400;
+    NSString *token = oldLogger.loggerToken;
+    NSString *file = [self currentLogFile:oldLogger];
+    NSString *old = [self fakeOldFileFor:oldLogger size:100];
+    [MXLogger destroyWithLoggerToken:token];
+    XCTAssertEqual([oldLogger infoWithName:nil msg:@"ignored after destroy" tag:nil], (NSInteger)0);
+    XCTAssertEqualObjects(oldLogger.diskCachePath, @"");
+
+    MXLogger *replacement = [[MXLogger alloc] initWithNamespace:ns diskCacheDirectory:dir fileHeader:nil];
+    [self.loggerTokens addObject:replacement.loggerToken];
+    __weak MXLogger *weakOldLogger = oldLogger;
+    oldLogger = nil;
+    XCTAssertNil(weakOldLogger, @"已销毁的实例应正常释放");
+    XCTAssertEqual([MXLogger valueForLoggerToken:token], replacement);
+
+    XCTAssertTrue([self fileExists:old]);
+    XCTAssertEqual([replacement infoWithName:nil msg:@"replacement survives" tag:nil], (NSInteger)0);
+    XCTAssertEqualObjects([MXLogger selectWithDiskCacheFilePath:file cryptKey:nil iv:nil].firstObject[@"msg"],
+                          @"replacement survives");
+}
+
+#endif
 
 #pragma mark - 性能
 

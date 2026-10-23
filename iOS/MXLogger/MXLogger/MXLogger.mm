@@ -6,6 +6,10 @@
 //
 
 #import "include/MXLogger/MXLogger.h"
+#import <TargetConditionals.h>
+#if !TARGET_OS_OSX
+#import <UIKit/UIKit.h>
+#endif
 #include <MXLoggerCore/mxlogger.hpp>
 #include <MXLoggerCore/mxlogger_util.hpp>
 
@@ -172,9 +176,11 @@ static NSString * _defaultDiskCacheDirectory;
         
       
         
+        if (_logger == nullptr) return nil;
         self.loggerToken = [NSString stringWithUTF8String:_logger->logger_token()];
         
 
+#if !TARGET_OS_OSX
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationDidEnterBackground:)
                                                      name:UIApplicationDidEnterBackgroundNotification
@@ -184,6 +190,7 @@ static NSString * _defaultDiskCacheDirectory;
                                                  selector:@selector(applicationDidEnterrForeground:)
                                                      name:UIApplicationWillEnterForegroundNotification
                                                    object:nil];
+#endif
    
         _shouldRemoveExpiredDataWhenEnterBackground = YES;
       
@@ -210,15 +217,14 @@ static NSString * _defaultDiskCacheDirectory;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    /// 实例只会在destroyWithLoggerToken移除字典强引用后走到这里，
-    /// 显式destroy的路径中C++对象已被删除，此调用查不到key时是安全的无操作
-    /// An instance only deallocs after destroyWithLoggerToken drops the dictionary's
-    /// strong reference; when the C++ object was already destroyed there, this call
-    /// finds no key and is a safe no-op
-    mx_logger::delete_namespace(_nameSpace.UTF8String, _directory.UTF8String);
-
+    // 显式 destroy 后同一 namespace 可能已重建，旧实例不能再次删除新的底层对象。
+    // A destroyed instance must not delete a replacement created for the same namespace.
+    if (_logger != nullptr) {
+        mx_logger::delete_namespace(_nameSpace.UTF8String, _directory.UTF8String);
+    }
 }
 
+#if !TARGET_OS_OSX
 -(void)applicationDidEnterrForeground:(NSNotification *)notification{
 
 }
@@ -242,6 +248,7 @@ static NSString * _defaultDiskCacheDirectory;
     [application endBackgroundTask:bgTask];
     bgTask = UIBackgroundTaskInvalid;
 }
+#endif
 
 
 
@@ -405,16 +412,29 @@ static NSString * _defaultDiskCacheDirectory;
 }
 
 
-// 默认缓存目录 library
+// 系统目录 API 会自动返回沙盒容器内的对应路径。
+// System directory APIs resolve inside the app container when sandboxed.
 + (nullable NSString *)userCacheDirectory {
-    
+#if TARGET_OS_OSX
+    NSString *supportPath = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory,
+                                                               NSUserDomainMask, YES).firstObject;
+    NSString *identifier = NSBundle.mainBundle.bundleIdentifier;
+    if (identifier.length == 0) identifier = NSProcessInfo.processInfo.processName;
+    if (identifier.length == 0) identifier = @"com.mxlogger";
+    return [supportPath stringByAppendingPathComponent:identifier];
+#else
     NSString *libraryPath = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES).firstObject;
     return libraryPath;
+#endif
 }
 
 +(NSString*)defaultDiskCacheDirectory{
     if(!_defaultDiskCacheDirectory){
+#if TARGET_OS_OSX
+        _defaultDiskCacheDirectory = [[self userCacheDirectory] stringByAppendingPathComponent:@"MXLogger"];
+#else
         _defaultDiskCacheDirectory = [[self userCacheDirectory] stringByAppendingPathComponent:@"com.mxlog.LoggerCache"];
+#endif
     }
     return _defaultDiskCacheDirectory;
 }
