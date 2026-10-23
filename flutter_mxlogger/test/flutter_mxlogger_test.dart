@@ -718,7 +718,7 @@ void main() {
 
   // ---------------------------------------------------------------
   group('App生命周期联动 (WidgetsBindingObserver)', () {
-    test('进入后台时自动清理过期文件(默认开启)', () {
+    test('移动端进入后台自动清理，macOS 必须手动清理', () {
       final logger =
           MXLogger(nameSpace: uniqueNs(), directory: newDir('bg').path);
       logger.info('current');
@@ -729,7 +729,10 @@ void main() {
 
       logger.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      expect(old.existsSync(), isFalse, reason: 'paused时应触发removeExpireData');
+      expect(old.existsSync(), Platform.isMacOS,
+          reason: 'macOS 不应因 paused 自动清理，移动端保持自动清理');
+      logger.removeExpireData();
+      expect(old.existsSync(), isFalse, reason: '显式清理应删除过期文件');
     });
 
     test('shouldRemoveExpiredDataWhenEnterBackground(false) 后不清理', () {

@@ -8,7 +8,7 @@ MXLogger は mmap メモリマッピングを基盤とし、AES-CFB-128 暗号�
 
 - **バージョン**: 2.2.0
 - **要件**: Dart SDK `>=2.19.0 <4.0.0`、Flutter `>=3.7.0`
-- **対応プラットフォーム**: iOS（>= 9.0）、Android（minSdk 21）
+- **対応プラットフォーム**: iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）
 
 ## 目次
 
@@ -47,16 +47,18 @@ dependencies:
 
 ネイティブ SDK の依存関係は自動的に取り込まれます。
 
-- iOS（CocoaPods、既定）: `MXLogger 2.2.0` → `MXLoggerCore 2.2.0` に依存
-- iOS（Swift Package Manager）: ホストアプリで Flutter の SwiftPM サポートを有効にしている場合（`flutter config --enable-swift-package-manager`）、プラグインは `ios/flutter_mxlogger/Package.swift` 経由で統合され、代わりに [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0` に依存します
+- iOS / macOS（CocoaPods）: `MXLogger 2.2.0` → `MXLoggerCore 2.2.0` に依存
+- iOS / macOS（Swift Package Manager）: ホストアプリで Flutter の SwiftPM サポートを有効にしている場合（`flutter config --enable-swift-package-manager`）、プラグインは `darwin/flutter_mxlogger/Package.swift` 経由で統合され、代わりに [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0` に依存します
 - Android: Gradle が `io.github.coder-dongjiayi:mxlogger:2.2.0` に依存
 
-### iOS の release アーカイブ：FFI シンボルの保持
+iOS / macOS は `darwin/` を共有します（Flutter 3.7+）。macOS の既定ディレクトリは `<Application Support>/<bundle-id>/MXLogger/<nameSpace>` です。bundle ID がなければプロセス名を使います。macOS では `removeExpireData()` を明示的に呼び出してください。
+
+### Apple の release アーカイブ：FFI シンボルの保持
 
 ホストアプリの **Runner** ターゲットで、Release と Profile の
 **Build Settings > Strip Style** を **Non-Global Symbols**
 （`STRIP_STYLE = non-global`）に設定してください。サンプルでは、両方の構成が使う
-`example/ios/Flutter/Release.xcconfig` に設定しています。ほかのホストアプリでは、
+`example/ios/Flutter/Release.xcconfig` と `example/macos/Runner/Configs/Release.xcconfig` に設定しています。ほかのホストアプリでは、
 対応する release 構成に設定を追加するか、Runner ターゲットで直接設定してください。
 
 SwiftPM で静的リンクする場合、`DynamicLibrary.process()` はアプリの実行ファイルから
@@ -151,7 +153,7 @@ static Future<MXLogger> initialize({
 | パラメータ | 説明 |
 |---|---|
 | `nameSpace` | ログファイルの名前空間。一意性のためドメインの逆順表記を推奨。最終的なディレクトリは `directory/nameSpace` |
-| `directory` | カスタムディレクトリ。省略時は MethodChannel でプラットフォーム既定値を取得: iOS `<Library>/com.mxlog.LoggerCache`、Android `<filesDir>/com.mxlog.LoggerCache` |
+| `directory` | カスタムディレクトリ。省略時は MethodChannel でプラットフォーム既定値を取得: iOS `<Library>/com.mxlog.LoggerCache`、Android `<filesDir>/com.mxlog.LoggerCache`, macOS `<Application Support>/<bundle-id>/MXLogger` |
 | `consoleEnable` | コンソール出力の有無。debug ビルドでのみ有効 |
 | `storagePolicy` | ファイル分割ポリシー。2.2 を参照 |
 | `fileName` | カスタムファイル名。既定値は `mxlog` |
@@ -258,7 +260,7 @@ void removeAll();             // すべてのログファイルを削除
 
 `removeExpireData()` は 2 段階でクリーンアップします。まず最終更新時刻が `maxDiskAge` より古いファイルを削除し、それでも合計サイズが `maxDiskSize` を超えていれば、古いファイルから順に削除を続けます。**現在書き込み中のファイルは決して削除されません。**
 
-アプリがバックグラウンドに移行したとき自動的に一度呼ばれます。`shouldRemoveExpiredDataWhenEnterBackground(false)` で無効化できます。
+iOS / Android ではバックグラウンド移行時に自動実行され、`shouldRemoveExpiredDataWhenEnterBackground(false)` で無効化できます。macOS ではこの設定は無効です。`removeExpireData()` を明示的に呼び出してください。
 
 ## 2.6 状態
 

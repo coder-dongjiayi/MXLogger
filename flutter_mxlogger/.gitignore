@@ -11,5 +11,6 @@ build/
 test/native/libmxlogger_test.dylib
 test/native/build_tmp/
 # SwiftPM 本地构建产物 / SwiftPM local build output
-ios/flutter_mxlogger/.build/
-ios/flutter_mxlogger/.swiftpm/
+darwin/flutter_mxlogger/.build/
+darwin/flutter_mxlogger/.swiftpm/
+darwin/FlutterFramework/

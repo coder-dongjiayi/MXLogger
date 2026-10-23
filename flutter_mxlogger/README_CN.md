@@ -8,7 +8,7 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
 
 - **当前版本**：2.2.0
 - **环境要求**：Dart SDK `>=2.19.0 <4.0.0`、Flutter `>=3.7.0`
-- **平台支持**：iOS（>= 9.0）、Android（minSdk 21）
+- **平台支持**：iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）
 
 ## 目录
 
@@ -48,16 +48,19 @@ dependencies:
 
 原生 SDK 依赖会自动引入：
 
-- iOS（CocoaPods，默认）：依赖 `MXLogger 2.2.0` → `MXLoggerCore 2.2.0`
-- iOS（Swift Package Manager）：宿主 App 开启了 Flutter 的 SwiftPM 支持（`flutter config --enable-swift-package-manager`）时，插件通过 `ios/flutter_mxlogger/Package.swift` 接入，改为依赖 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0`
+- iOS / macOS（CocoaPods）：依赖 `MXLogger 2.2.0` → `MXLoggerCore 2.2.0`
+- iOS / macOS（Swift Package Manager）：宿主 App 开启了 Flutter 的 SwiftPM 支持（`flutter config --enable-swift-package-manager`）时，插件通过 `darwin/flutter_mxlogger/Package.swift` 接入，改为依赖 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0`
 - Android：Gradle 依赖 `io.github.coder-dongjiayi:mxlogger:2.2.0`
 
-### iOS release 归档：保留 FFI 符号
+iOS / macOS 共用 `darwin/` 实现（`sharedDarwinSource`，Flutter 3.7+）。Flutter 3.44+ 默认使用 SwiftPM，CocoaPods 仍受支持。macOS 默认目录为 `<Application Support>/<bundle-id>/MXLogger/<nameSpace>`，没有 bundle ID 时使用进程名；沙盒应用的 Application Support 位于容器内。macOS 清理需显式调用 `removeExpireData()`。
+
+### Apple release 归档：保留 FFI 符号
 
 在宿主应用的 **Runner** target 中，将 Release 和 Profile 的
 **Build Settings > Strip Style** 设置为 **Non-Global Symbols**
 （`STRIP_STYLE = non-global`）。示例已在 `example/ios/Flutter/Release.xcconfig`
-中设置，两个构建配置均使用该文件。其他宿主应用需在对应的 release 配置中添加该设置，
+及 `example/macos/Runner/Configs/Release.xcconfig`
+中设置，Release / Profile 均使用对应文件。其他宿主应用需在对应的 release 配置中添加该设置，
 或直接在 Runner target 上设置。
 
 使用 SwiftPM 静态链接时，`DynamicLibrary.process()` 会从应用可执行文件中查找
@@ -152,7 +155,7 @@ static Future<MXLogger> initialize({
 | 参数 | 说明 |
 |---|---|
 | `nameSpace` | 日志命名空间，建议用域名反转保证唯一。最终目录为 `directory/nameSpace` |
-| `directory` | 自定义目录。不传则通过 MethodChannel 取平台默认路径：iOS `<Library>/com.mxlog.LoggerCache`、Android `<filesDir>/com.mxlog.LoggerCache` |
+| `directory` | 自定义目录。不传则通过 MethodChannel 取平台默认路径：iOS `<Library>/com.mxlog.LoggerCache`、Android `<filesDir>/com.mxlog.LoggerCache`、macOS `<Application Support>/<bundle-id>/MXLogger` |
 | `consoleEnable` | 是否开启控制台打印，仅 debug 构建有效 |
 | `storagePolicy` | 文件切分策略，见 2.2 |
 | `fileName` | 自定义文件名，默认 `mxlog` |
@@ -259,7 +262,7 @@ void removeAll();             // 删除所有日志文件
 
 `removeExpireData()` 的清理顺序：先按最后修改时间删掉超过 `maxDiskAge` 的文件；若总大小仍超过 `maxDiskSize`，再从最旧的开始继续删。**当前正在写入的文件永远不会被删除。**
 
-App 进入后台时会自动调用一次，可通过 `shouldRemoveExpiredDataWhenEnterBackground(false)` 关闭。
+iOS / Android App 进入后台时会自动调用，可通过 `shouldRemoveExpiredDataWhenEnterBackground(false)` 关闭。macOS 必须手动调用 `removeExpireData()`，后台清理开关在 macOS 上不生效。
 
 ## 2.6 状态查询
 

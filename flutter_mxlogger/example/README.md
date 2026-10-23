@@ -1,16 +1,43 @@
-# example
+# MXLogger Flutter example
 
-A new Flutter project.
+The example uses the plugin from the parent directory. The plugin requires
+Flutter 3.7+, while this example's dependencies require Dart 3.8+.
 
-## Getting Started
+On macOS, run from this directory:
 
-This project is a starting point for a Flutter application.
+```bash
+flutter pub get
+flutter run -d macos
+```
 
-A few resources to get you started if this is your first Flutter project:
+The native `MXLogger` / `MXLoggerCore` pods or `mxlogger-spm` package must be
+available at version 2.2.0. For CocoaPods development before publication, set
+`MXLOGGER_LOCAL_NATIVE=1` to use the native sources from this checkout. When
+Flutter's SwiftPM integration is enabled, its package dependency must instead
+be resolved to a local `mxlogger-spm` checkout for unpublished builds.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+The macOS tests exercise the registered MethodChannel, default and custom
+directories, encrypted FFI writes and reads, logger tokens, reopening, explicit
+cleanup, and writes from secondary isolates:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter test integration_test/macos_logger_test.dart -d macos
+```
+
+Flutter integration tests run in Debug. Verify Release AOT and FFI symbol
+retention with the separate entrypoint:
+
+```bash
+flutter build macos --release -t integration_test/macos_release_smoke.dart
+build/macos/Build/Products/Release/example.app/Contents/MacOS/example
+```
+
+The Release check prints `MXLOGGER_MACOS_RELEASE_SMOKE_OK` and exits with code 0
+after an encrypted write/read round trip. Both checks remove their test logs.
+Use a deployment target supported by your installed Xcode SDK for the Runner
+and its dependencies; the plugin's declared macOS minimum is 10.14.
+
+On macOS, `shouldRemoveExpiredDataWhenEnterBackground` has no effect. Call
+`removeExpireData()` explicitly when your app wants to enforce its age and size
+limits. Default logs are under `Application Support/<bundle-id>/MXLogger` (inside
+the app container when sandboxing is enabled).

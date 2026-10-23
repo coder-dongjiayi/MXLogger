@@ -1,2 +1,5 @@
 #include "../../Flutter/Flutter-Release.xcconfig"
 #include "Warnings.xcconfig"
+
+// Keep C export names for DynamicLibrary.process() with static SwiftPM linking.
+STRIP_STYLE = non-global

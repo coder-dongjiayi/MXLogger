@@ -106,7 +106,7 @@ pod 'MXLoggerCore', :path => '/path/to/MXLogger'
 SwiftPM 使用 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm.git)，
 `spm/Package.swift` 已声明 iOS 12+、macOS 10.13+。两端共用原生 API；macOS 需显式调用
 `removeExpireData` 清理，`shouldRemoveExpiredDataWhenEnterBackground` 不生效。
-Flutter macOS 插件将在后续阶段接入，目前尚未启用。
+Flutter macOS 已通过共享的 `darwin/` 插件接入（Flutter 3.7+、macOS 10.14+），使用同一套 Dart API。
 
 ## Android
 
@@ -237,7 +237,7 @@ macOS 写入新增返回码 `-4`（文件锁失败或超过 32 位有效长度�
 
 | API | 说明 |
 | --- | --- |
-| `+ initializeWithNamespace:` | 默认目录 `Library/com.mxlog.LoggerCache` |
+| `+ initializeWithNamespace:` | iOS 默认目录 `Library/com.mxlog.LoggerCache`；macOS 为 `Application Support/<bundle-id>/MXLogger` |
 | `+ initializeWithNamespace:fileHeader:` | 指定文件头信息 |
 | `+ initializeWithNamespace:cryptKey:iv:fileHeader:` | 加密 |
 | `+ initializeWithNamespace:storagePolicy:fileName:fileHeader:` | 指定存储策略和文件名 |
@@ -263,7 +263,7 @@ macOS 写入新增返回码 `-4`（文件锁失败或超过 32 位有效长度�
 | `level` | `NSInteger` | 写入文件的最低等级，0 debug … 4 fatal |
 | `maxDiskAge` | `NSUInteger` | 最大存储时长（秒），0 不限制 |
 | `maxDiskSize` | `NSUInteger` | 最大总字节数，0 不限制 |
-| `shouldRemoveExpiredDataWhenEnterBackground` | `BOOL` | 进入后台是否自动清理，默认 `YES` |
+| `shouldRemoveExpiredDataWhenEnterBackground` | `BOOL` | iOS 进入后台是否自动清理，默认 `YES`；macOS 不生效 |
 | `diskCachePath` | `NSString`（只读） | 日志目录 |
 | `logSize` | `NSUInteger`（只读） | 当前占用字节数 |
 | `loggerToken` | `NSString`（只读） | nameSpace + 目录的 md5 |
@@ -406,7 +406,7 @@ Android Java 仍使用以上大写枚举名。Flutter / Dart 使用 `yyyyMMdd`�
 | `void setLevel(int lvl)` | 写入文件的最低等级，0 debug … 4 fatal |
 | `void setMaxDiskAge(int age)` | 最大存储时长（秒），0 不限制 |
 | `void setMaxDiskSize(int size)` | 最大总字节数，0 不限制 |
-| `void shouldRemoveExpiredDataWhenEnterBackground(bool should)` | 进入后台是否自动清理，默认 `true` |
+| `void shouldRemoveExpiredDataWhenEnterBackground(bool should)` | 移动端进入后台是否自动清理，默认 `true`；macOS 需手动清理 |
 | `void removeExpireData()` | 先删过期文件，超出大小限制再从最旧的继续删 |
 | `void removeAll()` | 删除全部日志文件 |
 | `void removeBeforeAllData()` | 删除除当前正在写入外的所有文件 |

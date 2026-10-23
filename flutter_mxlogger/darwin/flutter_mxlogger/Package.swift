@@ -1,8 +1,8 @@
 // swift-tools-version: 5.9
-// flutter_mxlogger 插件的 SwiftPM 清单(iOS)。宿主 App 开启 Flutter 的 Swift Package Manager 支持
+// flutter_mxlogger 插件的 SwiftPM 清单(iOS / macOS)。宿主 App 开启 Flutter 的 Swift Package Manager 支持
 // (flutter config --enable-swift-package-manager)时由 flutter_tools 自动接入；否则仍走 podspec。
 // 源码与 CocoaPods 共用 Sources/flutter_mxlogger 目录。
-// SwiftPM manifest for the flutter_mxlogger plugin (iOS). Picked up by flutter_tools when the host
+// SwiftPM manifest for the flutter_mxlogger plugin (iOS / macOS). Picked up by flutter_tools when the host
 // app has Flutter's Swift Package Manager support enabled; the podspec is used otherwise.
 // Sources under Sources/flutter_mxlogger are shared with CocoaPods.
 
@@ -12,6 +12,7 @@ let package = Package(
     name: "flutter_mxlogger",
     platforms: [
         .iOS("13.0"),
+        .macOS(.v10_14),
     ],
     products: [
         .library(name: "flutter-mxlogger", targets: ["flutter_mxlogger"]),
@@ -34,5 +35,6 @@ let package = Package(
                 .headerSearchPath("include/flutter_mxlogger"),
             ]
         ),
-    ]
+    ],
+    cxxLanguageStandard: .gnucxx17
 )

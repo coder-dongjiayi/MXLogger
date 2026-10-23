@@ -8,7 +8,7 @@ See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) 
 
 - **Version**: 2.2.0
 - **Requirements**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
-- **Platforms**: iOS (>= 9.0), Android (minSdk 21)
+- **Platforms**: iOS (>= 9.0), macOS (>= 10.14), Android (minSdk 21)
 
 ## Contents
 
@@ -47,16 +47,18 @@ dependencies:
 
 The native SDK dependencies are pulled in automatically:
 
-- iOS (CocoaPods, default): depends on `MXLogger 2.2.0` → `MXLoggerCore 2.2.0`
-- iOS (Swift Package Manager): when the host app has enabled Flutter's SwiftPM support (`flutter config --enable-swift-package-manager`), the plugin is integrated via `ios/flutter_mxlogger/Package.swift` and depends on [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0` instead
+- iOS / macOS (CocoaPods): depends on `MXLogger 2.2.0` → `MXLoggerCore 2.2.0`
+- iOS / macOS (Swift Package Manager): when the host app has enabled Flutter's SwiftPM support (`flutter config --enable-swift-package-manager`), the plugin is integrated via `darwin/flutter_mxlogger/Package.swift` and depends on [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0` instead
 - Android: Gradle depends on `io.github.coder-dongjiayi:mxlogger:2.2.0`
 
+iOS and macOS share the implementation in `darwin/` (`sharedDarwinSource`, Flutter 3.7+). SwiftPM is the default with Flutter 3.44+; CocoaPods remains supported. On macOS the default directory is `<Application Support>/<bundle-id>/MXLogger/<nameSpace>`; the process name replaces a missing bundle ID. In a sandboxed app, Application Support is inside its container. macOS cleanup is manual via `removeExpireData()`.
 
-### iOS release archives: preserve FFI symbols
+### Apple release archives: preserve FFI symbols
 
 For the host **Runner** target, set **Build Settings > Strip Style** to
 **Non-Global Symbols** for Release and Profile (`STRIP_STYLE = non-global`).
-The example applies this in `example/ios/Flutter/Release.xcconfig`, which both
+The example applies this in `example/ios/Flutter/Release.xcconfig` and
+`example/macos/Runner/Configs/Release.xcconfig`, which both
 configurations use. In another host app, add the setting to its corresponding
 release configuration or set it on the Runner target directly.
 
@@ -151,7 +153,7 @@ static Future<MXLogger> initialize({
 | Parameter | Description |
 |---|---|
 | `nameSpace` | Namespace of the log files; a reverse-domain name is recommended for uniqueness. The final directory is `directory/nameSpace` |
-| `directory` | Custom directory. When omitted, the platform default is resolved over the MethodChannel: iOS `<Library>/com.mxlog.LoggerCache`, Android `<filesDir>/com.mxlog.LoggerCache` |
+| `directory` | Custom directory. When omitted, the platform default is resolved over the MethodChannel: iOS `<Library>/com.mxlog.LoggerCache`, Android `<filesDir>/com.mxlog.LoggerCache`, macOS `<Application Support>/<bundle-id>/MXLogger` |
 | `consoleEnable` | Whether to print to the console; effective in debug builds only |
 | `storagePolicy` | File split policy, see 2.2 |
 | `fileName` | Custom file name, defaults to `mxlog` |
@@ -258,7 +260,7 @@ void removeAll();             // delete all log files
 
 `removeExpireData()` cleans up in two steps: first it deletes files whose last-modified time is older than `maxDiskAge`; if the total size still exceeds `maxDiskSize`, it keeps deleting from the oldest file onward. **The file currently being written is never deleted.**
 
-It is called automatically once when the app enters background; turn that off with `shouldRemoveExpiredDataWhenEnterBackground(false)`.
+On iOS and Android it is called automatically when the app enters background; turn that off with `shouldRemoveExpiredDataWhenEnterBackground(false)`. On macOS, call `removeExpireData()` explicitly; the background-cleanup flag has no effect.
 
 ## 2.6 State
 

@@ -166,9 +166,12 @@ class MXLogger with WidgetsBindingObserver {
 
   /// 监听App生命周期：进入后台时按需清理过期日志文件
   /// Observe the app lifecycle: remove expired log files when entering background (if enabled)
+  /// macOS 由调用方手动清理，不响应生命周期事件。
+  /// macOS cleanup is explicit and does not follow app lifecycle events.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused &&
+    if (!Platform.isMacOS &&
+        state == AppLifecycleState.paused &&
         _shouldRemoveExpiredDataWhenEnterBackground == true) {
       removeExpireData();
     }
@@ -279,6 +282,8 @@ class MXLogger with WidgetsBindingObserver {
   /// directory: 自定义日志文件路径，不填时使用默认路径：
   ///            ios: /Library/com.mxlog.LoggerCache/nameSpace
   ///            android: /files/com.mxlog.LoggerCache/nameSpace
+  ///            macos: Application Support/<bundle-id>/MXLogger/nameSpace
+  ///                   无 bundle-id 时使用进程名 / uses the process name if no bundle ID exists
   ///            custom log directory; defaults to the paths above when omitted
   /// consoleEnable: 是否开启控制台打印 / whether to enable console printing
   /// storagePolicy: 日志文件存储策略 / log file storage policy
@@ -515,6 +520,8 @@ class MXLogger with WidgetsBindingObserver {
 
   /// 程序进入后台的时候是否去清理过期文件 默认为true
   /// Whether to remove expired log files when the app enters background, defaults to true
+  /// macOS 上不生效，请显式调用 [removeExpireData]。
+  /// Has no effect on macOS; call [removeExpireData] explicitly.
   void shouldRemoveExpiredDataWhenEnterBackground(bool should) {
     _shouldRemoveExpiredDataWhenEnterBackground = should;
   }

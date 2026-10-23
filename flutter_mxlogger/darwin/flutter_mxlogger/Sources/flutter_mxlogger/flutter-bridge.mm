@@ -4,13 +4,13 @@
 //
 //  Created by 董家祎 on 2022/3/11.
 //
-//  Flutter FFI桥接层(iOS): 以C符号(flutter_mxlogger_前缀)导出OC版MXLogger的能力，
+//  Flutter FFI桥接层(iOS / macOS): 以C符号(flutter_mxlogger_前缀)导出OC版MXLogger的能力，
 //  供Dart侧通过dart:ffi的lookup绑定调用，与Android端flutter-bridge.cpp的导出符号对应
-//  (iOS额外多导出一个select_logfiles占位符号)
-//  Flutter FFI bridge (iOS): exports the Objective-C MXLogger as C symbols (prefixed
+//  (Apple 平台额外多导出一个select_logfiles占位符号)
+//  Flutter FFI bridge (iOS / macOS): exports the Objective-C MXLogger as C symbols (prefixed
 //  with flutter_mxlogger_) so the Dart side can bind them via dart:ffi lookup;
 //  symbols correspond to the Android flutter-bridge.cpp exports
-//  (iOS additionally exports a select_logfiles stub)
+//  (Apple platforms additionally export a select_logfiles stub)
 //
 
 #include <MXLogger/MXLogger.h>

@@ -1,5 +1,5 @@
 name: flutter_mxlogger
-description: Cross-platform logging library for iOS and Android, built on mmap with AES-CFB-128 encryption. The C/C++ core is called through dart:ffi, so performance is close to native.
+description: Cross-platform logging library for iOS, macOS and Android, built on mmap with AES-CFB-128 encryption. The C/C++ core is called through dart:ffi, so performance is close to native.
 version: 2.2.0
 homepage: https://github.com/coder-dongjiayi/MXLogger
 repository: https://github.com/coder-dongjiayi/MXLogger
@@ -34,6 +34,10 @@ flutter:
         pluginClass: FlutterMxloggerPlugin
       ios:
         pluginClass: FlutterMxloggerPlugin
+        sharedDarwinSource: true
+      macos:
+        pluginClass: FlutterMxloggerPlugin
+        sharedDarwinSource: true
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

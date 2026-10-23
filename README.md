@@ -109,8 +109,7 @@ pod 'MXLoggerCore', :path => '/path/to/MXLogger'
 SwiftPM uses [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm.git);
 the manifest in `spm/Package.swift` declares iOS 12+ and macOS 10.13+.
 Both platforms use the same native API. On macOS, call `removeExpireData` explicitly;
-`shouldRemoveExpiredDataWhenEnterBackground` has no effect. Flutter macOS integration
-is a separate step and is not enabled yet.
+`shouldRemoveExpiredDataWhenEnterBackground` has no effect. Flutter macOS uses the same Dart API through the shared `darwin/` plugin (Flutter 3.7+, macOS 10.14+).
 
 ## Android
 
@@ -246,7 +245,7 @@ committed-length limit; inspect `errorDesc` for details.
 
 | API | Notes |
 | --- | --- |
-| `+ initializeWithNamespace:` | default directory `Library/com.mxlog.LoggerCache` |
+| `+ initializeWithNamespace:` | iOS default: `Library/com.mxlog.LoggerCache`; macOS: `Application Support/<bundle-id>/MXLogger` |
 | `+ initializeWithNamespace:fileHeader:` | with a file header |
 | `+ initializeWithNamespace:cryptKey:iv:fileHeader:` | encrypted |
 | `+ initializeWithNamespace:storagePolicy:fileName:fileHeader:` | policy + file name |
@@ -272,7 +271,7 @@ committed-length limit; inspect `errorDesc` for details.
 | `level` | `NSInteger` | minimum level written to disk, 0 debug … 4 fatal |
 | `maxDiskAge` | `NSUInteger` | max age in seconds, 0 = unlimited |
 | `maxDiskSize` | `NSUInteger` | max total size in bytes, 0 = unlimited |
-| `shouldRemoveExpiredDataWhenEnterBackground` | `BOOL` | auto cleanup on entering background, `YES` by default |
+| `shouldRemoveExpiredDataWhenEnterBackground` | `BOOL` | iOS background cleanup, `YES` by default; no effect on macOS |
 | `diskCachePath` | `NSString` (readonly) | log directory |
 | `logSize` | `NSUInteger` (readonly) | bytes currently on disk |
 | `loggerToken` | `NSString` (readonly) | md5 of nameSpace + directory |
@@ -416,7 +415,7 @@ platform default directory during `initialize`.
 | `void setLevel(int lvl)` | minimum level written to disk, 0 debug … 4 fatal |
 | `void setMaxDiskAge(int age)` | max age in seconds, 0 = unlimited |
 | `void setMaxDiskSize(int size)` | max total size in bytes, 0 = unlimited |
-| `void shouldRemoveExpiredDataWhenEnterBackground(bool should)` | auto cleanup on entering background, `true` by default |
+| `void shouldRemoveExpiredDataWhenEnterBackground(bool should)` | auto cleanup on entering background on mobile, `true` by default; macOS requires explicit cleanup |
 | `void removeExpireData()` | delete expired files, then the oldest ones while over the size limit |
 | `void removeAll()` | delete every log file |
 | `void removeBeforeAllData()` | delete every file except the one being written |
@@ -563,8 +562,8 @@ MXLogger roadmap.
 - In a modularized app, pass the **loggerToken** to sub-modules and write through the class methods —
   no need to pass the logger object around.
 - `maxDiskAge` / `maxDiskSize` are not enforced on every write: the cleanup runs in
-  `removeExpireData` (automatic on entering background on iOS and Flutter; call it yourself on
-  Android).
+  `removeExpireData` (automatic on entering background on iOS and Flutter mobile; call it yourself on
+  native Android and macOS).
 
 
 # License

@@ -33,8 +33,12 @@ extern "C" void flutter_mxlogger_ffi_anchor(void);
       NSString * directory = @"";
 
       if ([arguments[@"directory"] isKindOfClass:[NSNull class]]) {
+#if TARGET_OS_OSX
+          directory = [MXLogger defaultDiskCacheDirectory];
+#else
           NSString *libraryPath = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES).firstObject;
           directory =  [libraryPath stringByAppendingPathComponent:@"com.mxlog.LoggerCache"];
+#endif
           
       }else{
           directory = arguments[@"directory"];
