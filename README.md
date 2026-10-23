@@ -92,7 +92,7 @@ Full documentation for the analyzer: [mxlogger_analyzer_lib/README.md](./mxlogge
 ## iOS
 
 ```ruby
-pod 'MXLogger', '~> 2.0.0'
+pod 'MXLogger', '~> 2.2.0'
 ```
 
 ## Native macOS
@@ -115,14 +115,14 @@ is a separate step and is not enabled yet.
 ## Android
 
 ```groovy
-implementation 'io.github.coder-dongjiayi:mxlogger:latest.release'
+implementation 'io.github.coder-dongjiayi:mxlogger:2.2.0'
 ```
 
 ## Flutter
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.0.0
+  flutter_mxlogger: ^2.2.0
   mxlogger_analyzer_lib: ^2.0.0   # optional: the in-app log viewer
 ```
 

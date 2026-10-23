@@ -70,7 +70,7 @@ dependencies {
 //ext {
 //    PUBLISH_ARTIFACT_ID = "mxlogger"
 //    PUBLISH_GROUP_ID = 'io.github.coder-dongjiayi'
-//    PUBLISH_VERSION = '2.0.0'
+//    PUBLISH_VERSION = '2.2.0'
 //}
 // ===== Javadoc 产物：Maven Central 要求正式版必须带 -javadoc.jar =====
 tasks.register('javadocRelease', Javadoc) {

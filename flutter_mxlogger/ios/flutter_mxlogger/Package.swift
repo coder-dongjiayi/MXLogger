@@ -19,9 +19,9 @@ let package = Package(
     dependencies: [
         // Flutter.framework，由 flutter_tools 生成到插件包旁边 / generated next to this package by flutter_tools
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
-        // 原生 MXLogger(OC + C++ Core)，与 podspec 中 MXLogger 2.1.0 对应
-        // Native MXLogger (ObjC + C++ core), matches `MXLogger 2.1.0` in the podspec
-        .package(url: "https://github.com/coder-dongjiayi/mxlogger-spm.git", exact: "2.1.0"),
+        // 原生 MXLogger(OC + C++ Core)，与 podspec 中 MXLogger 2.2.0 对应
+        // Native MXLogger (ObjC + C++ core), matches `MXLogger 2.2.0` in the podspec
+        .package(url: "https://github.com/coder-dongjiayi/mxlogger-spm.git", exact: "2.2.0"),
     ],
     targets: [
         .target(

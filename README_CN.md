@@ -90,7 +90,7 @@ mxlogger_analyzer 解析。
 ## iOS
 
 ```ruby
-pod 'MXLogger', '~> 2.0.0'
+pod 'MXLogger', '~> 2.2.0'
 ```
 
 ## 原生 macOS
@@ -111,14 +111,14 @@ Flutter macOS 插件将在后续阶段接入，目前尚未启用。
 ## Android
 
 ```groovy
-implementation 'io.github.coder-dongjiayi:mxlogger:latest.release'
+implementation 'io.github.coder-dongjiayi:mxlogger:2.2.0'
 ```
 
 ## Flutter
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.0.0
+  flutter_mxlogger: ^2.2.0
   mxlogger_analyzer_lib: ^2.0.0   # 可选：app 内实时查看日志
 ```
 

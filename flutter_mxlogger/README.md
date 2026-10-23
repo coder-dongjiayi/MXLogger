@@ -6,7 +6,7 @@ MXLogger is a cross-platform logging library built on mmap memory mapping, with 
 
 See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) for the full project.
 
-- **Version**: 2.1.0
+- **Version**: 2.2.0
 - **Requirements**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
 - **Platforms**: iOS (>= 9.0), Android (minSdk 21)
 
@@ -42,14 +42,14 @@ See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) 
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.1.0
+  flutter_mxlogger: ^2.2.0
 ```
 
 The native SDK dependencies are pulled in automatically:
 
-- iOS (CocoaPods, default): depends on `MXLogger 2.1.0` → `MXLoggerCore 2.1.0`
-- iOS (Swift Package Manager): when the host app has enabled Flutter's SwiftPM support (`flutter config --enable-swift-package-manager`), the plugin is integrated via `ios/flutter_mxlogger/Package.swift` and depends on [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.1.0` instead
-- Android: Gradle depends on `io.github.coder-dongjiayi:mxlogger:2.1.0`
+- iOS (CocoaPods, default): depends on `MXLogger 2.2.0` → `MXLoggerCore 2.2.0`
+- iOS (Swift Package Manager): when the host app has enabled Flutter's SwiftPM support (`flutter config --enable-swift-package-manager`), the plugin is integrated via `ios/flutter_mxlogger/Package.swift` and depends on [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0` instead
+- Android: Gradle depends on `io.github.coder-dongjiayi:mxlogger:2.2.0`
 
 
 ### iOS release archives: preserve FFI symbols

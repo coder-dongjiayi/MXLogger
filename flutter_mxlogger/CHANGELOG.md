@@ -1,7 +1,9 @@
 
 # MXLogger for Flutter Change Log
 
-# Unreleased
+# v2.2.0 (Unreleased)
+* Add native macOS support in MXLogger / MXLoggerCore, including CocoaPods, SwiftPM, and cooperative multi-process access to a shared log directory. Flutter macOS plugin integration is still in progress.
+* Align the Flutter package and native CocoaPods, SwiftPM, and Android dependencies to 2.2.0.
 * Raise the minimum supported Flutter version to 3.7.0 and Dart SDK to 2.19.0.
 * Migrate the native SwiftPM dependency to `https://github.com/coder-dongjiayi/mxlogger-spm.git`.
 

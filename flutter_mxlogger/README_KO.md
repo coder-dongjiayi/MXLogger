@@ -6,7 +6,7 @@ MXLogger는 mmap 메모리 매핑을 기반으로 하고 AES-CFB-128 암호화�
 
 전체 프로젝트는 [MXLogger 메인 저장소](https://github.com/coder-dongjiayi/MXLogger)를 참고하세요.
 
-- **버전**: 2.1.0
+- **버전**: 2.2.0
 - **요구 사항**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
 - **지원 플랫폼**: iOS(>= 9.0), Android(minSdk 21)
 
@@ -42,14 +42,14 @@ MXLogger는 mmap 메모리 매핑을 기반으로 하고 AES-CFB-128 암호화�
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.1.0
+  flutter_mxlogger: ^2.2.0
 ```
 
 네이티브 SDK 의존성은 자동으로 포함됩니다.
 
-- iOS(CocoaPods, 기본): `MXLogger 2.1.0` → `MXLoggerCore 2.1.0`에 의존
-- iOS(Swift Package Manager): 호스트 앱에서 Flutter의 SwiftPM 지원을 켠 경우(`flutter config --enable-swift-package-manager`) 플러그인은 `ios/flutter_mxlogger/Package.swift`로 통합되며, 대신 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.1.0`에 의존합니다
-- Android: Gradle이 `io.github.coder-dongjiayi:mxlogger:2.1.0`에 의존
+- iOS(CocoaPods, 기본): `MXLogger 2.2.0` → `MXLoggerCore 2.2.0`에 의존
+- iOS(Swift Package Manager): 호스트 앱에서 Flutter의 SwiftPM 지원을 켠 경우(`flutter config --enable-swift-package-manager`) 플러그인은 `ios/flutter_mxlogger/Package.swift`로 통합되며, 대신 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0`에 의존합니다
+- Android: Gradle이 `io.github.coder-dongjiayi:mxlogger:2.2.0`에 의존
 
 ### iOS release 아카이브: FFI 심볼 유지
 

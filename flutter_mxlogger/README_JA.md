@@ -6,7 +6,7 @@ MXLogger は mmap メモリマッピングを基盤とし、AES-CFB-128 暗号�
 
 プロジェクト全体は [MXLogger メインリポジトリ](https://github.com/coder-dongjiayi/MXLogger) を参照してください。
 
-- **バージョン**: 2.1.0
+- **バージョン**: 2.2.0
 - **要件**: Dart SDK `>=2.19.0 <4.0.0`、Flutter `>=3.7.0`
 - **対応プラットフォーム**: iOS（>= 9.0）、Android（minSdk 21）
 
@@ -42,14 +42,14 @@ MXLogger は mmap メモリマッピングを基盤とし、AES-CFB-128 暗号�
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.1.0
+  flutter_mxlogger: ^2.2.0
 ```
 
 ネイティブ SDK の依存関係は自動的に取り込まれます。
 
-- iOS（CocoaPods、既定）: `MXLogger 2.1.0` → `MXLoggerCore 2.1.0` に依存
-- iOS（Swift Package Manager）: ホストアプリで Flutter の SwiftPM サポートを有効にしている場合（`flutter config --enable-swift-package-manager`）、プラグインは `ios/flutter_mxlogger/Package.swift` 経由で統合され、代わりに [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.1.0` に依存します
-- Android: Gradle が `io.github.coder-dongjiayi:mxlogger:2.1.0` に依存
+- iOS（CocoaPods、既定）: `MXLogger 2.2.0` → `MXLoggerCore 2.2.0` に依存
+- iOS（Swift Package Manager）: ホストアプリで Flutter の SwiftPM サポートを有効にしている場合（`flutter config --enable-swift-package-manager`）、プラグインは `ios/flutter_mxlogger/Package.swift` 経由で統合され、代わりに [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0` に依存します
+- Android: Gradle が `io.github.coder-dongjiayi:mxlogger:2.2.0` に依存
 
 ### iOS の release アーカイブ：FFI シンボルの保持
 

@@ -5,10 +5,10 @@ set -euo pipefail
 # 输出到 scripts/release/<version>_mxlogger.zip。
 #
 # 用法:
-#   scripts/android_release.sh 1.2.15
+#   scripts/android_release.sh 2.2.0
 #
 # 脚本会自己跑 gradle 构建，改完源码（Java / Kotlin / C++）直接执行即可。
-# 如果确认产物已是最新、想跳过构建，用: SKIP_BUILD=1 scripts/android_release.sh 1.2.15
+# 如果确认产物已是最新、想跳过构建，用: SKIP_BUILD=1 scripts/android_release.sh 2.2.0
 
 VERSION="${1:-}"
 if [ -z "${VERSION}" ]; then

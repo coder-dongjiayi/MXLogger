@@ -166,7 +166,7 @@ packages:
       path: "../flutter_mxlogger"
       relative: true
     source: path
-    version: "2.1.0"
+    version: "2.2.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
