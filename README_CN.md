@@ -108,6 +108,77 @@ SwiftPM 使用 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm.gi
 `removeExpireData` 清理，`shouldRemoveExpiredDataWhenEnterBackground` 不生效。
 Flutter macOS 已通过共享的 `darwin/` 插件接入（Flutter 3.7+、macOS 10.14+），使用同一套 Dart API。
 
+### 原生 macOS Demo
+
+原生示例位于 `macOS/MXLoggerDemo`，使用 **AppKit + Swift + Main.storyboard**，
+入口、主页、文件列表、日志详情以及列表单元格均可在 Storyboard 中编辑。
+界面沿用 iOS / Android / Flutter Demo 的 Logo、紫色状态卡、分组功能和中英文切换，
+并直接复用 iOS Demo 的 Logo 和语言资源。
+
+```bash
+pod install --project-directory=macOS/MXLoggerDemo
+open macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
+```
+
+在 Xcode 选择 `MXLoggerDemo` scheme 和 `My Mac` 后运行。
+Demo 从当前仓库加载原生 Pods，无需先发布 2.2.0，也不依赖 Flutter。
+默认参数与其他三个 Demo 一致：命名空间 `com.djy.mxlogger`、按小时切分、
+AES-CFB-128 加密、保留 7 天、大小上限 10 MB。
+
+功能包括五级日志、网络 JSON、通用写入、Token 写入、等级与开关设置、
+10 万条性能测试、多线程 / 多进程并发写入与数量及顺序校验、手动清理、实例重建，
+以及带等级 / 关键词筛选和完整内容查看的日志浏览器。
+macOS 不提供后台自动清理开关；Release 中控制台开关会置灰。
+`pod install` 会为本地 Xcode 生成 `Configurations/SDK.xcconfig`，使 Demo 的部署目标适配当前 SDK。
+
+单独验证 Demo：
+
+```bash
+bash scripts/verify_macos_demo.sh
+```
+
+该检查编译 Debug / Release，并实际执行双进程加密读写、Token、清理和重开校验。
+Debug 还会加载 Storyboard 检查页面连接、导航、双语及筛选，生成应用自身视图的预览。
+日志和预览位于 `build/macos-native-demo/`。
+
+### macOS 回归验证与发布准备
+
+在安装了 Xcode（含 iOS SDK）、CocoaPods、Python 3 和 Flutter 3.44+ 的 Mac 上运行：
+
+```bash
+python3 scripts/verify_macos_support.py
+# Flutter 不在 PATH 时：
+python3 scripts/verify_macos_support.py --flutter /path/to/flutter/bin/flutter
+```
+
+脚本依次运行 Core 测试（包含真实多进程读写、清理、进程退出恢复）、Objective-C / Swift
+API 测试、原生 macOS Demo、Flutter 单元测试、iOS 设备与模拟器桥接编译，以及 macOS CocoaPods / SwiftPM
+两种接入方式的 Debug 集成测试和 Release 加密读写。Release 还会检查所有桥接导出符号。
+
+测试工程生成在 `build/macos-validation/run-*/`，使用本地原生源码，因此原生 2.2.0
+尚未发布时也可验证。发布用的依赖地址、版本和示例锁文件不会被改写，Flutter 全局配置也不变。
+测试工程的部署目标会根据当前 Xcode SDK 的最低支持版本调整；库自身的 macOS 10.13
+和 Flutter 插件的 macOS 10.14 声明保持不变。该检查不能替代旧系统上的实际运行验证。
+
+可用 `--package-manager pods` 或 `--package-manager spm` 单独验证一种接入方式，
+`--skip-native` 跳过 Core / 原生 Apple 测试。`--offline` 仅表示 Dart 包使用本地缓存，
+Flutter 引擎缓存和 CocoaPods 索引仍需提前准备。日志和结果位于对应运行目录的 `logs/`。
+此脚本使用 Flutter 3.44+ 切换测试工程的接入方式；插件的最低 Flutter 要求仍为 3.7。
+成功后默认删除占用数 GB 的 Flutter 测试工程并保留日志；加 `--keep-builds` 可保留构建现场，失败时也会保留。
+
+Android 原生回归使用 NDK、CMake 和 Ninja，编译四种 ABI，并检查没有引入 macOS 的进程锁：
+
+```bash
+ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_android_native.sh
+```
+
+`.github/workflows/verify-logger.yml` 在相关 PR 和手动触发时执行上述检查，保留日志 7 天。
+Android 检查覆盖原生编译，设备上的运行验证需另行进行。
+
+2.2.0 发布时，先同步 `mxlogger-spm` 镜像，并使主仓库和镜像的 `v2.2.0` 标签可用；
+随后发布 `MXLoggerCore`、`MXLogger` 和 Android 2.2.0，最后发布 Flutter 包。
+发布 Flutter 前运行 `scripts/pub_flutter_mxlogger.sh --dry-run`，并在依赖正式可用后验证远程接入。
+
 ## Android
 
 ```groovy

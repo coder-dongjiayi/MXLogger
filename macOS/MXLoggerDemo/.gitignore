@@ -1,0 +1,5 @@
+Pods/
+build/
+Configurations/SDK.xcconfig
+xcuserdata/
+*.xcuserstate

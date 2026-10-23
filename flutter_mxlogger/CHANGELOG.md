@@ -5,6 +5,7 @@
 * Add macOS support, including the Flutter plugin, CocoaPods, SwiftPM, and cooperative multi-process access to a shared log directory.
 * Share the Apple plugin implementation through `darwin/` using Flutter 3.7's `sharedDarwinSource` layout.
 * On macOS, use `Application Support/<bundle-id>/MXLogger` by default (fall back to the process name if no bundle ID is available). Cleanup is explicit through `removeExpireData()`; `shouldRemoveExpiredDataWhenEnterBackground` has no effect.
+* Add reproducible local-source macOS regression checks and CI for native Apple APIs, Flutter CocoaPods/SwiftPM Debug and Release builds, and Android native compilation across four ABIs.
 * Align the Flutter package and native CocoaPods, SwiftPM, and Android dependencies to 2.2.0.
 * Raise the minimum supported Flutter version to 3.7.0 and Dart SDK to 2.19.0.
 * Migrate the native SwiftPM dependency to `https://github.com/coder-dongjiayi/mxlogger-spm.git`.

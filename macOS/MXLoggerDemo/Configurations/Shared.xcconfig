@@ -1,0 +1,10 @@
+MACOSX_DEPLOYMENT_TARGET = 10.13
+#include? "SDK.xcconfig"
+SWIFT_VERSION = 5.0
+PRODUCT_BUNDLE_IDENTIFIER = com.mxlogger.macos.demo
+MARKETING_VERSION = 2.2.0
+CURRENT_PROJECT_VERSION = 1
+INFOPLIST_FILE = MXLoggerDemo/Info.plist
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks
+CODE_SIGN_STYLE = Automatic
+ENABLE_HARDENED_RUNTIME = YES

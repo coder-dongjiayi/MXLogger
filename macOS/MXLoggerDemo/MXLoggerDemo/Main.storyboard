@@ -1,0 +1,727 @@
+<?xml version='1.0' encoding='utf-8'?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17150" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="WindowController">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17150" />
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0" />
+    </dependencies>
+    <scenes>
+        <scene sceneID="WindowScene">
+            <objects>
+                <windowController id="WindowController" sceneMemberID="viewController">
+                    <window key="window" title="MXLogger Demo · macOS" releasedWhenClosed="NO" id="DemoWindow">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" />
+                        <rect key="contentRect" x="180" y="100" width="1000" height="820" />
+                    </window>
+                    <connections>
+                        <segue destination="Root" kind="relationship" relationship="window.shadowedContentViewController" id="c-0001" />
+                    </connections>
+                </windowController>
+            </objects>
+        </scene>
+        <scene sceneID="RootScene">
+            <objects>
+                <viewController id="Root" storyboardIdentifier="Root" sceneMemberID="viewController" customClass="DemoViewController" customModule="MXLoggerDemo" customModuleProvider="target">
+                    <view id="RootView" key="view" customClass="DemoBackgroundView" customModule="MXLoggerDemo" customModuleProvider="target">
+                        <rect key="frame" x="0" y="0" width="1000" height="820" />
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" />
+                        <subviews>
+                            <textField id="NavTitle" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="250" y="776" width="500" height="24" />
+                                <textFieldCell key="cell" title="MXLogger Demo" id="c-0002" alignment="center" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                    <font key="font" metaFont="systemBold" size="17" />
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                </textFieldCell>
+                            </textField>
+                            <button id="Back" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="18" y="771" width="95" height="32" />
+                                <buttonCell key="cell" type="push" title="‹ Back" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="c-0003">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" />
+                                    <font key="font" metaFont="system" size="13" />
+                                </buttonCell>
+                                <connections>
+                                    <action selector="back:" target="Root" id="c-0004" />
+                                </connections>
+                            </button>
+                            <button id="Language" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="885" y="771" width="95" height="32" />
+                                <buttonCell key="cell" type="push" title="中文" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="c-0005">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" />
+                                    <font key="font" metaFont="system" size="13" />
+                                </buttonCell>
+                                <connections>
+                                    <action selector="toggleLanguage:" target="Root" id="c-0006" />
+                                </connections>
+                            </button>
+                            <view id="PageContainer" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="0" y="34" width="1000" height="730" />
+                            </view>
+                            <textField id="Status" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="24" y="8" width="950" height="18" />
+                                <textFieldCell key="cell" title="" id="c-0007" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                    <font key="font" metaFont="system" size="11" />
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="NavTitle" firstAttribute="centerX" id="c-0008" secondItem="RootView" secondAttribute="centerX" />
+                            <constraint firstItem="NavTitle" firstAttribute="top" id="c-0009" secondItem="RootView" secondAttribute="top" constant="17" />
+                            <constraint firstItem="NavTitle" firstAttribute="width" id="c-0010" constant="620" />
+                            <constraint firstItem="Back" firstAttribute="leading" id="c-0011" secondItem="RootView" secondAttribute="leading" constant="18" />
+                            <constraint firstItem="Back" firstAttribute="top" id="c-0012" secondItem="RootView" secondAttribute="top" constant="11" />
+                            <constraint firstItem="Language" firstAttribute="trailing" id="c-0013" secondItem="RootView" secondAttribute="trailing" constant="-18" />
+                            <constraint firstItem="Language" firstAttribute="top" id="c-0014" secondItem="RootView" secondAttribute="top" constant="11" />
+                            <constraint firstItem="PageContainer" firstAttribute="leading" id="c-0015" secondItem="RootView" secondAttribute="leading" />
+                            <constraint firstItem="RootView" firstAttribute="trailing" id="c-0016" secondItem="PageContainer" secondAttribute="trailing" />
+                            <constraint firstItem="PageContainer" firstAttribute="top" id="c-0017" secondItem="RootView" secondAttribute="top" constant="56" />
+                            <constraint firstItem="RootView" firstAttribute="bottom" id="c-0018" secondItem="PageContainer" secondAttribute="bottom" constant="34" />
+                            <constraint firstItem="Status" firstAttribute="leading" id="c-0019" secondItem="RootView" secondAttribute="leading" constant="24" />
+                            <constraint firstItem="RootView" firstAttribute="trailing" id="c-0020" secondItem="Status" secondAttribute="trailing" constant="24" />
+                            <constraint firstItem="RootView" firstAttribute="bottom" id="c-0021" secondItem="Status" secondAttribute="bottom" constant="8" />
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="content" destination="PageContainer" id="c-0022" />
+                        <outlet property="titleLabel" destination="NavTitle" id="c-0023" />
+                        <outlet property="backButton" destination="Back" id="c-0024" />
+                        <outlet property="languageButton" destination="Language" id="c-0025" />
+                        <outlet property="statusLabel" destination="Status" id="c-0026" />
+                    </connections>
+                </viewController>
+                <customObject id="RootResponder" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder" />
+            </objects>
+        </scene>
+        <scene sceneID="LandingScene">
+            <objects>
+                <viewController id="Landing" storyboardIdentifier="Landing" sceneMemberID="viewController" customClass="DemoLandingViewController" customModule="MXLoggerDemo" customModuleProvider="target">
+                    <view id="LandingView" key="view" customClass="DemoBackgroundView" customModule="MXLoggerDemo" customModuleProvider="target">
+                        <rect key="frame" x="0" y="0" width="1000" height="730" />
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" />
+                        <subviews>
+                            <imageView id="LandingLogo" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="452" y="410" width="96" height="96" />
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="center" imageScaling="proportionallyUpOrDown" id="c-0027" image="mxlogger_logo" />
+                            </imageView>
+                            <textField id="Brand" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="300" y="350" width="400" height="40" />
+                                <textFieldCell key="cell" title="MXLogger" id="c-0028" alignment="center" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                    <font key="font" metaFont="systemBold" size="30" />
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                </textFieldCell>
+                            </textField>
+                            <textField id="LandingSubtitle" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="180" y="285" width="640" height="52" />
+                                <textFieldCell key="cell" title="High-performance cross-platform logging built on mmap" id="c-0029" alignment="center" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                    <font key="font" metaFont="system" size="15" />
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                </textFieldCell>
+                            </textField>
+                            <button id="Enter" translatesAutoresizingMaskIntoConstraints="NO" customClass="DemoPrimaryButton" customModule="MXLoggerDemo" customModuleProvider="target">
+                                <rect key="frame" x="380" y="110" width="240" height="48" />
+                                <buttonCell key="cell" type="push" title="Enter Demo" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="c-0030">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" />
+                                    <font key="font" metaFont="system" size="13" />
+                                </buttonCell>
+                                <connections>
+                                    <action selector="enter:" target="Landing" id="c-0031" />
+                                </connections>
+                            </button>
+                            <textField id="Version" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="260" y="65" width="480" height="22" />
+                                <textFieldCell key="cell" title="macOS Native Demo · MXLogger 2.2.0" id="c-0032" alignment="center" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                    <font key="font" metaFont="system" size="12" />
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="LandingLogo" firstAttribute="centerX" id="c-0033" secondItem="LandingView" secondAttribute="centerX" />
+                            <constraint firstItem="Brand" firstAttribute="centerX" id="c-0034" secondItem="LandingView" secondAttribute="centerX" />
+                            <constraint firstItem="LandingSubtitle" firstAttribute="centerX" id="c-0035" secondItem="LandingView" secondAttribute="centerX" />
+                            <constraint firstItem="Enter" firstAttribute="centerX" id="c-0036" secondItem="LandingView" secondAttribute="centerX" />
+                            <constraint firstItem="Version" firstAttribute="centerX" id="c-0037" secondItem="LandingView" secondAttribute="centerX" />
+                            <constraint firstItem="LandingLogo" firstAttribute="width" id="c-0038" constant="96" />
+                            <constraint firstItem="LandingLogo" firstAttribute="height" id="c-0039" constant="96" />
+                            <constraint firstItem="LandingLogo" firstAttribute="centerY" id="c-0040" secondItem="LandingView" secondAttribute="centerY" constant="-70" />
+                            <constraint firstItem="Brand" firstAttribute="top" id="c-0041" secondItem="LandingLogo" secondAttribute="bottom" constant="24" />
+                            <constraint firstItem="Brand" firstAttribute="width" id="c-0042" constant="440" />
+                            <constraint firstItem="Brand" firstAttribute="height" id="c-0043" constant="42" />
+                            <constraint firstItem="LandingSubtitle" firstAttribute="top" id="c-0044" secondItem="Brand" secondAttribute="bottom" constant="10" />
+                            <constraint firstItem="LandingSubtitle" firstAttribute="width" id="c-0045" constant="720" />
+                            <constraint firstItem="LandingSubtitle" firstAttribute="height" id="c-0046" constant="52" />
+                            <constraint firstItem="Enter" firstAttribute="width" id="c-0047" constant="240" />
+                            <constraint firstItem="Enter" firstAttribute="height" id="c-0048" constant="48" />
+                            <constraint firstItem="LandingView" firstAttribute="bottom" id="c-0049" secondItem="Enter" secondAttribute="bottom" constant="110" />
+                            <constraint firstItem="Version" firstAttribute="top" id="c-0050" secondItem="Enter" secondAttribute="bottom" constant="14" />
+                            <constraint firstItem="Version" firstAttribute="width" id="c-0051" constant="500" />
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="subtitle" destination="LandingSubtitle" id="c-0052" />
+                        <outlet property="enterButton" destination="Enter" id="c-0053" />
+                        <outlet property="versionLabel" destination="Version" id="c-0054" />
+                    </connections>
+                </viewController>
+                <customObject id="LandingResponder" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder" />
+            </objects>
+        </scene>
+        <scene sceneID="HomeScene">
+            <objects>
+                <viewController id="Home" storyboardIdentifier="Home" sceneMemberID="viewController" customClass="DemoHomeViewController" customModule="MXLoggerDemo" customModuleProvider="target">
+                    <view id="HomeView" key="view" customClass="DemoBackgroundView" customModule="MXLoggerDemo" customModuleProvider="target">
+                        <rect key="frame" x="0" y="0" width="1000" height="730" />
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" />
+                        <subviews>
+                            <view id="Summary" translatesAutoresizingMaskIntoConstraints="NO" customClass="DemoSummaryView" customModule="MXLoggerDemo" customModuleProvider="target">
+                                <rect key="frame" x="0" y="0" width="944" height="156" />
+                                <rect key="frame" x="28" y="556" width="944" height="156" />
+                                <subviews>
+                                    <imageView id="SummaryLogo" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="24" y="90" width="44" height="44" />
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="center" imageScaling="proportionallyUpOrDown" id="c-0055" image="mxlogger_logo" />
+                                    </imageView>
+                                    <textField id="SummaryBrand" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="86" y="110" width="520" height="28" />
+                                        <textFieldCell key="cell" title="MXLogger" id="c-0056" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="systemBold" size="22" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                    <textField id="Namespace" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="86" y="85" width="760" height="20" />
+                                        <textFieldCell key="cell" title="com.djy.mxlogger · AES-CFB 128 encryption" id="c-0057" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="system" size="12" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                    <textField id="MmapBadge" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="820" y="100" width="90" height="22" />
+                                        <textFieldCell key="cell" title="mmap" id="c-0058" alignment="center" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="systemBold" size="14" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                    <textField id="SizeValue" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="24" y="43" width="205" height="26" />
+                                        <textFieldCell key="cell" title="4 KB" id="c-0070" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="systemBold" size="20" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                    <textField id="SizeCaption" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="24" y="20" width="205" height="17" />
+                                        <textFieldCell key="cell" title="Log Size" id="c-0071" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="system" size="11" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                    <textField id="FilesValue" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="249" y="43" width="205" height="26" />
+                                        <textFieldCell key="cell" title="1" id="c-0080" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="systemBold" size="20" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                    <textField id="FilesCaption" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="249" y="20" width="205" height="17" />
+                                        <textFieldCell key="cell" title="Files" id="c-0081" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="system" size="11" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                    <textField id="LevelValue" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="474" y="43" width="205" height="26" />
+                                        <textFieldCell key="cell" title="Debug" id="c-0090" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="systemBold" size="20" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                    <textField id="LevelCaption" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="474" y="20" width="205" height="17" />
+                                        <textFieldCell key="cell" title="Write Level" id="c-0091" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="system" size="11" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                    <textField id="PolicyValue" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="699" y="43" width="205" height="26" />
+                                        <textFieldCell key="cell" title="Hourly" id="c-0100" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="systemBold" size="20" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                    <textField id="PolicyCaption" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                        <rect key="frame" x="699" y="20" width="205" height="17" />
+                                        <textFieldCell key="cell" title="Policy" id="c-0101" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                            <font key="font" metaFont="system" size="11" />
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace" />
+                                        </textFieldCell>
+                                    </textField>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="SummaryLogo" firstAttribute="leading" id="c-0059" secondItem="Summary" secondAttribute="leading" constant="24" />
+                                    <constraint firstItem="SummaryLogo" firstAttribute="top" id="c-0060" secondItem="Summary" secondAttribute="top" constant="22" />
+                                    <constraint firstItem="SummaryLogo" firstAttribute="width" id="c-0061" constant="44" />
+                                    <constraint firstItem="SummaryLogo" firstAttribute="height" id="c-0062" constant="44" />
+                                    <constraint firstItem="SummaryBrand" firstAttribute="leading" id="c-0063" secondItem="SummaryLogo" secondAttribute="trailing" constant="16" />
+                                    <constraint firstItem="SummaryBrand" firstAttribute="top" id="c-0064" secondItem="Summary" secondAttribute="top" constant="18" />
+                                    <constraint firstItem="Namespace" firstAttribute="leading" id="c-0065" secondItem="SummaryLogo" secondAttribute="trailing" constant="16" />
+                                    <constraint firstItem="Namespace" firstAttribute="top" id="c-0066" secondItem="SummaryBrand" secondAttribute="bottom" constant="5" />
+                                    <constraint firstItem="Summary" firstAttribute="trailing" id="c-0067" secondItem="Namespace" secondAttribute="trailing" constant="20" />
+                                    <constraint firstItem="Summary" firstAttribute="trailing" id="c-0068" secondItem="MmapBadge" secondAttribute="trailing" constant="26" />
+                                    <constraint firstItem="MmapBadge" firstAttribute="top" id="c-0069" secondItem="Summary" secondAttribute="top" constant="25" />
+                                    <constraint firstItem="SizeValue" firstAttribute="leading" id="c-0072" secondItem="Summary" secondAttribute="leading" constant="24" />
+                                    <constraint firstItem="Summary" firstAttribute="bottom" id="c-0073" secondItem="SizeValue" secondAttribute="bottom" constant="42" />
+                                    <constraint firstItem="SizeValue" firstAttribute="width" id="c-0074" constant="200" />
+                                    <constraint firstItem="SizeCaption" firstAttribute="leading" id="c-0075" secondItem="Summary" secondAttribute="leading" constant="24" />
+                                    <constraint firstItem="Summary" firstAttribute="bottom" id="c-0076" secondItem="SizeCaption" secondAttribute="bottom" constant="19" />
+                                    <constraint firstItem="SizeCaption" firstAttribute="width" id="c-0077" constant="200" />
+                                    <constraint firstItem="FilesValue" firstAttribute="leading" id="c-0082" secondItem="Summary" secondAttribute="leading" constant="249" />
+                                    <constraint firstItem="Summary" firstAttribute="bottom" id="c-0083" secondItem="FilesValue" secondAttribute="bottom" constant="42" />
+                                    <constraint firstItem="FilesValue" firstAttribute="width" id="c-0084" constant="200" />
+                                    <constraint firstItem="FilesCaption" firstAttribute="leading" id="c-0085" secondItem="Summary" secondAttribute="leading" constant="249" />
+                                    <constraint firstItem="Summary" firstAttribute="bottom" id="c-0086" secondItem="FilesCaption" secondAttribute="bottom" constant="19" />
+                                    <constraint firstItem="FilesCaption" firstAttribute="width" id="c-0087" constant="200" />
+                                    <constraint firstItem="LevelValue" firstAttribute="leading" id="c-0092" secondItem="Summary" secondAttribute="leading" constant="474" />
+                                    <constraint firstItem="Summary" firstAttribute="bottom" id="c-0093" secondItem="LevelValue" secondAttribute="bottom" constant="42" />
+                                    <constraint firstItem="LevelValue" firstAttribute="width" id="c-0094" constant="200" />
+                                    <constraint firstItem="LevelCaption" firstAttribute="leading" id="c-0095" secondItem="Summary" secondAttribute="leading" constant="474" />
+                                    <constraint firstItem="Summary" firstAttribute="bottom" id="c-0096" secondItem="LevelCaption" secondAttribute="bottom" constant="19" />
+                                    <constraint firstItem="LevelCaption" firstAttribute="width" id="c-0097" constant="200" />
+                                    <constraint firstItem="PolicyValue" firstAttribute="leading" id="c-0102" secondItem="Summary" secondAttribute="leading" constant="699" />
+                                    <constraint firstItem="Summary" firstAttribute="bottom" id="c-0103" secondItem="PolicyValue" secondAttribute="bottom" constant="42" />
+                                    <constraint firstItem="PolicyValue" firstAttribute="width" id="c-0104" constant="200" />
+                                    <constraint firstItem="PolicyCaption" firstAttribute="leading" id="c-0105" secondItem="Summary" secondAttribute="leading" constant="699" />
+                                    <constraint firstItem="Summary" firstAttribute="bottom" id="c-0106" secondItem="PolicyCaption" secondAttribute="bottom" constant="19" />
+                                    <constraint firstItem="PolicyCaption" firstAttribute="width" id="c-0107" constant="200" />
+                                </constraints>
+                            </view>
+                            <scrollView id="HomeTableScroll" borderType="none" hasVerticalScroller="YES" autohidesScrollers="YES" drawsBackground="NO" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="28" y="10" width="944" height="500" />
+                                <clipView key="contentView" id="HomeTableClip" drawsBackground="NO">
+                                    <rect key="frame" x="0" y="0" width="944" height="500" />
+                                    <subviews>
+                                        <tableView id="HomeTable" viewBased="YES" rowHeight="66" columnAutoresizingStyle="lastColumnOnly" allowsColumnReordering="NO" allowsColumnResizing="NO" allowsMultipleSelection="NO" customClass="DemoTableView" customModule="MXLoggerDemo" customModuleProvider="target">
+                                            <rect key="frame" x="0" y="0" width="940" height="500" />
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                            <size key="intercellSpacing" width="0" height="0" />
+                                            <tableColumns>
+                                                <tableColumn id="HomeTableColumn" width="940" minWidth="100" maxWidth="10000" identifier="content">
+                                                    <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="">
+                                                        <font key="font" metaFont="smallSystem" />
+                                                        <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog" />
+                                                        <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog" />
+                                                    </tableHeaderCell>
+                                                    <textFieldCell key="dataCell" title="" lineBreakMode="truncatingTail" selectable="YES">
+                                                        <font key="font" metaFont="system" size="13" />
+                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog" />
+                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog" />
+                                                    </textFieldCell>
+                                                    <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" />
+                                                    <prototypeCellViews>
+                                                        <tableCellView id="HomeTableColumnActionCell" identifier="ActionCell" customClass="DemoActionCell" customModule="MXLoggerDemo" customModuleProvider="target">
+                                                            <rect key="frame" x="0" y="0" width="940" height="66" />
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                            <subviews>
+                                                                <imageView id="HomeTableColumnActionCellIcon">
+                                                                    <rect key="frame" x="20" y="22" width="22" height="22" />
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="center" imageScaling="proportionallyUpOrDown" id="c-0117" />
+                                                                </imageView>
+                                                                <textField id="HomeTableColumnActionCellheading" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="62" y="35" width="625" height="19" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                                    <textFieldCell key="cell" title="Write Info Log" id="c-0118" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="14" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField id="HomeTableColumnActionCellsubtitle" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="62" y="13" width="625" height="17" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                                    <textFieldCell key="cell" title="info(name:message:tag:)" id="c-0120" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="11" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField id="HomeTableColumnActionCellvalue" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="707" y="24" width="216" height="20" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="NO" minXMargin="YES" />
+                                                                    <textFieldCell key="cell" title="›" id="c-0122" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="13" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <button id="HomeTableColumnActionCellToggle" customClass="DemoToggleButton" customModule="MXLoggerDemo" customModuleProvider="target">
+                                                                    <rect key="frame" x="884" y="22" width="40" height="24" />
+                                                                    <autoresizingMask key="autoresizingMask" minXMargin="YES" />
+                                                                    <buttonCell key="cell" type="check" title="" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="c-0124">
+                                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" />
+                                                                        <font key="font" metaFont="system" size="13" />
+                                                                    </buttonCell>
+                                                                    <connections>
+                                                                        <action selector="toggleChanged:" target="HomeTableColumnActionCell" id="c-0125" />
+                                                                    </connections>
+                                                                </button>
+                                                            </subviews>
+                                                            <connections>
+                                                                <outlet property="heading" destination="HomeTableColumnActionCellheading" id="c-0119" />
+                                                                <outlet property="subtitle" destination="HomeTableColumnActionCellsubtitle" id="c-0121" />
+                                                                <outlet property="value" destination="HomeTableColumnActionCellvalue" id="c-0123" />
+                                                                <outlet property="icon" destination="HomeTableColumnActionCellIcon" id="c-0126" />
+                                                                <outlet property="toggle" destination="HomeTableColumnActionCellToggle" id="c-0127" />
+                                                            </connections>
+                                                        </tableCellView>
+                                                        <tableCellView id="HomeTableColumnHeaderCell" identifier="HeaderCell">
+                                                            <rect key="frame" x="0" y="0" width="940" height="34" />
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                            <subviews>
+                                                                <textField id="HomeTableColumnHeaderCellText" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="8" y="9" width="900" height="18" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                                    <textFieldCell key="cell" title="Section" id="c-0128" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="12" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                            </subviews>
+                                                            <connections>
+                                                                <outlet property="textField" destination="HomeTableColumnHeaderCellText" id="c-0129" />
+                                                            </connections>
+                                                        </tableCellView>
+                                                    </prototypeCellViews>
+                                                </tableColumn>
+                                            </tableColumns>
+                                        </tableView>
+                                    </subviews>
+                                </clipView>
+                                <scroller key="horizontalScroller" id="HomeTablehorizontalScroller" verticalHuggingPriority="750" horizontal="YES" />
+                                <scroller key="verticalScroller" id="HomeTableverticalScroller" verticalHuggingPriority="750" horizontal="NO" />
+                            </scrollView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="Summary" firstAttribute="leading" id="c-0111" secondItem="HomeView" secondAttribute="leading" constant="28" />
+                            <constraint firstItem="HomeView" firstAttribute="trailing" id="c-0112" secondItem="Summary" secondAttribute="trailing" constant="28" />
+                            <constraint firstItem="Summary" firstAttribute="top" id="c-0113" secondItem="HomeView" secondAttribute="top" constant="16" />
+                            <constraint firstItem="Summary" firstAttribute="height" id="c-0114" constant="156" />
+                            <constraint firstItem="HomeTableScroll" firstAttribute="top" id="c-0130" secondItem="Summary" secondAttribute="bottom" constant="12" />
+                            <constraint firstItem="HomeTableScroll" firstAttribute="leading" id="c-0131" secondItem="HomeView" secondAttribute="leading" constant="28" />
+                            <constraint firstItem="HomeView" firstAttribute="trailing" id="c-0132" secondItem="HomeTableScroll" secondAttribute="trailing" constant="28" />
+                            <constraint firstItem="HomeView" firstAttribute="bottom" id="c-0133" secondItem="HomeTableScroll" secondAttribute="bottom" constant="12" />
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="sizeValue" destination="SizeValue" id="c-0078" />
+                        <outlet property="sizeCaption" destination="SizeCaption" id="c-0079" />
+                        <outlet property="filesValue" destination="FilesValue" id="c-0088" />
+                        <outlet property="filesCaption" destination="FilesCaption" id="c-0089" />
+                        <outlet property="levelValue" destination="LevelValue" id="c-0098" />
+                        <outlet property="levelCaption" destination="LevelCaption" id="c-0099" />
+                        <outlet property="policyValue" destination="PolicyValue" id="c-0108" />
+                        <outlet property="policyCaption" destination="PolicyCaption" id="c-0109" />
+                        <outlet property="namespaceLabel" destination="Namespace" id="c-0110" />
+                        <outlet property="table" destination="HomeTable" id="c-0134" />
+                    </connections>
+                </viewController>
+                <customObject id="HomeResponder" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder" />
+            </objects>
+        </scene>
+        <scene sceneID="FilesScene">
+            <objects>
+                <viewController id="Files" storyboardIdentifier="Files" sceneMemberID="viewController" customClass="DemoFilesViewController" customModule="MXLoggerDemo" customModuleProvider="target">
+                    <view id="FilesView" key="view" customClass="DemoBackgroundView" customModule="MXLoggerDemo" customModuleProvider="target">
+                        <rect key="frame" x="0" y="0" width="1000" height="730" />
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" />
+                        <subviews>
+                            <textField id="FilesSummary" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="28" y="680" width="700" height="24" />
+                                <textFieldCell key="cell" title="Log Files" id="c-0135" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                    <font key="font" metaFont="system" size="13" />
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                </textFieldCell>
+                            </textField>
+                            <button id="RefreshFiles" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="914" y="678" width="58" height="28" />
+                                <buttonCell key="cell" type="push" title="↻" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="c-0136">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" />
+                                    <font key="font" metaFont="system" size="13" />
+                                </buttonCell>
+                                <connections>
+                                    <action selector="refreshFiles:" target="Files" id="c-0137" />
+                                </connections>
+                            </button>
+                            <scrollView id="FilesTableScroll" borderType="none" hasVerticalScroller="YES" autohidesScrollers="YES" drawsBackground="NO" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="28" y="10" width="944" height="500" />
+                                <clipView key="contentView" id="FilesTableClip" drawsBackground="NO">
+                                    <rect key="frame" x="0" y="0" width="944" height="500" />
+                                    <subviews>
+                                        <tableView id="FilesTable" viewBased="YES" rowHeight="66" columnAutoresizingStyle="lastColumnOnly" allowsColumnReordering="NO" allowsColumnResizing="NO" allowsMultipleSelection="NO" customClass="DemoTableView" customModule="MXLoggerDemo" customModuleProvider="target">
+                                            <rect key="frame" x="0" y="0" width="940" height="500" />
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                            <size key="intercellSpacing" width="0" height="3" />
+                                            <tableColumns>
+                                                <tableColumn id="FilesTableColumn" width="940" minWidth="100" maxWidth="10000" identifier="content">
+                                                    <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="">
+                                                        <font key="font" metaFont="smallSystem" />
+                                                        <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog" />
+                                                        <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog" />
+                                                    </tableHeaderCell>
+                                                    <textFieldCell key="dataCell" title="" lineBreakMode="truncatingTail" selectable="YES">
+                                                        <font key="font" metaFont="system" size="13" />
+                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog" />
+                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog" />
+                                                    </textFieldCell>
+                                                    <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" />
+                                                    <prototypeCellViews>
+                                                        <tableCellView id="FilesTableColumnActionCell" identifier="ActionCell" customClass="DemoActionCell" customModule="MXLoggerDemo" customModuleProvider="target">
+                                                            <rect key="frame" x="0" y="0" width="940" height="66" />
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                            <subviews>
+                                                                <imageView id="FilesTableColumnActionCellIcon">
+                                                                    <rect key="frame" x="20" y="22" width="22" height="22" />
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="center" imageScaling="proportionallyUpOrDown" id="c-0144" />
+                                                                </imageView>
+                                                                <textField id="FilesTableColumnActionCellheading" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="62" y="35" width="625" height="19" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                                    <textFieldCell key="cell" title="Write Info Log" id="c-0145" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="14" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField id="FilesTableColumnActionCellsubtitle" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="62" y="13" width="625" height="17" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                                    <textFieldCell key="cell" title="info(name:message:tag:)" id="c-0147" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="11" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField id="FilesTableColumnActionCellvalue" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="707" y="24" width="216" height="20" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="NO" minXMargin="YES" />
+                                                                    <textFieldCell key="cell" title="›" id="c-0149" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="13" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <button id="FilesTableColumnActionCellToggle" customClass="DemoToggleButton" customModule="MXLoggerDemo" customModuleProvider="target">
+                                                                    <rect key="frame" x="884" y="22" width="40" height="24" />
+                                                                    <autoresizingMask key="autoresizingMask" minXMargin="YES" />
+                                                                    <buttonCell key="cell" type="check" title="" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="c-0151">
+                                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" />
+                                                                        <font key="font" metaFont="system" size="13" />
+                                                                    </buttonCell>
+                                                                    <connections>
+                                                                        <action selector="toggleChanged:" target="FilesTableColumnActionCell" id="c-0152" />
+                                                                    </connections>
+                                                                </button>
+                                                            </subviews>
+                                                            <connections>
+                                                                <outlet property="heading" destination="FilesTableColumnActionCellheading" id="c-0146" />
+                                                                <outlet property="subtitle" destination="FilesTableColumnActionCellsubtitle" id="c-0148" />
+                                                                <outlet property="value" destination="FilesTableColumnActionCellvalue" id="c-0150" />
+                                                                <outlet property="icon" destination="FilesTableColumnActionCellIcon" id="c-0153" />
+                                                                <outlet property="toggle" destination="FilesTableColumnActionCellToggle" id="c-0154" />
+                                                            </connections>
+                                                        </tableCellView>
+                                                        <tableCellView id="FilesTableColumnHeaderCell" identifier="HeaderCell">
+                                                            <rect key="frame" x="0" y="0" width="940" height="34" />
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                            <subviews>
+                                                                <textField id="FilesTableColumnHeaderCellText" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="8" y="9" width="900" height="18" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                                    <textFieldCell key="cell" title="Section" id="c-0155" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="12" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                            </subviews>
+                                                            <connections>
+                                                                <outlet property="textField" destination="FilesTableColumnHeaderCellText" id="c-0156" />
+                                                            </connections>
+                                                        </tableCellView>
+                                                    </prototypeCellViews>
+                                                </tableColumn>
+                                            </tableColumns>
+                                        </tableView>
+                                    </subviews>
+                                </clipView>
+                                <scroller key="horizontalScroller" id="FilesTablehorizontalScroller" verticalHuggingPriority="750" horizontal="YES" />
+                                <scroller key="verticalScroller" id="FilesTableverticalScroller" verticalHuggingPriority="750" horizontal="NO" />
+                            </scrollView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="FilesSummary" firstAttribute="leading" id="c-0138" secondItem="FilesView" secondAttribute="leading" constant="28" />
+                            <constraint firstItem="FilesSummary" firstAttribute="top" id="c-0139" secondItem="FilesView" secondAttribute="top" constant="18" />
+                            <constraint firstItem="FilesView" firstAttribute="trailing" id="c-0140" secondItem="RefreshFiles" secondAttribute="trailing" constant="28" />
+                            <constraint firstItem="RefreshFiles" firstAttribute="top" id="c-0141" secondItem="FilesView" secondAttribute="top" constant="14" />
+                            <constraint firstItem="FilesTableScroll" firstAttribute="leading" id="c-0157" secondItem="FilesView" secondAttribute="leading" constant="28" />
+                            <constraint firstItem="FilesView" firstAttribute="trailing" id="c-0158" secondItem="FilesTableScroll" secondAttribute="trailing" constant="28" />
+                            <constraint firstItem="FilesTableScroll" firstAttribute="top" id="c-0159" secondItem="FilesView" secondAttribute="top" constant="58" />
+                            <constraint firstItem="FilesView" firstAttribute="bottom" id="c-0160" secondItem="FilesTableScroll" secondAttribute="bottom" constant="14" />
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="summary" destination="FilesSummary" id="c-0161" />
+                        <outlet property="table" destination="FilesTable" id="c-0162" />
+                    </connections>
+                </viewController>
+                <customObject id="FilesResponder" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder" />
+            </objects>
+        </scene>
+        <scene sceneID="ViewerScene">
+            <objects>
+                <viewController id="Viewer" storyboardIdentifier="Viewer" sceneMemberID="viewController" customClass="DemoLogViewerController" customModule="MXLoggerDemo" customModuleProvider="target">
+                    <view id="ViewerView" key="view" customClass="DemoBackgroundView" customModule="MXLoggerDemo" customModuleProvider="target">
+                        <rect key="frame" x="0" y="0" width="1000" height="730" />
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" />
+                        <subviews>
+                            <segmentedControl id="LevelFilters" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="28" y="680" width="944" height="30" />
+                                <segmentedCell key="cell" borderStyle="border" alignment="left" style="rounded" trackingMode="selectOne" id="c-0163">
+                                    <font key="font" metaFont="system" size="13" />
+                                    <segments>
+                                        <segment label="All" width="138" selected="YES" />
+                                        <segment label="Debug" width="138" />
+                                        <segment label="Info" width="138" />
+                                        <segment label="Warn" width="138" />
+                                        <segment label="Error" width="138" />
+                                        <segment label="Fatal" width="138" />
+                                    </segments>
+                                </segmentedCell>
+                                <connections>
+                                    <action selector="filterChanged:" target="Viewer" id="c-0164" />
+                                </connections>
+                            </segmentedControl>
+                            <searchField id="Search" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="28" y="636" width="944" height="30" />
+                                <searchFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" bezelStyle="round" borderStyle="bezel" placeholderString="Search msg / name / tag" id="c-0165">
+                                    <font key="font" metaFont="system" size="13" />
+                                </searchFieldCell>
+                            </searchField>
+                            <textField id="ViewerSummary" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="28" y="603" width="944" height="20" />
+                                <textFieldCell key="cell" title="Records" id="c-0166" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                    <font key="font" metaFont="system" size="12" />
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                </textFieldCell>
+                            </textField>
+                            <scrollView id="RecordsTableScroll" borderType="none" hasVerticalScroller="YES" autohidesScrollers="YES" drawsBackground="NO" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="28" y="10" width="944" height="500" />
+                                <clipView key="contentView" id="RecordsTableClip" drawsBackground="NO">
+                                    <rect key="frame" x="0" y="0" width="944" height="500" />
+                                    <subviews>
+                                        <tableView id="RecordsTable" viewBased="YES" rowHeight="130" columnAutoresizingStyle="lastColumnOnly" allowsColumnReordering="NO" allowsColumnResizing="NO" allowsMultipleSelection="NO" customClass="DemoTableView" customModule="MXLoggerDemo" customModuleProvider="target">
+                                            <rect key="frame" x="0" y="0" width="940" height="500" />
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                            <size key="intercellSpacing" width="0" height="3" />
+                                            <tableColumns>
+                                                <tableColumn id="RecordsTableColumn" width="940" minWidth="100" maxWidth="10000" identifier="content">
+                                                    <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="">
+                                                        <font key="font" metaFont="smallSystem" />
+                                                        <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog" />
+                                                        <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog" />
+                                                    </tableHeaderCell>
+                                                    <textFieldCell key="dataCell" title="" lineBreakMode="truncatingTail" selectable="YES">
+                                                        <font key="font" metaFont="system" size="13" />
+                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog" />
+                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog" />
+                                                    </textFieldCell>
+                                                    <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" />
+                                                    <prototypeCellViews>
+                                                        <tableCellView id="RecordsTableColumnRecordCell" identifier="RecordCell" customClass="DemoRecordCell" customModule="MXLoggerDemo" customModuleProvider="target">
+                                                            <rect key="frame" x="0" y="0" width="940" height="130" />
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                            <subviews>
+                                                                <textField id="RecordsTableColumnRecordCellbadge" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="16" y="98" width="64" height="18" />
+                                                                    <autoresizingMask key="autoresizingMask" />
+                                                                    <textFieldCell key="cell" title="INFO" id="c-0179" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="systemBold" size="12" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField id="RecordsTableColumnRecordCellnameLabel" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="92" y="98" width="560" height="18" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                                    <textFieldCell key="cell" title="mxlogger" id="c-0181" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="systemBold" size="13" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField id="RecordsTableColumnRecordCelltimeLabel" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="700" y="98" width="220" height="18" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="NO" minXMargin="YES" />
+                                                                    <textFieldCell key="cell" title="10-23 12:00:00.000" id="c-0183" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="11" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField id="RecordsTableColumnRecordCellmessageLabel" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="16" y="38" width="905" height="52" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                                    <textFieldCell key="cell" title="Log message" id="c-0185" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="14" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                                <textField id="RecordsTableColumnRecordCelltagLabel" verticalHuggingPriority="750">
+                                                                    <rect key="frame" x="16" y="12" width="905" height="18" />
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" />
+                                                                    <textFieldCell key="cell" title="# demo · main · tid 123" id="c-0187" alignment="left" wraps="YES" scrollable="NO" lineBreakMode="truncatingTail">
+                                                                        <font key="font" metaFont="system" size="11" />
+                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog" />
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                            </subviews>
+                                                            <connections>
+                                                                <outlet property="badge" destination="RecordsTableColumnRecordCellbadge" id="c-0180" />
+                                                                <outlet property="nameLabel" destination="RecordsTableColumnRecordCellnameLabel" id="c-0182" />
+                                                                <outlet property="timeLabel" destination="RecordsTableColumnRecordCelltimeLabel" id="c-0184" />
+                                                                <outlet property="messageLabel" destination="RecordsTableColumnRecordCellmessageLabel" id="c-0186" />
+                                                                <outlet property="tagLabel" destination="RecordsTableColumnRecordCelltagLabel" id="c-0188" />
+                                                            </connections>
+                                                        </tableCellView>
+                                                    </prototypeCellViews>
+                                                </tableColumn>
+                                            </tableColumns>
+                                        </tableView>
+                                    </subviews>
+                                </clipView>
+                                <scroller key="horizontalScroller" id="RecordsTablehorizontalScroller" verticalHuggingPriority="750" horizontal="YES" />
+                                <scroller key="verticalScroller" id="RecordsTableverticalScroller" verticalHuggingPriority="750" horizontal="NO" />
+                            </scrollView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="LevelFilters" firstAttribute="top" id="c-0167" secondItem="ViewerView" secondAttribute="top" constant="14" />
+                            <constraint firstItem="LevelFilters" firstAttribute="leading" id="c-0168" secondItem="ViewerView" secondAttribute="leading" constant="28" />
+                            <constraint firstItem="ViewerView" firstAttribute="trailing" id="c-0169" secondItem="LevelFilters" secondAttribute="trailing" constant="28" />
+                            <constraint firstItem="LevelFilters" firstAttribute="height" id="c-0170" constant="30" />
+                            <constraint firstItem="Search" firstAttribute="top" id="c-0171" secondItem="LevelFilters" secondAttribute="bottom" constant="12" />
+                            <constraint firstItem="Search" firstAttribute="leading" id="c-0172" secondItem="ViewerView" secondAttribute="leading" constant="28" />
+                            <constraint firstItem="ViewerView" firstAttribute="trailing" id="c-0173" secondItem="Search" secondAttribute="trailing" constant="28" />
+                            <constraint firstItem="Search" firstAttribute="height" id="c-0174" constant="30" />
+                            <constraint firstItem="ViewerSummary" firstAttribute="top" id="c-0175" secondItem="Search" secondAttribute="bottom" constant="10" />
+                            <constraint firstItem="ViewerSummary" firstAttribute="leading" id="c-0176" secondItem="ViewerView" secondAttribute="leading" constant="28" />
+                            <constraint firstItem="RecordsTableScroll" firstAttribute="top" id="c-0189" secondItem="ViewerSummary" secondAttribute="bottom" constant="10" />
+                            <constraint firstItem="RecordsTableScroll" firstAttribute="leading" id="c-0190" secondItem="ViewerView" secondAttribute="leading" constant="28" />
+                            <constraint firstItem="ViewerView" firstAttribute="trailing" id="c-0191" secondItem="RecordsTableScroll" secondAttribute="trailing" constant="28" />
+                            <constraint firstItem="ViewerView" firstAttribute="bottom" id="c-0192" secondItem="RecordsTableScroll" secondAttribute="bottom" constant="14" />
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="table" destination="RecordsTable" id="c-0193" />
+                        <outlet property="filters" destination="LevelFilters" id="c-0194" />
+                        <outlet property="search" destination="Search" id="c-0195" />
+                        <outlet property="summary" destination="ViewerSummary" id="c-0196" />
+                    </connections>
+                </viewController>
+                <customObject id="ViewerResponder" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder" />
+            </objects>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="mxlogger_logo" width="512" height="512" />
+    </resources>
+</document>

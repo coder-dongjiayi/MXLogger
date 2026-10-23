@@ -41,3 +41,9 @@ On macOS, `shouldRemoveExpiredDataWhenEnterBackground` has no effect. Call
 `removeExpireData()` explicitly when your app wants to enforce its age and size
 limits. Default logs are under `Application Support/<bundle-id>/MXLogger` (inside
 the app container when sandboxing is enabled).
+
+To run all checks against unpublished local native sources, use
+`python3 scripts/verify_macos_support.py` from the repository root. It creates
+isolated CocoaPods and SwiftPM fixtures and adjusts only their deployment targets
+to the installed Xcode SDK. See the main repository's
+[verification instructions](../../README.md#macos-regression-checks-and-release-preparation).

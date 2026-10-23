@@ -1,0 +1,63 @@
+name: verify-logger
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Core/**'
+      - 'iOS/MXLogger/**'
+      - 'iOS/MXLoggerDemo/**'
+      - 'macOS/**'
+      - 'Android/MXLogger/mxlogger/**'
+      - 'flutter_mxlogger/**'
+      - 'spm/**'
+      - '*.podspec'
+      - 'scripts/verify_*'
+      - 'scripts/sync_spm_mirror.sh'
+      - '.github/workflows/verify-logger.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  apple:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.9
+          channel: stable
+          cache: true
+      - name: Core, native Apple, Flutter CocoaPods and SwiftPM
+        run: python3 scripts/verify_macos_support.py
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: apple-verification-logs
+          path: |
+            build/macos-validation/run-*/logs/
+            build/macos-native-demo/*.log
+            build/macos-native-demo/previews/
+          retention-days: 7
+          if-no-files-found: warn
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install NDK
+        run: sdkmanager 'ndk;27.0.12077973'
+      - name: Android Core and bridges, four ABIs
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.0.12077973"
+          bash scripts/verify_android_native.sh
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: android-verification-logs
+          path: build/android-validation/*.log
+          retention-days: 7
+          if-no-files-found: warn

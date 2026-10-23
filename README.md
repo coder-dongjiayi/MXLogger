@@ -111,6 +111,82 @@ the manifest in `spm/Package.swift` declares iOS 12+ and macOS 10.13+.
 Both platforms use the same native API. On macOS, call `removeExpireData` explicitly;
 `shouldRemoveExpiredDataWhenEnterBackground` has no effect. Flutter macOS uses the same Dart API through the shared `darwin/` plugin (Flutter 3.7+, macOS 10.14+).
 
+### Native macOS demo
+
+`macOS/MXLoggerDemo` is a native **AppKit + Swift + Main.storyboard** app. Its landing,
+home, file list, log viewer and reusable cells are editable in Storyboard. The UI
+follows the iOS / Android / Flutter demos, including the purple status card and
+English/Chinese switching, and shares the iOS demo's logo and localization resources.
+
+```bash
+pod install --project-directory=macOS/MXLoggerDemo
+open macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
+```
+
+Run the `MXLoggerDemo` scheme on `My Mac`. It uses this checkout's native pods and
+does not require Flutter or a published 2.2.0 release. Its defaults match the other
+demos: `com.djy.mxlogger`, hourly files, AES-CFB-128, seven-day retention and a 10 MB limit.
+
+The demo covers five log levels, network JSON, generic/token writes, configuration,
+a 100,000-write benchmark, concurrent threads/processes with count/order verification,
+manual cleanup, instance rebuilding, and a log viewer with level/search filters and
+full record details. macOS cleanup is explicit; the console switch is disabled in Release.
+`pod install` generates a local `Configurations/SDK.xcconfig` for the installed Xcode SDK.
+
+```bash
+bash scripts/verify_macos_demo.sh
+```
+
+This builds Debug and Release and exercises encrypted multi-process write/read,
+tokens, cleanup and reopening. The Debug check also loads the Storyboard to check
+outlets, navigation, localization and filters and renders the app's own views.
+Logs and previews are saved under `build/macos-native-demo/`.
+
+### macOS regression checks and release preparation
+
+On a Mac with Xcode (including the iOS SDK), CocoaPods, Python 3 and Flutter 3.44+:
+
+```bash
+python3 scripts/verify_macos_support.py
+# If Flutter is not on PATH:
+python3 scripts/verify_macos_support.py --flutter /path/to/flutter/bin/flutter
+```
+
+This runs Core tests (including real cooperating processes, cleanup and process-exit
+recovery), Objective-C / Swift API tests, the native macOS demo, Flutter unit tests, iOS device/simulator
+bridge compilation, and macOS Debug integration and Release encrypted write/read
+checks through both CocoaPods and SwiftPM. All bridge exports are checked after stripping.
+
+Fixtures use local native sources under `build/macos-validation/run-*/`, so the native
+release need not be published first. Distribution manifests, example lockfiles and
+global Flutter settings are preserved. Fixture deployment targets follow the installed
+Xcode SDK's supported floor; the native macOS 10.13 and Flutter plugin macOS 10.14
+declarations stay unchanged. These checks do not establish runtime compatibility on older systems.
+
+Use `--package-manager pods` or `--package-manager spm` to check one integration,
+`--skip-native` to skip Core / native Apple tests, or `--offline` to use cached Dart
+packages (engine artifacts and CocoaPods metadata still need to be available).
+Results and logs are in each run's `logs/` directory. Flutter 3.44+ is required by this
+verification harness; the plugin itself still declares Flutter 3.7+.
+Successful Flutter fixtures are removed by default to reclaim several GB; logs remain.
+Pass `--keep-builds` to retain them. Failed fixtures are always retained for diagnosis.
+
+The Android check requires an NDK, CMake and Ninja. It compiles four ABIs and rejects
+an accidental dependency on the macOS process lock:
+
+```bash
+ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_android_native.sh
+```
+
+`.github/workflows/verify-logger.yml` runs these checks for relevant PRs and manual
+dispatches and retains logs for seven days. Android runtime behavior on a device
+requires separate verification.
+
+For 2.2.0, synchronize the `mxlogger-spm` mirror and make the main and mirror `v2.2.0`
+tags available, then publish `MXLoggerCore`, `MXLogger` and Android 2.2.0 before the
+Flutter package. Run `scripts/pub_flutter_mxlogger.sh --dry-run` before publishing
+Flutter, then verify remote dependency resolution once the native releases are available.
+
 ## Android
 
 ```groovy
