@@ -142,6 +142,29 @@ tokens, cleanup and reopening. The Debug check also loads the Storyboard to chec
 outlets, navigation, localization and filters and renders the app's own views.
 Logs and previews are saved under `build/macos-native-demo/`.
 
+### Flutter macOS demo
+
+`flutter_mxlogger/example` shares the mobile demo's landing page, purple status card,
+grouped features, English/Chinese switching, file list and encrypted log viewer. The
+macOS app adds a resizable window, desktop settings dialogs, an independent Finder
+entry and explicit cleanup instructions. It covers writes, a 100,000-write benchmark,
+concurrent isolates, cleanup and filtering. Isolates share one process; use the native
+demo above for multiple processes.
+
+Run from the repository root, without publishing native 2.2.0 first:
+
+```bash
+bash scripts/run_flutter_macos_demo.sh
+# Set FLUTTER_BIN=/path/to/flutter/bin/flutter if Flutter is not on PATH.
+bash scripts/run_flutter_macos_demo.sh build --release
+bash scripts/run_flutter_macos_demo.sh test
+```
+
+The script scopes local CocoaPods to the command, and the demo follows the installed
+Xcode SDK's build floor. The UI check uses temporary logs and saves previews under
+`flutter_mxlogger/example/screenshots/macos-*.png`. See the
+[Flutter demo guide](flutter_mxlogger/example/README.md).
+
 ### macOS regression checks and release preparation
 
 On a Mac with Xcode (including the iOS SDK), CocoaPods, Python 3 and Flutter 3.44+:
@@ -154,7 +177,7 @@ python3 scripts/verify_macos_support.py --flutter /path/to/flutter/bin/flutter
 
 This runs Core tests (including real cooperating processes, cleanup and process-exit
 recovery), Objective-C / Swift API tests, the native macOS demo, Flutter unit tests, iOS device/simulator
-bridge compilation, and macOS Debug integration and Release encrypted write/read
+bridge compilation, Flutter desktop demo UI flows, and macOS Debug integration and Release encrypted write/read
 checks through both CocoaPods and SwiftPM. All bridge exports are checked after stripping.
 
 Fixtures use local native sources under `build/macos-validation/run-*/`, so the native

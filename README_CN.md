@@ -141,6 +141,26 @@ bash scripts/verify_macos_demo.sh
 Debug 还会加载 Storyboard 检查页面连接、导航、双语及筛选，生成应用自身视图的预览。
 日志和预览位于 `build/macos-native-demo/`。
 
+### Flutter macOS Demo
+
+Flutter 桌面示例位于 `flutter_mxlogger/example`，复用手机端的落地页、紫色状态卡、
+分组功能、中英文切换、文件列表及日志查看器，补充桌面窗口、设置弹窗和独立 Finder 入口。
+支持五级 / JSON / Token 写入、10 万条性能测试、多 isolate 并发校验、手动清理和日志筛选。
+macOS 隐藏后台清理开关；多 isolate 属于同一个进程，多进程演示见上方原生 Demo。
+
+在仓库根目录运行，无需先发布原生 2.2.0：
+
+```bash
+bash scripts/run_flutter_macos_demo.sh
+# Flutter 不在 PATH 时，在命令前设置 FLUTTER_BIN=/path/to/flutter/bin/flutter
+bash scripts/run_flutter_macos_demo.sh build --release
+bash scripts/run_flutter_macos_demo.sh test
+```
+
+启动脚本仅为当前命令启用本地 CocoaPods，Demo 自动适配本机 Xcode SDK 的最低构建版本。
+界面检查使用临时日志目录，并在 `flutter_mxlogger/example/screenshots/macos-*.png` 保存预览。
+详细说明见 [Flutter Demo](flutter_mxlogger/example/README.md)。
+
 ### macOS 回归验证与发布准备
 
 在安装了 Xcode（含 iOS SDK）、CocoaPods、Python 3 和 Flutter 3.44+ 的 Mac 上运行：
@@ -152,7 +172,7 @@ python3 scripts/verify_macos_support.py --flutter /path/to/flutter/bin/flutter
 ```
 
 脚本依次运行 Core 测试（包含真实多进程读写、清理、进程退出恢复）、Objective-C / Swift
-API 测试、原生 macOS Demo、Flutter 单元测试、iOS 设备与模拟器桥接编译，以及 macOS CocoaPods / SwiftPM
+API 测试、原生 macOS Demo、Flutter 单元测试、桌面 Demo 界面流程、iOS 设备与模拟器桥接编译，以及 macOS CocoaPods / SwiftPM
 两种接入方式的 Debug 集成测试和 Release 加密读写。Release 还会检查所有桥接导出符号。
 
 测试工程生成在 `build/macos-validation/run-*/`，使用本地原生源码，因此原生 2.2.0

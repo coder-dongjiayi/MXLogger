@@ -83,7 +83,8 @@ String tr(String key, [List<Object?> args = const []]) {
 
 const Map<String, String> _en = {
   // Landing
-  'landing.subtitle': 'High-performance cross-platform log library based on mmap',
+  'landing.subtitle':
+      'High-performance cross-platform log library based on mmap',
   'landing.enter': 'Enter Demo Console',
 
   // Common
@@ -112,7 +113,8 @@ const Map<String, String> _en = {
   'home.write.network.title': 'Write Network Request Log',
   'home.write.network.subtitle': 'msg is a JSON string, tag = request',
   'home.write.custom.title': 'log() Generic Write',
-  'home.write.custom.subtitle': 'Write with a custom level, here level = 3 (error)',
+  'home.write.custom.subtitle':
+      'Write with a custom level, here level = 3 (error)',
   'home.write.key.title': 'Write via loggerToken',
   'home.write.key.subtitle':
       'Modular scenario: pass only the key, MXLogger.infoLog',
@@ -133,6 +135,8 @@ const Map<String, String> _en = {
   'home.config.enable.title': 'Master Switch (enable)',
   'home.config.enable.subtitle': 'When off, all log writing stops',
   'home.config.background.title': 'Clean Expired Files in Background',
+  'home.config.macos.cleanup':
+      'macOS cleanup is explicit. Use Remove Expired Files to apply the age and disk limits; entering background does not trigger cleanup.',
   'home.config.age.title': 'Max Age (maxDiskAge)',
   'home.config.age.subtitle': 'Expired files will be removed; 0 = unlimited',
   'home.config.size.title': 'Disk Limit (maxDiskSize)',
@@ -167,6 +171,8 @@ const Map<String, String> _en = {
   'home.section.info.footer':
       'loggerToken = md5(namespace + directory); retrieve the instance across modules via loggerToken.',
   'home.info.path.title': 'Cache Directory (diskcachePath)',
+  'home.info.finder.title': 'Open in Finder',
+  'home.info.finder.subtitle': 'Open the current logger directory',
   'home.info.error.title': 'Last Error (errorDesc)',
   'home.info.error.subtitle': 'Error description when a write returns non-zero',
   'home.info.rebuild.title': 'Destroy & Rebuild Instance',
@@ -285,10 +291,12 @@ const Map<String, String> _zhHans = {
   'home.config.level.subtitle': '低于该等级的日志不写入文件',
   'home.config.console.title': '控制台打印 consoleEnable',
   'home.config.console.subtitle': '影响写入性能，发布环境建议关闭',
-  'home.config.console.subtitle.release': '仅 Debug 构建有效，Release/Profile 已在编译期移除',
+  'home.config.console.subtitle.release':
+      '仅 Debug 构建有效，Release/Profile 已在编译期移除',
   'home.config.enable.title': '日志总开关 enable',
   'home.config.enable.subtitle': '关闭后所有日志停止写入',
   'home.config.background.title': '进入后台清理过期文件',
+  'home.config.macos.cleanup': 'macOS 需手动清理。点击“清理过期文件”应用保留时间和磁盘上限，进入后台不会触发清理。',
   'home.config.age.title': '有效期 maxDiskAge',
   'home.config.age.subtitle': '超期文件将被清理，0 为无限制',
   'home.config.size.title': '容量上限 maxDiskSize',
@@ -315,8 +323,11 @@ const Map<String, String> _zhHans = {
 
   // 主页 - 实例信息
   'home.section.info': '实例信息',
-  'home.section.info.footer': 'loggerToken = md5(namespace + directory)，跨模块通过 loggerToken 找回实例。',
+  'home.section.info.footer':
+      'loggerToken = md5(namespace + directory)，跨模块通过 loggerToken 找回实例。',
   'home.info.path.title': '缓存目录 diskcachePath',
+  'home.info.finder.title': '在 Finder 中打开',
+  'home.info.finder.subtitle': '打开当前 logger 的日志目录',
   'home.info.error.title': '查看最近错误 errorDesc',
   'home.info.error.subtitle': '写入返回非 0 时的错误描述',
   'home.info.rebuild.title': '销毁并重建实例',

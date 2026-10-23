@@ -2,6 +2,7 @@
 # MXLogger for Flutter Change Log
 
 # v2.2.0 (Unreleased)
+* Complete the Flutter macOS demo with desktop layout, settings dialogs, manual cleanup guidance, a Finder entry, local-source launch commands, and UI regression previews.
 * Add macOS support, including the Flutter plugin, CocoaPods, SwiftPM, and cooperative multi-process access to a shared log directory.
 * Share the Apple plugin implementation through `darwin/` using Flutter 3.7's `sharedDarwinSource` layout.
 * On macOS, use `Application Support/<bundle-id>/MXLogger` by default (fall back to the process name if no bundle ID is available). Cleanup is explicit through `removeExpireData()`; `shouldRemoveExpiredDataWhenEnterBackground` has no effect.

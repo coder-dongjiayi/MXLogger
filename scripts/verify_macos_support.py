@@ -85,11 +85,14 @@ class Verification:
         for name in ["Core", "Android"]:
             (stage / name).symlink_to(ROOT / name, target_is_directory=True)
         excludes = [".git", ".idea", ".dart_tool", "build", "Pods", "ephemeral",
-                    ".symlinks", ".build", ".swiftpm", "FlutterFramework", "*.dylib"]
+                    ".symlinks", ".build", ".swiftpm", "FlutterFramework", "*.dylib",
+                    "SDK.xcconfig", "Podfile.lock"]
         self.run(f"{manager}-copy", ["rsync", "-a"] +
                  [f"--exclude={item}" for item in excludes] +
                  [str(ROOT / "flutter_mxlogger") + "/", str(plugin) + "/"])
         example = plugin / "example"
+        (example / "macos/Runner/Configs/SDK.xcconfig").write_text(
+            f"MXLOGGER_DEMO_DEPLOYMENT_TARGET = {self.macos_target}\n")
         replace_once(example / "pubspec.yaml", "\nflutter:\n",
                      "\nflutter:\n  config:\n    enable-swift-package-manager: " +
                      str(manager == "spm").lower() + "\n")
@@ -99,7 +102,13 @@ class Verification:
                                  project.read_text()))
         if manager == "spm":
             # Exercise SwiftPM alone, without falling back to CocoaPods.
+            self.run("spm-deintegrate", ["pod", "deintegrate",
+                                         example / "macos/Runner.xcodeproj"])
             (example / "macos/Podfile").unlink()
+            workspace = example / "macos/Runner.xcworkspace/contents.xcworkspacedata"
+            workspace.write_text(re.sub(
+                r'\s*<FileRef\s+location\s*=\s*"group:Pods/Pods.xcodeproj">\s*</FileRef>',
+                '', workspace.read_text()))
             for name in ["Flutter-Debug.xcconfig", "Flutter-Release.xcconfig"]:
                 config = example / "macos/Flutter" / name
                 config.write_text("\n".join(
@@ -118,16 +127,23 @@ class Verification:
             podfile = example / "macos/Podfile"
             replace_once(podfile, "File.expand_path('../../..', __dir__)",
                          ruby_string(ROOT))
-            replace_once(podfile, "platform :osx, '10.14'",
-                         f"platform :osx, '{self.macos_target}'")
-            replace_once(podfile, "    flutter_additional_macos_build_settings(target)",
-                         "    flutter_additional_macos_build_settings(target)\n"
-                         "    target.build_configurations.each { |config| "
-                         "config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = "
-                         f"'{self.macos_target}'" + " }")
+            replace_once(podfile,
+                         "demo_target = [Gem::Version.new('10.14'), Gem::Version.new(sdk_minimum)].max.to_s",
+                         f"demo_target = '{self.macos_target}'")
         pub = [self.flutter, "pub", "get"] + (["--offline"] if self.offline else [])
         self.run(f"{manager}-pub", pub, cwd=plugin)
         return plugin
+
+    def flutter_demo(self, manager, example):
+        try:
+            self.run(f"{manager}-demo", [self.flutter, "drive", "-d", "macos", "--no-pub",
+                     "--driver=test_driver/integration_test.dart",
+                     "--target=integration_test/macos_demo_test.dart"], cwd=example, timeout=600)
+        finally:
+            previews = self.logs / f"{manager}-demo-previews"
+            previews.mkdir(exist_ok=True)
+            for path in (example / "screenshots").glob("macos-*.png"):
+                shutil.copy2(path, previews / path.name)
 
     def ios_bridge(self, plugin):
         source = plugin / "darwin/flutter_mxlogger/Sources/flutter_mxlogger"
@@ -160,6 +176,7 @@ class Verification:
         self.run(f"{manager}-integration", [self.flutter, "test",
                  "integration_test/macos_logger_test.dart", "-d", "macos",
                  "--no-pub", "--reporter", "expanded"], cwd=example)
+        self.flutter_demo(manager, example)
         self.run(f"{manager}-release-build", [self.flutter, "build", "macos",
                  "--release", "-t", "integration_test/macos_release_smoke.dart",
                  "--no-pub"], cwd=example)

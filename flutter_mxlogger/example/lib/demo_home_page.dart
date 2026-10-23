@@ -40,7 +40,9 @@ import 'log_file_list_page.dart';
 const bool kConsoleAvailable = kDebugMode;
 
 class DemoHomePage extends StatefulWidget {
-  const DemoHomePage({super.key});
+  const DemoHomePage({super.key, this.directory});
+
+  final String? directory;
 
   @override
   State<DemoHomePage> createState() => _DemoHomePageState();
@@ -86,24 +88,28 @@ class _DemoHomePageState extends State<DemoHomePage> {
     // 文件头信息: 文件创建时会写入，一般放 App 版本、平台等业务信息
     final fileHeader = jsonEncode({
       'platform': Platform.operatingSystem,
-      'appVersion': '2.0.0',
+      'appVersion': '2.2.0',
       'systemVersion': Platform.operatingSystemVersion,
       'from': 'flutter-demo',
     });
 
     // 按小时分片存储 + AES CFB-128 加密(与原生 demo 相同参数)
     final logger = await MXLogger.initialize(
-        nameSpace: kDemoNamespace,
-        consoleEnable: kConsoleAvailable,
-        storagePolicy: MXStoragePolicyType.yyyyMMddHH,
-        fileHeader: fileHeader,
-        cryptKey: kDemoCryptKey,
-        iv: kDemoIV);
+      nameSpace: kDemoNamespace,
+      directory: widget.directory,
+      consoleEnable: kConsoleAvailable,
+      storagePolicy: MXStoragePolicyType.yyyyMMddHH,
+      fileHeader: fileHeader,
+      cryptKey: kDemoCryptKey,
+      iv: kDemoIV,
+    );
 
     logger.setMaxDiskAge(60 * 60 * 24 * 7); // 日志最多保留 7 天
     logger.setMaxDiskSize(1024 * 1024 * 10); // 日志最多占用 10 MB
     logger.setLevel(0); // 0:debug 全部写入
-    logger.shouldRemoveExpiredDataWhenEnterBackground(true);
+    if (!Platform.isMacOS) {
+      logger.shouldRemoveExpiredDataWhenEnterBackground(true);
+    }
 
     if (!mounted) return;
     setState(() {
@@ -136,8 +142,11 @@ class _DemoHomePageState extends State<DemoHomePage> {
     if (logger == null) return;
     const name = 'mxlogger';
     const tag = 'demo';
-    final msg =
-        tr('log.msg.fmt', [_writeCount + 1, levelName(level), timeNowText()]);
+    final msg = tr('log.msg.fmt', [
+      _writeCount + 1,
+      levelName(level),
+      timeNowText(),
+    ]);
     int result;
     switch (level) {
       case 0:
@@ -162,7 +171,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
       'costTime': '183ms',
       'requestHeaders': {
         'content-type': 'application/json',
-        'token': 'eyJhbGciOi...'
+        'token': 'eyJhbGciOi...',
       },
       'requestBody': {'mobile': '188****8888'},
       'response': {'code': 0, 'msg': 'ok'},
@@ -181,8 +190,12 @@ class _DemoHomePageState extends State<DemoHomePage> {
 
   void _writeByLoggerToken() {
     // 业务组件不持有 logger 对象，只拿一个字符串 token 即可写入
-    MXLogger.infoLog(_loggerToken, tr('log.module.msg'),
-        name: 'module.user', tag: 'module');
+    MXLogger.infoLog(
+      _loggerToken,
+      tr('log.module.msg'),
+      name: 'module.user',
+      tag: 'module',
+    );
     _handleWriteResult(0, tr('toast.key.success'));
   }
 
@@ -259,8 +272,11 @@ class _DemoHomePageState extends State<DemoHomePage> {
   /// 主 isolate 来源: 模拟 UI 事件里打日志，边写边读 getLogFiles
   Future<void> _writeOnMainIsolate(String runName, int total) async {
     for (var i = 1; i <= total; i++) {
-      _logger!.info('#${'$i'.padLeft(5, '0')} main concurrent write',
-          name: runName, tag: 'main');
+      _logger!.info(
+        '#${'$i'.padLeft(5, '0')} main concurrent write',
+        name: runName,
+        tag: 'main',
+      );
       if (i % 50 == 0) {
         _logger!.getLogFiles(); // 覆盖"写入与查询并发"的场景
         await Future<void>.delayed(Duration.zero); // 让出事件循环，保持 UI 响应
@@ -270,7 +286,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
 
   /// 解析当前日志文件，按来源校验: 条数是否等于预期、序号是否连续(单来源内顺序不被打乱)
   Future<void> _verifyConcurrent(
-      String runName, Map<String, int> expected) async {
+    String runName,
+    Map<String, int> expected,
+  ) async {
     showToast(context, tr('toast.concurrent.verifying'));
     final logger = _logger!;
 
@@ -314,30 +332,34 @@ class _DemoHomePageState extends State<DemoHomePage> {
           ? tr('verify.line.ok')
           : (countOK ? tr('verify.line.order') : tr('verify.line.missing'));
       report.writeln(
-          tr('verify.line.fmt', [tag, sequence.length, expectCount, state]));
+        tr('verify.line.fmt', [tag, sequence.length, expectCount, state]),
+      );
     }
     report.write('\n${tr('verify.summary.fmt', [parsed.total, tags.length])}');
 
     if (!mounted) return;
     await _showAlert(
-        tr(allPass ? 'verify.pass.title' : 'verify.fail.title'),
-        report.toString());
+      tr(allPass ? 'verify.pass.title' : 'verify.fail.title'),
+      report.toString(),
+    );
   }
 
   // ---------------- 配置动作 ----------------
 
   Future<void> _pickLevel() async {
     final selected = await _showOptionsSheet<int>(
-        tr('home.config.level.title'), tr('picker.level.message'),
-        [for (var l = 0; l <= 4; l++) MapEntry('${levelName(l)} ($l)', l)]);
+      tr('home.config.level.title'),
+      tr('picker.level.message'),
+      [for (var l = 0; l <= 4; l++) MapEntry('${levelName(l)} ($l)', l)],
+    );
     if (selected == null) return;
     _logger?.setLevel(selected);
     setState(() => _level = selected);
   }
 
   Future<void> _pickDiskAge() async {
-    final selected = await _showOptionsSheet<int>(
-        'maxDiskAge', tr('picker.age.message'), [
+    final selected =
+        await _showOptionsSheet<int>('maxDiskAge', tr('picker.age.message'), [
       MapEntry(tr('duration.1min'), 60),
       MapEntry(tr('duration.1hour'), 3600),
       MapEntry(tr('duration.1day'), 86400),
@@ -350,8 +372,8 @@ class _DemoHomePageState extends State<DemoHomePage> {
   }
 
   Future<void> _pickDiskSize() async {
-    final selected = await _showOptionsSheet<int>(
-        'maxDiskSize', tr('picker.size.message'), [
+    final selected =
+        await _showOptionsSheet<int>('maxDiskSize', tr('picker.size.message'), [
       const MapEntry('1 MB', 1024 * 1024),
       const MapEntry('10 MB', 1024 * 1024 * 10),
       const MapEntry('100 MB', 1024 * 1024 * 100),
@@ -367,9 +389,15 @@ class _DemoHomePageState extends State<DemoHomePage> {
   Future<void> _openFileList() async {
     final logger = _logger;
     if (logger == null) return;
-    await Navigator.of(context).push(MaterialPageRoute(
+    await Navigator.of(context).push(
+      MaterialPageRoute(
         builder: (_) => LogFileListPage(
-            logger: logger, cryptKey: kDemoCryptKey, iv: kDemoIV)));
+          logger: logger,
+          cryptKey: kDemoCryptKey,
+          iv: kDemoIV,
+        ),
+      ),
+    );
     _refreshStatus();
   }
 
@@ -381,12 +409,16 @@ class _DemoHomePageState extends State<DemoHomePage> {
         content: Text(tr('alert.removeall.message')),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(tr('common.cancel'))),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(tr('common.cancel')),
+          ),
           TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(tr('common.remove'),
-                  style: TextStyle(color: kLevelColors[3]))),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(
+              tr('common.remove'),
+              style: TextStyle(color: kLevelColors[3]),
+            ),
+          ),
         ],
       ),
     );
@@ -413,6 +445,20 @@ class _DemoHomePageState extends State<DemoHomePage> {
     showToast(context, toast);
   }
 
+  Future<void> _openInFinder() async {
+    try {
+      await const MethodChannel(
+        'com.mxlogger.demo/desktop',
+      ).invokeMethod<void>('openDirectory', _diskCachePath);
+    } on PlatformException catch (error) {
+      if (!mounted) return;
+      await _showAlert(
+        tr('home.info.finder.title'),
+        error.message ?? error.code,
+      );
+    }
+  }
+
   // ---------------- UI ----------------
 
   @override
@@ -422,37 +468,48 @@ class _DemoHomePageState extends State<DemoHomePage> {
     return Scaffold(
       backgroundColor: groupedBg(context),
       appBar: AppBar(
-        title: Text(tr('home.title'),
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+        title: Text(
+          tr('home.title'),
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+        ),
         centerTitle: true,
         backgroundColor: groupedBg(context),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         actions: const [LanguageToggleButton(), SizedBox(width: 8)],
       ),
-      body: _logger == null
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
-              children: [
-                _statusCard(),
-                _section(tr('home.section.write'),
+      body: DemoContent(
+        child: _logger == null
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+                children: [
+                  _statusCard(),
+                  _section(
+                    tr('home.section.write'),
                     footer: tr('home.section.write.footer'),
-                    rows: _writeRows()),
-                _section(tr('home.section.config'),
-                    footer: tr(kConsoleAvailable
-                        ? 'home.section.config.footer'
-                        : 'home.section.config.footer.release'),
-                    rows: _configRows()),
-                _section(tr('home.section.perf'),
+                    rows: _writeRows(),
+                  ),
+                  _section(
+                    tr('home.section.config'),
+                    footer:
+                        '${tr(kConsoleAvailable ? 'home.section.config.footer' : 'home.section.config.footer.release')}${Platform.isMacOS ? '\n${tr('home.config.macos.cleanup')}' : ''}',
+                    rows: _configRows(),
+                  ),
+                  _section(
+                    tr('home.section.perf'),
                     footer: tr('home.section.perf.footer'),
-                    rows: _perfRows()),
-                _section(tr('home.section.file'), rows: _fileRows()),
-                _section(tr('home.section.info'),
+                    rows: _perfRows(),
+                  ),
+                  _section(tr('home.section.file'), rows: _fileRows()),
+                  _section(
+                    tr('home.section.info'),
                     footer: tr('home.section.info.footer'),
-                    rows: _infoRows()),
-              ],
-            ),
+                    rows: _infoRows(),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 
@@ -462,14 +519,16 @@ class _DemoHomePageState extends State<DemoHomePage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-            colors: [Color(0xFF4F46E5), Color(0xFF6366F1)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight),
+          colors: [Color(0xFF4F46E5), Color(0xFF6366F1)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         boxShadow: [
           BoxShadow(
-              color: kBrandColor.withValues(alpha: 0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 6)),
+            color: kBrandColor.withValues(alpha: 0.35),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
         ],
       ),
       child: Column(
@@ -479,37 +538,50 @@ class _DemoHomePageState extends State<DemoHomePage> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(9),
-                child: Image.asset('assets/mxlogger_logo.png',
-                    width: 40, height: 40),
+                child: Image.asset(
+                  'assets/mxlogger_logo.png',
+                  width: 40,
+                  height: 40,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('MXLogger',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700)),
+                    const Text(
+                      'MXLogger',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(tr('home.card.namespace.fmt', [kDemoNamespace]),
-                        style: const TextStyle(
-                            color: Colors.white70, fontSize: 11)),
+                    Text(
+                      tr('home.card.namespace.fmt', [kDemoNamespace]),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                      ),
+                    ),
                   ],
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(8)),
-                child: const Text('mmap',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600)),
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'mmap',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
@@ -532,16 +604,21 @@ class _DemoHomePageState extends State<DemoHomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700)),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: 3),
-          Text(label,
-              style: const TextStyle(color: Colors.white60, fontSize: 11)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white60, fontSize: 11),
+          ),
         ],
       ),
     );
@@ -603,10 +680,13 @@ class _DemoHomePageState extends State<DemoHomePage> {
         icon: Icons.terminal,
         tint: kLevelColors[0],
         title: tr('home.config.console.title'),
-        subtitle: tr(kConsoleAvailable
-            ? 'home.config.console.subtitle'
-            : 'home.config.console.subtitle.release'),
+        subtitle: tr(
+          kConsoleAvailable
+              ? 'home.config.console.subtitle'
+              : 'home.config.console.subtitle.release',
+        ),
         value: _consoleOn,
+
         /// release/profile 构建下控制台输出已被编译期裁掉，开关置灰(onChanged 传 null)
         /// Console output is compiled out of release/profile builds, so the switch is
         /// disabled there (onChanged: null)
@@ -615,7 +695,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
                 _logger?.setConsoleEnable(isOn);
                 setState(() => _consoleOn = isOn);
                 showToast(
-                    context, tr(isOn ? 'toast.console.on' : 'toast.console.off'));
+                  context,
+                  tr(isOn ? 'toast.console.on' : 'toast.console.off'),
+                );
               }
             : null,
       ),
@@ -631,17 +713,18 @@ class _DemoHomePageState extends State<DemoHomePage> {
           showToast(context, tr(isOn ? 'toast.enable.on' : 'toast.enable.off'));
         },
       ),
-      _switchRow(
-        icon: Icons.nightlight_round,
-        tint: kBrandColor,
-        title: tr('home.config.background.title'),
-        subtitle: 'shouldRemoveExpiredDataWhenEnterBackground',
-        value: _backgroundCleanOn,
-        onChanged: (isOn) {
-          _logger?.shouldRemoveExpiredDataWhenEnterBackground(isOn);
-          setState(() => _backgroundCleanOn = isOn);
-        },
-      ),
+      if (!Platform.isMacOS)
+        _switchRow(
+          icon: Icons.nightlight_round,
+          tint: kBrandColor,
+          title: tr('home.config.background.title'),
+          subtitle: 'shouldRemoveExpiredDataWhenEnterBackground',
+          value: _backgroundCleanOn,
+          onChanged: (isOn) {
+            _logger?.shouldRemoveExpiredDataWhenEnterBackground(isOn);
+            setState(() => _backgroundCleanOn = isOn);
+          },
+        ),
       _actionRow(
         icon: Icons.schedule,
         tint: kLevelColors[2],
@@ -740,6 +823,15 @@ class _DemoHomePageState extends State<DemoHomePage> {
         subtitle: _diskCachePath,
         onTap: () => _copyText(_diskCachePath, tr('toast.path.copied')),
       ),
+      if (Platform.isMacOS)
+        _actionRow(
+          icon: Icons.folder,
+          tint: kLevelColors[1],
+          title: tr('home.info.finder.title'),
+          subtitle: tr('home.info.finder.subtitle'),
+          push: true,
+          onTap: _openInFinder,
+        ),
       _actionRow(
         icon: Icons.feedback,
         tint: kLevelColors[2],
@@ -747,8 +839,10 @@ class _DemoHomePageState extends State<DemoHomePage> {
         subtitle: tr('home.info.error.subtitle'),
         onTap: () {
           final desc = _logger?.errorDesc;
-          _showAlert('errorDesc',
-              (desc == null || desc.isEmpty) ? tr('alert.no.error') : desc);
+          _showAlert(
+            'errorDesc',
+            (desc == null || desc.isEmpty) ? tr('alert.no.error') : desc,
+          );
         },
       ),
       _actionRow(
@@ -767,25 +861,31 @@ class _DemoHomePageState extends State<DemoHomePage> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-          child: Text(title,
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: secondaryText(context))),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: secondaryText(context),
+            ),
+          ),
         ),
         Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-              color: cardBg(context), borderRadius: BorderRadius.circular(12)),
+            color: cardBg(context),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Column(
             children: [
               for (var i = 0; i < rows.length; i++) ...[
                 if (i > 0)
                   Divider(
-                      height: 0.5,
-                      thickness: 0.5,
-                      indent: 58,
-                      color: demoDividerColor(context)),
+                    height: 0.5,
+                    thickness: 0.5,
+                    indent: 58,
+                    color: demoDividerColor(context),
+                  ),
                 rows[i],
               ],
             ],
@@ -794,8 +894,10 @@ class _DemoHomePageState extends State<DemoHomePage> {
         if (footer != null)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Text(footer,
-                style: TextStyle(fontSize: 12, color: tertiaryText(context))),
+            child: Text(
+              footer,
+              style: TextStyle(fontSize: 12, color: tertiaryText(context)),
+            ),
           ),
       ],
     );
@@ -806,7 +908,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
       width: 30,
       height: 30,
       decoration: BoxDecoration(
-          color: tint, borderRadius: BorderRadius.circular(8)),
+        color: tint,
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Icon(icon, size: 18, color: Colors.white),
     );
   }
@@ -832,16 +936,21 @@ class _DemoHomePageState extends State<DemoHomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: TextStyle(
-                          fontSize: 15, color: primaryText(context))),
+                  Text(
+                    title,
+                    style: TextStyle(fontSize: 15, color: primaryText(context)),
+                  ),
                   if (subtitle != null && subtitle.isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Text(subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: 12, color: secondaryText(context))),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: secondaryText(context),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -850,11 +959,12 @@ class _DemoHomePageState extends State<DemoHomePage> {
               const SizedBox(width: 8),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 110),
-                child: Text(value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 13, color: secondaryText(context))),
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13, color: secondaryText(context)),
+                ),
               ),
             ],
             if (push) ...[
@@ -873,6 +983,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     required String title,
     String? subtitle,
     required bool value,
+
     /// null 表示该开关在当前构建下不可用，Switch 自动变为置灰不可点
     /// null means the switch is unavailable in this build; Switch renders it greyed out
     ValueChanged<bool>? onChanged,
@@ -887,19 +998,26 @@ class _DemoHomePageState extends State<DemoHomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: TextStyle(
-                        fontSize: 15,
-                        color: onChanged == null
-                            ? secondaryText(context)
-                            : primaryText(context))),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: onChanged == null
+                        ? secondaryText(context)
+                        : primaryText(context),
+                  ),
+                ),
                 if (subtitle != null && subtitle.isNotEmpty) ...[
                   const SizedBox(height: 2),
-                  Text(subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 12, color: secondaryText(context))),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: secondaryText(context),
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -911,12 +1029,41 @@ class _DemoHomePageState extends State<DemoHomePage> {
   }
 
   Future<T?> _showOptionsSheet<T>(
-      String title, String subtitle, List<MapEntry<String, T>> options) {
+    String title,
+    String subtitle,
+    List<MapEntry<String, T>> options,
+  ) {
+    if (Platform.isMacOS) {
+      return showDialog<T>(
+        context: context,
+        builder: (dialogContext) => SimpleDialog(
+          title: Text(title),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+              child: Text(
+                subtitle,
+                style: TextStyle(color: secondaryText(context)),
+              ),
+            ),
+            for (final option in options)
+              SimpleDialogOption(
+                onPressed: () => Navigator.of(dialogContext).pop(option.value),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(option.key),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
     return showModalBottomSheet<T>(
       context: context,
       backgroundColor: cardBg(context),
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (sheetContext) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -925,13 +1072,21 @@ class _DemoHomePageState extends State<DemoHomePage> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
               child: Column(
                 children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(subtitle,
-                      style: TextStyle(
-                          fontSize: 12, color: secondaryText(context))),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: secondaryText(context),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -955,12 +1110,16 @@ class _DemoHomePageState extends State<DemoHomePage> {
         content: message.isEmpty
             ? null
             : SingleChildScrollView(
-                child: SelectableText(message,
-                    style: const TextStyle(fontSize: 14))),
+                child: SelectableText(
+                  message,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(tr('common.ok'))),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(tr('common.ok')),
+          ),
         ],
       ),
     );
@@ -978,9 +1137,12 @@ Future<int> _spawnBenchmark(String loggerToken) {
     final watch = Stopwatch()..start();
     for (var i = 1; i <= 100000; i++) {
       // 每条日志带序号，方便在查看器里核对写入顺序和完整性
-      MXLogger.infoLog(loggerToken,
-          '[${'$i'.padLeft(6, '0')}] This is a benchmark loooooooooooooooooooooooooooooog',
-          name: 'benchmark', tag: 'perf');
+      MXLogger.infoLog(
+        loggerToken,
+        '[${'$i'.padLeft(6, '0')}] This is a benchmark loooooooooooooooooooooooooooooog',
+        name: 'benchmark',
+        tag: 'perf',
+      );
     }
     return watch.elapsedMilliseconds;
   });
@@ -989,7 +1151,11 @@ Future<int> _spawnBenchmark(String loggerToken) {
 /// 启动一个后台 isolate 写入来源。isolate 之间共享的是 native 侧同一个
 /// logger(通过 loggerToken 寻址)，与原生端多线程写同一个 logger 的场景等价。
 Future<void> _spawnConcurrentWorker(
-    String loggerToken, String runName, String tag, int total) {
+  String loggerToken,
+  String runName,
+  String tag,
+  int total,
+) {
   return Isolate.run(() {
     final random = Random();
     for (var i = 1; i <= total; i++) {
@@ -1010,10 +1176,15 @@ Future<void> _spawnConcurrentWorker(
 
 /// 后台 isolate 解析日志文件，收集指定 runName 各来源的序号列表
 Future<({int total, Map<String, List<int>> seqs})> _parseRunRecords(
-    String path, String runName) {
+  String path,
+  String runName,
+) {
   return Isolate.run(() {
     final records = MXLogger.selectLogmsg(
-        diskcacheFilePath: path, cryptKey: kDemoCryptKey, iv: kDemoIV);
+      diskcacheFilePath: path,
+      cryptKey: kDemoCryptKey,
+      iv: kDemoIV,
+    );
     // 按 tag 收集本轮日志的序号(保持文件中的先后顺序)
     final seqs = <String, List<int>>{};
     for (final record in records) {

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'demo_home_page.dart';
@@ -11,7 +13,9 @@ Future<void> main() async {
 }
 
 class MXDemoApp extends StatelessWidget {
-  const MXDemoApp({super.key});
+  const MXDemoApp({super.key, this.directory});
+
+  final String? directory;
 
   @override
   Widget build(BuildContext context) {
@@ -25,16 +29,20 @@ class MXDemoApp extends StatelessWidget {
       darkTheme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-            seedColor: kBrandColor, brightness: Brightness.dark),
+          seedColor: kBrandColor,
+          brightness: Brightness.dark,
+        ),
       ),
-      home: const LandingPage(),
+      home: LandingPage(directory: directory),
     );
   }
 }
 
 /// 落地页(对齐 iOS demo 的 Main.storyboard 落地页)
 class LandingPage extends StatelessWidget {
-  const LandingPage({super.key});
+  const LandingPage({super.key, this.directory});
+
+  final String? directory;
 
   @override
   Widget build(BuildContext context) {
@@ -59,20 +67,27 @@ class LandingPage extends StatelessWidget {
               const Spacer(flex: 3),
               ClipRRect(
                 borderRadius: BorderRadius.circular(22),
-                child: Image.asset('assets/mxlogger_logo.png',
-                    width: 96, height: 96),
+                child: Image.asset(
+                  'assets/mxlogger_logo.png',
+                  width: 96,
+                  height: 96,
+                ),
               ),
               const SizedBox(height: 28),
-              Text('MXLogger',
-                  style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w700,
-                      color: primaryText(context))),
+              Text(
+                'MXLogger',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w700,
+                  color: primaryText(context),
+                ),
+              ),
               const SizedBox(height: 10),
-              Text(tr('landing.subtitle'),
-                  textAlign: TextAlign.center,
-                  style:
-                      TextStyle(fontSize: 15, color: secondaryText(context))),
+              Text(
+                tr('landing.subtitle'),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15, color: secondaryText(context)),
+              ),
               const Spacer(flex: 4),
               SizedBox(
                 width: 240,
@@ -84,16 +99,24 @@ class LandingPage extends StatelessWidget {
                     shape: const StadiumBorder(),
                   ),
                   onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) => const DemoHomePage())),
-                  child: Text(tr('landing.enter'),
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                    MaterialPageRoute(
+                      builder: (_) => DemoHomePage(directory: directory),
+                    ),
+                  ),
+                  child: Text(
+                    tr('landing.enter'),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
-              Text('Flutter Demo · flutter_mxlogger 2.2.0',
-                  style: TextStyle(fontSize: 12, color: tertiaryText(context))),
+              Text(
+                '${Platform.isMacOS ? 'Flutter macOS' : 'Flutter'} Demo · flutter_mxlogger 2.2.0',
+                style: TextStyle(fontSize: 12, color: tertiaryText(context)),
+              ),
               const SizedBox(height: 48),
             ],
           ),

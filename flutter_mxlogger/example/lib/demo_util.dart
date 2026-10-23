@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'demo_l10n.dart';
@@ -94,6 +96,23 @@ Color tertiaryText(BuildContext context) =>
 Color demoDividerColor(BuildContext context) =>
     _isDark(context) ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA);
 
+/// Keep the same grouped demo pages readable in a resizable desktop window.
+class DemoContent extends StatelessWidget {
+  const DemoContent({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Platform.isMacOS
+      ? Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 960),
+            child: child,
+          ),
+        )
+      : child;
+}
+
 /// 语言切换按钮: 英文环境显示 "中文" 中文环境显示 "English"
 class LanguageToggleButton extends StatelessWidget {
   const LanguageToggleButton({super.key});
@@ -107,10 +126,13 @@ class LanguageToggleButton extends StatelessWidget {
     return TextButton(
       onPressed: DemoL10n.toggle,
       style: TextButton.styleFrom(
-          foregroundColor: secondaryText(context),
-          visualDensity: VisualDensity.compact),
-      child: Text(DemoL10n.switchButtonTitle,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+        foregroundColor: secondaryText(context),
+        visualDensity: VisualDensity.compact,
+      ),
+      child: Text(
+        DemoL10n.switchButtonTitle,
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      ),
     );
   }
 }
@@ -119,15 +141,22 @@ class LanguageToggleButton extends StatelessWidget {
 void showToast(BuildContext context, String text) {
   final messenger = ScaffoldMessenger.of(context);
   messenger.clearSnackBars();
-  messenger.showSnackBar(SnackBar(
-    content: Text(text,
+  messenger.showSnackBar(
+    SnackBar(
+      content: Text(
+        text,
         textAlign: TextAlign.center,
         style: const TextStyle(
-            fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white)),
-    behavior: SnackBarBehavior.floating,
-    backgroundColor: Colors.black.withValues(alpha: 0.78),
-    shape: const StadiumBorder(),
-    margin: const EdgeInsets.only(left: 48, right: 48, bottom: 90),
-    duration: const Duration(milliseconds: 1600),
-  ));
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.white,
+        ),
+      ),
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.black.withValues(alpha: 0.78),
+      shape: const StadiumBorder(),
+      margin: const EdgeInsets.only(left: 48, right: 48, bottom: 90),
+      duration: const Duration(milliseconds: 1600),
+    ),
+  );
 }

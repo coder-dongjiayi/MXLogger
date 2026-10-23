@@ -5,3 +5,5 @@
 # Xcode-related
 **/dgph
 **/xcuserdata/
+Runner/Configs/SDK.xcconfig
+Podfile.lock

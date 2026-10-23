@@ -13,6 +13,7 @@ on:
       - 'spm/**'
       - '*.podspec'
       - 'scripts/verify_*'
+      - 'scripts/run_flutter_macos_demo.sh'
       - 'scripts/sync_spm_mirror.sh'
       - '.github/workflows/verify-logger.yml'
 

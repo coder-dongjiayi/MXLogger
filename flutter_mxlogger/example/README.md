@@ -1,9 +1,54 @@
-# MXLogger Flutter example
+# MXLogger Flutter demo — iOS / Android / macOS
 
 The example uses the plugin from the parent directory. The plugin requires
 Flutter 3.7+, while this example's dependencies require Dart 3.8+.
 
-On macOS, run from this directory:
+The macOS demo reuses the same landing page, grouped feature console, file list,
+encrypted log viewer and English/Chinese switching as the mobile examples. It adds
+a resizable desktop window, readable content width, dialog-based settings, a
+separate **Open in Finder** row, and explicit cleanup instructions. The background
+cleanup switch is hidden on macOS. Release/profile builds disable the console switch.
+
+Defaults match the native demos: namespace `com.djy.mxlogger`, hourly files,
+AES-CFB-128, seven-day retention and a 10 MB disk budget. Features include all five
+levels, JSON/generic/token writes, configuration, a 100,000-write benchmark,
+concurrent isolates with count/order verification, manual cleanup, rebuilding,
+file browsing, level/keyword filters and copying full log messages. Isolates share
+one process; the separate native macOS demo also demonstrates multiple processes.
+
+## Run the unpublished macOS demo
+
+From the repository root, with Flutter, Xcode and CocoaPods installed:
+
+```bash
+bash scripts/run_flutter_macos_demo.sh
+# If Flutter is not on PATH:
+FLUTTER_BIN=/path/to/flutter/bin/flutter bash scripts/run_flutter_macos_demo.sh
+```
+
+This starts the actual `lib/main.dart` app using this checkout's native CocoaPods.
+It scopes `MXLOGGER_LOCAL_NATIVE=1` and `FLUTTER_SWIFT_PACKAGE_MANAGER=false` to the
+command, without changing Flutter's global settings or requiring published 2.2.0
+dependencies. The demo's CocoaPods setup generates an ignored
+`macos/Runner/Configs/SDK.xcconfig` to match the installed Xcode SDK's build floor;
+the plugin's declared macOS minimum remains 10.14.
+
+Build the actual demo in Release, or exercise its desktop UI and save previews:
+
+```bash
+bash scripts/run_flutter_macos_demo.sh build --release
+bash scripts/run_flutter_macos_demo.sh test
+```
+
+The UI check uses a temporary log directory and covers settings, all write APIs,
+concurrent isolates, navigation, localization and filtering. Its previews are
+rendered from the app's own widget tree and saved to `screenshots/macos-*.png`.
+
+![macOS Flutter demo](screenshots/macos-02-home.png)
+
+## Published dependencies and plugin checks
+
+Once native dependencies are published, run from this directory:
 
 ```bash
 flutter pub get
@@ -34,8 +79,10 @@ build/macos/Build/Products/Release/example.app/Contents/MacOS/example
 
 The Release check prints `MXLOGGER_MACOS_RELEASE_SMOKE_OK` and exits with code 0
 after an encrypted write/read round trip. Both checks remove their test logs.
-Use a deployment target supported by your installed Xcode SDK for the Runner
-and its dependencies; the plugin's declared macOS minimum is 10.14.
+The Runner and its dependencies use the generated SDK configuration described above.
+For SwiftPM builds with a newer Xcode SDK, set `MXLOGGER_DEMO_DEPLOYMENT_TARGET`
+to a supported macOS version in `macos/Runner/Configs/SDK.xcconfig`, or use the
+isolated regression fixtures below, which generate it automatically.
 
 On macOS, `shouldRemoveExpiredDataWhenEnterBackground` has no effect. Call
 `removeExpireData()` explicitly when your app wants to enforce its age and size
