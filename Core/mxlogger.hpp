@@ -132,15 +132,19 @@ public:
     /// max_size 则从最旧的文件开始继续删除；当前正在写入的文件不会被删除
     /// Clean up log files: first delete expired files (last-modified time older than
     /// max_age), then, if the total size still exceeds max_size, keep deleting from the
-    /// oldest file onward; the file currently being written is never deleted
+    /// oldest file onward; the file currently being written is never deleted.
+    /// macOS also skips files held by other cooperating logger processes.
     void remove_expire_data();
 
     /// 删除所有日志文件
     /// Remove all log files
+    /// macOS: 与其他进程协调删除；仍存活的 logger 在下次写入时重开文件。
+    /// macOS: coordinated across processes; live loggers reopen on their next write.
     void remove_all();
 
     /// 删除除当前正在写入文件之外的所有日志文件
-    /// Remove all log files except the one currently being written
+    /// Remove all log files except the one currently being written.
+    /// On macOS, also retain files held by other cooperating logger processes.
     void remove_before_all();
 
     /// 返回日志目录已占用的磁盘大小(byte)
@@ -201,6 +205,9 @@ public:
     ///
     /// @return 0 成功  -1 扩容失败  -2 解除映射失败  -3 映射失败
     ///         0 success, -1 file expansion failed, -2 unmap failed, -3 mmap failed
+    ///         macOS: -3 也包含文件状态刷新失败；-4 为进程锁失败或超过 uint32 长度上限。
+    ///         macOS: -3 also covers state-refresh failure; -4 means a process-lock
+    ///         failure or a file length exceeding the uint32 limit.
     ///
     /// @param level 日志等级：0 debug 1 info 2 warn 3 error 4 fatal
     ///              log level: 0 debug, 1 info, 2 warn, 3 error, 4 fatal

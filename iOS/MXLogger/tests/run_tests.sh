@@ -70,5 +70,15 @@ for PLATFORM in iphoneos iphonesimulator; do
     xcrun clang++ -isysroot "$IOS_SDK" -target "$TARGET" \
         -std=c++17 -fobjc-arc -c -I"$CORE/include" -I"$CORE" \
         "$APPLE/MXLogger.mm" -o "$BUILD/MXLogger-$PLATFORM.o"
+    # Compile the modified Core paths too; no desktop locking may enter iOS.
+    for SOURCE in sink/mmap_sink.cpp sink/base_file_sink.cpp mxlogger_util.cpp; do
+        OBJECT="$BUILD/$(basename "$SOURCE" .cpp)-$PLATFORM.o"
+        xcrun clang++ -isysroot "$IOS_SDK" -target "$TARGET" \
+            -std=c++17 -c -I"$CORE" "$CORE/$SOURCE" -o "$OBJECT"
+        if nm -u "$OBJECT" | grep -q '_flock'; then
+            echo "unexpected macOS process lock in $PLATFORM: $SOURCE" >&2
+            exit 1
+        fi
+    done
 done
 echo ">> native Apple tests passed"

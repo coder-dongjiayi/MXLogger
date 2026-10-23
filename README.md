@@ -202,6 +202,20 @@ underlying C++ instance is deduplicated on that pair. The md5 of the pair is the
 pass it around a modularized app and write logs through the class methods without holding the logger
 object.
 
+The native macOS Core coordinates processes sharing a log directory. Before appending it takes a
+directory file lock and refreshes the committed length, file identity and mapping capacity. Reads
+copy a committed snapshot under a shared lock, then decode after unlocking. All participants must
+use this protocol, matching encryption parameters and an accessible shared directory. Separate
+directories do not block each other. iOS and Android retain their existing file access paths;
+the Windows multiprocess backend is not implemented yet.
+
+The macOS `.mxlogger.lock` coordinator is excluded from log listings, size budgets and cleanup;
+do not manually delete it while loggers are alive. Age/size cleanup and `removeBeforeAllData`
+retain files held by other processes. Explicit `removeAllData` deletes all logs, and live loggers
+reopen files before their next write. The `.mx` format is unchanged; this does not add CRC or
+power-loss durability guarantees. macOS writes can return `-4` for a lock failure or the 32-bit
+committed-length limit; inspect `errorDesc` for details.
+
 > **Deprecation notice.** `loggerToken` used to be called `loggerKey`, which was easy to confuse with
 > the encryption `cryptKey`. Every `loggerKey` API on iOS / Android / Flutter is still available and
 > forwards to its `loggerToken` counterpart, but it is marked deprecated and **will be removed in a

@@ -50,7 +50,12 @@ private:
     void* file_mapping_ = nullptr;
 #endif
 
-    int write_data_(const void* buffer, size_t buffer_size);
+    int write_data_(const void* buffer, size_t buffer_size, bool only_if_empty = false);
+#if MXLOGGER_MACOS_MULTIPROCESS
+    // Requires the directory's exclusive lock; refreshes cached length, capacity
+    // and file identity before touching the mapping.
+    bool refresh_mmap_();
+#endif
 
     /// 建立(或恢复)文件映射：fd丢失时重开文件，空文件先做页对齐扩容，
     /// 成功后从文件头恢复actual_size_；构造和写入自愈共用此路径
@@ -67,7 +72,7 @@ private:
     size_t get_actual_size_();
 
     void write_actual_size_(size_t size);
-    int log_(const details::log_msg& msg);
+    int log_(const details::log_msg& msg, bool only_if_empty = false);
 
     /// is_sync为true同步刷盘，false异步
     bool msync_(bool is_sync);

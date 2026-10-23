@@ -176,7 +176,11 @@ MX_TEST(mmap_sink, recovers_after_initial_open_failure) {
     mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
 
     // 初始不可写: 写入返回-3(映射失败), 不崩溃
+#if MXLOGGER_MACOS_MULTIPROCESS
+    EXPECT_EQ(write_log(sink, level::info, "before-recover"), -4);
+#else
     EXPECT_EQ(write_log(sink, level::info, "before-recover"), -3);
+#endif
 
     // 障碍解除后, 无需重建sink, 下一次写入自动重开文件+重建映射
     ::remove(blocker.c_str());

@@ -13,7 +13,11 @@
 namespace mxlogger{
 namespace sinks{
 
-base_file_sink::base_file_sink(const std::string &dir_path, const std::string &filename, policy::storage_policy policy):dir_path_(dir_path), filename_(filename), policy_(policy){
+base_file_sink::base_file_sink(const std::string &dir_path, const std::string &filename, policy::storage_policy policy):dir_path_(dir_path), policy_(policy),
+#if MXLOGGER_MACOS_MULTIPROCESS
+    process_lock_(dir_path),
+#endif
+    filename_(filename){
     
     if (mxlogger::create_dir(dir_path) == false) {
        error_record =  MXLoggerError("base_file_sink error:%s\n",strerror(errno));
@@ -84,6 +88,15 @@ bool base_file_sink::open(){
         error_record =  MXLoggerError("ope_file_ error:%s\n",strerror(errno));
         return  false;
     }
+#if MXLOGGER_MACOS_MULTIPROCESS
+    // Retain a shared data-file lock until close() so age/size cleanup in any
+    // process can identify live files. Appends use the separate directory lock.
+    if (!ipc::flock_retry(file_ident, LOCK_SH)) {
+        error_record = MXLoggerError("data file lock error:%s\n", strerror(errno));
+        close();
+        return false;
+    }
+#endif
     error_record = "";
  
     return true;
@@ -111,6 +124,11 @@ long long base_file_sink::max_disk_size() const{
 }
 
 long  base_file_sink::dir_size() const{
+#if MXLOGGER_MACOS_MULTIPROCESS
+    ipc::directory_lock directory_lock(dir_path_, false);
+    ipc::scoped_lock lock(directory_lock, false);
+    if (!lock) return 0;
+#endif
    
     long   current_cache_size=0;
     
@@ -135,6 +153,13 @@ void base_file_sink::remove_expire_data(){
      if (max_disk_age_ <= 0 && max_disk_size_ <= 0) {
          return;
      }
+#if MXLOGGER_MACOS_MULTIPROCESS
+     ipc::scoped_lock lock(process_lock_);
+     if (!lock) {
+         error_record = MXLoggerError("cleanup lock error:%s\n", strerror(errno));
+         return;
+     }
+#endif
 
      long   current_cache_size=0;
    
@@ -157,7 +182,11 @@ void base_file_sink::remove_expire_data(){
          long size = std::stol(map["size"]);
          time_t last_time = (time_t)std::stol(map["last_timestamp"]);
 
-         if (max_disk_age_ > 0 && last_time < expiration_tp && file_name.compare(filename_) != 0) {
+         bool can_expire = max_disk_age_ > 0 && last_time < expiration_tp && file_name.compare(filename_) != 0;
+#if MXLOGGER_MACOS_MULTIPROCESS
+         can_expire = can_expire && ipc::file_is_inactive(dir_path_ + file_name);
+#endif
+         if (can_expire) {
              /// 过期文件
              delete_urls.push_back(file_name);
 
@@ -204,6 +233,9 @@ void base_file_sink::remove_expire_data(){
                  MXLoggerInfo("%s is currently being mapped and will not be deleted",file_name.c_str());
                  continue;
              }
+#if MXLOGGER_MACOS_MULTIPROCESS
+             if (!ipc::file_is_inactive(delete_path)) continue;
+#endif
              if (remove(delete_path.c_str()) == 0) {
                  current_cache_size = current_cache_size - file_size;
                  MXLoggerInfo("over limit size file : %s(%ld byte)",file_name.c_str(),file_size);
@@ -222,6 +254,13 @@ void base_file_sink::remove_expire_data(){
 
 
 int base_file_sink::remove_all_(bool skip_current){
+#if MXLOGGER_MACOS_MULTIPROCESS
+    ipc::scoped_lock lock(process_lock_);
+    if (!lock) {
+        error_record = MXLoggerError("cleanup lock error:%s\n", strerror(errno));
+        return 0;
+    }
+#endif
     std::vector<std::map<std::string, std::string>> destination;
     
     mxlogger::get_files(&destination, dir_path_.c_str());
@@ -234,6 +273,11 @@ int base_file_sink::remove_all_(bool skip_current){
         if(skip_current == true && file_name == filename_){
             continue;
         }
+#if MXLOGGER_MACOS_MULTIPROCESS
+        if (skip_current && !ipc::file_is_inactive(dir_path_ + file_name)) continue;
+        // Explicit remove_all may unlink live files. Before their next write,
+        // every sink checks the inode and reopens the replacement under this lock.
+#endif
         count_ ++;
         std::string subdir = dir_path_ + file_name;
         remove(subdir.c_str());

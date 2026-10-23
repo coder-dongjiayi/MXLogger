@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include "sink.hpp"
+#include "../mxlogger_interprocess.hpp"
 namespace mxlogger{
 namespace sinks {
 class base_file_sink : public sink{
@@ -32,7 +33,9 @@ private:
     
     int remove_all_(bool skip_current);
 protected:
-    
+#if MXLOGGER_MACOS_MULTIPROCESS
+    ipc::directory_lock process_lock_;
+#endif
    
     
     /// 日志文件名称

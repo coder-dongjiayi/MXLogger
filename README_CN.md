@@ -200,6 +200,16 @@ debugPrint("日志目录 ${logger.diskcachePath}");
 去重；这一对的 md5 就是 **loggerToken**——大型 app 组件化时把它传给子模块，子模块用类方法写日志，不必传
 logger 对象。
 
+原生 macOS Core 支持多个进程协作访问同一日志目录：写入前获取目录级文件锁，刷新有效长度、
+文件身份和映射容量；读取时复制有效数据快照后解锁解析。各进程须使用本协议及一致的加密参数，
+实际目录必须共享且可访问。不同日志目录互不阻塞；iOS、Android 保持原来的文件访问流程，
+Windows 的多进程实现尚未接入。
+
+macOS 的 `.mxlogger.lock` 是协调文件，不计入日志列表或大小，也不会被清理；logger 存活时请勿手动删除。
+过期/容量清理及 `removeBeforeAllData` 会保留其他进程仍持有的日志文件；显式 `removeAllData` 删除全部日志，
+各进程在下次写入前重开文件。`.mx` 格式保持不变，没有新增 CRC 或断电持久性保证；
+macOS 写入新增返回码 `-4`（文件锁失败或超过 32 位有效长度上限），详情见 `errorDesc`。
+
 > **废弃说明。** `loggerToken` 之前叫 `loggerKey`，容易和加密用的 `cryptKey` 混淆。iOS / Android / Flutter
 > 三端所有 `loggerKey` 系列 API 仍然可用，内部直接转发到对应的 `loggerToken` 版本，但已标记为废弃，
 > **后续版本一定会移除**。请尽早迁移：`loggerKey` → `loggerToken`，`xxxWithLoggerKey:` → `xxxWithLoggerToken:`，

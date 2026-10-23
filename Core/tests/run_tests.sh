@@ -48,6 +48,7 @@ echo ">> compiling core + tests..."
     test_mxlogger_api.cpp \
     test_file_util.cpp \
     test_concurrency.cpp \
+    test_multiprocess.cpp \
     "$CORE/mxlogger.cpp" \
     "$CORE/mxlogger_console.cpp" \
     "$CORE/mxlogger_util.cpp" \

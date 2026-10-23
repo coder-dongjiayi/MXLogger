@@ -33,6 +33,7 @@
 #include "mxlogger_helper.hpp"
 #include "aes/aes_crypt.hpp"
 #include "debug_log.hpp"
+#include "mxlogger_interprocess.hpp"
 namespace mxlogger{
 
 #ifdef _WIN32
@@ -118,7 +119,13 @@ inline bool create_dir(const std::string &path){
         }
         auto subdir = dir_name.substr(0,token_pos);
         if (!subdir.empty() && !path_exists(subdir.data()) && !makedir(subdir.data())) {
-
+#if MXLOGGER_MACOS_MULTIPROCESS
+            // Another process may have created this component after our stat.
+            if (errno == EEXIST && path_exists(subdir.c_str())) {
+                search_offset = token_pos + 1;
+                continue;
+            }
+#endif
             return  false;
 
         }
@@ -158,7 +165,6 @@ inline void close_(int fd){
 inline int  select_form_path(const char* path,std::vector<std::map<std::string, std::string>> *vector,const char* crypt_key, const char* iv){
 
 
-
     if (path_exists(path) == false) {
         MXLoggerError("select_form_path: file not exists %s",path);
         return  -1;
@@ -179,6 +185,18 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
     }
 
     /// 只读解析，不应创建/写入文件
+#if MXLOGGER_MACOS_MULTIPROCESS
+    std::vector<uint8_t> snapshot;
+    if (!ipc::read_snapshot(path, snapshot)) return -1;
+    size_t disk_size = snapshot.size();
+    size_t cursor = 0;
+    auto read_record = [&](void *buffer, size_t bytes) -> long {
+        size_t available = std::min(bytes, snapshot.size() - cursor);
+        memcpy(buffer, snapshot.data() + cursor, available);
+        cursor += available;
+        return static_cast<long>(available);
+    };
+#else
     int fd = open_readonly_(path);
     if (fd < 0) {
         MXLoggerError("select_form_path: open failed %s",strerror(errno));
@@ -187,26 +205,39 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
 
     /// 以磁盘真实大小为边界，防止损坏的size字段导致越界读取
     size_t disk_size = file_size(path);
+#endif
 
     uint32_t size = 0;
+#if MXLOGGER_MACOS_MULTIPROCESS
+    if (read_record(&size, sizeof(uint32_t)) != sizeof(uint32_t)) return -1;
+#else
     if (read_(fd, &size, sizeof(uint32_t)) != (long)sizeof(uint32_t)) {
         close_(fd);
         return -1;
     }
+#endif
 
     size_t begin = sizeof(uint32_t);
     while (begin <= size && begin + sizeof(uint32_t) <= disk_size) {
 
         uint32_t  item_size = 0;
 
+#if MXLOGGER_MACOS_MULTIPROCESS
+        if (read_record(&item_size, sizeof(uint32_t)) != sizeof(uint32_t)) break;
+#else
         if (read_(fd, &item_size, sizeof(uint32_t)) != (long)sizeof(uint32_t)) break;
+#endif
 
         /// 记录头损坏(长度为0或超出文件边界)，终止解析
         if (item_size == 0 || begin + sizeof(uint32_t) + item_size > disk_size) break;
 
         std::vector<uint8_t> buffer(item_size);
 
+#if MXLOGGER_MACOS_MULTIPROCESS
+        if (read_record(buffer.data(), item_size) != item_size) break;
+#else
         if (read_(fd, buffer.data(), item_size) != (long)item_size) break;
+#endif
 
         if (is_crypt) {
 
@@ -241,7 +272,9 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
 
     }
 
+#if !MXLOGGER_MACOS_MULTIPROCESS
     close_(fd);
+#endif
 
     return 0;
 }
@@ -302,6 +335,10 @@ inline int get_files(std::vector<std::map<std::string, std::string>> *destinatio
         if (strcmp(".DS_Store", entry->d_name) == 0 || strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0) {
             continue;
         }
+#if MXLOGGER_MACOS_MULTIPROCESS
+        // The coordinator is neither a log nor part of the age/size budget.
+        if (strcmp(ipc::lock_filename, entry->d_name) == 0) continue;
+#endif
         std::string subdir = std::string(dir_) + entry->d_name;
 
         /// lstat失败(文件在readdir后被删除)则跳过，防止读到未初始化的statbuf

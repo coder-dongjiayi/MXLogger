@@ -44,6 +44,9 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// Supports concurrent writes within one process. Before any destroy call, stop and
 /// wait for all writes to that logger, including token-based writes, to finish.
 /// Writing and destruction must not run concurrently.
+/// macOS 支持协作多进程访问同一日志目录；各进程需使用本版本及一致的加密参数。
+/// macOS supports cooperating processes sharing a log directory; all participants
+/// must use this protocol and matching encryption parameters.
 @interface MXLogger : NSObject
 
 /// 默认日志根目录，不包含 nameSpace；通过系统目录 API 获取，支持 App Sandbox。
@@ -267,20 +270,29 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// the file currently being written is never deleted.
 /// iOS calls this on entering background by default (see shouldRemoveExpiredDataWhenEnterBackground).
 /// macOS requires an explicit call; setting maxDiskAge/maxDiskSize does not trigger cleanup.
+/// macOS 也会跳过其他进程仍持有的日志文件。
+/// macOS also skips log files still held by other cooperating processes.
 -(void)removeExpireData;
 
 /// 清理全部日志文件
 /// Remove all log files
+/// macOS 删除操作与其他进程协调；仍存活的 logger 在下次写入时重开文件。
+/// macOS coordinates deletion across processes; live loggers reopen on their next write.
 -(void)removeAllData;
 
 /// 删除除当前正在写入日志文件外的所有日志文件
 /// Remove all log files except the one currently being written
+/// macOS 也保留其他进程仍持有的日志文件。
+/// macOS also retains log files held by other cooperating processes.
 -(void)removeBeforeAllData;
 
 /// 输出日志
 /// Write a log entry
 /// @return 0 成功（-1 扩容失败 -2 解除映射失败 -3 映射失败，调用 errorDesc 方法查看错误信息）
 ///         0 success (-1 file expansion failed, -2 unmap failed, -3 mmap failed; call errorDesc for details)
+/// macOS: -3 也包含状态刷新失败；-4 为进程锁失败或超过 uint32 文件长度上限。
+/// macOS: -3 also covers state-refresh failure; -4 means a process-lock failure
+/// or a file length exceeding the uint32 limit.
 /// @param level 日志等级：0 debug 1 info 2 warn 3 error 4 fatal / log level: 0 debug, 1 info, 2 warn, 3 error, 4 fatal
 /// @param name 日志名称 / logger name
 /// @param msg 日志信息 / log message

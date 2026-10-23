@@ -14,6 +14,10 @@
 #include <unistd.h>
 #endif
 #include <cerrno>
+#include <limits>
+#if MXLOGGER_MACOS_MULTIPROCESS
+#include <sys/stat.h>
+#endif
 #include "../log_serialize.h"
 
 
@@ -42,6 +46,14 @@ mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,po
 }
 
 bool mmap_sink::recover_mmap_(){
+#if MXLOGGER_MACOS_MULTIPROCESS
+    ipc::scoped_lock lock(process_lock_);
+    if (!lock) {
+        error_record = MXLoggerError("initialization lock error:%s\n", strerror(errno));
+        return false;
+    }
+    return refresh_mmap_();
+#else
 
     /// fd丢失(初次open失败或映射失败)时重开文件，open对不存在的文件会重新创建
     /// Reopen the file when the fd is lost (initial open or a mapping failed);
@@ -77,7 +89,57 @@ bool mmap_sink::recover_mmap_(){
         write_actual_size_(0);
     }
     return true;
+#endif
 }
+#if MXLOGGER_MACOS_MULTIPROCESS
+bool mmap_sink::refresh_mmap_() {
+    struct stat opened{}, current{};
+    if (file_ident >= 0) {
+        if (::fstat(file_ident, &opened) != 0) {
+            error_record = MXLoggerError("fstat error:%s\n", strerror(errno));
+            return false;
+        }
+        int result = ::stat(log_disk_path_.c_str(), &current);
+        if (result != 0 && errno != ENOENT) {
+            error_record = MXLoggerError("stat error:%s\n", strerror(errno));
+            return false;
+        }
+        // remove_all() can unlink a mapped file in another process. Never keep
+        // appending to that orphaned inode, even if a same-named file now exists.
+        if (result != 0 || opened.st_dev != current.st_dev || opened.st_ino != current.st_ino) {
+            if (!munmap_()) return false;
+            close();
+        }
+    }
+    if (file_ident < 0) {
+        if (!open()) return false;
+        if (::fstat(file_ident, &opened) != 0) {
+            error_record = MXLoggerError("fstat error:%s\n", strerror(errno));
+            return false;
+        }
+    }
+    size_t capacity = static_cast<size_t>(opened.st_size);
+    // Unmap with the OLD mapping length before adopting another process's size.
+    if (mmap_ptr_ != nullptr && capacity != file_size_ && !munmap_()) return false;
+    file_size_ = capacity;
+    if (capacity == 0) {
+        if (truncate_(0) != 0) return false;
+    } else {
+        if (capacity < offset_length) {
+            error_record = MXLoggerError("invalid macOS log file size:%zu\n", capacity);
+            return false;
+        }
+        if (mmap_ptr_ == nullptr && !mmap_()) return false;
+    }
+    actual_size_ = get_actual_size_();
+    if (actual_size_ > file_size_ - offset_length) {
+        // Fail closed instead of erasing existing records on an invalid header.
+        error_record = MXLoggerError("invalid macOS log data length:%zu\n", actual_size_);
+        return false;
+    }
+    return true;
+}
+#endif
 mmap_sink::~mmap_sink(){
     munmap_();
     MXLoggerInfo("mmap_sink delloc");
@@ -91,14 +153,21 @@ int mmap_sink::log(const details::log_msg& msg){
 }
 
 void mmap_sink::add_file_heder(const char* msg){
-    
+#if MXLOGGER_MACOS_MULTIPROCESS
+    if (msg == nullptr) return;
+    details::log_msg log_msg(level::level_enum::debug,"com.djy.mxlogger.fileHeader",nullptr,msg,true);
+    // The empty check and append share ONE locked transaction, including when
+    // several processes initialize the same empty file simultaneously.
+    log_(log_msg, true);
+#else
     if(actual_size_ !=0 || msg == nullptr) return;
     details::log_msg log_msg(level::level_enum::debug,"com.djy.mxlogger.fileHeader",nullptr,msg,true);
     log_(log_msg);
+#endif
 }
 
 
-int mmap_sink::log_(const details::log_msg& msg){
+int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
     flatbuffers::FlatBufferBuilder builder;
     
     auto root =  Createlog_serializeDirect(builder,msg.name,msg.tag,msg.msg,msg.level,(uint32_t)msg.thread_id,msg.is_main_thread,msg.time_stamp);
@@ -114,11 +183,27 @@ int mmap_sink::log_(const details::log_msg& msg){
         cfb128_encrypt(point, point, size);
     }
     
-    return  write_data_(point, size);
+    return  write_data_(point, size, only_if_empty);
  
 }
 
-int mmap_sink::write_data_(const void* buffer, size_t buffer_size){
+int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_empty){
+#if MXLOGGER_MACOS_MULTIPROCESS
+    ipc::scoped_lock lock(process_lock_);
+    if (!lock) {
+        error_record = MXLoggerError("write lock error:%s\n", strerror(errno));
+        return -4;
+    }
+    if (!refresh_mmap_()) return -3;
+    if (only_if_empty && actual_size_ != 0) return 0;
+    // The on-disk committed length is uint32_t, even in a 64-bit process.
+    constexpr size_t max_length = std::numeric_limits<uint32_t>::max();
+    if (buffer_size > max_length - offset_length || actual_size_ > max_length - offset_length - buffer_size) {
+        error_record = MXLoggerError("macOS log exceeds uint32 length limit\n");
+        return -4;
+    }
+#else
+    (void)only_if_empty;
 
     /// 0、映射缺失(构造失败或上次映射失败)时先自愈：重开文件/重建映射并从
     /// 文件头恢复actual_size_，防止内存中的偏移与磁盘脱节；仍失败则放弃本次写入。
@@ -132,6 +217,7 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size){
     if (mmap_ptr_ == nullptr && recover_mmap_() == false) {
         return -3;
     }
+#endif
 
     ///1.、需要写入字节总大小 = 当前文件真实长度 + 需要写入buffer的长度 + offset_length
 
@@ -292,6 +378,13 @@ bool mmap_sink::mmap_(){
 }
 
 void mmap_sink::flush() {
+#if MXLOGGER_MACOS_MULTIPROCESS
+    ipc::scoped_lock lock(process_lock_);
+    if (!lock) {
+        error_record = MXLoggerError("flush lock error:%s\n", strerror(errno));
+        return;
+    }
+#endif
     async_();
 }
 bool mmap_sink::msync_(bool is_sync){
@@ -310,7 +403,13 @@ bool mmap_sink::msync_(bool is_sync){
         FlushFileBuffers((HANDLE)_get_osfhandle(file_ident));
     }
 #else
-    if (msync(mmap_ptr_, get_file_size(), is_sync ? MS_SYNC : MS_ASYNC) != 0) {
+#if MXLOGGER_MACOS_MULTIPROCESS
+    // Another process may have grown the file beyond our old mapping.
+    size_t mapped_size = file_size_;
+#else
+    size_t mapped_size = get_file_size();
+#endif
+    if (msync(mmap_ptr_, mapped_size, is_sync ? MS_SYNC : MS_ASYNC) != 0) {
 
         error_record =  MXLoggerError("[mxlogger_error]msync_ error:%s\n",strerror(errno));
 
