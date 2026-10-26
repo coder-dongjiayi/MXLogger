@@ -33,6 +33,9 @@ See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) 
 - [4. Parsing `.mx` log files](#4-parsing-mx-log-files)
   - [4.1 Where the files are](#41-where-the-files-are)
   - [4.2 Chrome extension and desktop analyzer (macOS / Windows / Linux)](#42-chrome-extension-and-desktop-analyzer-macos--windows--linux)
+    - [4.2.1 Chrome extension](#421-chrome-extension)
+    - [4.2.2 Desktop app](#422-desktop-app)
+    - [4.2.3 Import and search logs](#423-import-and-search-logs)
   - [4.3 In-app analyzer (`mxlogger_analyzer_lib`)](#43-in-app-analyzer-mxlogger_analyzer_lib)
   - [4.4 Parsing in Dart](#44-parsing-in-dart)
 - [Example](#example)
@@ -437,8 +440,8 @@ A `.mx` file is not text. Every record is a flatbuffer, and the whole file is AE
 
 | Scenario | Use |
 |---|---|
-| Analyze `.mx` files in Chrome | [Install MXLogger Analyzer from the Chrome Web Store](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
-| A file pulled from a device or uploaded by a user, analyzed on a computer | [4.2 Chrome extension and desktop analyzer](#42-chrome-extension-and-desktop-analyzer-macos--windows--linux) |
+| Analyze `.mx` files in Chrome | [4.2.1 Chrome extension](#421-chrome-extension) |
+| Analyze exported logs in a desktop app | [4.2.2 Desktop app](#422-desktop-app) |
 | Read logs on the phone while testing, no computer involved | [4.3 In-app analyzer](#43-in-app-analyzer-mxlogger_analyzer_lib) |
 | Your own viewer or upload pipeline in Dart | [4.4 Parsing in Dart](#44-parsing-in-dart) |
 
@@ -468,12 +471,25 @@ Getting the files onto a computer:
 
 ## 4.2 Chrome extension and desktop analyzer (macOS / Windows / Linux)
 
-Choose how to install the analyzer:
+### 4.2.1 Chrome extension
 
-- **Chrome extension**: [Install MXLogger Analyzer from the Chrome Web Store](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi). Open the link in Chrome and click **Add to Chrome** → **Add extension**.
-- **Desktop app (macOS / Windows / Linux)**: download `mxlogger_analyzer` for your OS from [Releases](https://github.com/coder-dongjiayi/MXLogger/releases).
+Use **MXLogger Analyzer** in Chrome to read `.mx` files exported from your iOS, macOS or Android app:
 
-Open **MXLogger Analyzer** from Chrome's extensions menu or launch the desktop app. Both use a three-step import wizard:
+1. Open the [Chrome Web Store page](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) in Chrome and click **Add to Chrome** → **Add extension**.
+2. Open Chrome's extensions menu and click **MXLogger Analyzer**. The analyzer opens in a new tab; you can pin its icon to the toolbar for quick access.
+3. Select or drag in one or more `.mx` files obtained in [4.1](#41-where-the-files-are), then follow the [import steps below](#423-import-and-search-logs). For encrypted logs, enter the `cryptKey` / `iv` used when writing them; leave both empty for unencrypted logs.
+
+Parsing and decryption run locally in the browser and work offline after installation. Logs and decryption keys are not uploaded to a server. Imported logs are cached in the extension's local storage and remain available after refreshing the page. KEY/IV are kept only for the current tab session by default; enable the option to save them in this browser if you want to reuse them next time.
+
+To reparse a file, select the original `.mx` file again and re-enter any decryption parameters that were not saved. Use the analyzer's clear-data action to remove cached logs.
+
+### 4.2.2 Desktop app
+
+Download `mxlogger_analyzer` for macOS, Windows or Linux from [Releases](https://github.com/coder-dongjiayi/MXLogger/releases), launch it and follow the same import steps below.
+
+### 4.2.3 Import and search logs
+
+The Chrome extension and desktop app both use a three-step import wizard:
 
 1. **Pick the file**: drag one or more `.mx` files onto the window, or click to browse.
 2. **Decryption**: enter the `cryptKey` / `iv` the logger was created with. Leave both empty for unencrypted logs. If the key was rotated, add every pair; they are tried in the numbered checkbox order until one decodes the record. In the Chrome extension, KEY/IV are kept for the current session unless you choose to save them locally.

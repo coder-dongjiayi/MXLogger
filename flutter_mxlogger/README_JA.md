@@ -33,6 +33,9 @@ MXLogger は mmap メモリマッピングを基盤とし、AES-CFB-128 暗号�
 - [4. `.mx` ログファイルを読む](#4-mx-ログファイルを読む)
   - [4.1 ファイルの場所](#41-ファイルの場所)
   - [4.2 Chrome 拡張機能とデスクトップアナライザー（macOS / Windows / Linux）](#42-chrome-拡張機能とデスクトップアナライザーmacos--windows--linux)
+    - [4.2.1 Chrome 拡張機能](#421-chrome-拡張機能)
+    - [4.2.2 デスクトップアプリ](#422-デスクトップアプリ)
+    - [4.2.3 ログのインポートと検索](#423-ログのインポートと検索)
   - [4.3 アプリ内アナライザー（`mxlogger_analyzer_lib`）](#43-アプリ内アナライザーmxlogger_analyzer_lib)
   - [4.4 Dart で解析する](#44-dart-で解析する)
 - [Example](#example)
@@ -437,8 +440,8 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 | シナリオ | 使うもの |
 |---|---|
-| Chrome で `.mx` ログを分析する | [Chrome ウェブストアから MXLogger Analyzer をインストール](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
-| 端末から取り出した、またはユーザーがアップロードしたファイルを PC で分析する | [4.2 Chrome 拡張機能とデスクトップアナライザー](#42-chrome-拡張機能とデスクトップアナライザーmacos--windows--linux) |
+| Chrome で `.mx` ログを分析する | [4.2.1 Chrome 拡張機能](#421-chrome-拡張機能) |
+| エクスポートしたログをデスクトップアプリで分析する | [4.2.2 デスクトップアプリ](#422-デスクトップアプリ) |
 | テスト中に PC を使わず端末上でログを読む | [4.3 アプリ内アナライザー](#43-アプリ内アナライザーmxlogger_analyzer_lib) |
 | Dart で自前のビューアやアップロード経路を作る | [4.4 Dart で解析する](#44-dart-で解析する) |
 
@@ -468,12 +471,25 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 ## 4.2 Chrome 拡張機能とデスクトップアナライザー（macOS / Windows / Linux）
 
-インストール方法を選びます。
+### 4.2.1 Chrome 拡張機能
 
-- **Chrome 拡張機能**: [Chrome ウェブストアから MXLogger Analyzer をインストール](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi)。Chrome でリンクを開き、「Chrome に追加」→「拡張機能を追加」をクリックします。
-- **デスクトップアプリ（macOS / Windows / Linux）**: [Releases](https://github.com/coder-dongjiayi/MXLogger/releases) から自分の OS 向けの `mxlogger_analyzer` をダウンロードします。
+Chrome の **MXLogger Analyzer** で、iOS、macOS、Android アプリからエクスポートした `.mx` ログを解析できます。
 
-Chrome の拡張機能メニューから **MXLogger Analyzer** を開くか、デスクトップアプリを起動します。どちらも 3 ステップでログをインポートします。
+1. Chrome で [Chrome ウェブストアのページ](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) を開き、「Chrome に追加」→「拡張機能を追加」をクリックします。
+2. Chrome の拡張機能メニューから **MXLogger Analyzer** を選ぶと、新しいタブで解析ツールが開きます。アイコンをツールバーに固定すると、次回からすぐに開けます。
+3. [4.1](#41-ファイルの場所) の手順で取得した `.mx` ファイルを 1 つ以上選択またはドロップし、[以下の手順](#423-ログのインポートと検索)でインポートします。暗号化したログには書き込み時の `cryptKey` / `iv` を入力し、暗号化していないログでは両方を空欄にします。
+
+解析と復号はブラウザ内で行われ、インストール後はオフラインでも利用できます。ログや復号鍵はサーバーに送信されません。取り込んだログは拡張機能のローカルストレージにキャッシュされ、ページを再読み込みしても閲覧できます。KEY/IV は既定では現在のタブのセッション中だけ保持されます。次回も使用する場合は、このブラウザに KEY と IV を保存するオプションを有効にしてください。
+
+再解析する場合は元の `.mx` ファイルを選び直し、保存していない復号パラメーターを再入力します。ログのキャッシュを削除するには、解析ツールのデータ消去機能を使います。
+
+### 4.2.2 デスクトップアプリ
+
+[Releases](https://github.com/coder-dongjiayi/MXLogger/releases) から macOS、Windows、Linux 向けの `mxlogger_analyzer` をダウンロードして起動し、以下の同じ手順でログをインポートします。
+
+### 4.2.3 ログのインポートと検索
+
+Chrome 拡張機能とデスクトップアプリは、どちらも 3 ステップでログをインポートします。
 
 1. **ファイルを選ぶ**: 1 つ以上の `.mx` ファイルをウィンドウにドラッグするか、クリックして選択します。
 2. **復号**: ロガー作成時に使った `cryptKey` / `iv` を入力します。暗号化していないログは両方空欄のままにします。鍵をローテーションした場合はすべてのペアを追加してください。番号付きチェックボックスの順に、レコードが復号できるまで試行されます。Chrome 拡張機能では KEY/IV は現在のセッションのみ保持され、必要に応じてローカル保存を選択できます。

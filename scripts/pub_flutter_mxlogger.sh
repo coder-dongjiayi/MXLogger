@@ -8,4 +8,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../flutter_mxlogger"
 
-flutter packages pub publish --server=https://pub.dartlang.org "$@"
+# 发布固定使用 pub.dev，避免本机 PUB_HOSTED_URL 指向只读镜像。
+export PUB_HOSTED_URL=https://pub.dev
+
+flutter pub publish "$@"

@@ -1,7 +1,7 @@
 
 # MXLogger for Flutter Change Log
 
-# v2.2.0 (Unreleased)
+# v2.2.0/2026-10-26
 * Complete the Flutter macOS demo with desktop layout, settings dialogs, manual cleanup guidance, a Finder entry, local-source launch commands, and UI regression previews.
 * Add macOS support, including the Flutter plugin, CocoaPods, SwiftPM, and cooperative multi-process access to a shared log directory.
 * Share the Apple plugin implementation through `darwin/` using Flutter 3.7's `sharedDarwinSource` layout.

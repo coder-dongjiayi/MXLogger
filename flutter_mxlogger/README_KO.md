@@ -33,6 +33,9 @@ MXLogger는 mmap 메모리 매핑을 기반으로 하고 AES-CFB-128 암호화�
 - [4. `.mx` 로그 파일 읽기](#4-mx-로그-파일-읽기)
   - [4.1 파일 위치](#41-파일-위치)
   - [4.2 Chrome 확장 프로그램과 데스크톱 분석기(macOS / Windows / Linux)](#42-chrome-확장-프로그램과-데스크톱-분석기macos--windows--linux)
+    - [4.2.1 Chrome 확장 프로그램](#421-chrome-확장-프로그램)
+    - [4.2.2 데스크톱 앱](#422-데스크톱-앱)
+    - [4.2.3 로그 가져오기 및 검색](#423-로그-가져오기-및-검색)
   - [4.3 앱 내장 분석기(`mxlogger_analyzer_lib`)](#43-앱-내장-분석기mxlogger_analyzer_lib)
   - [4.4 Dart로 파싱하기](#44-dart로-파싱하기)
 - [Example](#example)
@@ -436,8 +439,8 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 | 상황 | 사용할 것 |
 |---|---|
-| Chrome에서 `.mx` 로그 분석 | [Chrome 웹 스토어에서 MXLogger Analyzer 설치](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
-| 기기에서 꺼낸 파일이나 사용자가 업로드한 파일을 컴퓨터에서 분석 | [4.2 Chrome 확장 프로그램과 데스크톱 분석기](#42-chrome-확장-프로그램과-데스크톱-분석기macos--windows--linux) |
+| Chrome에서 `.mx` 로그 분석 | [4.2.1 Chrome 확장 프로그램](#421-chrome-확장-프로그램) |
+| 내보낸 로그를 데스크톱 앱에서 분석 | [4.2.2 데스크톱 앱](#422-데스크톱-앱) |
 | 테스트 중 컴퓨터 없이 휴대폰에서 로그 읽기 | [4.3 앱 내장 분석기](#43-앱-내장-분석기mxlogger_analyzer_lib) |
 | Dart로 직접 뷰어나 업로드 파이프라인 만들기 | [4.4 Dart로 파싱하기](#44-dart로-파싱하기) |
 
@@ -467,12 +470,25 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 ## 4.2 Chrome 확장 프로그램과 데스크톱 분석기(macOS / Windows / Linux)
 
-분석기 설치 방법을 선택하세요.
+### 4.2.1 Chrome 확장 프로그램
 
-- **Chrome 확장 프로그램**: [Chrome 웹 스토어에서 MXLogger Analyzer 설치](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi). Chrome에서 링크를 열고 **Chrome에 추가** → **확장 프로그램 추가**를 클릭하세요.
-- **데스크톱 앱(macOS / Windows / Linux)**: [Releases](https://github.com/coder-dongjiayi/MXLogger/releases)에서 자신의 OS용 `mxlogger_analyzer`를 다운로드하세요.
+Chrome의 **MXLogger Analyzer**로 iOS, macOS, Android 앱에서 내보낸 `.mx` 로그를 분석할 수 있습니다.
 
-Chrome 확장 프로그램 메뉴에서 **MXLogger Analyzer**를 열거나 데스크톱 앱을 실행하세요. 두 버전 모두 3단계로 로그를 가져옵니다.
+1. Chrome에서 [Chrome 웹 스토어 페이지](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi)를 열고 **Chrome에 추가** → **확장 프로그램 추가**를 클릭하세요.
+2. Chrome 확장 프로그램 메뉴에서 **MXLogger Analyzer**를 선택하면 새 탭에서 분석기가 열립니다. 아이콘을 툴바에 고정하면 다음에 빠르게 열 수 있습니다.
+3. [4.1](#41-파일-위치)의 방법으로 가져온 `.mx` 파일을 하나 이상 선택하거나 드래그한 뒤 [아래 절차](#423-로그-가져오기-및-검색)에 따라 가져오세요. 암호화된 로그에는 기록할 때 사용한 `cryptKey` / `iv`를 입력하고, 암호화하지 않은 로그는 두 항목을 모두 비워 둡니다.
+
+파싱과 복호화는 브라우저 안에서 실행되며 설치 후에는 오프라인에서도 사용할 수 있습니다. 로그와 복호화 키는 서버에 업로드되지 않습니다. 가져온 로그는 확장 프로그램의 로컬 저장소에 캐시되어 페이지를 새로고침해도 볼 수 있습니다. KEY/IV는 기본적으로 현재 탭 세션 동안만 유지됩니다. 다음에도 사용하려면 이 브라우저에 KEY와 IV를 저장하는 옵션을 켜세요.
+
+다시 파싱하려면 원본 `.mx` 파일을 다시 선택하고 저장하지 않은 복호화 매개변수를 입력해야 합니다. 로그 캐시를 삭제하려면 분석기의 데이터 삭제 기능을 사용하세요.
+
+### 4.2.2 데스크톱 앱
+
+[Releases](https://github.com/coder-dongjiayi/MXLogger/releases)에서 macOS, Windows 또는 Linux용 `mxlogger_analyzer`를 다운로드하고 실행한 뒤, 아래의 동일한 절차로 로그를 가져오세요.
+
+### 4.2.3 로그 가져오기 및 검색
+
+Chrome 확장 프로그램과 데스크톱 앱은 모두 3단계로 로그를 가져옵니다.
 
 1. **파일 선택**: 하나 이상의 `.mx` 파일을 창으로 드래그하거나 클릭해서 선택합니다.
 2. **복호화**: 로거를 만들 때 쓴 `cryptKey` / `iv`를 입력합니다. 암호화하지 않은 로그는 둘 다 비워 둡니다. 키를 교체한 적이 있다면 모든 쌍을 추가하세요. 번호가 붙은 체크박스 순서대로 레코드가 디코딩될 때까지 시도합니다. Chrome 확장 프로그램은 기본적으로 현재 세션에만 KEY/IV를 유지하며, 필요하면 로컬 저장을 선택할 수 있습니다.

@@ -34,6 +34,9 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
 - [四、解析 `.mx` 日志文件](#四解析-mx-日志文件)
   - [4.1 文件在哪](#41-文件在哪)
   - [4.2 Chrome 扩展与桌面解析器（macOS / Windows / Linux）](#42-chrome-扩展与桌面解析器macos--windows--linux)
+    - [4.2.1 Chrome 扩展](#421-chrome-扩展)
+    - [4.2.2 桌面 app](#422-桌面-app)
+    - [4.2.3 导入与检索日志](#423-导入与检索日志)
   - [4.3 App 内嵌解析器（`mxlogger_analyzer_lib`）](#43-app-内嵌解析器mxlogger_analyzer_lib)
   - [4.4 用 Dart 解析](#44-用-dart-解析)
 - [示例工程](#示例工程)
@@ -439,8 +442,8 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 | 场景 | 用哪个 |
 |---|---|
-| 在 Chrome 浏览器中解析 `.mx` 日志 | [从 Chrome 应用商店安装 MXLogger Analyzer](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
-| 从设备导出或用户上传的日志文件，在电脑上分析 | [4.2 Chrome 扩展与桌面解析器](#42-chrome-扩展与桌面解析器macos--windows--linux) |
+| 在 Chrome 浏览器中解析 `.mx` 日志 | [4.2.1 Chrome 扩展](#421-chrome-扩展) |
+| 在桌面 app 中分析导出的日志文件 | [4.2.2 桌面 app](#422-桌面-app) |
 | 测试时直接在手机上看日志，不连电脑 | [4.3 App 内嵌解析器](#43-app-内嵌解析器mxlogger_analyzer_lib) |
 | 自己用 Dart 做查看界面或上传管道 | [4.4 用 Dart 解析](#44-用-dart-解析) |
 
@@ -470,12 +473,25 @@ FlutterMxloggerPlugin.info(loggerToken, /*tag*/ "network", /*name*/ "okhttp", /*
 
 ## 4.2 Chrome 扩展与桌面解析器（macOS / Windows / Linux）
 
-可选择以下方式安装解析器：
+### 4.2.1 Chrome 扩展
 
-- **Chrome 扩展**：[从 Chrome 应用商店安装 MXLogger Analyzer](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi)。在 Chrome 中打开链接，点击「添加至 Chrome」→「添加扩展程序」。
-- **桌面 app（macOS / Windows / Linux）**：到 [Releases](https://github.com/coder-dongjiayi/MXLogger/releases) 下载对应系统的 `mxlogger_analyzer`。
+通过 Chrome 中的 **MXLogger Analyzer**，可以解析从 iOS、macOS 或 Android app 导出的 `.mx` 日志：
 
-从 Chrome 扩展菜单打开 **MXLogger Analyzer**，或启动桌面 app，两者均使用三步导入向导：
+1. 在 Chrome 中打开 [Chrome 应用商店页面](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi)，点击「添加至 Chrome」→「添加扩展程序」。
+2. 打开 Chrome 扩展菜单，点击 **MXLogger Analyzer**，解析器会在新标签页中打开；也可以将扩展固定到工具栏，方便下次使用。
+3. 选择或拖入按 [4.1](#41-文件在哪) 获取的一个或多个 `.mx` 文件，按[下方导入步骤](#423-导入与检索日志)操作。加密日志填写写入时使用的 `cryptKey` / `iv`，未加密日志两项均留空。
+
+解析和解密均在浏览器本地执行，安装后可离线使用，日志和解密密钥不会上传到服务器。导入的日志缓存在扩展自己的本地存储中，刷新页面后仍可查看。KEY/IV 默认只保留在当前标签页会话中；如需下次继续使用，可勾选「在此浏览器保存 KEY 和 IV」。
+
+重新解析时需要再次选择原始 `.mx` 文件，并重新填写未保存的解密参数。需要移除日志缓存时，使用解析器中的清除数据操作。
+
+### 4.2.2 桌面 app
+
+到 [Releases](https://github.com/coder-dongjiayi/MXLogger/releases) 下载对应 macOS、Windows 或 Linux 的 `mxlogger_analyzer`，启动后按下方相同的步骤导入日志。
+
+### 4.2.3 导入与检索日志
+
+Chrome 扩展和桌面 app 均使用三步导入向导：
 
 1. **选文件**：把一个或多个 `.mx` 文件拖到窗口里，或点击选择。
 2. **解密**：填入初始化 logger 时用的 `cryptKey` / `iv`；未加密就都留空。中途换过密钥的话把每一组都加上，会按勾选框里的序号依次尝试，直到解开为止。Chrome 扩展默认只在当前会话保留 KEY/IV，可勾选本地保存以便下次使用。
