@@ -7,11 +7,16 @@
 #   scripts/pub_mxlogger_analyzer.sh             # 上传（首次会打开浏览器做 Google 账号授权）
 set -euo pipefail
 
-cd "$(dirname "$0")/../mxlogger_analyzer/mxlogger_analyzer_lib"
+MXLOGGER_SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+source "$MXLOGGER_SCRIPT_DIR/flutter_env.sh"
+mxlogger_resolve_flutter "$MXLOGGER_SCRIPT_DIR/../mxlogger_analyzer"
+printf '使用 Flutter: %s\n' "$FLUTTER_BIN"
+
+cd "$MXLOGGER_SCRIPT_DIR/../mxlogger_analyzer/mxlogger_analyzer_lib"
 
 # ~/.zshrc 里 PUB_HOSTED_URL 指向国内镜像 pub.flutter-io.cn，镜像是只读的、不能发布；
 # 而 dart pub publish 已经没有 --server 选项（旧脚本那个参数不起作用），
 # 上传地址只由 PUB_HOSTED_URL 决定，所以这里临时改回 pub.dev。
 export PUB_HOSTED_URL=https://pub.dev
 
-flutter pub publish "$@"
+"$FLUTTER_BIN" pub publish "$@"

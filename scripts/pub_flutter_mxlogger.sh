@@ -6,9 +6,14 @@
 #   scripts/pub_flutter_mxlogger.sh             # 上传
 set -euo pipefail
 
-cd "$(dirname "$0")/../flutter_mxlogger"
+MXLOGGER_SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+source "$MXLOGGER_SCRIPT_DIR/flutter_env.sh"
+mxlogger_resolve_flutter "$MXLOGGER_SCRIPT_DIR/../flutter_mxlogger/example"
+printf '使用 Flutter: %s\n' "$FLUTTER_BIN"
+
+cd "$MXLOGGER_SCRIPT_DIR/../flutter_mxlogger"
 
 # 发布固定使用 pub.dev，避免本机 PUB_HOSTED_URL 指向只读镜像。
 export PUB_HOSTED_URL=https://pub.dev
 
-flutter pub publish "$@"
+"$FLUTTER_BIN" pub publish "$@"
