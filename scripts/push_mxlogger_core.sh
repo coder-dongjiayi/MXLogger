@@ -2,10 +2,11 @@
 # 发布 MXLoggerCore.podspec 到 CocoaPods trunk。
 #
 # 用法：
-#   scripts/mxlogger_core.sh
+#   bash scripts/push_mxlogger_core.sh
 set -euo pipefail
 
 # podspec 位于仓库根目录（本脚本的上一级）
 cd "$(dirname "$0")/.."
+source scripts/pod_validation_env.sh MXLoggerCore.podspec
 
 pod trunk push --allow-warnings --verbose --skip-import-validation MXLoggerCore.podspec

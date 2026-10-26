@@ -8,12 +8,25 @@ set -euo pipefail
 #   scripts/android_release.sh 2.2.0
 #
 # 脚本会自己跑 gradle 构建，改完源码（Java / Kotlin / C++）直接执行即可。
+# macOS 自动使用已安装的 JDK 17；如已设置 JAVA_HOME，则优先使用该配置。
 # 如果确认产物已是最新、想跳过构建，用: SKIP_BUILD=1 scripts/android_release.sh 2.2.0
 
 VERSION="${1:-}"
 if [ -z "${VERSION}" ]; then
   echo "用法: $0 <version>"
   exit 1
+fi
+
+# macOS 的 Java 安装目录由 java_home 查找，避免依赖每次手动 export。
+if [ -z "${JAVA_HOME:-}" ] && [ -x /usr/libexec/java_home ]; then
+  if ! JAVA_HOME=$(/usr/libexec/java_home -F -v 17 2>/dev/null); then
+    echo "❌ 未找到 JDK 17，请先安装 JDK 17，或通过 JAVA_HOME 指定已有的 JDK。" >&2
+    exit 1
+  fi
+fi
+if [ -n "${JAVA_HOME:-}" ]; then
+  export JAVA_HOME
+  export PATH="${JAVA_HOME}/bin:${PATH}"
 fi
 
 # 固定坐标
