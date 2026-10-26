@@ -282,7 +282,7 @@ class MXLogger with WidgetsBindingObserver {
   /// directory: 自定义日志文件路径，不填时使用默认路径：
   ///            ios: /Library/com.mxlog.LoggerCache/nameSpace
   ///            android: /files/com.mxlog.LoggerCache/nameSpace
-  ///            macos: Application Support/<bundle-id>/MXLogger/nameSpace
+  ///            macos: `Application Support/<bundle-id>/MXLogger/nameSpace`
   ///                   无 bundle-id 时使用进程名 / uses the process name if no bundle ID exists
   ///            custom log directory; defaults to the paths above when omitted
   /// consoleEnable: 是否开启控制台打印 / whether to enable console printing
