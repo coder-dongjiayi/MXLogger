@@ -32,7 +32,7 @@ fi
 # 固定坐标
 GROUP_ID="io.github.coder-dongjiayi"
 ARTIFACT_ID="mxlogger"
-GPG_KEY="99ECB1C655BCEDC6"    # 你的 GPG 主 KeyID
+GPG_KEY="DA2BC76FCCFB87DE"    # 你的 GPG 主 KeyID
 
 # ===== 路径写死 =====
 # 本脚本在 scripts/，上一级即仓库根；Android 工程位于 Android/MXLogger
