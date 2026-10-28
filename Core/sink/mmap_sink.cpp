@@ -15,7 +15,7 @@
 #endif
 #include <cerrno>
 #include <limits>
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
 #include <sys/stat.h>
 #endif
 #include "../log_serialize.h"
@@ -46,19 +46,20 @@ mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,po
 }
 
 bool mmap_sink::recover_mmap_(){
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     ipc::scoped_lock lock(process_lock_);
     if (!lock) {
-        error_record = MXLoggerError("initialization lock error:%s\n", strerror(errno));
+        error_record = MXLoggerError("initialization lock error:%s\n", lock.error_message().c_str());
         return false;
     }
+    transaction_cleanup cleanup{*this};
     return refresh_mmap_();
 #else
 
     /// fd丢失(初次open失败或映射失败)时重开文件，open对不存在的文件会重新创建
     /// Reopen the file when the fd is lost (initial open or a mapping failed);
     /// open() recreates the file when it no longer exists
-    if (file_ident < 0 && open() == false) {
+    if (!file_.valid() && open() == false) {
         return false;
     }
 
@@ -91,58 +92,74 @@ bool mmap_sink::recover_mmap_(){
     return true;
 #endif
 }
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
 bool mmap_sink::refresh_mmap_() {
-    struct stat opened{}, current{};
-    if (file_ident >= 0) {
-        if (::fstat(file_ident, &opened) != 0) {
-            error_record = MXLoggerError("fstat error:%s\n", strerror(errno));
+    files::file_info opened, current;
+    if (file_.valid()) {
+        if (!file_.info(opened)) {
+            error_record = MXLoggerError("file info error:%s\n", file_.error_message().c_str());
             return false;
         }
-        int result = ::stat(log_disk_path_.c_str(), &current);
-        if (result != 0 && errno != ENOENT) {
-            error_record = MXLoggerError("stat error:%s\n", strerror(errno));
+        std::error_code error;
+        const bool exists = files::path_info(log_disk_path_, current, error);
+        if (!exists && !files::is_missing(error)) {
+            error_record = MXLoggerError("path info error:%s\n", files::error_message(error).c_str());
             return false;
         }
-        // remove_all() can unlink a mapped file in another process. Never keep
-        // appending to that orphaned inode, even if a same-named file now exists.
-        if (result != 0 || opened.st_dev != current.st_dev || opened.st_ino != current.st_ino) {
+        if (!exists || !opened.same_file(current)) {
             if (!munmap_()) return false;
             close();
         }
     }
-    if (file_ident < 0) {
-        if (!open()) return false;
-        if (::fstat(file_ident, &opened) != 0) {
-            error_record = MXLoggerError("fstat error:%s\n", strerror(errno));
-            return false;
-        }
+    if (!file_.valid() && !open()) return false;
+    if (!file_.info(opened) || opened.size > std::numeric_limits<size_t>::max()) {
+        error_record = MXLoggerError("file size error:%s\n", file_.error_message().c_str());
+        return false;
     }
-    size_t capacity = static_cast<size_t>(opened.st_size);
-    // Unmap with the OLD mapping length before adopting another process's size.
+    const size_t capacity = static_cast<size_t>(opened.size);
     if (mmap_ptr_ != nullptr && capacity != file_size_ && !munmap_()) return false;
     file_size_ = capacity;
     if (capacity == 0) {
         if (truncate_(0) != 0) return false;
     } else {
         if (capacity < offset_length) {
-            error_record = MXLoggerError("invalid macOS log file size:%zu\n", capacity);
+            error_record = MXLoggerError("invalid log file size:%zu\n", capacity);
             return false;
         }
         if (mmap_ptr_ == nullptr && !mmap_()) return false;
     }
     actual_size_ = get_actual_size_();
     if (actual_size_ > file_size_ - offset_length) {
-        // Fail closed instead of erasing existing records on an invalid header.
-        error_record = MXLoggerError("invalid macOS log data length:%zu\n", actual_size_);
+        error_record = MXLoggerError("invalid committed data length:%zu\n", actual_size_);
         return false;
     }
+    error_record.clear();
     return true;
 }
 #endif
+mmap_sink::transaction_cleanup::~transaction_cleanup() {
+#ifdef _WIN32
+    // No cooperating idle process may retain a view or data handle that can
+    // prevent the next process from growing or deleting this file.
+    if (sink.munmap_()) sink.close();
+#endif
+}
+
 mmap_sink::~mmap_sink(){
     munmap_();
     MXLoggerInfo("mmap_sink delloc");
+}
+
+void mmap_sink::remove_all() {
+#if !MXLOGGER_MULTIPROCESS
+    // Single-process POSIX sinks must stop appending into unlinked files.
+    // Windows releases views per transaction; macOS refreshes the file identity.
+    if (!munmap_()) return;
+    close();
+    file_size_ = 0;
+    actual_size_ = 0;
+#endif
+    base_file_sink::remove_all();
 }
 int mmap_sink::log(const details::log_msg& msg){
     if (should_log(msg.level) == false) {
@@ -153,7 +170,7 @@ int mmap_sink::log(const details::log_msg& msg){
 }
 
 void mmap_sink::add_file_heder(const char* msg){
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     if (msg == nullptr) return;
     details::log_msg log_msg(level::level_enum::debug,"com.djy.mxlogger.fileHeader",nullptr,msg,true);
     // The empty check and append share ONE locked transaction, including when
@@ -188,20 +205,15 @@ int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
 }
 
 int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_empty){
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     ipc::scoped_lock lock(process_lock_);
     if (!lock) {
-        error_record = MXLoggerError("write lock error:%s\n", strerror(errno));
+        error_record = MXLoggerError("write lock error:%s\n", lock.error_message().c_str());
         return -4;
     }
+    transaction_cleanup cleanup{*this};
     if (!refresh_mmap_()) return -3;
     if (only_if_empty && actual_size_ != 0) return 0;
-    // The on-disk committed length is uint32_t, even in a 64-bit process.
-    constexpr size_t max_length = std::numeric_limits<uint32_t>::max();
-    if (buffer_size > max_length - offset_length || actual_size_ > max_length - offset_length - buffer_size) {
-        error_record = MXLoggerError("macOS log exceeds uint32 length limit\n");
-        return -4;
-    }
 #else
     (void)only_if_empty;
 
@@ -218,6 +230,15 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_
         return -3;
     }
 #endif
+
+    // The on-disk committed length is uint32_t on every platform, including
+    // Windows x64. Reject an append before the serialized length can wrap.
+    constexpr size_t max_length = static_cast<size_t>(std::min<uint64_t>(
+        std::numeric_limits<uint32_t>::max(), std::numeric_limits<size_t>::max() - offset_length));
+    if (buffer_size > max_length - offset_length || actual_size_ > max_length - offset_length - buffer_size) {
+        error_record = MXLoggerError("log exceeds uint32 length limit\n");
+        return -4;
+    }
 
     ///1.、需要写入字节总大小 = 当前文件真实长度 + 需要写入buffer的长度 + offset_length
 
@@ -240,6 +261,15 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_
         }
     }
 
+#ifdef _WIN32
+    // Mapped writes do not automatically update the file's last-write time.
+    // Update before publishing any record so age cleanup sees recent writes;
+    // a metadata failure still leaves the committed log unchanged.
+    if (!file_.update_write_time()) {
+        error_record = MXLoggerError("update write time error:%s\n", file_.error_message().c_str());
+        return -1;
+    }
+#endif
     uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
     
     
@@ -278,8 +308,12 @@ size_t mmap_sink::get_actual_size_(){
 //扩容
 /// 0 成功  -1 扩容失败 -2 解除映射失败 -3 映射失败
 int mmap_sink::truncate_(size_t size){
-
+    if (page_size_ == 0 || size > std::numeric_limits<size_t>::max() - page_size_) {
+        error_record = MXLoggerError("mapping capacity overflow\n");
+        return -1;
+    }
     size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
+    const bool was_empty = file_size_ == 0;
 
     /// Windows下文件被映射时无法调整大小，统一先解除映射再扩容(POSIX下此顺序同样安全)
     if(munmap_() == false){
@@ -287,6 +321,15 @@ int mmap_sink::truncate_(size_t size){
     }
     if(ftruncate(capacity_size) == false){
         return -1;
+    }
+    // Initialize the length before mapping, including if mapping later fails
+    // and must be retried. SetEndOfFile leaves extended contents unspecified.
+    if (was_empty) {
+        const uint32_t empty = 0;
+        if (file_.write_at(&empty, sizeof(empty), 0) != sizeof(empty)) {
+            error_record = MXLoggerError("initialize file header error:%s\n", file_.error_message().c_str());
+            return -1;
+        }
     }
 
     file_size_ = capacity_size;
@@ -299,91 +342,35 @@ int mmap_sink::truncate_(size_t size){
 }
 // 解除映射
 bool mmap_sink::munmap_(){
-    if(mmap_ptr_ != nullptr){
-#ifdef _WIN32
-        if (UnmapViewOfFile(mmap_ptr_) == 0) {
-
-            error_record = MXLoggerError("munmap_ error:%lu",GetLastError());
-
-
-            return false;
-        }
-#else
-        if (munmap(mmap_ptr_, file_size_) != 0) {
-
-            error_record = MXLoggerError("munmap_ error:%s",strerror(errno));
-
-
-            return false;
-        }
-#endif
-        error_record = "";
-        mmap_ptr_ = nullptr;
+    const bool success = mapping_.unmap();
+    mmap_ptr_ = mapping_.data();
+    if (!success) {
+        error_record = MXLoggerError("unmap error:%s\n", mapping_.error_message().c_str());
     }
-#ifdef _WIN32
-    if (file_mapping_ != nullptr) {
-        CloseHandle((HANDLE)file_mapping_);
-        file_mapping_ = nullptr;
+    return success;
+}
+
+bool mmap_sink::mmap_(){
+    const bool success = mapping_.map(file_, file_size_);
+    mmap_ptr_ = mapping_.data();
+    if (!success) {
+        error_record = MXLoggerError("map error:%s\n", mapping_.error_message().c_str());
+        return false;
     }
-#endif
+    error_record.clear();
     return true;
 }
 
-// 建立文件与内存的映射
-bool mmap_sink::mmap_(){
-
-#ifdef _WIN32
-    HANDLE file_handle = (HANDLE)_get_osfhandle(file_ident);
-    if (file_handle == INVALID_HANDLE_VALUE) {
-        error_record = MXLoggerError("[mxlogger_error]start_mmap invalid fd\n");
-        return false;
-    }
-
-    file_mapping_ = CreateFileMappingW(file_handle, NULL, PAGE_READWRITE,
-                                       (DWORD)(((uint64_t)file_size_) >> 32),
-                                       (DWORD)(file_size_ & 0xFFFFFFFF), NULL);
-    /// 映射失败不close文件fd：fd是sink的生命周期资源，关掉它会把瞬时失败
-    /// (如内存压力)变成永久失败——后续写入的重映射自愈全靠这个fd
-    /// Do NOT close the file fd on mapping failure: the fd is a lifetime resource of
-    /// the sink, and closing it turns a transient failure (e.g. memory pressure) into
-    /// a permanent one — the re-mapping self-healing on later writes depends on it
-    if (file_mapping_ == nullptr) {
-        error_record = MXLoggerError("[mxlogger_error]CreateFileMapping error:%lu\n",GetLastError());
-        return false;
-    }
-
-    mmap_ptr_ = (uint8_t*)MapViewOfFile((HANDLE)file_mapping_, FILE_MAP_ALL_ACCESS, 0, 0, file_size_);
-    if (mmap_ptr_ == nullptr) {
-        error_record = MXLoggerError("[mxlogger_error]MapViewOfFile error:%lu\n",GetLastError());
-        CloseHandle((HANDLE)file_mapping_);
-        file_mapping_ = nullptr;
-        return false;
-    }
-#else
-    mmap_ptr_ =  (uint8_t*)::mmap(NULL, file_size_, PROT_READ|PROT_WRITE, MAP_SHARED, file_ident, 0);
-
-    if (mmap_ptr_ == MAP_FAILED) {
-        mmap_ptr_ = nullptr;
-
-        error_record = MXLoggerError("[mxlogger_error]start_mmap error:%s\n",strerror(errno));
-
-        /// 同上：保住fd，等下一次写入时recover_mmap_重试映射
-        /// Same as above: keep the fd so recover_mmap_ can retry on the next write
-        return  false;
-    }
-#endif
-    error_record = "";
-
-    return  true;
-}
-
 void mmap_sink::flush() {
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     ipc::scoped_lock lock(process_lock_);
     if (!lock) {
-        error_record = MXLoggerError("flush lock error:%s\n", strerror(errno));
+        error_record = MXLoggerError("flush lock error:%s\n", lock.error_message().c_str());
         return;
     }
+    transaction_cleanup cleanup{*this};
+    if (!is_exit_path()) return;
+    if (!refresh_mmap_()) return;
 #endif
     async_();
 }
@@ -400,10 +387,13 @@ bool mmap_sink::msync_(bool is_sync){
     }
     if (is_sync) {
         /// FlushViewOfFile是异步写回，同步语义需要再刷文件缓冲
-        FlushFileBuffers((HANDLE)_get_osfhandle(file_ident));
+        if (FlushFileBuffers(file_.get()) == 0) {
+            error_record = MXLoggerError("[mxlogger_error]FlushFileBuffers error:%lu\n", GetLastError());
+            return false;
+        }
     }
 #else
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     // Another process may have grown the file beyond our old mapping.
     size_t mapped_size = file_size_;
 #else

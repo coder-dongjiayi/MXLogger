@@ -11,7 +11,8 @@
 #include "sink/mmap_sink.hpp"
 #include "log_msg.hpp"
 #include <memory>
-#include <unistd.h>
+#include <chrono>
+#include <thread>
 
 using mxlogger::sinks::mmap_sink;
 using mxlogger::details::log_msg;
@@ -176,7 +177,7 @@ MX_TEST(mmap_sink, recovers_after_initial_open_failure) {
     mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
 
     // 初始不可写: 写入返回-3(映射失败), 不崩溃
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     EXPECT_EQ(write_log(sink, level::info, "before-recover"), -4);
 #else
     EXPECT_EQ(write_log(sink, level::info, "before-recover"), -3);
@@ -275,7 +276,72 @@ MX_TEST(file_sink, remove_all_clears_dir) {
     record_list files;
     mxlogger::get_files(&files, dir.c_str());
     EXPECT_EQ(files.size(), (size_t)0);
+
+    // The same sink must recreate a visible file instead of writing to the
+    // old mapping (or failing to delete it on Windows).
+    EXPECT_EQ(write_log(sink, level::info, "after remove all"), 0);
+    sink.flush();
+    const auto records = mxtest::parse_dir(dir);
+    EXPECT_EQ(records.size(), (size_t)1);
+    if (!records.empty()) EXPECT_EQ(records[0].at("msg"), std::string("after remove all"));
 }
+
+MX_TEST(file_sink, unicode_directory_cleanup_and_reopen) {
+    const std::string dir = mxtest::temp_dir("中文 空格/日志");
+    {
+        mmap_sink sink(dir, "应用日志", policy::yyyy_MM_dd);
+        sink.init_aescfb("key12345", "iv123");
+        EXPECT_EQ(write_log(sink, level::info, "中文加密日志"), 0);
+        sink.flush();
+
+        mxtest::write_dummy_file(dir + "过期日志.mx", 128);
+        mxtest::set_mtime_days_ago(dir + "过期日志.mx", 10);
+        sink.set_max_disk_age(86400);
+        sink.remove_expire_data();
+        EXPECT_FALSE(mxlogger::path_exists((dir + "过期日志.mx").c_str()));
+
+        mxtest::write_dummy_file(dir + "其他日志.mx", 128);
+        sink.remove_before_all();
+        EXPECT_FALSE(mxlogger::path_exists((dir + "其他日志.mx").c_str()));
+    }
+    {
+        mmap_sink sink(dir, "应用日志", policy::yyyy_MM_dd);
+        sink.init_aescfb("key12345", "iv123");
+        EXPECT_EQ(write_log(sink, level::info, "重新打开"), 0);
+        const auto records = mxtest::parse_dir(dir, "key12345", "iv123");
+        EXPECT_EQ(records.size(), (size_t)2);
+        if (records.size() == 2) {
+            EXPECT_EQ(records[0].at("msg"), std::string("中文加密日志"));
+            EXPECT_EQ(records[1].at("msg"), std::string("重新打开"));
+        }
+        sink.remove_all();
+        EXPECT_TRUE(mxtest::first_mx_path(dir).empty());
+        EXPECT_EQ(write_log(sink, level::info, "删除后写入"), 0);
+        EXPECT_EQ(mxtest::parse_dir(dir, "key12345", "iv123").size(), (size_t)1);
+    }
+}
+
+#ifdef _WIN32
+MX_TEST(file_sink, mapped_append_refreshes_expiration_timestamp) {
+    const auto dir = mxtest::temp_dir("win_mmap_mtime");
+    std::string path;
+    {
+        mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+        EXPECT_EQ(write_log(sink, level::info, "first"), 0);
+        path = mxtest::first_mx_path(dir);
+        mxtest::set_mtime_days_ago(path, 10);
+        EXPECT_EQ(write_log(sink, level::info, "recent"), 0);
+    }
+    // Only mtime (not a live-file lease) protects this closed writer's file.
+    mmap_sink cleaner(dir, "cleaner", policy::yyyy_MM_dd);
+    cleaner.set_max_disk_age(86400);
+    cleaner.remove_expire_data();
+    EXPECT_TRUE(mxlogger::path_exists(path.c_str()));
+    record_list records;
+    EXPECT_EQ(mxlogger::select_form_path(path.c_str(), &records, nullptr, nullptr), 0);
+    EXPECT_EQ(records.size(), size_t(2));
+}
+#endif
 
 MX_TEST(file_sink, expire_noop_when_no_limits) {
     // 默认(max_age/max_size都为0=不限制)下 remove_expire_data 必须什么都不删,
@@ -341,9 +407,9 @@ MX_TEST(file_sink, expire_by_max_size_only_oldest_first) {
 
     // 创建间隔>1s保证birthtime可区分(秒级精度)
     mxtest::write_dummy_file(dir + "a_oldest.mx", 4096);
-    sleep(2);
+    std::this_thread::sleep_for(std::chrono::seconds(2));
     mxtest::write_dummy_file(dir + "b_middle.mx", 4096);
-    sleep(2);
+    std::this_thread::sleep_for(std::chrono::seconds(2));
     mxtest::write_dummy_file(dir + "c_newest.mx", 4096);
 
     // 当前mmap文件按系统页大小分配，Apple Silicon上通常为16KB，不能假定为4KB。

@@ -30,6 +30,7 @@ public:
     
     
     void flush() override;
+    void remove_all() override;
 
 private:
     
@@ -45,13 +46,17 @@ private:
     // 映射内存首地址
     uint8_t* mmap_ptr_ = nullptr;
 
-#ifdef _WIN32
-    // Windows的文件映射对象(CreateFileMapping)，与映射视图配对管理
-    void* file_mapping_ = nullptr;
-#endif
+    files::mapped_view mapping_;
+
+    // Declared after the directory lock in each transaction: destruction must
+    // release Windows data views/handles BEFORE unlocking that directory.
+    struct transaction_cleanup {
+        mmap_sink &sink;
+        ~transaction_cleanup();
+    };
 
     int write_data_(const void* buffer, size_t buffer_size, bool only_if_empty = false);
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     // Requires the directory's exclusive lock; refreshes cached length, capacity
     // and file identity before touching the mapping.
     bool refresh_mmap_();

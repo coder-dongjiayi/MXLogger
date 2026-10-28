@@ -7,6 +7,7 @@
 
 #include "debug_log.hpp"
 #include <string>
+#include <cstdarg>
 #ifdef  __ANDROID__
 #include <android/log.h>
 #endif

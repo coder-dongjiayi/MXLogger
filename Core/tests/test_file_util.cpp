@@ -10,6 +10,10 @@
 #include "test_support.hpp"
 #include "sink/mmap_sink.hpp"
 #include "log_msg.hpp"
+#ifdef _WIN32
+#include <winioctl.h>
+#include <limits>
+#endif
 
 using mxtest::record_list;
 
@@ -24,7 +28,7 @@ MX_TEST(file_util, path_exists_and_file_size) {
 }
 
 MX_TEST(file_util, create_dir_nested) {
-    system("rm -rf mxtest_tmp/fu_nested");
+    EXPECT_TRUE(mxtest::reset_dir("mxtest_tmp/fu_nested"));
     // create_dir接收文件路径，逐级创建到最后一个/为止
     EXPECT_TRUE(mxlogger::create_dir("mxtest_tmp/fu_nested/a/b/file.txt"));
     EXPECT_TRUE(mxlogger::path_exists("mxtest_tmp/fu_nested/a/b"));
@@ -55,6 +59,87 @@ MX_TEST(file_util, get_files_lists_and_skips) {
     record_list none;
     EXPECT_EQ(mxlogger::get_files(&none, "mxtest_tmp/no_such_dir/"), -1);
 }
+
+#ifdef _WIN32
+MX_TEST(file_util, windows_coordinator_is_reserved_regardless_of_case) {
+    const auto dir = mxtest::temp_dir("win_coordinator_case");
+    mxtest::write_dummy_file(dir + ".MXLOGGER.LOCK", 0);
+    mxlogger::sinks::mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+    record_list files;
+    EXPECT_EQ(mxlogger::get_files(&files, dir.c_str()), 0);
+    EXPECT_EQ(files.size(), size_t(1));
+    sink.remove_all();
+    files.clear();
+    EXPECT_EQ(mxlogger::get_files(&files, dir.c_str()), 0);
+    EXPECT_TRUE(files.empty());
+    EXPECT_TRUE(mxlogger::path_exists((dir + ".MXLOGGER.LOCK").c_str()));
+}
+
+MX_TEST(file_util, windows_absolute_paths_and_separators) {
+    const auto root = std::filesystem::absolute(
+        std::filesystem::u8path(mxtest::temp_dir("win_paths")));
+    // Include a drive prefix, backslashes, spaces and a non-ASCII component.
+    const std::string dir = root.u8string() + "\\新目录 空格\\";
+    EXPECT_TRUE(mxlogger::create_dir(dir + "file.mx"));
+    EXPECT_TRUE(mxlogger::path_exists(dir.c_str()));
+    mxtest::write_dummy_file(dir + "中文.mx", 32);
+    std::filesystem::create_directory(std::filesystem::u8path(dir + "子目录"));
+
+    record_list files;
+    // Listing works even when the caller omits the trailing separator.
+    EXPECT_EQ(mxlogger::get_files(&files, dir.substr(0, dir.size() - 1).c_str()), 0);
+    EXPECT_EQ(files.size(), (size_t)1);
+    if (!files.empty()) EXPECT_EQ(files[0]["name"], std::string("中文.mx"));
+
+    std::string forward = dir;
+    std::replace(forward.begin(), forward.end(), '\\', '/');
+    EXPECT_TRUE(mxlogger::create_dir(forward + "file.mx"));
+    EXPECT_EQ(mxlogger::file_size((forward + "中文.mx").c_str()), (size_t)32);
+    EXPECT_EQ(mxlogger::remove_file((forward + "中文.mx").c_str()), 0);
+    EXPECT_FALSE(mxlogger::path_exists((dir + "中文.mx").c_str()));
+
+    // Existing drive roots must not be interpreted as directories to create.
+    EXPECT_TRUE(mxlogger::create_dir(root.root_path().u8string() + "file.mx"));
+}
+
+MX_TEST(file_util, windows_filetime_after_2038) {
+    const int64_t unix_seconds = 2208988800LL; // 2040-01-01 UTC
+    ULARGE_INTEGER ticks;
+    ticks.QuadPart = static_cast<ULONGLONG>(unix_seconds * 10000000LL + 116444736000000000LL);
+    FILETIME time{ticks.LowPart, ticks.HighPart};
+    EXPECT_EQ(mxlogger::filetime_to_unix(time), unix_seconds);
+}
+
+MX_TEST(file_util, windows_large_file_size_and_cleanup) {
+    const auto dir = mxtest::temp_dir("win_large");
+    mxlogger::sinks::mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+    const auto path = dir + "大文件.mx";
+    HANDLE file = CreateFileW(mxlogger::utf8_to_wide(path.c_str()).c_str(),
+                              GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                              nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    EXPECT_TRUE(file != INVALID_HANDLE_VALUE);
+    if (file == INVALID_HANDLE_VALUE) return;
+
+    // Sparse allocation checks >2 GiB accounting without writing gigabytes.
+    DWORD returned = 0;
+    const bool sparse = DeviceIoControl(file, FSCTL_SET_SPARSE, nullptr, 0,
+                                        nullptr, 0, &returned, nullptr) != 0;
+    EXPECT_TRUE(sparse);
+    LARGE_INTEGER length;
+    length.QuadPart = 3LL * 1024 * 1024 * 1024;
+    const bool resized = sparse && SetFilePointerEx(file, length, nullptr, FILE_BEGIN) && SetEndOfFile(file);
+    EXPECT_TRUE(resized);
+    CloseHandle(file);
+    if (!resized) return;
+
+    EXPECT_EQ(mxlogger::file_size(path.c_str()), static_cast<size_t>(length.QuadPart));
+    EXPECT_EQ(sink.dir_size(), std::numeric_limits<long>::max());
+    sink.set_max_disk_size(1);
+    sink.remove_expire_data();
+    EXPECT_FALSE(mxlogger::path_exists(path.c_str()));
+    EXPECT_TRUE(sink.dir_size() > 0); // The current mapped file is preserved.
+}
+#endif
 
 // 生成一个正常的加密日志文件供损坏测试使用
 static std::string make_valid_log(const std::string& dir, int count) {

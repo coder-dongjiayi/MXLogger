@@ -10,11 +10,12 @@
 #include "../mxlogger_helper.hpp"
 #include "../mxlogger_file_util.hpp"
 #include <cerrno>
+#include <limits>
 namespace mxlogger{
 namespace sinks{
 
 base_file_sink::base_file_sink(const std::string &dir_path, const std::string &filename, policy::storage_policy policy):dir_path_(dir_path), policy_(policy),
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     process_lock_(dir_path),
 #endif
     filename_(filename){
@@ -32,26 +33,15 @@ base_file_sink::~base_file_sink(){
 }
 
 size_t base_file_sink::get_file_size(){
-    return mxlogger::file_size(log_disk_path_.data());
+    files::file_info info;
+    return file_.valid() && file_.info(info) ? static_cast<size_t>(info.size) : mxlogger::file_size(log_disk_path_.data());
 }
 void base_file_sink::close(){
-    if (file_ident >= 0) {
-#ifdef _WIN32
-        ::_close(file_ident);
-#else
-        ::close(file_ident);
-#endif
-    }
-    file_ident = -1;
+    if (!file_.close()) error_record = MXLoggerError("close error:%s\n", file_.error_message().c_str());
 }
 bool base_file_sink::ftruncate(size_t capacity_size){
-
-#ifdef _WIN32
-    if (::_chsize_s(file_ident, (long long)capacity_size) != 0) {
-#else
-    if (::ftruncate(file_ident, static_cast<off_t>(capacity_size)) != 0) {
-#endif
-        error_record =  MXLoggerError("truncate_ error:%s\n",strerror(errno));
+    if (!file_.resize(capacity_size)) {
+        error_record = MXLoggerError("truncate_ error:%s\n", file_.error_message().c_str());
 
         return  false;
     }else{
@@ -66,33 +56,26 @@ bool base_file_sink::is_exit_path(){
 }
 
 bool base_file_sink::open(){
-    
-    std::string file_path = dir_path_ + filename_;
-    if (path_exists(file_path.data()) == true && file_ident >= 0)  return true;
-
-
-    if (file_ident >= 0) {
-        close();
-    }
-        
-    log_disk_path_ = file_path;
-
-    /// 打开文件，如果文件不存在则创建文件
-#ifdef _WIN32
-    file_ident =  ::_wopen(mxlogger::utf8_to_wide(log_disk_path_.c_str()).c_str(),
-                           _O_RDWR | _O_CREAT | _O_BINARY | _O_NOINHERIT, _S_IREAD | _S_IWRITE);
-#else
-    file_ident =  ::open(log_disk_path_.c_str(), O_RDWR|O_CLOEXEC|O_CREAT,S_IRWXU);
-#endif
-    if (file_ident < 0) {
-        error_record =  MXLoggerError("ope_file_ error:%s\n",strerror(errno));
+    if (file_.valid()) return true;
+    log_disk_path_ = dir_path_ + filename_;
+    if (!file_.open(log_disk_path_, false, true)) {
+        error_record = MXLoggerError("open_file error:%s\n", file_.error_message().c_str());
         return  false;
     }
-#if MXLOGGER_MACOS_MULTIPROCESS
-    // Retain a shared data-file lock until close() so age/size cleanup in any
-    // process can identify live files. Appends use the separate directory lock.
-    if (!ipc::flock_retry(file_ident, LOCK_SH)) {
-        error_record = MXLoggerError("data file lock error:%s\n", strerror(errno));
+#if MXLOGGER_MULTIPROCESS
+#ifdef _WIN32
+    files::file_info info;
+    if (!file_.info(info)) {
+        error_record = MXLoggerError("file info error:%s\n", file_.error_message().c_str());
+        close();
+        return false;
+    }
+    if (!active_lease_.hold(dir_path_, info)) {
+        error_record = MXLoggerError("active file lease error:%s\n", active_lease_.error_message().c_str());
+#else
+    if (!file_.lock(false)) {
+        error_record = MXLoggerError("data file lock error:%s\n", file_.error_message().c_str());
+#endif
         close();
         return false;
     }
@@ -124,13 +107,13 @@ long long base_file_sink::max_disk_size() const{
 }
 
 long  base_file_sink::dir_size() const{
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     ipc::directory_lock directory_lock(dir_path_, false);
     ipc::scoped_lock lock(directory_lock, false);
     if (!lock) return 0;
 #endif
    
-    long   current_cache_size=0;
+    int64_t current_cache_size = 0;
     
     std::vector<std::map<std::string, std::string>> destination;
     
@@ -138,7 +121,12 @@ long  base_file_sink::dir_size() const{
     
     for (int i = 0; i < destination.size(); i++) {
         std::map<std::string, std::string> map = destination[i];
-        current_cache_size  = current_cache_size + std::stol(map["size"]);
+        const int64_t size = std::stoll(map["size"]);
+        // Preserve the public long return type without overflowing on Windows.
+        if (size > std::numeric_limits<long>::max() - current_cache_size) {
+            return std::numeric_limits<long>::max();
+        }
+        current_cache_size += size;
         
     }
     
@@ -153,15 +141,15 @@ void base_file_sink::remove_expire_data(){
      if (max_disk_age_ <= 0 && max_disk_size_ <= 0) {
          return;
      }
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
      ipc::scoped_lock lock(process_lock_);
      if (!lock) {
-         error_record = MXLoggerError("cleanup lock error:%s\n", strerror(errno));
+         error_record = MXLoggerError("cleanup lock error:%s\n", lock.error_message().c_str());
          return;
      }
 #endif
 
-     long   current_cache_size=0;
+     int64_t current_cache_size = 0;
    
      std::vector<std::string> delete_urls;
      std::vector<std::map<std::string, std::string>> final_dir;
@@ -179,11 +167,11 @@ void base_file_sink::remove_expire_data(){
      for (int i = 0; i < destination.size(); i++) {
          std::map<std::string, std::string> map = destination[i];
          std::string file_name  = map["name"];
-         long size = std::stol(map["size"]);
-         time_t last_time = (time_t)std::stol(map["last_timestamp"]);
+         int64_t size = std::stoll(map["size"]);
+         int64_t last_time = std::stoll(map["last_timestamp"]);
 
          bool can_expire = max_disk_age_ > 0 && last_time < expiration_tp && file_name.compare(filename_) != 0;
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
          can_expire = can_expire && ipc::file_is_inactive(dir_path_ + file_name);
 #endif
          if (can_expire) {
@@ -206,7 +194,7 @@ void base_file_sink::remove_expire_data(){
 
              std::string delete_path = dir_path_ + name;
              MXLoggerInfo("expire file : %s",name.c_str());
-             if (remove(delete_path.c_str()) != 0) {
+             if (mxlogger::remove_file(delete_path.c_str()) != 0) {
 
                  error_record =  MXLoggerError("delete %s failed!!!",name.c_str());
              }
@@ -224,7 +212,7 @@ void base_file_sink::remove_expire_data(){
          for (int i = (int)final_dir.size() - 1; i >= 0; i--) {
              std::map<std::string, std::string> map = final_dir[i];
              std::string file_name  = map["name"];
-             long file_size = std::stol(map["size"]);
+             int64_t file_size = std::stoll(map["size"]);
 
              std::string delete_path = dir_path_ + file_name;
 
@@ -233,12 +221,12 @@ void base_file_sink::remove_expire_data(){
                  MXLoggerInfo("%s is currently being mapped and will not be deleted",file_name.c_str());
                  continue;
              }
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
              if (!ipc::file_is_inactive(delete_path)) continue;
 #endif
-             if (remove(delete_path.c_str()) == 0) {
+             if (mxlogger::remove_file(delete_path.c_str()) == 0) {
                  current_cache_size = current_cache_size - file_size;
-                 MXLoggerInfo("over limit size file : %s(%ld byte)",file_name.c_str(),file_size);
+                 MXLoggerInfo("over limit size file : %s(%lld byte)",file_name.c_str(),static_cast<long long>(file_size));
                  removeCount = removeCount + 1;
                  if (max_disk_size_ >= current_cache_size) {
                      MXLoggerInfo("over limit data(%d files)...",removeCount);
@@ -254,10 +242,10 @@ void base_file_sink::remove_expire_data(){
 
 
 int base_file_sink::remove_all_(bool skip_current){
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     ipc::scoped_lock lock(process_lock_);
     if (!lock) {
-        error_record = MXLoggerError("cleanup lock error:%s\n", strerror(errno));
+        error_record = MXLoggerError("cleanup lock error:%s\n", lock.error_message().c_str());
         return 0;
     }
 #endif
@@ -273,14 +261,17 @@ int base_file_sink::remove_all_(bool skip_current){
         if(skip_current == true && file_name == filename_){
             continue;
         }
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
         if (skip_current && !ipc::file_is_inactive(dir_path_ + file_name)) continue;
         // Explicit remove_all may unlink live files. Before their next write,
         // every sink checks the inode and reopens the replacement under this lock.
 #endif
-        count_ ++;
         std::string subdir = dir_path_ + file_name;
-        remove(subdir.c_str());
+        if (mxlogger::remove_file(subdir.c_str()) == 0) {
+            count_++;
+        } else {
+            error_record = MXLoggerError("delete %s failed: %s", file_name.c_str(), strerror(errno));
+        }
     }
     return count_;
 

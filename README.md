@@ -327,13 +327,16 @@ directory file lock and refreshes the committed length, file identity and mappin
 copy a committed snapshot under a shared lock, then decode after unlocking. All participants must
 use this protocol, matching encryption parameters and an accessible shared directory. Separate
 directories do not block each other. iOS and Android retain their existing file access paths;
-the Windows multiprocess backend is not implemented yet.
+an experimental Windows Core backend now follows this directory protocol using `LockFileEx`.
+It releases data views and handles before unlocking each transaction, with separate coordinator
+leases protecting active files. Actual Windows execution needs the manually dispatched
+`verify-logger` CI; Flutter Windows plugin integration is still separate work.
 
-The macOS `.mxlogger.lock` coordinator is excluded from log listings, size budgets and cleanup;
+The macOS/Windows Core `.mxlogger.lock` coordinator is excluded from log listings, size budgets and cleanup;
 do not manually delete it while loggers are alive. Age/size cleanup and `removeBeforeAllData`
 retain files held by other processes. Explicit `removeAllData` deletes all logs, and live loggers
 reopen files before their next write. The `.mx` format is unchanged; this does not add CRC or
-power-loss durability guarantees. macOS writes can return `-4` for a lock failure or the 32-bit
+power-loss durability guarantees. macOS/Windows Core writes can return `-4` for a lock failure or the 32-bit
 committed-length limit; inspect `errorDesc` for details.
 
 > **Deprecation notice.** `loggerToken` used to be called `loggerKey`, which was easy to confuse with

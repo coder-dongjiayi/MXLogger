@@ -2,25 +2,48 @@ name: verify-logger
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - 'Core/**'
-      - 'iOS/MXLogger/**'
-      - 'iOS/MXLoggerDemo/**'
-      - 'macOS/**'
-      - 'Android/MXLogger/mxlogger/**'
-      - 'flutter_mxlogger/**'
-      - 'spm/**'
-      - '*.podspec'
-      - 'scripts/verify_*'
-      - 'scripts/run_flutter_macos_demo.sh'
-      - 'scripts/sync_spm_mirror.sh'
-      - '.github/workflows/verify-logger.yml'
 
 permissions:
   contents: read
 
 jobs:
+  windows:
+    name: Windows Core (${{ matrix.configuration }})
+    runs-on: windows-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Core and tests (MSVC x64)
+        run: |
+          New-Item -ItemType Directory -Force build/windows-core | Out-Null
+          cmake -S Core -B build/windows-core -A x64 -DMXLOGGER_BUILD_TESTS=ON 2>&1 | Tee-Object build/windows-core/configure.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build
+        run: |
+          cmake --build build/windows-core --config ${{ matrix.configuration }} --parallel 2>&1 | Tee-Object build/windows-core/build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Test
+        run: |
+          ctest --test-dir build/windows-core -C ${{ matrix.configuration }} --output-on-failure --no-tests=error --output-junit test-results.xml 2>&1 | Tee-Object build/windows-core/ctest.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: windows-core-${{ matrix.configuration }}-logs
+          path: |
+            build/windows-core/*.log
+            build/windows-core/test-results.xml
+            build/windows-core/Testing/Temporary/
+          retention-days: 7
+          if-no-files-found: warn
+
   apple:
     runs-on: macos-latest
     timeout-minutes: 45

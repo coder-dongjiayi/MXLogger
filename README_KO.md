@@ -266,9 +266,9 @@ debugPrint("logs live in ${logger.diskcachePath}");
 
 모든 플랫폼에서 로거는 **nameSpace + diskCacheDirectory**로 식별되며, 같은 조합은 같은 C++ 인스턴스를 공유합니다. 이 조합의 MD5 값이 **loggerToken**입니다. 모듈 간에 이 값을 전달하면 로거 객체를 보관하지 않고 클래스 메서드로 기록할 수 있습니다.
 
-네이티브 macOS Core는 같은 로그 디렉터리를 공유하는 프로세스의 접근을 조정합니다. 추가 기록 전에 디렉터리 단위 파일 잠금을 획득하고 확정된 길이, 파일 식별 정보와 매핑 용량을 갱신합니다. 읽을 때는 공유 잠금 아래에서 확정된 스냅샷을 복사한 뒤 잠금을 풀고 복호화·분석합니다. 참여하는 모든 프로세스는 같은 방식과 암호화 설정, 접근 가능한 공유 디렉터리를 사용해야 합니다. 서로 다른 디렉터리는 서로를 기다리지 않습니다. iOS / Android의 기존 파일 접근 방식은 유지되며, Windows 다중 프로세스 구현은 아직 없습니다.
+네이티브 macOS Core는 같은 로그 디렉터리를 공유하는 프로세스의 접근을 조정합니다. 추가 기록 전에 디렉터리 단위 파일 잠금을 획득하고 확정된 길이, 파일 식별 정보와 매핑 용량을 갱신합니다. 읽을 때는 공유 잠금 아래에서 확정된 스냅샷을 복사한 뒤 잠금을 풀고 복호화·분석합니다. 참여하는 모든 프로세스는 같은 방식과 암호화 설정, 접근 가능한 공유 디렉터리를 사용해야 합니다. 서로 다른 디렉터리는 서로를 기다리지 않습니다. iOS / Android의 기존 파일 접근 방식은 유지되며, Windows Core에는 같은 디렉터리 조정 방식을 사용하는 실험적 백엔드를 추가했습니다. LockFileEx와 임시 매핑을 사용하며 실행 검증은 수동 verify-logger CI에서 수행합니다. Flutter 플러그인의 Windows 통합은 별도 작업입니다.
 
-macOS의 조정 파일 `.mxlogger.lock`은 로그 목록, 용량 계산과 정리 대상에서 제외됩니다. 로거가 살아 있는 동안 수동으로 삭제하지 마세요. 보관 기간·용량 기반 정리와 `removeBeforeAllData`는 다른 프로세스가 사용 중인 파일을 보존합니다. `removeAllData`는 모든 로그를 삭제하며, 실행 중인 로거는 다음 기록 전에 파일을 다시 엽니다. `.mx` 형식은 바뀌지 않았고, CRC나 전원 차단 내구성 보장이 추가되는 것은 아닙니다. macOS에서는 잠금 실패 또는 확정 길이가 32비트 한도에 도달하면 `-4`를 반환할 수 있습니다. 자세한 내용은 `errorDesc`를 확인하세요.
+macOS / Windows Core의 조정 파일 `.mxlogger.lock`은 로그 목록, 용량 계산과 정리 대상에서 제외됩니다. 로거가 살아 있는 동안 수동으로 삭제하지 마세요. 보관 기간·용량 기반 정리와 `removeBeforeAllData`는 다른 프로세스가 사용 중인 파일을 보존합니다. `removeAllData`는 모든 로그를 삭제하며, 실행 중인 로거는 다음 기록 전에 파일을 다시 엽니다. `.mx` 형식은 바뀌지 않았고, CRC나 전원 차단 내구성 보장이 추가되는 것은 아닙니다. macOS / Windows Core에서는 잠금 실패 또는 확정 길이가 32비트 한도에 도달하면 `-4`를 반환할 수 있습니다. 자세한 내용은 `errorDesc`를 확인하세요.
 
 > **사용 중단 예정 API 안내.** `loggerToken`의 이전 이름은 `loggerKey`였으며, 암호화용 `cryptKey`와 혼동하기 쉬웠습니다. iOS / Android / Flutter의 각 `loggerKey` API는 현재도 대응하는 `loggerToken` API로 전달되지만 사용 중단 예정이며 **향후 릴리스에서 제거됩니다**. `loggerKey` → `loggerToken`, `xxxWithLoggerKey:` → `xxxWithLoggerToken:`, `getLoggerKey()` → `getLoggerToken()`, `logLoggerKey` → `logLoggerToken`, `destroyWithLoggerKey` → `destroyWithLoggerToken`으로 이전하세요.
 

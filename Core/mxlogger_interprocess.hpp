@@ -1,29 +1,11 @@
 #ifndef mxlogger_interprocess_hpp
 #define mxlogger_interprocess_hpp
 
-#if defined(__APPLE__)
-#include <TargetConditionals.h>
-#endif
-
-// Native macOS only. iOS (including Catalyst), Android and Windows keep their
-// existing paths. A future Windows backend must implement the same protocol.
-#if defined(__APPLE__) && TARGET_OS_OSX
-#define MXLOGGER_MACOS_MULTIPROCESS 1
-#else
-#define MXLOGGER_MACOS_MULTIPROCESS 0
-#endif
-
-#if MXLOGGER_MACOS_MULTIPROCESS
-#include <cerrno>
-#include <fcntl.h>
-#include <algorithm>
-#include <cstdint>
+#include "mxlogger_file.hpp"
+#if MXLOGGER_MULTIPROCESS
 #include <cstring>
 #include <new>
-#include <string>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <stdexcept>
 #include <vector>
 
 namespace mxlogger {
@@ -31,51 +13,46 @@ namespace ipc {
 
 constexpr const char *lock_filename = ".mxlogger.lock";
 
-inline bool flock_retry(int fd, int operation) {
-    int result;
-    do {
-        result = ::flock(fd, operation);
-    } while (result != 0 && errno == EINTR);
-    return result == 0;
-}
-
 inline std::string parent_directory(const std::string &path) {
+#ifdef _WIN32
+    auto slash = path.find_last_of("/\\");
+#else
     auto slash = path.find_last_of('/');
+#endif
     return slash == std::string::npos ? "./" : path.substr(0, slash + 1);
 }
 
-// One persistent coordination file per logger directory. Never unlink this file:
-// all cooperating writers, readers and cleaners must lock the same inode.
-// A sink reuses its fd under the existing C++ logger_mutex. Standalone reads use
-// separate fds, so a shared lock cannot downgrade a writer's exclusive lock.
+inline std::string coordination_path(const std::string &directory) {
+    if (directory.empty()) return std::string("./") + lock_filename;
+    const char last = directory.back();
+    bool separator = last == '/';
+#ifdef _WIN32
+    separator = separator || last == '\\';
+#endif
+    return directory + (separator ? "" : "/") + lock_filename;
+}
+
+// Persistent and excluded from cleanup. Each lock owns its OS handle so readers
+// cannot downgrade a writer's lock through a reused fd. Acquire the thread
+// mutex first; recursive locking and shared-to-exclusive upgrades are forbidden.
 class directory_lock {
 public:
     explicit directory_lock(const std::string &directory, bool create = true)
-        : path_((directory.empty() ? "." : directory) +
-                (directory.empty() || directory.back() != '/' ? "/" : "") + lock_filename),
-          create_(create) {}
-    ~directory_lock() { if (fd_ >= 0) ::close(fd_); }
-
+        : path_(coordination_path(directory)), create_(create) {}
     bool lock(bool exclusive) {
-        if (fd_ < 0) {
-            do {
-                fd_ = ::open(path_.c_str(), (create_ ? O_RDWR | O_CREAT : O_RDONLY) | O_CLOEXEC, 0600);
-            } while (fd_ < 0 && errno == EINTR);
-            // Legacy/exported files have no coordinator. Reading them must not
-            // create files or require write permission in the source directory.
-            if (fd_ < 0) return !create_ && errno == ENOENT;
+        if (!file_.valid() && !file_.open(path_, !create_, create_, false)) {
+            return !create_ && files::is_missing(file_.error());
         }
-        return flock_retry(fd_, exclusive ? LOCK_EX : LOCK_SH);
+        return file_.lock(exclusive);
     }
-    void unlock() { if (fd_ >= 0) flock_retry(fd_, LOCK_UN); }
-
+    void unlock() { if (file_.valid()) file_.unlock(); }
+    std::string error_message() const { return file_.error_message(); }
     directory_lock(const directory_lock &) = delete;
     directory_lock &operator=(const directory_lock &) = delete;
-
 private:
     std::string path_;
     bool create_;
-    int fd_ = -1;
+    files::native_file file_;
 };
 
 class scoped_lock {
@@ -84,6 +61,7 @@ public:
         : lock_(lock), locked_(lock.lock(exclusive)) {}
     ~scoped_lock() { if (locked_) lock_.unlock(); }
     explicit operator bool() const { return locked_; }
+    std::string error_message() const { return lock_.error_message(); }
     scoped_lock(const scoped_lock &) = delete;
     scoped_lock &operator=(const scoped_lock &) = delete;
 private:
@@ -91,48 +69,92 @@ private:
     bool locked_;
 };
 
-// Called while holding the directory's exclusive lock. Writers keep a shared
-// lock on the data fd for their lifetime; an exclusive nonblocking probe detects
-// live writers without PID files or stale process registrations.
-inline bool file_is_inactive(const std::string &path) {
-    int fd = ::open(path.c_str(), O_RDONLY | O_CLOEXEC);
-    if (fd < 0) return false;
-    bool inactive = flock_retry(fd, LOCK_EX | LOCK_NB);
-    ::close(fd);
-    return inactive;
+#ifdef _WIN32
+// Byte zero coordinates transactions. Other ranges hold shared live-file leases
+// so idle writers can close data files and release views before any expansion.
+// Hash the OS identity, not path spelling. Collisions conservatively preserve
+// extra files; they cannot cause an active file to be deleted.
+inline uint64_t lease_offset(const files::file_info &info) {
+    uint64_t value = 14695981039346656037ULL;
+    for (uint64_t word : {info.volume, info.index}) {
+        for (int i = 0; i < 8; ++i) {
+            value ^= (word >> (8 * i)) & 0xff;
+            value *= 1099511628211ULL;
+        }
+    }
+    return (value & 0x7fffffffffffffffULL) | 1;
 }
 
-// Copy only committed bytes while holding the shared lock. Decryption and
-// FlatBuffers decoding then run outside the lock, without blocking writers.
+class active_file_lease {
+public:
+    bool hold(const std::string &directory, const files::file_info &info) {
+        const uint64_t next = lease_offset(info);
+        if (held_ && next == offset_) return true;
+        if (!file_.valid() && !file_.open(coordination_path(directory), false, true, false)) return false;
+        if (!file_.lock(false, true, next)) return false;
+        if (held_) file_.unlock(offset_);
+        offset_ = next;
+        held_ = true;
+        return true;
+    }
+    std::string error_message() const { return file_.error_message(); }
+private:
+    files::native_file file_;
+    uint64_t offset_ = 0;
+    bool held_ = false;
+};
+#endif
+
+// Caller holds the directory's exclusive lock. macOS leases are shared flocks
+// on data fds; Windows leases use identities and separate coordinator handles.
+inline bool file_is_inactive(const std::string &path) {
+    files::native_file file;
+    if (!file.open(path, true)) return false;
+#ifdef _WIN32
+    files::file_info info;
+    if (!file.info(info)) return false;
+    files::native_file coordinator;
+    if (!coordinator.open(coordination_path(parent_directory(path)), true, false, false)) return false;
+    return coordinator.lock(true, false, lease_offset(info));
+#else
+    return file.lock(true, false);
+#endif
+}
+
+// Copy committed bytes under a shared lock; decrypt and parse after releasing
+// it. Windows snapshots use a read-only view, coherent with mapped writers.
 inline bool read_snapshot(const char *path, std::vector<uint8_t> &snapshot) {
     directory_lock directory_lock(parent_directory(path), false);
     scoped_lock lock(directory_lock, false);
     if (!lock) return false;
-    int fd = ::open(path, O_RDONLY | O_CLOEXEC);
-    if (fd < 0) return false;
-    struct stat info{};
+    files::native_file file;
+    files::file_info info;
+    if (!file.open(path, true) || !file.info(info) || info.size < sizeof(uint32_t) ||
+        info.size > std::numeric_limits<size_t>::max()) return false;
     uint32_t committed = 0;
-    ssize_t result;
-    do { result = ::read(fd, &committed, sizeof(committed)); } while (result < 0 && errno == EINTR);
-    if (::fstat(fd, &info) != 0 || info.st_size < 4 || result != sizeof(committed)) {
-        ::close(fd);
-        return false;
-    }
-    // A truncated legacy file may have an oversized length header. Preserve the
-    // parser's bounded partial-read behavior instead of allocating that length.
-    size_t bytes = static_cast<size_t>(std::min<uint64_t>(uint64_t(committed) + 4, info.st_size));
+#ifdef _WIN32
+    files::mapped_view view;
+    if (!view.map(file, static_cast<size_t>(info.size), false)) return false;
+    memcpy(&committed, view.data(), sizeof(committed));
+#else
+    if (file.read(&committed, sizeof(committed)) != sizeof(committed)) return false;
+#endif
+    const size_t bytes = static_cast<size_t>(std::min<uint64_t>(uint64_t(committed) + 4, info.size));
     try { snapshot.resize(bytes); }
-    catch (const std::bad_alloc &) { ::close(fd); return false; }
+    catch (const std::bad_alloc &) { return false; }
+    catch (const std::length_error &) { return false; }
+#ifdef _WIN32
+    memcpy(snapshot.data(), view.data(), bytes);
+#else
     memcpy(snapshot.data(), &committed, 4);
     size_t copied = 4;
     while (copied < bytes) {
-        do { result = ::read(fd, snapshot.data() + copied, bytes - copied); } while (result < 0 && errno == EINTR);
-        if (result <= 0) break;
-        copied += static_cast<size_t>(result);
+        auto count = file.read(snapshot.data() + copied, bytes - copied);
+        if (count <= 0) return false;
+        copied += static_cast<size_t>(count);
     }
-    ::close(fd);
-    snapshot.resize(copied);
-    return result >= 0;
+#endif
+    return true;
 }
 
 } // namespace ipc

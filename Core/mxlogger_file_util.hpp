@@ -15,13 +15,16 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
+#include <cstdint>
 #include <sys/stat.h>
+#include "mxlogger_file.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
 #include <direct.h>
 #include <fcntl.h>
+#include <filesystem>
 #else
 #include <dirent.h>
 #include <sys/file.h>
@@ -39,29 +42,19 @@ namespace mxlogger{
 #ifdef _WIN32
 /// Windows文件API需要宽字符才能正确处理中文等非ASCII路径
 inline std::wstring utf8_to_wide(const char* utf8){
-    if (utf8 == nullptr) return L"";
-    int len = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, nullptr, 0);
-    if (len <= 1) return L"";
-    std::wstring wide((size_t)len - 1, L'\0');
-    MultiByteToWideChar(CP_UTF8, 0, utf8, -1, &wide[0], len);
-    return wide;
+    return files::to_wide(utf8);
 }
 
 inline std::string wide_to_utf8(const wchar_t* wide){
-    if (wide == nullptr) return "";
-    int len = WideCharToMultiByte(CP_UTF8, 0, wide, -1, nullptr, 0, nullptr, nullptr);
-    if (len <= 1) return "";
-    std::string utf8((size_t)len - 1, '\0');
-    WideCharToMultiByte(CP_UTF8, 0, wide, -1, &utf8[0], len, nullptr, nullptr);
-    return utf8;
+    return files::to_utf8(wide);
 }
 
 /// FILETIME(1601年起的100ns计数) 转 unix秒
-inline long filetime_to_unix(const FILETIME& ft){
+inline int64_t filetime_to_unix(const FILETIME& ft){
     ULARGE_INTEGER u;
     u.LowPart = ft.dwLowDateTime;
     u.HighPart = ft.dwHighDateTime;
-    return (long)((u.QuadPart - 116444736000000000ULL) / 10000000ULL);
+    return (static_cast<int64_t>(u.QuadPart) - 116444736000000000LL) / 10000000LL;
 }
 #endif
 
@@ -101,7 +94,21 @@ inline bool makedir(const char* path){
 
 
 inline bool create_dir(const std::string &path){
-
+#ifdef _WIN32
+    // Construct from UTF-16: narrow filesystem paths use the Windows code page.
+    // parent_path handles drive roots, both separators and UNC shares.
+    const std::wstring wide = utf8_to_wide(path.c_str());
+    if (wide.empty()) { errno = EINVAL; return false; }
+    const auto parent = std::filesystem::path(wide).parent_path();
+    if (parent.empty()) { errno = EINVAL; return false; }
+    std::error_code error;
+    std::filesystem::create_directories(parent, error);
+    if (error) {
+        errno = error == std::errc::permission_denied ? EACCES : EIO;
+        return false;
+    }
+    return std::filesystem::is_directory(parent, error) && !error;
+#else
     auto pos = path.find_last_of("/");
 
     std::string dir_name = pos != std::string::npos ? path.substr(0,pos) : std::string{};
@@ -119,7 +126,7 @@ inline bool create_dir(const std::string &path){
         }
         auto subdir = dir_name.substr(0,token_pos);
         if (!subdir.empty() && !path_exists(subdir.data()) && !makedir(subdir.data())) {
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
             // Another process may have created this component after our stat.
             if (errno == EEXIST && path_exists(subdir.c_str())) {
                 search_offset = token_pos + 1;
@@ -135,6 +142,15 @@ inline bool create_dir(const std::string &path){
 
 
     return true;
+#endif
+}
+
+inline int remove_file(const char* path) {
+#ifdef _WIN32
+    return ::_wremove(utf8_to_wide(path).c_str());
+#else
+    return ::remove(path);
+#endif
 }
 
 /// 只读打开文件，返回文件描述符，失败返回-1
@@ -185,7 +201,7 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
     }
 
     /// 只读解析，不应创建/写入文件
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     std::vector<uint8_t> snapshot;
     if (!ipc::read_snapshot(path, snapshot)) return -1;
     size_t disk_size = snapshot.size();
@@ -208,7 +224,7 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
 #endif
 
     uint32_t size = 0;
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
     if (read_record(&size, sizeof(uint32_t)) != sizeof(uint32_t)) return -1;
 #else
     if (read_(fd, &size, sizeof(uint32_t)) != (long)sizeof(uint32_t)) {
@@ -222,7 +238,7 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
 
         uint32_t  item_size = 0;
 
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
         if (read_record(&item_size, sizeof(uint32_t)) != sizeof(uint32_t)) break;
 #else
         if (read_(fd, &item_size, sizeof(uint32_t)) != (long)sizeof(uint32_t)) break;
@@ -233,7 +249,7 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
 
         std::vector<uint8_t> buffer(item_size);
 
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
         if (read_record(buffer.data(), item_size) != item_size) break;
 #else
         if (read_(fd, buffer.data(), item_size) != (long)item_size) break;
@@ -272,7 +288,7 @@ inline int  select_form_path(const char* path,std::vector<std::map<std::string, 
 
     }
 
-#if !MXLOGGER_MACOS_MULTIPROCESS
+#if !MXLOGGER_MULTIPROCESS
     close_(fd);
 #endif
 
@@ -285,7 +301,10 @@ inline int get_files(std::vector<std::map<std::string, std::string>> *destinatio
     int result = 0;
 
 #ifdef _WIN32
-    std::wstring pattern = utf8_to_wide(dir_) + L"*";
+    std::wstring pattern = utf8_to_wide(dir_);
+    if (pattern.empty()) return -1;
+    if (pattern.back() != L'/' && pattern.back() != L'\\') pattern += L'\\';
+    pattern += L'*';
     WIN32_FIND_DATAW find_data;
     HANDLE find_handle = FindFirstFileW(pattern.c_str(), &find_data);
     if (find_handle == INVALID_HANDLE_VALUE) {
@@ -295,17 +314,18 @@ inline int get_files(std::vector<std::map<std::string, std::string>> *destinatio
     }
 
     do {
-        if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        if (find_data.dwFileAttributes & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT)) {
             continue;
         }
         std::string name = wide_to_utf8(find_data.cFileName);
+        if (CompareStringOrdinal(find_data.cFileName, -1, L".mxlogger.lock", -1, TRUE) == CSTR_EQUAL) continue;
         if (name == ".DS_Store") {
             continue;
         }
 
         long long st_size = ((long long)find_data.nFileSizeHigh << 32) | find_data.nFileSizeLow;
-        long last_time = filetime_to_unix(find_data.ftLastWriteTime);
-        long create_time = filetime_to_unix(find_data.ftCreationTime);
+        int64_t last_time = filetime_to_unix(find_data.ftLastWriteTime);
+        int64_t create_time = filetime_to_unix(find_data.ftCreationTime);
 
         std::map<std::string, std::string> map;
         map["name"] = name;
@@ -335,7 +355,7 @@ inline int get_files(std::vector<std::map<std::string, std::string>> *destinatio
         if (strcmp(".DS_Store", entry->d_name) == 0 || strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0) {
             continue;
         }
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
         // The coordinator is neither a log nor part of the age/size budget.
         if (strcmp(ipc::lock_filename, entry->d_name) == 0) continue;
 #endif
@@ -388,10 +408,10 @@ inline int get_files(std::vector<std::map<std::string, std::string>> *destinatio
 
     std::sort(destination->begin(), destination->end(), [](std::map<std::string, std::string> &a,std::map<std::string, std::string> &b){
         std::string a_time = a["create_timestamp"];
-        long a_t = std::stol(a_time);
+        int64_t a_t = std::stoll(a_time);
 
         std::string b_time = b["create_timestamp"];
-        long b_t = std::stol(b_time);
+        int64_t b_t = std::stoll(b_time);
         return a_t > b_t;
     });
 

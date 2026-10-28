@@ -18,7 +18,11 @@
 #include <sstream>
 #include <vector>
 #include <map>
-#include <sys/time.h>
+#include <chrono>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <exception>
 
 namespace mxtest {
 
@@ -63,6 +67,10 @@ inline void expect_eq(const A& a, const B& b, const char* expr, const char* file
 }
 
 inline int run_all() {
+    if (registry().empty()) {
+        printf("FAILED: no test cases registered\n");
+        return 1;
+    }
     int failed_cases = 0;
     const char* last_suite = "";
     for (auto& t : registry()) {
@@ -71,7 +79,15 @@ inline int run_all() {
             last_suite = t.suite;
         }
         int before = g_failures;
-        t.fn();
+        printf("  RUN %s\n", t.name);
+        fflush(stdout); // Identify the active case even if a native worker crashes.
+        try {
+            t.fn();
+        } catch (const std::exception& error) {
+            report(false, "unexpected exception", __FILE__, __LINE__, error.what());
+        } catch (...) {
+            report(false, "unexpected non-standard exception", __FILE__, __LINE__);
+        }
         printf("  %s %s\n", g_failures == before ? "PASS" : "FAIL", t.name);
         if (g_failures != before) failed_cases++;
     }
@@ -84,33 +100,36 @@ inline int run_all() {
 
 // ---------- 文件系统辅助 ----------
 
+inline bool reset_dir(const std::string& dir) {
+    std::error_code error;
+    const auto path = std::filesystem::u8path(dir);
+    std::filesystem::remove_all(path, error);
+    if (!error) std::filesystem::create_directories(path, error);
+    report(!error, "reset test directory", __FILE__, __LINE__,
+           dir + ": " + error.message());
+    return !error;
+}
+
 /// 创建一个干净的测试临时目录(带尾部/)，每个用例用自己的目录保证隔离
 inline std::string temp_dir(const std::string& name) {
     std::string dir = "mxtest_tmp/" + name + "/";
-    std::string cmd = "rm -rf " + dir + " && mkdir -p " + dir;
-    system(cmd.c_str());
+    reset_dir(dir);
     return dir;
 }
 
 inline void write_dummy_file(const std::string& path, size_t size, char fill = 'x') {
-    FILE* fp = fopen(path.c_str(), "wb");
-    if (!fp) return;
+    std::ofstream file(std::filesystem::u8path(path), std::ios::binary);
     std::string data(size, fill);
-    fwrite(data.data(), 1, size, fp);
-    fclose(fp);
+    file.write(data.data(), static_cast<std::streamsize>(data.size()));
+    report(file.good(), "write test file", __FILE__, __LINE__, path);
 }
 
 /// 读整个文件(二进制安全)
 inline std::string slurp(const std::string& path) {
-    FILE* fp = fopen(path.c_str(), "rb");
-    if (!fp) return "";
-    fseek(fp, 0, SEEK_END);
-    long n = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    std::string s((size_t)n, '\0');
-    fread(&s[0], 1, (size_t)n, fp);
-    fclose(fp);
-    return s;
+    std::ifstream file(std::filesystem::u8path(path), std::ios::binary);
+    if (!file) return "";
+    return std::string(std::istreambuf_iterator<char>(file),
+                       std::istreambuf_iterator<char>());
 }
 
 inline bool contains_bytes(const std::string& haystack, const std::string& needle) {
@@ -119,11 +138,12 @@ inline bool contains_bytes(const std::string& haystack, const std::string& needl
 
 /// 把文件修改时间改到 N 天前，用于测试过期清理
 inline void set_mtime_days_ago(const std::string& path, int days) {
-    struct timeval tv[2];
-    time_t t = time(nullptr) - (time_t)days * 86400;
-    tv[0].tv_sec = t; tv[0].tv_usec = 0;
-    tv[1].tv_sec = t; tv[1].tv_usec = 0;
-    utimes(path.c_str(), tv);
+    std::error_code error;
+    const auto time = std::filesystem::file_time_type::clock::now() -
+                      std::chrono::hours(24LL * days);
+    std::filesystem::last_write_time(std::filesystem::u8path(path), time, error);
+    report(!error, "set test file modification time", __FILE__, __LINE__,
+           path + ": " + error.message());
 }
 
 }

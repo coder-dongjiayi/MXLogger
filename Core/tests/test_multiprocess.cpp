@@ -1,135 +1,82 @@
 #include "mxlogger_interprocess.hpp"
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
 #include "test_support.hpp"
 #include "sink/mmap_sink.hpp"
 #include "log_msg.hpp"
-#include <mach-o/dyld.h>
-#include <poll.h>
-#include <spawn.h>
-#include <sys/wait.h>
-#include <signal.h>
+#include "test_process.hpp"
 #include <set>
 
-extern char **environ;
 using mxlogger::sinks::mmap_sink;
 using mxlogger::details::log_msg;
 using mxtest::record_list;
+using mxtest::worker;
 static const char *crypt_key = "ipc-key-12345678";
 static const char *crypt_iv = "short-iv";
-
-// Exec fresh processes rather than inheriting mmap offsets, mutexes or lock fds.
-// Pipes provide deterministic barriers; no scheduling sleeps are needed.
-class worker {
-public:
-    worker(const std::string &dir, int id, int count = 150, bool crypt = false,
-           const std::string &filename = "shared") {
-        int control[2], report[2];
-        if (::pipe(control) != 0) return;
-        if (::pipe(report) != 0) { ::close(control[0]); ::close(control[1]); return; }
-        fcntl(control[1], F_SETFD, FD_CLOEXEC);
-        fcntl(report[0], F_SETFD, FD_CLOEXEC);
-        uint32_t size = 4096;
-        char executable[4096];
-        if (_NSGetExecutablePath(executable, &size) != 0) {
-            for (int fd : {control[0], control[1], report[0], report[1]}) ::close(fd);
-            return;
-        }
-        std::vector<std::string> args = {executable, "--ipc-worker", dir, filename,
-            std::to_string(id), std::to_string(count), crypt ? "1" : "0",
-            std::to_string(control[0]), std::to_string(report[1])};
-        std::vector<char *> argv;
-        for (auto &arg : args) argv.push_back(&arg[0]);
-        argv.push_back(nullptr);
-        posix_spawn_file_actions_t actions;
-        posix_spawn_file_actions_init(&actions);
-        posix_spawn_file_actions_addclose(&actions, control[1]);
-        posix_spawn_file_actions_addclose(&actions, report[0]);
-        int result = posix_spawn(&pid_, executable, &actions, nullptr, argv.data(), environ);
-        posix_spawn_file_actions_destroy(&actions);
-        ::close(control[0]); ::close(report[1]);
-        if (result != 0) {
-            ::close(control[1]); ::close(report[0]); pid_ = -1; return;
-        }
-        control_ = control[1]; report_ = report[0];
-    }
-    ~worker() {
-        if (pid_ > 0) { ::kill(pid_, SIGKILL); int status; ::waitpid(pid_, &status, 0); }
-        if (control_ >= 0) ::close(control_);
-        if (report_ >= 0) ::close(report_);
-    }
-    bool send(char command) { return control_ >= 0 && ::write(control_, &command, 1) == 1; }
-    bool pending(int timeout = 10000) {
-        struct pollfd fd{report_, POLLIN, 0};
-        return report_ >= 0 && ::poll(&fd, 1, timeout) > 0 && (fd.revents & POLLIN);
-    }
-    bool receive(char expected = 'D') {
-        char response = 0;
-        return pending() && ::read(report_, &response, 1) == 1 && response == expected;
-    }
-    bool finish() {
-        if (!send('Q') || !receive('Q')) return false;
-        return reap(false);
-    }
-    bool kill_and_wait() {
-        if (pid_ <= 0 || ::kill(pid_, SIGKILL) != 0) return false;
-        return reap(true);
-    }
-private:
-    bool reap(bool killed) {
-        int status = 0;
-        pid_t result;
-        do { result = ::waitpid(pid_, &status, 0); } while (result < 0 && errno == EINTR);
-        if (result <= 0) return false;
-        pid_ = -1;
-        return killed ? WIFSIGNALED(status) && WTERMSIG(status) == SIGKILL
-                      : WIFEXITED(status) && WEXITSTATUS(status) == 0;
-    }
-    pid_t pid_ = -1;
-    int control_ = -1, report_ = -1;
-};
 
 int mxlogger_process_worker(int argc, char **argv) {
     if (argc != 9) return 20;
     const std::string dir = argv[2];
     const int id = atoi(argv[4]), count = atoi(argv[5]);
     const bool crypt = atoi(argv[6]) != 0;
-    const int control = atoi(argv[7]), report = atoi(argv[8]);
+    const auto control = mxtest::parse_pipe(argv[7]), report = mxtest::parse_pipe(argv[8]);
     {
         mmap_sink sink(dir, argv[3], policy::yyyy_MM_dd);
+#ifdef _WIN32
+        mxlogger::files::native_file external_file;
+        mxlogger::files::mapped_view external_view;
+#endif
         if (crypt) sink.init_aescfb(crypt_key, crypt_iv);
         if (!sink.error_record.empty()) return 21;
-        if (::write(report, "R", 1) != 1) return 22;
+        if (!mxtest::write_byte(report, 'R')) return 22;
         int round = 0;
         char command;
-        while (::read(control, &command, 1) == 1) {
+        while (mxtest::read_byte(control, command)) {
             if (command == 'Q') break;
             if (command == 'H') {
                 sink.add_file_heder("shared header");
-            } else if (command == 'W') {
+            } else if (command == 'W' || command == 'V') {
+                if (command == 'V') {
+                    mxlogger::files::native_file probe;
+                    if (!probe.open(mxlogger::ipc::coordination_path(dir)) || probe.lock(true, false)) return 32;
+                    if (!mxtest::write_byte(report, 'B')) return 33;
+                }
                 for (int i = 0; i < count; ++i) {
                     std::string msg = std::to_string(id) + ":" + std::to_string(round) + ":" + std::to_string(i) + ":" + std::string(512, 'P');
                     log_msg record(level::info, "ipc", "tag", msg.c_str(), false);
                     if (sink.log(record) != 0) return 23;
                 }
                 ++round;
-            } else if (command == 'T') {
+            }
+#ifdef _WIN32
+            else if (command == 'M') {
+                // Deliberately retain a foreign view outside the protocol to
+                // exercise native resize failure and recovery in another process.
+                const auto path = mxtest::first_mx_path(dir);
+                mxlogger::files::file_info info;
+                if (!external_file.open(path, true) || !external_file.info(info) ||
+                    !external_view.map(external_file, static_cast<size_t>(info.size), false)) return 30;
+            } else if (command == 'U') {
+                if (!external_view.unmap() || !external_file.close()) return 31;
+            }
+#endif
+            else if (command == 'T') {
                 mxlogger::ipc::directory_lock directory_lock(dir);
                 mxlogger::ipc::scoped_lock lock(directory_lock);
                 if (!lock) return 24;
                 std::string path = mxtest::first_mx_path(dir);
-                int fd = ::open(path.c_str(), O_RDWR | O_CLOEXEC);
+                mxlogger::files::native_file file;
                 uint32_t committed = 0;
-                if (fd < 0 || ::pread(fd, &committed, 4, 0) != 4 ||
-                    ::pwrite(fd, "uncommitted-tail", 16, 4 + committed) != 16) return 25;
-                ::close(fd);
-                if (::write(report, "L", 1) != 1) return 26;
-                // The parent terminates us while the OS lock and data lease are held.
-                while (true) ::pause();
+                if (!file.open(path) || file.read_at(&committed, 4, 0) != 4 ||
+                    file.write_at("uncommitted-tail", 16, 4 + committed) != 16) return 25;
+                file.close();
+                if (!mxtest::write_byte(report, 'L')) return 26;
+                // Terminate while the OS directory lock and live-file lease are held.
+                mxtest::wait_forever();
             } else return 27;
-            if (::write(report, "D", 1) != 1) return 28;
+            if (!mxtest::write_byte(report, 'D')) return 28;
         }
     } // Release the data-file lease before acknowledging a graceful exit.
-    return ::write(report, "Q", 1) == 1 ? 0 : 29;
+    return mxtest::write_byte(report, 'Q') ? 0 : 29;
 }
 
 static void check_records(const record_list &records, size_t count, bool header = false, int round = -1) {
@@ -158,11 +105,74 @@ MX_TEST(multiprocess, stale_offset_and_capacity_are_refreshed) {
     worker a(dir, 1), b(dir, 2);
     EXPECT_TRUE(a.receive('R')); EXPECT_TRUE(b.receive('R'));
     EXPECT_TRUE(a.send('W')); EXPECT_TRUE(a.receive());
-    // B already mapped the initial page before A appended and expanded the file.
+    // B initialized before A expanded; it must refresh capacity and append offset.
     EXPECT_TRUE(b.send('W')); EXPECT_TRUE(b.receive());
     check_records(mxtest::parse_dir(dir), 300);
     EXPECT_TRUE(a.finish()); EXPECT_TRUE(b.finish());
 }
+
+MX_TEST(multiprocess, shared_snapshot_blocks_writer_until_view_is_released) {
+    const auto dir = mxtest::temp_dir("ipc_snapshot_barrier");
+    worker writer(dir, 1, 40);
+    EXPECT_TRUE(writer.receive('R'));
+    {
+        mxlogger::ipc::directory_lock coordinator(dir);
+        mxlogger::ipc::scoped_lock snapshot_lock(coordinator, false);
+        EXPECT_TRUE(bool(snapshot_lock));
+        mxlogger::files::native_file file;
+        mxlogger::files::file_info info;
+        mxlogger::files::mapped_view view;
+        EXPECT_TRUE(file.open(mxtest::first_mx_path(dir), true));
+        EXPECT_TRUE(file.info(info));
+        EXPECT_TRUE(view.map(file, static_cast<size_t>(info.size), false));
+        EXPECT_TRUE(writer.send('V'));
+        EXPECT_TRUE(writer.receive('B')); // The child observed the conflicting shared lock.
+        EXPECT_FALSE(writer.pending(100));
+    } // View, file and then shared lock: growth may now proceed.
+    EXPECT_TRUE(writer.receive());
+    check_records(mxtest::parse_dir(dir), 40);
+    EXPECT_TRUE(writer.finish());
+}
+
+MX_TEST(multiprocess, unicode_directory_and_worker_arguments) {
+    std::string dir = mxtest::temp_dir("多进程 空格/日志");
+#ifdef _WIN32
+    dir = std::filesystem::absolute(std::filesystem::u8path(dir)).u8string();
+    if (dir.back() != '\\') dir += '\\';
+#endif
+    worker a(dir, 1, 20, true, "共享日志"), b(dir, 2, 20, true, "共享日志");
+    EXPECT_TRUE(a.receive('R')); EXPECT_TRUE(b.receive('R'));
+    EXPECT_TRUE(a.send('W')); EXPECT_TRUE(b.send('W'));
+    EXPECT_TRUE(a.receive()); EXPECT_TRUE(b.receive());
+    check_records(mxtest::parse_dir(dir, crypt_key, crypt_iv), 40);
+    EXPECT_TRUE(a.finish()); EXPECT_TRUE(b.finish());
+}
+
+#ifdef _WIN32
+MX_TEST(multiprocess, foreign_windows_mapping_growth_and_recovery) {
+    const auto dir = mxtest::temp_dir("ipc_foreign_mapping");
+    worker foreign(dir, 1, 1);
+    EXPECT_TRUE(foreign.receive('R'));
+    mmap_sink writer(dir, "shared", policy::yyyy_MM_dd);
+    log_msg first(level::info, "foreign", nullptr, "before growth", false);
+    EXPECT_EQ(writer.log(first), 0);
+    EXPECT_TRUE(foreign.send('M')); EXPECT_TRUE(foreign.receive());
+
+    std::string payload(128 * 1024, 'X');
+    log_msg growth(level::info, "foreign", nullptr, payload.c_str(), false);
+    int result = writer.log(growth);
+    EXPECT_TRUE(result == 0 || result == -1 || result == -3);
+    if (result != 0) EXPECT_FALSE(writer.error_record.empty());
+    printf("  Windows foreign-view extension result: %d\n", result);
+    EXPECT_TRUE(foreign.send('U')); EXPECT_TRUE(foreign.receive());
+    EXPECT_EQ(writer.log(growth), 0);
+    auto records = mxtest::parse_dir(dir);
+    EXPECT_EQ(records.size(), size_t(result == 0 ? 3 : 2));
+    if (!records.empty()) EXPECT_EQ(records.front()["msg"], std::string("before growth"));
+    if (records.size() >= 2) EXPECT_EQ(records.back()["msg"], payload);
+    EXPECT_TRUE(foreign.finish());
+}
+#endif
 
 static void concurrent_append(bool crypt) {
     std::string root = mxtest::temp_dir(crypt ? "ipc_parallel_crypt" : "ipc_parallel");
@@ -253,10 +263,14 @@ MX_TEST(multiprocess, legacy_reads_do_not_create_coordination_files) {
       log_msg msg(level::info, "legacy", nullptr, "read-only export", false);
       EXPECT_EQ(sink.log(msg), 0); }
     std::string lock_path = dir + mxlogger::ipc::lock_filename;
-    EXPECT_EQ(::unlink(lock_path.c_str()), 0);
+    EXPECT_EQ(mxlogger::remove_file(lock_path.c_str()), 0);
+    #ifndef _WIN32
     EXPECT_EQ(::chmod(dir.c_str(), 0555), 0);
+    #endif
     auto records = mxtest::parse_dir(dir);
+    #ifndef _WIN32
     EXPECT_EQ(::chmod(dir.c_str(), 0755), 0);
+    #endif
     EXPECT_EQ(records.size(), size_t(1));
     EXPECT_FALSE(mxlogger::path_exists(lock_path.c_str()));
 }
@@ -289,7 +303,7 @@ MX_TEST(multiprocess, independent_directories_do_not_block_each_other) {
 
 MX_TEST(multiprocess, lock_failure_never_falls_back_to_unlocked_writes) {
     std::string dir = mxtest::temp_dir("ipc_lock_failure");
-    EXPECT_EQ(::mkdir((dir + mxlogger::ipc::lock_filename).c_str(), 0755), 0);
+    EXPECT_TRUE(std::filesystem::create_directory(std::filesystem::u8path(dir + mxlogger::ipc::lock_filename)));
     mmap_sink sink(dir, "blocked", policy::yyyy_MM_dd);
     log_msg msg(level::info, "blocked", nullptr, "must not write", false);
     EXPECT_EQ(sink.log(msg), -4);
@@ -300,10 +314,11 @@ MX_TEST(multiprocess, invalid_committed_length_does_not_erase_existing_file) {
     std::string dir = mxtest::temp_dir("ipc_bad_header");
     { mmap_sink sink(dir, "bad", policy::yyyy_MM_dd); }
     std::string path = mxtest::first_mx_path(dir);
-    int fd = ::open(path.c_str(), O_RDWR);
+    mxlogger::files::native_file file;
+    EXPECT_TRUE(file.open(path));
     uint32_t invalid = UINT32_MAX;
-    EXPECT_EQ(::pwrite(fd, &invalid, 4, 0), ssize_t(4));
-    ::close(fd);
+    EXPECT_EQ(file.write_at(&invalid, 4, 0), std::ptrdiff_t(4));
+    file.close();
     std::string before = mxtest::slurp(path);
     mmap_sink sink(dir, "bad", policy::yyyy_MM_dd);
     log_msg msg(level::info, "bad", nullptr, "must not erase", false);

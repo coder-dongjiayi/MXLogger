@@ -22,6 +22,9 @@
 
 cmake_minimum_required(VERSION 3.10.0)
 
+# Identify the compiler before checking MSVC or enabling GNU-style assembly.
+project(MXLoggerCore LANGUAGES C CXX)
+
 IF(APPLE)
     # tell ranlib to ignore empty compilation units
     SET(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
@@ -30,7 +33,6 @@ IF(APPLE)
     SET(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> qc -S <TARGET> <LINK_FLAGS> <OBJECTS>")
     SET(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qc -S <TARGET> <LINK_FLAGS> <OBJECTS>")
 
-    add_compile_definitions(FORCE_POSIX)
 ENDIF()
 
 # MSVC没有GNU汇编器，ARM加速汇编仅在非MSVC下启用(内部有架构守卫，x86上编译为空)
@@ -39,9 +41,6 @@ IF(NOT MSVC)
     enable_language(ASM)
 ENDIF()
 
-IF(WIN32)
-    add_compile_definitions(_CRT_SECURE_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN)
-ENDIF()
 IF("${ANDROID_ABI}" STREQUAL "arm64-v8a")
     SET(ASM_OPTIONS "-x assembler-with-cpp")
     SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS} -march=armv8+crypto -D__ANDROID__")
@@ -62,8 +61,6 @@ IF(UNIX AND (NOT APPLE))
     ENDIF()
 ENDIF()
 
-
-project(MXLoggerCore)
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
@@ -86,6 +83,8 @@ add_library(MXLoggerCore
         logger_os.cpp
         logger_os.hpp
         mxlogger_file_util.hpp
+        mxlogger_file.hpp
+        mxlogger_platform.hpp
         mxlogger_interprocess.hpp
         mxlogger_helper.hpp
         mxlogger_util.cpp
@@ -129,10 +128,30 @@ target_include_directories(MXLoggerCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 set_target_properties(MXLoggerCore PROPERTIES
         CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
         POSITION_INDEPENDENT_CODE ON
         )
 
 
-target_link_libraries(MXLoggerCore)
+find_package(Threads REQUIRED)
+target_link_libraries(MXLoggerCore PUBLIC Threads::Threads)
+
+if(MSVC)
+    target_compile_options(MXLoggerCore PUBLIC /utf-8)
+endif()
+if(WIN32)
+    target_compile_definitions(MXLoggerCore PUBLIC
+        _CRT_SECURE_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN)
+endif()
+if(APPLE)
+    target_compile_definitions(MXLoggerCore PUBLIC FORCE_POSIX $<$<CONFIG:Debug>:DEBUG=1>)
+endif()
+
+# Opt in explicitly so Android/Flutter consumers only build the library.
+option(MXLOGGER_BUILD_TESTS "Build the native Core tests" OFF)
+if(MXLOGGER_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 

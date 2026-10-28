@@ -21,7 +21,7 @@ namespace util{
 }
 
  int mxlogger_util::select_logfiles_dir(const char* dir,std::vector<std::map<std::string, std::string>> *destination){
-#if MXLOGGER_MACOS_MULTIPROCESS
+#if MXLOGGER_MULTIPROCESS
      ipc::directory_lock directory_lock(dir, false);
      ipc::scoped_lock lock(directory_lock, false);
      if (!lock) return -1;

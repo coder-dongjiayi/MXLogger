@@ -9,6 +9,7 @@
 #define sink_hpp
 
 #include <stdio.h>
+#include <atomic>
 #include "log_enum.h"
 
 #include "log_msg.hpp"
