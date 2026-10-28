@@ -145,6 +145,23 @@ bash scripts/verify_macos_demo.sh
 Debug 还会加载 Storyboard 检查页面连接、导航、双语及筛选，生成应用自身视图的预览。
 日志和预览位于 `build/macos-native-demo/`。
 
+### 原生 Windows Demo
+
+原生示例位于 [`Windows/MXLoggerDemo`](Windows/MXLoggerDemo/README.md)，使用 **Win32 + C++17**，
+直接链接本仓库 Core。包含中英文界面、初始化配置、五级日志与 JSON / Token 写入、
+线程 / 双进程数量及顺序校验、10 万条性能测试、清理重建和带筛选的日志浏览器。
+
+```powershell
+cmake -S Windows/MXLoggerDemo -B build/windows-demo -A x64
+cmake --build build/windows-demo --config Debug --parallel
+.\build\windows-demo\bin\Debug\MXLoggerDemo.exe
+```
+
+Windows 10/11 x64，需 Visual Studio C++ 桌面开发工具和 CMake 3.20+。
+手动运行 `verify-logger` 会在 Windows Debug / Release 构建并运行真实窗口自测，
+上传 Demo zip、日志及界面截图；每次仍检查 Windows、Apple 和 Android 全平台。
+Mac 可编辑代码并验证共用日志操作，Windows GUI 的编译和运行由 Windows CI 验证。
+
 ### Flutter macOS Demo
 
 Flutter 桌面示例位于 `flutter_mxlogger/example`，复用手机端的落地页、紫色状态卡、

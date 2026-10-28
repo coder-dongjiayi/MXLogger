@@ -8,9 +8,9 @@ permissions:
 
 jobs:
   windows:
-    name: Windows Core (${{ matrix.configuration }})
+    name: Windows Core + Demo (${{ matrix.configuration }})
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -33,6 +33,25 @@ jobs:
         run: |
           ctest --test-dir build/windows-core -C ${{ matrix.configuration }} --output-on-failure --no-tests=error --output-junit test-results.xml 2>&1 | Tee-Object build/windows-core/ctest.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Native Windows demo, window smoke and package
+        run: ./scripts/verify_windows_demo.ps1 -Configuration ${{ matrix.configuration }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: windows-demo-${{ matrix.configuration }}-logs
+          path: |
+            build/windows-native-demo/${{ matrix.configuration }}/*.log
+            build/windows-native-demo/${{ matrix.configuration }}/self-test/ui-report.txt
+            build/windows-native-demo/${{ matrix.configuration }}/self-test/*.png
+            build/windows-native-demo/${{ matrix.configuration }}/self-test/model/report.*
+          retention-days: 7
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows-demo-${{ matrix.configuration }}
+          path: build/windows-native-demo/${{ matrix.configuration }}/MXLoggerDemo-windows-x64-${{ matrix.configuration }}.zip
+          retention-days: 7
+          if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
         with:

@@ -147,6 +147,24 @@ tokens, cleanup and reopening. The Debug check also loads the Storyboard to chec
 outlets, navigation, localization and filters and renders the app's own views.
 Logs and previews are saved under `build/macos-native-demo/`.
 
+### Native Windows demo
+
+[`Windows/MXLoggerDemo`](Windows/MXLoggerDemo/README.md) is a native **Win32 + C++17** app,
+linked directly to this checkout's Core. It includes Chinese/English UI, configuration,
+five log levels, JSON/token writes, thread/process count and order checks, a 100,000-write
+benchmark, cleanup/rebuilding, and a searchable log viewer.
+
+```powershell
+cmake -S Windows/MXLoggerDemo -B build/windows-demo -A x64
+cmake --build build/windows-demo --config Debug --parallel
+.\build\windows-demo\bin\Debug\MXLoggerDemo.exe
+```
+
+Targets Windows 10/11 x64 with Visual Studio desktop C++ tools and CMake 3.20+.
+Manual `verify-logger` CI builds Debug/Release, exercises the actual window/controls,
+and uploads demo zips, logs and screenshots. Every manual run continues to check all platforms.
+On Mac you can edit the code and test shared log actions; Windows CI verifies the native GUI.
+
 ### Flutter macOS demo
 
 `flutter_mxlogger/example` shares the mobile demo's landing page, purple status card,
