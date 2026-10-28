@@ -196,25 +196,28 @@ MX_TEST(multiprocess, idle_cached_process_allows_another_process_to_grow) {
     EXPECT_TRUE(idle.finish());
 }
 
-MX_TEST(multiprocess, cached_mapping_lease_expires_without_event_notification) {
+MX_TEST(multiprocess, cached_mapping_lease_expires_and_rearms_after_repeated_appends) {
     const auto dir = mxtest::temp_dir("win_cache_bounded_lease");
     mmap_sink writer(dir, "shared", policy::yyyy_MM_dd);
     log_msg record(level::info, "cache", nullptr, "retained", false);
-    EXPECT_EQ(writer.log(record), 0);
     mxlogger::files::native_file probe;
     EXPECT_TRUE(probe.open(mxlogger::ipc::coordination_path(dir)));
     // Simulate a caller which cannot signal the named event (e.g. another
     // Windows security context). The idle owner must release byte 2 anyway.
-    bool acquired = false;
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
-    do {
-        acquired = probe.lock(true, false, 2);
-        if (!acquired) std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    } while (!acquired && std::chrono::steady_clock::now() < deadline);
-    EXPECT_TRUE(acquired);
-    if (acquired) EXPECT_TRUE(probe.unlock(2));
-    EXPECT_EQ(writer.log(record), 0);
-    EXPECT_EQ(mxtest::parse_dir(dir).size(), size_t(2));
+    for (int round = 0; round < 3; ++round) {
+        // Repeated appends reuse one notification. After timeout eviction,
+        // the next burst must arm the monitor again without an external event.
+        for (int i = 0; i < 64; ++i) EXPECT_EQ(writer.log(record), 0);
+        bool acquired = false;
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+        do {
+            acquired = probe.lock(true, false, 2);
+            if (!acquired) std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        } while (!acquired && std::chrono::steady_clock::now() < deadline);
+        EXPECT_TRUE(acquired);
+        if (acquired) EXPECT_TRUE(probe.unlock(2));
+    }
+    EXPECT_EQ(mxtest::parse_dir(dir).size(), size_t(3 * 64));
 }
 
 MX_TEST(multiprocess, killed_cached_writer_releases_view_and_mapping_lease) {

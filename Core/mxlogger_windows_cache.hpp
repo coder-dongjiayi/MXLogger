@@ -91,10 +91,11 @@ public:
         return !release_ || release_(context_);
     }
     void leave() {
-        if (retain_ && ready_ && SetEvent(ready_)) {
+        if (retain_ && arm_worker()) {
             cached_ = true;
         } else {
             if (ready_) ResetEvent(ready_);
+            ready_signaled_ = false;
             // Transactions without an mmap cleanup guard (e.g. remove_all)
             // must also finish with the view closed before releasing byte 2.
             if (!release_ || release_(context_)) {
@@ -105,7 +106,7 @@ public:
                 error_ = ERROR_WRITE_FAULT;
                 // Do not release protection around a view that failed to close.
                 cached_ = true;
-                if (start_worker()) SetEvent(ready_);
+                if (start_worker()) arm_worker();
             }
         }
         retain_ = false;
@@ -123,6 +124,7 @@ public:
             }
             release_ = nullptr; context_ = nullptr;
             cached_ = false; retain_ = false;
+            ready_signaled_ = false;
         }
         if (ready_) { CloseHandle(ready_); ready_ = nullptr; }
         if (stop_) { CloseHandle(stop_); stop_ = nullptr; }
@@ -139,6 +141,7 @@ private:
     void *context_ = nullptr;
     release_function release_ = nullptr;
     bool enabled_ = true, held_ = false, cached_ = false, retain_ = false;
+    bool ready_signaled_ = false; // Guarded by mutex_, like cached_.
     ULONGLONG cooldown_until_ = 0;
 
     bool fail(DWORD error) { error_ = error; mutex_.unlock(); return false; }
@@ -155,6 +158,14 @@ private:
         request_ = CreateEventW(nullptr, TRUE, FALSE, name.c_str());
         // If events are unavailable, never retain a mapping. An uncontended
         // byte-2 transaction can still use the safe transient implementation.
+        return true;
+    }
+    bool arm_worker() { // Caller holds mutex_.
+        // This manual-reset event stays signaled for the whole monitoring
+        // interval. Repeated appends need no further kernel notification.
+        if (ready_signaled_) return true;
+        if (!ready_ || !SetEvent(ready_)) return false;
+        ready_signaled_ = true;
         return true;
     }
     bool start_worker() {
@@ -178,6 +189,8 @@ private:
             if (result != WAIT_OBJECT_0 + 1 && result != WAIT_TIMEOUT) break;
             std::lock_guard<std::mutex> lock(mutex_);
             ResetEvent(ready_);
+            // Rearm on the next retained mapping, even if release_ fails.
+            ready_signaled_ = false;
             if (!held_ || !cached_) continue;
             // Timeout bounds idle retention even if another user cannot signal
             // the named event. It is not evidence of contention: do not impose
