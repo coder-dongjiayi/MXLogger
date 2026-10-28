@@ -24,15 +24,37 @@ Release 将上述 `Debug` 换成 `Release`。CMake 生成的 `MXLoggerDemo.sln` 
 - 默认目录 `%LOCALAPPDATA%\MXLoggerDemo\Logs`；在「初始化配置」中修改目录、命名空间、文件名、策略、Key/IV，再应用。
 - 五级日志、网络 JSON、Token 写入；运行时写入开关、最低等级、保留时间、大小限制和 Debug 控制台开关。
 - 四线程共 4,000 条、两个独立进程共 2,000 条；写入后实际读取文件，校验数量和各线程/进程内部顺序。
-- 100,000 条写入性能测试（计时不含 flush 和读取，测试期间关闭控制台）、Flush、销毁重建。
+- 100,000 条直接写入性能测试：关闭控制台和 UI 定时刷新，循环内不更新进度或轮询取消；写完显示总耗时和吞吐量。计时不含 flush 和读取，日志预览需手动刷新。
 - 文件列表、最新 1,000 条日志预览、等级/关键词筛选、完整记录详情；复制路径/Token、打开目录、错误详情。
 - 手动清理过期、仅保留当前、删除全部。保留时长和大小在点击清理时生效，无后台清理开关。
 
-耗时操作在后台执行，可取消；关闭窗口会等待工作结束并回收演示子进程。
+耗时操作在后台执行；并发测试可取消，性能测试等待整批写完。关闭窗口会等待工作结束并回收演示子进程。
 Release 控制台开关置灰。Debug 控制台输出沿用 Core 的 stdout；需要查看时，从带输出重定向的终端启动。
 配置只保存在当前进程中，默认 Key/IV 是公开的演示参数。切换密钥请使用新命名空间；
 Demo 会检查已有文件的解码状态，避免以不匹配的参数继续写入。
 启动多个 Demo 可指向同一目录演示共享写入；请保持命名空间、文件名、策略和加密参数一致。
+
+## Windows 写入性能
+
+Core 的 Windows 路径会在持有映射保护锁时复用文件句柄和映射，减少逐条打开、映射和关闭。
+映射由独立的跨进程锁保护；其他写入或清理者通知后台线程释放它，拿到锁后才继续操作。
+有实际锁竞争时会短暂使用逐次释放的路径，避免每条日志都交接缓存；另一个 Demo 仅处于空闲状态不会一直禁用缓存。
+是否可以复用由实际映射锁竞争决定，不依赖日志频率。通知不可达时，后台线程也会在
+500 ms 的租期结束后释放映射；竞争后暂缓缓存 250 ms，这些时间只影响复用策略。
+首次容量为 64 KiB，扩容时最多预留 1 MiB；文件长度可能大于实际日志数据，四字节提交长度及 `.mx` 格式保持不变。
+macOS、iOS 和 Android 的映射策略保持原样。共享目录的所有进程应一起更新到本次构建，避免混用不同的协调协议。
+
+可以在同一台 Windows 机器上比较缓存开关下的真实写入耗时：
+
+```powershell
+pwsh -File scripts/verify_windows_demo.ps1 -Configuration Release -Benchmark
+```
+
+脚本使用同一个 exe、相同 `log()` 循环分别执行明文 / AES 各 100,000 条，并在计时结束后
+验证记录数量和顺序。`benchmark/transient/` 使用诊断变量 `MXLOGGER_WINDOWS_MAPPING_CACHE=0` 关闭映射复用，
+`benchmark/cached/` 开启复用；两组都保留跨进程锁、新的扩容策略和逐条文件时间更新。
+因此这个对照隔离的是映射复用的收益，不能作为与历史版本整体性能差异的精确对照。
+脚本结束后恢复环境变量，正常运行 Demo 默认开启复用。
 
 ## 自动验证与 CI 产物
 
@@ -50,7 +72,9 @@ pwsh -File scripts/verify_windows_demo.ps1 -Configuration Release
 结果在 `build/windows-native-demo/<Debug|Release>/self-test/`，包含 `model/report.json`、`ui-report.txt` 和截图。
 
 GitHub Actions 的 `verify-logger` **仅手动触发**。每次运行仍验证 Windows Debug/Release、Apple 和 Android；
-Windows 会额外构建、自测并上传此 Demo。下载 `windows-demo-<配置>` 中的 zip，解压运行 `MXLoggerDemo.exe`。
+Windows 会额外构建、自测并上传此 Demo，同时运行上述 100,000 条对照测试。
+耗时、吞吐量和倍数在日志及 `benchmark/comparison.json` 中，不以固定耗时作为 CI 成败阈值。
+下载 `windows-demo-<配置>` 中的 zip，解压运行 `MXLoggerDemo.exe`。
 这验证原生 Windows Demo，Flutter Windows / FFI DLL 将在后续阶段接入。
 
 ## 在 Mac 上开发
@@ -78,3 +102,11 @@ The default key/IV are public demo values; choose a new namespace when changing 
 `verify_windows_demo.ps1` builds, runs shared model checks and real window/control smoke checks, saves reports/PNGs,
 and produces a zip. Manual `verify-logger` CI runs this for Debug and Release alongside all other platforms.
 On macOS only the shared action model runs; native Windows compilation/UI verification requires Windows or Windows CI.
+
+Windows reuses mappings while it holds a separate interprocess lock, with background eviction for conflicting
+writers/cleanup. Actual contention temporarily switches to transient views; idle peer loggers do not disable caching.
+Retention is bounded to 500 ms,
+with a 250 ms cooldown after contention. All cooperating writers should upgrade together; the log format and other
+platforms' mapping behavior are unchanged. The benchmark has no per-record progress/cancellation polling or UI timer;
+it reports total write time before manually loading previews. Pass `-Benchmark` to compare cache off/on using the same
+executable and verify 100,000 plaintext/AES records per case. Reports are under `benchmark/` in the build directory.

@@ -149,6 +149,87 @@ MX_TEST(multiprocess, unicode_directory_and_worker_arguments) {
 }
 
 #ifdef _WIN32
+MX_TEST(multiprocess, directory_guard_destruction_releases_mapping_gate) {
+    const auto dir = mxtest::temp_dir("win_cache_guard_lifetime");
+    { mxlogger::ipc::directory_lock lock(dir); EXPECT_TRUE(lock.lock(true)); }
+    worker next(dir, 1, 1);
+    EXPECT_TRUE(next.receive('R'));
+    EXPECT_TRUE(next.send('W')); EXPECT_TRUE(next.receive());
+    EXPECT_TRUE(next.finish());
+}
+
+MX_TEST(multiprocess, cached_mapping_handoff_within_one_process_and_cleanup) {
+    const auto dir = mxtest::temp_dir("win_cache_local_handoff");
+    mmap_sink first(dir, "shared", policy::yyyy_MM_dd);
+    log_msg one(level::info, "cache", nullptr, "first", false);
+    log_msg two(level::info, "cache", nullptr, "second", false);
+    EXPECT_EQ(first.log(one), 0);
+    // Opening a second logger must evict the first one's cached mapping,
+    // including when both loggers belong to the same process.
+    mmap_sink second(dir, "shared", policy::yyyy_MM_dd);
+    EXPECT_EQ(second.log(two), 0);
+    EXPECT_EQ(first.log(one), 0);
+    EXPECT_EQ(mxtest::parse_dir(dir).size(), size_t(3));
+    second.remove_all();
+    EXPECT_TRUE(mxtest::first_mx_path(dir).empty());
+    EXPECT_EQ(first.log(two), 0);
+    auto records = mxtest::parse_dir(dir);
+    EXPECT_EQ(records.size(), size_t(1));
+    if (!records.empty()) EXPECT_EQ(records[0]["msg"], std::string("second"));
+}
+
+MX_TEST(multiprocess, idle_cached_process_allows_another_process_to_grow) {
+    const auto dir = mxtest::temp_dir("win_cache_idle_growth");
+    worker idle(dir, 1, 3);
+    EXPECT_TRUE(idle.receive('R'));
+    EXPECT_TRUE(idle.send('W')); EXPECT_TRUE(idle.receive());
+    // The child is now waiting on its command pipe. Its eviction worker must
+    // release the retained view without any new log call in that process.
+    mmap_sink newcomer(dir, "shared", policy::yyyy_MM_dd);
+    const std::string payload(256 * 1024, 'G');
+    log_msg growth(level::info, "cache", nullptr, payload.c_str(), false);
+    EXPECT_EQ(newcomer.log(growth), 0);
+    EXPECT_TRUE(idle.send('W')); EXPECT_TRUE(idle.receive());
+    const auto records = mxtest::parse_dir(dir);
+    EXPECT_EQ(records.size(), size_t(7));
+    if (records.size() == 7) EXPECT_EQ(records[3].at("msg"), payload);
+    EXPECT_TRUE(idle.finish());
+}
+
+MX_TEST(multiprocess, cached_mapping_lease_expires_without_event_notification) {
+    const auto dir = mxtest::temp_dir("win_cache_bounded_lease");
+    mmap_sink writer(dir, "shared", policy::yyyy_MM_dd);
+    log_msg record(level::info, "cache", nullptr, "retained", false);
+    EXPECT_EQ(writer.log(record), 0);
+    mxlogger::files::native_file probe;
+    EXPECT_TRUE(probe.open(mxlogger::ipc::coordination_path(dir)));
+    // Simulate a caller which cannot signal the named event (e.g. another
+    // Windows security context). The idle owner must release byte 2 anyway.
+    bool acquired = false;
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    do {
+        acquired = probe.lock(true, false, 2);
+        if (!acquired) std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    } while (!acquired && std::chrono::steady_clock::now() < deadline);
+    EXPECT_TRUE(acquired);
+    if (acquired) EXPECT_TRUE(probe.unlock(2));
+    EXPECT_EQ(writer.log(record), 0);
+    EXPECT_EQ(mxtest::parse_dir(dir).size(), size_t(2));
+}
+
+MX_TEST(multiprocess, killed_cached_writer_releases_view_and_mapping_lease) {
+    const auto dir = mxtest::temp_dir("win_cache_crash");
+    worker killed(dir, 1, 10);
+    EXPECT_TRUE(killed.receive('R'));
+    EXPECT_TRUE(killed.send('W')); EXPECT_TRUE(killed.receive());
+    EXPECT_TRUE(killed.kill_and_wait());
+    worker survivor(dir, 2, 10);
+    EXPECT_TRUE(survivor.receive('R'));
+    EXPECT_TRUE(survivor.send('W')); EXPECT_TRUE(survivor.receive());
+    check_records(mxtest::parse_dir(dir), 20);
+    EXPECT_TRUE(survivor.finish());
+}
+
 MX_TEST(multiprocess, foreign_windows_mapping_growth_and_recovery) {
     const auto dir = mxtest::temp_dir("ipc_foreign_mapping");
     worker foreign(dir, 1, 1);

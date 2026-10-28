@@ -2,6 +2,9 @@
 #define mxlogger_interprocess_hpp
 
 #include "mxlogger_file.hpp"
+#ifdef _WIN32
+#include "mxlogger_windows_cache.hpp"
+#endif
 #if MXLOGGER_MULTIPROCESS
 #include <cstring>
 #include <new>
@@ -39,20 +42,52 @@ class directory_lock {
 public:
     explicit directory_lock(const std::string &directory, bool create = true)
         : path_(coordination_path(directory)), create_(create) {}
+#ifdef _WIN32
+    ~directory_lock() { if (exclusive_) unlock(); }
+#endif
     bool lock(bool exclusive) {
+#ifdef _WIN32
+        cache_.clear_error();
+#endif
         if (!file_.valid() && !file_.open(path_, !create_, create_, false)) {
             return !create_ && files::is_missing(file_.error());
         }
-        return file_.lock(exclusive);
+        if (!file_.lock(exclusive)) return false;
+#ifdef _WIN32
+        exclusive_ = exclusive;
+        if (exclusive && !cache_.enter(path_)) { file_.unlock(); exclusive_ = false; return false; }
+#endif
+        return true;
     }
-    void unlock() { if (file_.valid()) file_.unlock(); }
-    std::string error_message() const { return file_.error_message(); }
+    void unlock() {
+#ifdef _WIN32
+        if (exclusive_) { cache_.leave(); exclusive_ = false; }
+#endif
+        if (file_.valid()) file_.unlock();
+    }
+    std::string error_message() const {
+#ifdef _WIN32
+        if (cache_.error()) return files::error_message(std::error_code(cache_.error(), std::system_category()));
+#endif
+        return file_.error_message();
+    }
+#ifdef _WIN32
+    void configure_mapping_cache(void *context, windows_mapping_cache::release_function release) { cache_.configure(context, release); }
+    bool cached_mapping() const { return cache_.cached(); }
+    bool retain_mapping(bool valid) { return cache_.retain(valid); }
+    bool discard_mapping() { return cache_.discard(); }
+    void stop_mapping_cache() { cache_.stop(); }
+#endif
     directory_lock(const directory_lock &) = delete;
     directory_lock &operator=(const directory_lock &) = delete;
 private:
     std::string path_;
     bool create_;
     files::native_file file_;
+#ifdef _WIN32
+    windows_mapping_cache cache_;
+    bool exclusive_ = false;
+#endif
 };
 
 class scoped_lock {

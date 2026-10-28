@@ -144,21 +144,27 @@ void Session::rebuild() { close(); open(); }
 void Session::require_enabled() const {
     check(logger_->is_enable(), "Enable logging before running this action. / 请先开启日志写入。");
 }
-std::string Session::benchmark(int count, Progress& progress) {
+std::string Session::benchmark(int count, Progress& progress, double* elapsed) {
     require_enabled();
     progress.total = count; progress.completed = 0;
     const bool console = logger_->is_enable_console();
     logger_->set_enable_console(false);
+    const int level = config_.level;
     const auto start = std::chrono::steady_clock::now();
     try {
         for (int i = 0; i < count; ++i) {
-            if (progress.cancel) throw std::runtime_error("Cancelled / 已取消");
-            write(config_.level, "benchmark " + std::to_string(i), "Benchmark");
-            progress.completed = i + 1;
+            const auto message = "benchmark " + std::to_string(i);
+            const int result = logger_->log(level, "MXLoggerDemo", message.c_str(), "Benchmark", false);
+            if (result != 0) {
+                const char* error = logger_->error_desc();
+                throw std::runtime_error("Benchmark write failed (" + std::to_string(result) + "): " + (error ? error : ""));
+            }
         }
     } catch (...) { logger_->set_enable_console(console); throw; }
-    logger_->set_enable_console(console);
     const auto seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    logger_->set_enable_console(console);
+    progress.completed = count;
+    if (elapsed) *elapsed = seconds;
     std::ostringstream text;
     text << count << " writes / 条, " << std::fixed << std::setprecision(3) << seconds << " s, "
          << static_cast<long long>(count / std::max(0.000001, seconds)) << " records/s (flush excluded)";

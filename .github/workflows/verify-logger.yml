@@ -34,7 +34,7 @@ jobs:
           ctest --test-dir build/windows-core -C ${{ matrix.configuration }} --output-on-failure --no-tests=error --output-junit test-results.xml 2>&1 | Tee-Object build/windows-core/ctest.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Native Windows demo, window smoke and package
-        run: ./scripts/verify_windows_demo.ps1 -Configuration ${{ matrix.configuration }}
+        run: ./scripts/verify_windows_demo.ps1 -Configuration ${{ matrix.configuration }} -Benchmark
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -44,6 +44,8 @@ jobs:
             build/windows-native-demo/${{ matrix.configuration }}/self-test/ui-report.txt
             build/windows-native-demo/${{ matrix.configuration }}/self-test/*.png
             build/windows-native-demo/${{ matrix.configuration }}/self-test/model/report.*
+            build/windows-native-demo/${{ matrix.configuration }}/benchmark/*/benchmark.*
+            build/windows-native-demo/${{ matrix.configuration }}/benchmark/comparison.json
           retention-days: 7
           if-no-files-found: warn
       - uses: actions/upload-artifact@v7

@@ -249,6 +249,14 @@ int base_file_sink::remove_all_(bool skip_current){
         return 0;
     }
 #endif
+#ifdef _WIN32
+    // remove_all can delete this sink's current file too. The directory gate
+    // has already evicted other owners; release our own view before deletion.
+    if (!process_lock_.discard_mapping()) {
+        error_record = MXLoggerError("cleanup mapping release failed\n");
+        return 0;
+    }
+#endif
     std::vector<std::map<std::string, std::string>> destination;
     
     mxlogger::get_files(&destination, dir_path_.c_str());

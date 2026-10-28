@@ -2,6 +2,7 @@
 #include "mxlogger_util.hpp"
 #include "json/cJSON.h"
 #include <chrono>
+#include <cstdlib>
 #include <fstream>
 #include <functional>
 #include <iterator>
@@ -139,6 +140,59 @@ int smoke(const fs::path& report_dir) {
     std::ofstream text_file(report_dir / "report.txt");
     text_file << log.str() << (passed ? "PASS\n" : "FAIL\n");
     expect(json_file.good() && text_file.good(), "Writing smoke reports failed");
+    return passed ? 0 : 1;
+}
+
+int benchmark_report(const fs::path& report_dir) {
+    fs::create_directories(report_dir);
+    std::unique_ptr<cJSON, decltype(&cJSON_Delete)> report(cJSON_CreateObject(), cJSON_Delete);
+    if (!report) throw std::runtime_error("Benchmark report allocation failed");
+    auto* cases = cJSON_AddArrayToObject(report.get(), "cases");
+    const char* cache = std::getenv("MXLOGGER_WINDOWS_MAPPING_CACHE");
+    cJSON_AddBoolToObject(report.get(), "mapping_cache", !(cache && std::string(cache) == "0"));
+#ifdef NDEBUG
+    cJSON_AddStringToObject(report.get(), "configuration", "Release");
+#else
+    cJSON_AddStringToObject(report.get(), "configuration", "Debug");
+#endif
+    cJSON_AddStringToObject(report.get(), "scope", "100,000 real log() calls; console disabled; explicit flush and readback excluded from timing");
+    bool passed = true;
+    std::ostringstream log;
+    const auto data = report_dir / fs::u8path("benchmark-data-" + unique_id());
+    for (bool encrypted : {false, true}) {
+        auto* item = cJSON_CreateObject(); cJSON_AddItemToArray(cases, item);
+        cJSON_AddBoolToObject(item, "encrypted", encrypted);
+        try {
+            Config config; config.root = data.u8string(); config.name_space = encrypted ? "aes" : "plain";
+            config.encrypted = encrypted; config.max_age = 0; config.max_size = 0;
+            Session session(config);
+            Progress progress;
+            double seconds = 0;
+            const auto description = session.benchmark(100000, progress, &seconds);
+            session.logger()->flush();
+            const auto records = session.all_records();
+            expect(count_tag(records, "Benchmark") == 100000, "Benchmark record count mismatch");
+            size_t sequence = 0;
+            for (const auto& record : records) {
+                if (field(record, "tag") != "Benchmark") continue;
+                expect(field(record, "msg") == "benchmark " + std::to_string(sequence++), "Benchmark record order mismatch");
+            }
+            cJSON_AddNumberToObject(item, "records", 100000);
+            cJSON_AddNumberToObject(item, "seconds", seconds);
+            cJSON_AddNumberToObject(item, "records_per_second", 100000 / seconds);
+            cJSON_AddBoolToObject(item, "passed", true);
+            log << (encrypted ? "AES-CFB-128: " : "Plaintext: ") << description << " / count + order PASS\n";
+        } catch (const std::exception& error) {
+            passed = false; cJSON_AddBoolToObject(item, "passed", false);
+            cJSON_AddStringToObject(item, "error", error.what()); log << "FAIL: " << error.what() << '\n';
+        }
+    }
+    cJSON_AddBoolToObject(report.get(), "passed", passed);
+    char* json = cJSON_Print(report.get());
+    if (!json) throw std::runtime_error("Benchmark JSON allocation failed");
+    std::ofstream output(report_dir / "benchmark.json"); output << json << '\n'; cJSON_free(json);
+    std::ofstream text(report_dir / "benchmark.txt"); text << log.str();
+    expect(output.good() && text.good(), "Writing benchmark report failed");
     return passed ? 0 : 1;
 }
 } // namespace demo

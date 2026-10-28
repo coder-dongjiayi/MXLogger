@@ -43,6 +43,13 @@ mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,po
     /// A failure here (e.g. the directory is temporarily unwritable) is not fatal:
     /// write_data_ retries through this same recovery path before every write
     recover_mmap_();
+#ifdef _WIN32
+    // Start caching only after the initial recovery finishes. A
+    // throwing constructor must never leave a callback into a partial sink.
+    process_lock_.configure_mapping_cache(this, [](void *context) {
+        return static_cast<mmap_sink *>(context)->release_windows_mapping_();
+    });
+#endif
 }
 
 bool mmap_sink::recover_mmap_(){
@@ -94,6 +101,19 @@ bool mmap_sink::recover_mmap_(){
 }
 #if MXLOGGER_MULTIPROCESS
 bool mmap_sink::refresh_mmap_() {
+#ifdef _WIN32
+    // No cooperating exclusive transaction can touch this directory until it
+    // has evicted our retained view. Avoid reopening the path and querying its
+    // identity/size on each record while that protection remains ours.
+    if (mmap_ptr_ && process_lock_.cached_mapping()) {
+        actual_size_ = get_actual_size_();
+        if (actual_size_ > file_size_ - offset_length) {
+            error_record = MXLoggerError("invalid committed data length:%zu\n", actual_size_);
+            return false;
+        }
+        return true;
+    }
+#endif
     files::file_info opened, current;
     if (file_.valid()) {
         if (!file_.info(opened)) {
@@ -139,13 +159,23 @@ bool mmap_sink::refresh_mmap_() {
 #endif
 mmap_sink::transaction_cleanup::~transaction_cleanup() {
 #ifdef _WIN32
-    // No cooperating idle process may retain a view or data handle that can
-    // prevent the next process from growing or deleting this file.
+    if (sink.process_lock_.retain_mapping(sink.mmap_ptr_ != nullptr)) return;
     if (sink.munmap_()) sink.close();
 #endif
 }
 
+#ifdef _WIN32
+bool mmap_sink::release_windows_mapping_() {
+    const bool unmapped = mapping_.unmap();
+    mmap_ptr_ = mapping_.data();
+    return unmapped && file_.close();
+}
+#endif
+
 mmap_sink::~mmap_sink(){
+#ifdef _WIN32
+    process_lock_.stop_mapping_cache();
+#endif
     munmap_();
     MXLoggerInfo("mmap_sink delloc");
 }
@@ -313,6 +343,20 @@ int mmap_sink::truncate_(size_t size){
         return -1;
     }
     size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
+#ifdef _WIN32
+    // Reserve 64 KiB initially; grow geometrically up to 1 MiB of headroom.
+    // The committed-length header and record format remain unchanged.
+    constexpr size_t granularity = 64 * 1024;
+    const size_t headroom = std::min(std::max(file_size_, granularity), size_t(1024 * 1024));
+    size_t target = size;
+    if (file_size_ <= std::numeric_limits<size_t>::max() - headroom)
+        target = std::max(target, file_size_ + headroom);
+    if (target > std::numeric_limits<size_t>::max() - (granularity - 1)) {
+        error_record = MXLoggerError("mapping capacity overflow\n");
+        return -1;
+    }
+    capacity_size = ((target + granularity - 1) / granularity) * granularity;
+#endif
     const bool was_empty = file_size_ == 0;
 
     /// Windows下文件被映射时无法调整大小，统一先解除映射再扩容(POSIX下此顺序同样安全)

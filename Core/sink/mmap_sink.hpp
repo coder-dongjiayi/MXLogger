@@ -48,8 +48,8 @@ private:
 
     files::mapped_view mapping_;
 
-    // Declared after the directory lock in each transaction: destruction must
-    // release Windows data views/handles BEFORE unlocking that directory.
+    // Declared after the directory lock in each transaction. Windows either
+    // retains the view under its cache lease, or closes it before unlocking.
     struct transaction_cleanup {
         mmap_sink &sink;
         ~transaction_cleanup();
@@ -60,6 +60,11 @@ private:
     // Requires the directory's exclusive lock; refreshes cached length, capacity
     // and file identity before touching the mapping.
     bool refresh_mmap_();
+#endif
+#ifdef _WIN32
+    // Runs with the cache mutex held, including from its eviction thread.
+    // Must not acquire the directory lock or mutate public logger state.
+    bool release_windows_mapping_();
 #endif
 
     /// 建立(或恢复)文件映射：fd丢失时重开文件，空文件先做页对齐扩容，

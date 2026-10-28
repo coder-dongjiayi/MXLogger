@@ -97,6 +97,7 @@ struct Snapshot {
     demo::Records files, records;
     std::string selected_file;
     size_t record_count = 0;
+    bool records_loaded = true;
 };
 struct Result { Snapshot snapshot; std::string message, error; };
 
@@ -158,7 +159,7 @@ private:
     UINT dpi_ = 96;
     bool chinese_ = false, busy_ = false, closing_ = false, filling_ = false;
     bool self_test_ = false;
-    int test_stage_ = -1, exit_code_ = 0, scroll_ = 0;
+    int test_stage_ = -1, exit_code_ = 0, scroll_ = 0, operation_ = 0;
     fs::path reports_;
     demo::Config initial_;
     Snapshot snapshot_;
@@ -375,7 +376,7 @@ private:
         draw(wide(snapshot_.path),124,101,std::max(180,width-570),20,font_);
         SetTextColor(dc,ink);
         std::wstring status = status_;
-        if (busy_) status += L"  " + std::to_wstring(progress_.completed.load()) + L" / " + std::to_wstring(progress_.total.load());
+        if (busy_ && operation_ != benchmark) status += L"  " + std::to_wstring(progress_.completed.load()) + L" / " + std::to_wstring(progress_.total.load());
         draw(status,22,height-44,width-150,30,font_);
         RestoreDC(dc,saved);
     }
@@ -392,14 +393,14 @@ private:
         for (const auto& control : controls_) {
             const int id = control.first;
             bool enable = !busy_;
-            if (id == language || id == tab_actions || id == tab_config) enable = true;
-            if (id == cancel_task) enable = busy_ && !closing_;
+            if (id == language || id == tab_actions || id == tab_config) enable = !(busy_ && operation_ == benchmark);
+            if (id == cancel_task) enable = busy_ && !closing_ && operation_ != benchmark;
             if (id == console) enable = !busy_ && MXLOGGER_CONSOLE_ENABLED;
             if (id == aes_key || id == aes_iv) enable = !busy_ && checked(encrypted);
             EnableWindow(control.second, enable);
         }
     }
-    Snapshot capture(std::string selected_file) {
+    Snapshot capture(std::string selected_file, bool load_records = true) {
         Snapshot result;
         result.config = session_->config(); result.path = session_->path(); result.token = session_->token();
         result.size = session_->logger()->dir_size();
@@ -409,7 +410,8 @@ private:
         for (const auto& file : result.files) if (demo::field(file,"name") == selected_file) found = true;
         if (!found && !result.files.empty()) selected_file = demo::field(result.files.back(),"name");
         result.selected_file = selected_file;
-        if (!result.files.empty()) {
+        result.records_loaded = load_records;
+        if (load_records && !result.files.empty()) {
             result.records = session_->read(selected_file); result.record_count = result.records.size();
             if (result.records.size() > 1000) result.records.erase(result.records.begin(),result.records.end()-1000);
         }
@@ -425,8 +427,15 @@ private:
         }
         const int level = std::clamp(selected(sample_level),0,4);
         const auto file = snapshot_.selected_file;
+        operation_ = operation;
         busy_ = true; progress_.cancel = false; progress_.completed = 0; progress_.total = 0;
         status_ = tr(L"正在执行…",L"Working…"); controls_enabled(); InvalidateRect(window_,nullptr,TRUE);
+        if (operation == benchmark) {
+            // Paint the initial state before starting the clock. No timer,
+            // progress reporting or per-record cancellation polling during it.
+            KillTimer(window_,1);
+            RedrawWindow(window_,nullptr,nullptr,RDW_INVALIDATE|RDW_UPDATENOW|RDW_ALLCHILDREN);
+        }
         try {
           worker_ = std::thread([this,operation,config,level,file] {
             auto result = std::make_unique<Result>();
@@ -457,7 +466,7 @@ private:
                         default: break;
                     }
                 }
-                result->snapshot = capture(file);
+                result->snapshot = capture(file,operation != benchmark);
                 if (result->message.empty()) {
                     result->message = "OK / 完成";
                     if (operation == write_sample || operation == write_json || operation == write_token)
@@ -465,11 +474,11 @@ private:
                 }
             } catch (const std::exception& error) {
                 result->error = error.what();
-                try { if (session_) result->snapshot = capture(file); } catch (...) {}
+                try { if (session_) result->snapshot = capture(file,operation != benchmark); } catch (...) {}
             }
             if (PostMessageW(window_,done_message,0,reinterpret_cast<LPARAM>(result.get()))) result.release();
           });
-        } catch (...) { busy_=false; controls_enabled(); throw; }
+        } catch (...) { busy_=false; operation_=0; SetTimer(window_,1,80,nullptr); controls_enabled(); throw; }
     }
     void item(int id,int row,int column,const std::wstring& value) {
         if (column == 0) {
@@ -492,6 +501,12 @@ private:
     void render_records() {
         filling_ = true;
         ListView_DeleteAllItems(get(records_list)); visible_records_.clear();
+        if (!snapshot_.records_loaded) {
+            filling_ = false;
+            set(label_records,tr(L"日志浏览器 · 点击刷新加载",L"Log viewer · refresh to load"));
+            set(details,tr(L"性能测试已完成。点击“刷新”读取日志。",L"Benchmark completed. Click Refresh to read the logs."));
+            return;
+        }
         const auto query = lower(text(get(search))); const int level = selected(record_level) - 1;
         static const wchar_t* names[] = {L"DEBUG",L"INFO",L"WARN",L"ERROR",L"FATAL"};
         for (size_t i = snapshot_.records.size(); i > 0; --i) {
@@ -526,6 +541,8 @@ private:
     void completed(std::unique_ptr<Result> result) {
         if (worker_.joinable()) worker_.join();
         busy_ = false;
+        operation_ = 0;
+        if (!closing_) SetTimer(window_,1,80,nullptr);
         if (!result->snapshot.path.empty()) snapshot_ = std::move(result->snapshot);
         status_ = wide(result->error.empty() ? result->message : result->error);
         Button_SetCheck(get(enabled),snapshot_.config.enabled ? BST_CHECKED : BST_UNCHECKED);
@@ -628,8 +645,12 @@ private:
             case 9: click(rebuild); break;
             case 10: expect(snapshot_.record_count==4,"UI rebuild persistence/header"); click(thread_test); break;
             case 11: click(process_test); break;
-            case 12: click(benchmark); break;
-            case 13: click(flush); break;
+            case 12:
+                click(benchmark);
+                expect(!IsWindowEnabled(get(cancel_task)),"Benchmark must not offer per-record cancellation"); break;
+            case 13:
+                expect(!snapshot_.records_loaded && ListView_GetItemCount(get(records_list))==0,"Benchmark must defer preview loading");
+                click(refresh); break;
             case 14: {
                 expect(ListView_GetItemCount(get(files_list))>0 && ListView_GetItemCount(get(records_list))>0,"File/record browser");
                 expect(text(get(details)).find(L"thread_id:")!=std::wstring::npos,"Full record details");
@@ -711,6 +732,7 @@ private:
             }
             case done_message: completed(std::unique_ptr<Result>(reinterpret_cast<Result*>(lp))); return 0;
             case WM_TIMER:
+                if (busy_ && operation_ == benchmark) return 0;
                 if (busy_) { RECT rect{}; GetClientRect(window_,&rect); rect.top=std::max(s(800),static_cast<int>(rect.bottom))-scroll_-s(50); InvalidateRect(window_,&rect,FALSE); }
                 self_test_tick(); return 0;
             case WM_CLOSE:
@@ -743,12 +765,17 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR,int show) {
     if (!raw) return 1;
     std::vector<std::wstring> arguments(raw,raw+count); LocalFree(raw);
     if (count==4 && arguments[1]==L"--worker") return demo::run_worker(utf8(arguments[2]),utf8(arguments[3]));
-    bool self_test=false; fs::path reports;
+    bool self_test=false, benchmark_only=false; fs::path reports;
     if (count!=1) {
-        if (count!=4 || arguments[1]!=L"--self-test" || arguments[2]!=L"--report-dir") {
-            MessageBoxW(nullptr,L"Usage: MXLoggerDemo.exe [--self-test --report-dir <directory>]",L"MXLogger",MB_OK|MB_ICONERROR); return 2;
+        if (count!=4 || (arguments[1]!=L"--self-test" && arguments[1]!=L"--benchmark") || arguments[2]!=L"--report-dir") {
+            MessageBoxW(nullptr,L"Usage: MXLoggerDemo.exe [--self-test|--benchmark --report-dir <directory>]",L"MXLogger",MB_OK|MB_ICONERROR); return 2;
         }
-        self_test=true; reports=fs::absolute(arguments[3]);
+        benchmark_only=arguments[1]==L"--benchmark";
+        self_test=!benchmark_only; reports=fs::absolute(arguments[3]);
+    }
+    if (benchmark_only) {
+        try { return demo::benchmark_report(reports); }
+        catch (const std::exception& error) { std::ofstream(reports/"benchmark.txt") << "FAIL: " << error.what() << '\n'; return 1; }
     }
     const HRESULT com=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);
     if (FAILED(com)) return 1;
