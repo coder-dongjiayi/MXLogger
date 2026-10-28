@@ -56,6 +56,67 @@ pwsh -File scripts/verify_windows_demo.ps1 -Configuration Release -Benchmark
 因此这个对照隔离的是映射复用的收益，不能作为与历史版本整体性能差异的精确对照。
 脚本结束后恢复环境变量，正常运行 Demo 默认开启复用。
 
+## 写入分段诊断
+
+验证脚本会额外构建控制台工具 `MXLoggerProfile.exe`，它链接独立的
+`MXLoggerCoreProfile`。普通 GUI 和正式 Benchmark 链接的 Core 不含采样代码；
+诊断不改变加锁、逐条修改时间更新、加密或提交逻辑。Release CI 会自动运行诊断，
+Debug 也会编译诊断工具并验证统计器。
+
+从仓库根目录构建、验证并运行完整评测：
+
+```powershell
+pwsh -File scripts/verify_windows_demo.ps1 -Configuration Release -ProfileWrites
+```
+
+下载并解压最新 Release 包后，在同一台 Windows 电脑上执行：
+
+```powershell
+pwsh -File .\profile_windows_demo.ps1
+```
+
+脚本默认使用脚本所在目录的两个 exe；可通过 `-ExecutableDirectory` 指定构建产物目录，
+通过 `-ReportDirectory` 指定报告及临时日志的父目录（应与之前测试使用同一磁盘）。
+每次建立独立的 `run-时间戳/`，不覆盖原有报告或使用 Demo 的日志目录。
+默认每个 exe 预热一轮，然后交替运行普通 / 诊断程序各 7 轮，每轮各写入
+100,000 条明文和 AES 日志。普通程序仍使用现有 `--benchmark` 循环。
+控制台、进度刷新、初始化、显式 flush、读取校验和报告输出均不进入写入计时；
+每轮计时后检查文件头、记录数量、消息顺序及解密。
+
+结果首先看 `summary.txt` / `summary.json`：普通版本的中位数、最小值和最大值，
+诊断相对耗时差异，各阶段估算耗时排序，以及独立 API 微基准。
+阶段包括消息构造、线程锁等待、元数据、FlatBuffers 构造与分配释放、AES、
+目录锁获取 / 释放、缓存互斥锁等待、缓存协调 / 映射交接等待、文件打开 / 关闭、
+映射检查 / 创建 / 解除、扩容、文件时间更新、数据复制和其他开销。
+
+默认每 64 条抽样一次，并在各轮错开起点；恢复映射、打开关闭文件、映射与扩容、
+实际交接等待等低频操作完整计时。嵌套阶段采用独占耗时，子阶段从父阶段扣除，
+不会把缓存交接同时算作目录锁调用。所有计数在线程本地内存累积，仅统计计时循环
+所在前台线程；后台 CPU 不加入占比，前台等待后台释放资源的时间会被计入。
+`cache_hits`、`cache_misses`、`mapping_handoffs`、`ready_set_events` 和 `ready_reused`
+可检查实际路径和事件复用是否生效。初始化和结束后的 flush / 校验不进入这些统计。
+
+`profile.json` 保留每段调用数、抽样 / 完整计时数、实际采集耗时和估算值。
+完整计时部分直接采用，抽样部分按记录采样比例外推；未采到的条件分支显示 `null`。
+估算占比不强制归一到 100%，不同轮次的阶段中位数也不一定加总为总耗时中位数。
+时钟调用成本单列，未机械扣减。诊断耗时不能作为正式 Benchmark 成绩；
+`other` 还包含未分段代码与部分统计记账开销，不能直接视为可消除的业务开销。
+如果诊断比普通版本慢超过 5%，先降低采样频率再复测：
+
+```powershell
+pwsh -File .\profile_windows_demo.ps1 -SampleStride 256
+```
+
+单次诊断可运行 `MXLoggerProfile.exe --report-dir .\single-profile`。
+独立 API 复核可运行 `MXLoggerProfile.exe --microbench --report-dir .\api-profile`：
+在同盘临时文件上测量 100,000 次无竞争锁获取 / 释放，以及修改时间更新。
+微基准使用未映射的独立文件，其耗时用于复核热点，不能直接从真实日志耗时中相减。
+报告目录保留测试数据，可在评测结束后自行删除。
+
+本轮先评测单进程单线程，定位约 2.95 秒耗时；确认热点后再增加双进程共享 / 独立目录对照。
+CI 用来验证编译与结果完整性，性能对比应在同一台本地 Windows 电脑上完成。
+Mac 的诊断目标仅验证统计器和共用写入路径，报告明确标记 `macos-model-only`。
+
 ## 自动验证与 CI 产物
 
 安装 PowerShell 7 后，在 Windows 执行：
@@ -74,7 +135,8 @@ pwsh -File scripts/verify_windows_demo.ps1 -Configuration Release
 GitHub Actions 的 `verify-logger` **仅手动触发**。每次运行仍验证 Windows Debug/Release、Apple 和 Android；
 Windows 会额外构建、自测并上传此 Demo，同时运行上述 100,000 条对照测试。
 耗时、吞吐量和倍数在日志及 `benchmark/comparison.json` 中，不以固定耗时作为 CI 成败阈值。
-下载 `windows-demo-<配置>` 中的 zip，解压运行 `MXLoggerDemo.exe`。
+下载 `windows-demo-<配置>` 中的 zip，解压运行 `MXLoggerDemo.exe`；包中也包含诊断工具及脚本。
+Release 的分段评测报告位于 `windows-demo-Release-logs` 中的 `profile/run-*/`。
 这验证原生 Windows Demo，Flutter Windows / FFI DLL 将在后续阶段接入。
 
 ## 在 Mac 上开发

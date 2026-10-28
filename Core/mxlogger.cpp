@@ -256,7 +256,9 @@ int mxlogger::log(int level,const char* name, const char* msg,const char* tag,bo
         return 0;
     }
     
+    MXLOGGER_PROFILE_SPAN(profile_mutex, thread_mutex);
     std::lock_guard<std::mutex> lock(logger_mutex);
+    MXLOGGER_PROFILE_STOP(profile_mutex);
     
     if (name == nullptr || strcmp(name, "") == 0) {
         name = "mxlogger";
@@ -264,7 +266,9 @@ int mxlogger::log(int level,const char* name, const char* msg,const char* tag,bo
    
     level::level_enum lvl = mxlogger_helper::level_(level);
 
+    MXLOGGER_PROFILE_SPAN(profile_metadata, metadata);
     details::log_msg log_msg(lvl,name,tag,msg,is_main_thread);
+    MXLOGGER_PROFILE_STOP(profile_metadata);
     
     
     int result =  mmap_sink_ -> log(log_msg);

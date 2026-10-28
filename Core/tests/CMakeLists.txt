@@ -23,3 +23,9 @@ set_tests_properties(MXLoggerCore PROPERTIES
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     TIMEOUT 180
 )
+
+if(MXLOGGER_BUILD_PROFILE)
+    add_executable(mxlogger_profile_tests test_profile.cpp)
+    target_link_libraries(mxlogger_profile_tests PRIVATE MXLoggerCoreProfile)
+    add_test(NAME MXLoggerProfileCollector COMMAND mxlogger_profile_tests)
+endif()

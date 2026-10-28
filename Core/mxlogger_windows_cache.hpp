@@ -43,7 +43,10 @@ public:
     // Called after taking directory byte 0. A successful enter holds mutex_
     // until leave(), protecting sink state against the eviction thread.
     bool enter(const std::string &path) {
+        MXLOGGER_PROFILE_SPAN(profile_enter, cache_coordination);
+        MXLOGGER_PROFILE_SPAN(profile_mutex, cache_mutex);
         mutex_.lock();
+        MXLOGGER_PROFILE_STOP(profile_mutex);
         if (held_) return true;
         try {
             if (!initialize(path)) { mutex_.unlock(); return false; }
@@ -51,13 +54,15 @@ public:
         if (!gate_.lock(true, false, mapping_offset)) {
             const auto failure = gate_.error();
             if (failure.value() != ERROR_LOCK_VIOLATION) return fail(failure.value());
+            MXLOGGER_PROFILE_EXACT(profile_handoff, handoff_wait);
+            MXLOGGER_PROFILE_COUNT(handoff);
             // Contended writers use transient mappings for a short interval,
             // rather than paying a background-thread handoff on every record.
             cooldown_until_ = GetTickCount64() + cooldown_ms;
             // An event may be inaccessible across user/security boundaries.
             // The bounded lease below still releases idle mappings in that
             // case; permission to the coordinator file remains authoritative.
-            if (request_) SetEvent(request_);
+            if (request_) { SetEvent(request_); MXLOGGER_PROFILE_COUNT(request_set); }
             const ULONGLONG deadline = GetTickCount64() + 5000;
             while (!gate_.lock(true, false, mapping_offset)) {
                 const auto next = gate_.error();
@@ -82,6 +87,7 @@ public:
     // A failed/empty mapping is never retained. Thread/event allocation failure
     // safely falls back to the old transient lifetime, not unlocked access.
     bool retain(bool valid) {
+        MXLOGGER_PROFILE_SPAN(profile_retain, cache_coordination);
         retain_ = valid && can_retain() && start_worker();
         return retain_;
     }
@@ -91,6 +97,7 @@ public:
         return !release_ || release_(context_);
     }
     void leave() {
+        MXLOGGER_PROFILE_SPAN(profile_leave, cache_coordination);
         if (retain_ && arm_worker()) {
             cached_ = true;
         } else {
@@ -163,8 +170,9 @@ private:
     bool arm_worker() { // Caller holds mutex_.
         // This manual-reset event stays signaled for the whole monitoring
         // interval. Repeated appends need no further kernel notification.
-        if (ready_signaled_) return true;
+        if (ready_signaled_) { MXLOGGER_PROFILE_COUNT(ready_reused); return true; }
         if (!ready_ || !SetEvent(ready_)) return false;
+        MXLOGGER_PROFILE_COUNT(ready_set);
         ready_signaled_ = true;
         return true;
     }

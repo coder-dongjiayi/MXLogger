@@ -106,6 +106,8 @@ bool mmap_sink::refresh_mmap_() {
     // has evicted our retained view. Avoid reopening the path and querying its
     // identity/size on each record while that protection remains ours.
     if (mmap_ptr_ && process_lock_.cached_mapping()) {
+        MXLOGGER_PROFILE_SPAN(profile_refresh, mapping_refresh);
+        MXLOGGER_PROFILE_COUNT(cache_hit);
         actual_size_ = get_actual_size_();
         if (actual_size_ > file_size_ - offset_length) {
             error_record = MXLoggerError("invalid committed data length:%zu\n", actual_size_);
@@ -114,6 +116,8 @@ bool mmap_sink::refresh_mmap_() {
         return true;
     }
 #endif
+    MXLOGGER_PROFILE_EXACT(profile_recovery, mapping_refresh);
+    MXLOGGER_PROFILE_COUNT(cache_miss);
     files::file_info opened, current;
     if (file_.valid()) {
         if (!file_.info(opened)) {
@@ -215,6 +219,9 @@ void mmap_sink::add_file_heder(const char* msg){
 
 
 int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
+    // The outer span includes FlatBuffers allocation/free; nested spans remove
+    // encryption and the entire write transaction from its exclusive time.
+    MXLOGGER_PROFILE_SPAN(profile_serialize, serialization);
     flatbuffers::FlatBufferBuilder builder;
     
     auto root =  Createlog_serializeDirect(builder,msg.name,msg.tag,msg.msg,msg.level,(uint32_t)msg.thread_id,msg.is_main_thread,msg.time_stamp);
@@ -227,6 +234,7 @@ int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
     
     
     if (should_encrypt()) {
+        MXLOGGER_PROFILE_SPAN(profile_aes, encryption);
         cfb128_encrypt(point, point, size);
     }
     
@@ -235,6 +243,7 @@ int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
 }
 
 int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_empty){
+    MXLOGGER_PROFILE_SPAN(profile_transaction, other);
 #if MXLOGGER_MULTIPROCESS
     ipc::scoped_lock lock(process_lock_);
     if (!lock) {
@@ -300,6 +309,7 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_
         return -1;
     }
 #endif
+    MXLOGGER_PROFILE_SPAN(profile_append, append);
     uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
     
     

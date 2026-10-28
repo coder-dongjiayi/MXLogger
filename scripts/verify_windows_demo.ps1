@@ -2,7 +2,8 @@
 [CmdletBinding()]
 param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [switch]$Benchmark
+    [switch]$Benchmark,
+    [switch]$ProfileWrites
 )
 
 $ErrorActionPreference = 'Stop'
@@ -12,10 +13,12 @@ $reports = Join-Path $build 'self-test'
 $package = Join-Path $build 'package'
 New-Item -ItemType Directory -Force $build, $reports | Out-Null
 
-cmake -S (Join-Path $repo 'platform/Windows/MXLoggerDemo') -B $build -A x64 2>&1 | Tee-Object (Join-Path $build 'configure.log')
+cmake -S (Join-Path $repo 'platform/Windows/MXLoggerDemo') -B $build -A x64 '-DMXLOGGER_BUILD_PROFILE=ON' '-DMXLOGGER_BUILD_TESTS=ON' 2>&1 | Tee-Object (Join-Path $build 'configure.log')
 if ($LASTEXITCODE -ne 0) { throw "Demo configure failed: $LASTEXITCODE" }
 cmake --build $build --config $Configuration --parallel 2>&1 | Tee-Object (Join-Path $build 'build.log')
 if ($LASTEXITCODE -ne 0) { throw "Demo build failed: $LASTEXITCODE" }
+ctest --test-dir (Join-Path $build 'core') -C $Configuration -R MXLoggerProfileCollector '--no-tests=error' --output-on-failure 2>&1 | Tee-Object (Join-Path $build 'profile-collector-tests.log')
+if ($LASTEXITCODE -ne 0) { throw "Profile collector tests failed: $LASTEXITCODE" }
 
 $exe = Join-Path $build "bin/$Configuration/MXLoggerDemo.exe"
 function Invoke-DemoCheck([string]$Mode, [string]$ReportDirectory, [int]$Timeout) {
@@ -83,6 +86,10 @@ if ($Benchmark) {
     }
     $comparison | ConvertTo-Json | Set-Content (Join-Path $build 'benchmark/comparison.json')
     $comparison | Format-Table | Out-String | Write-Host
+}
+
+if ($ProfileWrites) {
+    & (Join-Path $PSScriptRoot 'profile_windows_demo.ps1') -ExecutableDirectory (Split-Path $exe) -ReportDirectory (Join-Path $build 'profile')
 }
 
 cmake --install $build --config $Configuration --prefix $package 2>&1 | Tee-Object (Join-Path $build 'install.log')

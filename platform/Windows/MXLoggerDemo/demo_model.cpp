@@ -2,6 +2,7 @@
 #include "demo_process.hpp"
 #include "mxlogger_util.hpp"
 #include "mxlogger_build_config.h"
+#include "mxlogger_profile.hpp"
 #include "json/cJSON.h"
 #include <algorithm>
 #include <chrono>
@@ -153,7 +154,10 @@ std::string Session::benchmark(int count, Progress& progress, double* elapsed) {
     const auto start = std::chrono::steady_clock::now();
     try {
         for (int i = 0; i < count; ++i) {
+            MXLOGGER_PROFILE_RECORD();
+            MXLOGGER_PROFILE_SPAN(profile_message, message);
             const auto message = "benchmark " + std::to_string(i);
+            MXLOGGER_PROFILE_STOP(profile_message);
             const int result = logger_->log(level, "MXLoggerDemo", message.c_str(), "Benchmark", false);
             if (result != 0) {
                 const char* error = logger_->error_desc();
