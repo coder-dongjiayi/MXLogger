@@ -17,7 +17,6 @@
 		BD62878727EB2FD000362E4C /* MXLoggerDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD62878627EB2FD000362E4C /* MXLoggerDemoTests.m */; };
 		BD62879227EB2FD000362E4C /* MXLoggerDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD62879127EB2FD000362E4C /* MXLoggerDemoUITests.m */; };
 		BD6287BC27EB305600362E4C /* MXLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD6287A927EB2FE400362E4C /* MXLogger.framework */; };
-		DD00000000000000000003F1 /* MXLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD6287A927EB2FE400362E4C /* MXLogger.framework */; };
 		BD6287BD27EB305600362E4C /* MXLogger.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = BD6287A927EB2FE400362E4C /* MXLogger.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DD00000000000000000002A2 /* MXDemoHomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00000000000000000001A2 /* MXDemoHomeViewController.m */; };
 		DD00000000000000000002A3 /* MXDemoHomeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = DD00000000000000000001A3 /* MXDemoHomeViewController.xib */; };
@@ -33,6 +32,7 @@
 		DD00000000000000000002B2 /* MXLogRecordCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = DD00000000000000000001B2 /* MXLogRecordCell.xib */; };
 		DD00000000000000000002C1 /* MXDemoL10n.m in Sources */ = {isa = PBXBuildFile; fileRef = DD00000000000000000001C1 /* MXDemoL10n.m */; };
 		DD00000000000000000002C3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = DD00000000000000000001C3 /* Localizable.strings */; };
+		DD00000000000000000003F1 /* MXLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD6287A927EB2FE400362E4C /* MXLogger.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -466,15 +466,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		DD00000000000000000001C3 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				DD00000000000000000001C4 /* en */,
-				DD00000000000000000001C5 /* zh-Hans */,
-			);
-			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
 		BD62877327EB2FCD00362E4C /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -489,6 +480,15 @@
 				BD62877927EB2FD000362E4C /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		DD00000000000000000001C3 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DD00000000000000000001C4 /* en */,
+				DD00000000000000000001C5 /* zh-Hans */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -545,7 +545,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -598,7 +598,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -612,9 +612,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S3ATYAJ48Q;
+				DEVELOPMENT_TEAM = HQ4D52T7MG;
 				INFOPLIST_FILE = MXLoggerDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -631,9 +631,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S3ATYAJ48Q;
+				DEVELOPMENT_TEAM = HQ4D52T7MG;
 				INFOPLIST_FILE = MXLoggerDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -649,9 +649,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S3ATYAJ48Q;
+				DEVELOPMENT_TEAM = HQ4D52T7MG;
 				INFOPLIST_FILE = MXLoggerDemoTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -669,9 +669,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S3ATYAJ48Q;
+				DEVELOPMENT_TEAM = HQ4D52T7MG;
 				INFOPLIST_FILE = MXLoggerDemoTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -688,7 +688,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S3ATYAJ48Q;
+				DEVELOPMENT_TEAM = HQ4D52T7MG;
 				INFOPLIST_FILE = MXLoggerDemoUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -706,7 +706,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = S3ATYAJ48Q;
+				DEVELOPMENT_TEAM = HQ4D52T7MG;
 				INFOPLIST_FILE = MXLoggerDemoUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

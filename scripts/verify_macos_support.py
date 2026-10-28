@@ -77,6 +77,19 @@ class Verification:
         self.steps.append(name)
         return log.read_text(errors="replace")
 
+    def ios_demo(self):
+        # Build the checked-in Xcode project just as an iPhone Run would. The
+        # validation override used for published pods must not hide stale
+        # deployment targets in the Demo, framework or Core subprojects.
+        for configuration in ["Debug", "Release"]:
+            self.run(f"ios-native-demo-{configuration.lower()}",
+                     ["env", "-u", "XCODE_XCCONFIG_FILE", "-u", "IPHONEOS_DEPLOYMENT_TARGET",
+                      "xcodebuild", "-project", ROOT / "iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj",
+                      "-scheme", "MXLoggerDemo", "-configuration", configuration,
+                      "-destination", "generic/platform=iOS",
+                      "-derivedDataPath", self.directory / "ios-native-demo" / configuration,
+                      "CODE_SIGNING_ALLOWED=NO", "build"], timeout=600)
+
     def prepare(self, manager):
         stage = self.directory / manager
         plugin = stage / "flutter_mxlogger"
@@ -233,6 +246,7 @@ def main():
         if not args.skip_native:
             check.run("core", ["bash", ROOT / "Core/tests/run_tests.sh"])
             check.run("apple-native", ["bash", ROOT / "iOS/MXLogger/tests/run_tests.sh"])
+            check.ios_demo()
             check.run("native-demo", ["bash", ROOT / "scripts/verify_macos_demo.sh"])
         check.run("flutter-precache", [flutter, "precache", "--ios", "--macos"])
         managers = ["pods", "spm"] if args.package_manager == "both" else [args.package_manager]
