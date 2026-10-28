@@ -163,7 +163,7 @@ packages:
   flutter_mxlogger:
     dependency: "direct main"
     description:
-      path: "../flutter_mxlogger"
+      path: "../platform/flutter_mxlogger"
       relative: true
     source: path
     version: "2.2.0"

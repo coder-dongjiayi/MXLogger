@@ -94,6 +94,11 @@ Full documentation for the analyzer: [mxlogger_analyzer_lib/README.md](./mxlogge
 
 # Install
 
+Platform integrations and demos live under `platform/`: `Windows/`, `macOS/`, `iOS/`, `Android/`, and `flutter_mxlogger/`.
+The shared `Core/`, `scripts/`, `spm/`, and CocoaPods specifications remain at the repository root.
+After updating an existing checkout, reopen projects from their new paths, preserve and regenerate affected CMake build directories,
+and run `flutter pub get` / `pod install` to refresh local dependency paths.
+
 ## iOS
 
 ```ruby
@@ -118,14 +123,14 @@ Both platforms use the same native API. On macOS, call `removeExpireData` explic
 
 ### Native macOS demo
 
-`macOS/MXLoggerDemo` is a native **AppKit + Swift + Main.storyboard** app. Its landing,
+`platform/macOS/MXLoggerDemo` is a native **AppKit + Swift + Main.storyboard** app. Its landing,
 home, file list, log viewer and reusable cells are editable in Storyboard. The UI
 follows the iOS / Android / Flutter demos, including the purple status card and
 English/Chinese switching, and shares the iOS demo's logo and localization resources.
 
 ```bash
-pod install --project-directory=macOS/MXLoggerDemo
-open macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
+pod install --project-directory=platform/macOS/MXLoggerDemo
+open platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
 ```
 
 Run the `MXLoggerDemo` scheme on `My Mac`. It uses this checkout's native pods and
@@ -149,13 +154,13 @@ Logs and previews are saved under `build/macos-native-demo/`.
 
 ### Native Windows demo
 
-[`Windows/MXLoggerDemo`](Windows/MXLoggerDemo/README.md) is a native **Win32 + C++17** app,
+[`platform/Windows/MXLoggerDemo`](platform/Windows/MXLoggerDemo/README.md) is a native **Win32 + C++17** app,
 linked directly to this checkout's Core. It includes Chinese/English UI, configuration,
 five log levels, JSON/token writes, thread/process count and order checks, a 100,000-write
 benchmark, cleanup/rebuilding, and a searchable log viewer.
 
 ```powershell
-cmake -S Windows/MXLoggerDemo -B build/windows-demo -A x64
+cmake -S platform/Windows/MXLoggerDemo -B build/windows-demo -A x64
 cmake --build build/windows-demo --config Debug --parallel
 .\build\windows-demo\bin\Debug\MXLoggerDemo.exe
 ```
@@ -167,7 +172,7 @@ On Mac you can edit the code and test shared log actions; Windows CI verifies th
 
 ### Flutter macOS demo
 
-`flutter_mxlogger/example` shares the mobile demo's landing page, purple status card,
+`platform/flutter_mxlogger/example` shares the mobile demo's landing page, purple status card,
 grouped features, English/Chinese switching, file list and encrypted log viewer. The
 macOS app adds a resizable window, desktop settings dialogs, an independent Finder
 entry and explicit cleanup instructions. It covers writes, a 100,000-write benchmark,
@@ -185,8 +190,8 @@ bash scripts/run_flutter_macos_demo.sh test
 
 The script scopes local CocoaPods to the command, and the demo follows the installed
 Xcode SDK's build floor. The UI check uses temporary logs and saves previews under
-`flutter_mxlogger/example/screenshots/macos-*.png`. See the
-[Flutter demo guide](flutter_mxlogger/example/README.md).
+`platform/flutter_mxlogger/example/screenshots/macos-*.png`. See the
+[Flutter demo guide](platform/flutter_mxlogger/example/README.md).
 
 ### macOS regression checks and release preparation
 

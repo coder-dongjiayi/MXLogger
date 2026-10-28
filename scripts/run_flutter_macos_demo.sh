@@ -21,7 +21,7 @@ esac
 # Scope the package-manager choice to this process; do not change Flutter's global config.
 export FLUTTER_SWIFT_PACKAGE_MANAGER=false
 export MXLOGGER_LOCAL_NATIVE=1
-cd "$ROOT/flutter_mxlogger/example"
+cd "$ROOT/platform/flutter_mxlogger/example"
 "$FLUTTER_BIN" pub get
 case "$ACTION" in
     run) exec "$FLUTTER_BIN" run -d macos --no-pub "$@" ;;

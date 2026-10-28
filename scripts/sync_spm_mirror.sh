@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# 把 Core (C++) 与 iOS/MXLogger (Objective-C) 组装成 SwiftPM 标准布局，
+# 把 Core (C++) 与 platform/iOS/MXLogger (Objective-C) 组装成 SwiftPM 标准布局，
 # 输出到镜像仓库 coder-dongjiayi/mxlogger-spm 的工作目录。
 #
 # 用法:
@@ -10,7 +10,7 @@
 # 保留输出目录的 .git、SwiftPM 缓存及本地 IDE 配置，分发源码以主仓库为准整体覆盖(含删除)。
 # 之后在镜像目录里 commit / tag / push 即完成发版。
 #
-# Assemble Core (C++) and iOS/MXLogger (Objective-C) into the standard SwiftPM layout and
+# Assemble Core (C++) and platform/iOS/MXLogger (Objective-C) into the standard SwiftPM layout and
 # write it to the working tree of the mirror repository coder-dongjiayi/mxlogger-spm.
 #
 # Usage:
@@ -48,7 +48,7 @@ rsync -a "$ROOT/Core/" "$STAGE/Sources/MXLoggerCore/" \
 
 # Objective-C 层: 只要源码与公开头，Info.plist 属于 framework 工程
 # Objective-C layer: sources and public header only; Info.plist belongs to the framework project
-rsync -a "$ROOT/iOS/MXLogger/MXLogger/" "$STAGE/Sources/MXLogger/" \
+rsync -a "$ROOT/platform/iOS/MXLogger/MXLogger/" "$STAGE/Sources/MXLogger/" \
     --exclude Info.plist \
     --exclude .DS_Store
 

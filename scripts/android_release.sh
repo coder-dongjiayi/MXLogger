@@ -35,9 +35,9 @@ ARTIFACT_ID="mxlogger"
 GPG_KEY="DA2BC76FCCFB87DE"    # 你的 GPG 主 KeyID
 
 # ===== 路径写死 =====
-# 本脚本在 scripts/，上一级即仓库根；Android 工程位于 Android/MXLogger
+# 本脚本在 scripts/，上一级即仓库根；Android 工程位于 platform/Android/MXLogger
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(cd "${SCRIPT_DIR}/../Android/MXLogger" && pwd)"
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/../platform/Android/MXLogger" && pwd)"
 RELEASE_DIR="${SCRIPT_DIR}/release"   # 最终 ZIP 输出到 scripts/release/
 SRC_DIR="${PROJECT_DIR}/mxlogger"
 GRADLEW="${PROJECT_DIR}/gradlew"

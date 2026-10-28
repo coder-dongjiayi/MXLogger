@@ -12,7 +12,7 @@ $reports = Join-Path $build 'self-test'
 $package = Join-Path $build 'package'
 New-Item -ItemType Directory -Force $build, $reports | Out-Null
 
-cmake -S (Join-Path $repo 'Windows/MXLoggerDemo') -B $build -A x64 2>&1 | Tee-Object (Join-Path $build 'configure.log')
+cmake -S (Join-Path $repo 'platform/Windows/MXLoggerDemo') -B $build -A x64 2>&1 | Tee-Object (Join-Path $build 'configure.log')
 if ($LASTEXITCODE -ne 0) { throw "Demo configure failed: $LASTEXITCODE" }
 cmake --build $build --config $Configuration --parallel 2>&1 | Tee-Object (Join-Path $build 'build.log')
 if ($LASTEXITCODE -ne 0) { throw "Demo build failed: $LASTEXITCODE" }

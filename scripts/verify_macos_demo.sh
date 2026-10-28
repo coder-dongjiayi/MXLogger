@@ -4,12 +4,12 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 BUILD="$ROOT/build/macos-native-demo"
 mkdir -p "$BUILD"
-pod install --project-directory="$ROOT/macOS/MXLoggerDemo" > "$BUILD/pods.log" 2>&1 || {
+pod install --project-directory="$ROOT/platform/macOS/MXLoggerDemo" > "$BUILD/pods.log" 2>&1 || {
     cat "$BUILD/pods.log"; exit 1;
 }
 for CONFIGURATION in Debug Release; do
     echo ">> macOS native demo: $CONFIGURATION"
-    xcodebuild -quiet -workspace "$ROOT/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace" \
+    xcodebuild -quiet -workspace "$ROOT/platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace" \
         -scheme MXLoggerDemo -configuration "$CONFIGURATION" -destination 'generic/platform=macOS' \
         -derivedDataPath "$BUILD" build > "$BUILD/$CONFIGURATION-build.log" 2>&1 || {
         cat "$BUILD/$CONFIGURATION-build.log"; exit 1;

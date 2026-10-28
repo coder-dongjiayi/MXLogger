@@ -20,7 +20,7 @@ BUILD="$ROOT/build/android-validation"
 mkdir -p "$BUILD"
 for ABI in arm64-v8a armeabi-v7a x86_64 x86; do
     echo ">> Android $ABI (API 21, Release)"
-    cmake -S "$ROOT/Android/MXLogger/mxlogger" -B "$BUILD/$ABI" -G Ninja \
+    cmake -S "$ROOT/platform/Android/MXLogger/mxlogger" -B "$BUILD/$ABI" -G Ninja \
         -DCMAKE_TOOLCHAIN_FILE="$NDK_DIR/build/cmake/android.toolchain.cmake" \
         -DANDROID_ABI="$ABI" -DANDROID_PLATFORM=android-21 \
         -DANDROID_STL=c++_static -DCMAKE_BUILD_TYPE=Release \

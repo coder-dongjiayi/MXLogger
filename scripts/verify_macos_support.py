@@ -84,7 +84,7 @@ class Verification:
         for configuration in ["Debug", "Release"]:
             self.run(f"ios-native-demo-{configuration.lower()}",
                      ["env", "-u", "XCODE_XCCONFIG_FILE", "-u", "IPHONEOS_DEPLOYMENT_TARGET",
-                      "xcodebuild", "-project", ROOT / "iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj",
+                      "xcodebuild", "-project", ROOT / "platform/iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj",
                       "-scheme", "MXLoggerDemo", "-configuration", configuration,
                       "-destination", "generic/platform=iOS",
                       "-derivedDataPath", self.directory / "ios-native-demo" / configuration,
@@ -92,17 +92,17 @@ class Verification:
 
     def prepare(self, manager):
         stage = self.directory / manager
-        plugin = stage / "flutter_mxlogger"
+        plugin = stage / "platform/flutter_mxlogger"
         plugin.mkdir(parents=True)
         # The unit-test library builder resolves these relative to the plugin.
-        for name in ["Core", "Android"]:
+        for name in ["Core", "platform/Android"]:
             (stage / name).symlink_to(ROOT / name, target_is_directory=True)
         excludes = [".git", ".idea", ".dart_tool", "build", "Pods", "ephemeral",
                     ".symlinks", ".build", ".swiftpm", "FlutterFramework", "*.dylib",
                     "SDK.xcconfig", "Podfile.lock"]
         self.run(f"{manager}-copy", ["rsync", "-a"] +
                  [f"--exclude={item}" for item in excludes] +
-                 [str(ROOT / "flutter_mxlogger") + "/", str(plugin) + "/"])
+                 [str(ROOT / "platform/flutter_mxlogger") + "/", str(plugin) + "/"])
         example = plugin / "example"
         (example / "macos/Runner/Configs/SDK.xcconfig").write_text(
             f"MXLOGGER_DEMO_DEPLOYMENT_TARGET = {self.macos_target}\n")
@@ -132,13 +132,13 @@ class Verification:
             manifest = plugin / "darwin/flutter_mxlogger/Package.swift"
             text, count = re.subn(
                 r'\.package\(url: "https://github\.com/coder-dongjiayi/mxlogger-spm\.git", exact: "[^"]+"\)',
-                '.package(path: "../../../mxlogger-spm")', manifest.read_text())
+                '.package(path: "../../../../mxlogger-spm")', manifest.read_text())
             if count != 1:
                 raise RuntimeError("Could not locate the native SwiftPM dependency")
             manifest.write_text(text)
         else:
             podfile = example / "macos/Podfile"
-            replace_once(podfile, "File.expand_path('../../..', __dir__)",
+            replace_once(podfile, "File.expand_path('../../../..', __dir__)",
                          ruby_string(ROOT))
             replace_once(podfile,
                          "demo_target = [Gem::Version.new('10.14'), Gem::Version.new(sdk_minimum)].max.to_s",
@@ -174,7 +174,7 @@ class Verification:
                     f"-fmodules-cache-path={self.directory / 'modules'}",
                     "-target", f"arm64-apple-ios{self.ios_target}{suffix}",
                     "-isysroot", sdk, "-F", framework,
-                    "-I", ROOT / "iOS/MXLogger/MXLogger/include",
+                    "-I", ROOT / "platform/iOS/MXLogger/MXLogger/include",
                     "-c", source / name, "-o", self.directory / f"{platform}-{name}.o",
                 ])
 
@@ -245,7 +245,7 @@ def main():
             raise RuntimeError("This verification script requires Flutter 3.44+; the plugin still supports 3.7+")
         if not args.skip_native:
             check.run("core", ["bash", ROOT / "Core/tests/run_tests.sh"])
-            check.run("apple-native", ["bash", ROOT / "iOS/MXLogger/tests/run_tests.sh"])
+            check.run("apple-native", ["bash", ROOT / "platform/iOS/MXLogger/tests/run_tests.sh"])
             check.ios_demo()
             check.run("native-demo", ["bash", ROOT / "scripts/verify_macos_demo.sh"])
         check.run("flutter-precache", [flutter, "precache", "--ios", "--macos"])

@@ -101,11 +101,11 @@ SwiftPM은 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm.git)�
 
 ### 네이티브 macOS 데모
 
-`macOS/MXLoggerDemo`는 **AppKit + Swift + Main.storyboard**로 구성된 네이티브 앱입니다. 시작 화면, 홈, 파일 목록, 로그 뷰어 및 재사용 셀을 Storyboard에서 편집할 수 있습니다. iOS / Android / Flutter 데모와 같은 보라색 상태 카드와 영어·중국어 전환을 제공하며, iOS 데모의 로고와 언어 리소스를 공유합니다.
+`platform/macOS/MXLoggerDemo`는 **AppKit + Swift + Main.storyboard**로 구성된 네이티브 앱입니다. 시작 화면, 홈, 파일 목록, 로그 뷰어 및 재사용 셀을 Storyboard에서 편집할 수 있습니다. iOS / Android / Flutter 데모와 같은 보라색 상태 카드와 영어·중국어 전환을 제공하며, iOS 데모의 로고와 언어 리소스를 공유합니다.
 
 ```bash
-pod install --project-directory=macOS/MXLoggerDemo
-open macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
+pod install --project-directory=platform/macOS/MXLoggerDemo
+open platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
 ```
 
 `MXLoggerDemo` 스킴과 `My Mac`을 선택해 실행합니다. 현재 체크아웃의 네이티브 Pod를 사용하므로 Flutter나 이미 배포된 2.2.0이 필요하지 않습니다. 기본값은 다른 데모와 동일하게 `com.djy.mxlogger`, 시간별 파일 분할, AES-CFB-128, 보관 기간 7일, 용량 한도 10MB입니다.
@@ -120,7 +120,7 @@ Debug / Release를 빌드하고 여러 프로세스의 암호화 읽기·쓰기,
 
 ### Flutter macOS 데모
 
-`flutter_mxlogger/example`은 모바일 버전과 시작 화면, 보라색 상태 카드, 기능 그룹, 영어·중국어 전환, 파일 목록 및 암호화 로그 뷰어를 공유합니다. macOS용으로 크기 조절 창, 설정 대화상자, 별도 Finder 항목과 수동 정리 설명을 추가했습니다. 기록, 10만 건 성능 측정, isolate 동시 처리, 정리와 필터를 체험할 수 있습니다. isolate는 같은 프로세스에 속합니다. 여러 프로세스의 동작은 위의 네이티브 데모에서 확인할 수 있습니다.
+`platform/flutter_mxlogger/example`은 모바일 버전과 시작 화면, 보라색 상태 카드, 기능 그룹, 영어·중국어 전환, 파일 목록 및 암호화 로그 뷰어를 공유합니다. macOS용으로 크기 조절 창, 설정 대화상자, 별도 Finder 항목과 수동 정리 설명을 추가했습니다. 기록, 10만 건 성능 측정, isolate 동시 처리, 정리와 필터를 체험할 수 있습니다. isolate는 같은 프로세스에 속합니다. 여러 프로세스의 동작은 위의 네이티브 데모에서 확인할 수 있습니다.
 
 저장소 루트에서 실행합니다. 네이티브 2.2.0을 먼저 배포할 필요가 없습니다.
 
@@ -131,7 +131,7 @@ bash scripts/run_flutter_macos_demo.sh build --release
 bash scripts/run_flutter_macos_demo.sh test
 ```
 
-스크립트는 해당 명령에만 로컬 CocoaPods를 적용하고, 데모의 빌드 대상을 설치된 Xcode SDK에 맞춥니다. UI 검증은 임시 로그를 사용하며 미리보기를 `flutter_mxlogger/example/screenshots/macos-*.png`에 저장합니다. [Flutter 데모 안내](flutter_mxlogger/example/README.md)도 참고하세요.
+스크립트는 해당 명령에만 로컬 CocoaPods를 적용하고, 데모의 빌드 대상을 설치된 Xcode SDK에 맞춥니다. UI 검증은 임시 로그를 사용하며 미리보기를 `platform/flutter_mxlogger/example/screenshots/macos-*.png`에 저장합니다. [Flutter 데모 안내](platform/flutter_mxlogger/example/README.md)도 참고하세요.
 
 ### macOS 회귀 검증 및 배포 준비
 

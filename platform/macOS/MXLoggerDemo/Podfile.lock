@@ -1,0 +1,22 @@
+PODS:
+  - MXLogger (2.2.0):
+    - MXLoggerCore (= 2.2.0)
+  - MXLoggerCore (2.2.0)
+
+DEPENDENCIES:
+  - MXLogger (from `../../..`)
+  - MXLoggerCore (from `../../..`)
+
+EXTERNAL SOURCES:
+  MXLogger:
+    :path: "../../.."
+  MXLoggerCore:
+    :path: "../../.."
+
+SPEC CHECKSUMS:
+  MXLogger: f0e816b5f0daca0c65fa65c60beeedfe423ae658
+  MXLoggerCore: 9e92289eddb86b872b675ff5c13b65aac57fc91a
+
+PODFILE CHECKSUM: 4bf314b6c8939e97a79ffaafc4605c299f63e431
+
+COCOAPODS: 1.17.0

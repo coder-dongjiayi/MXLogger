@@ -34,8 +34,8 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/coder-dongjiayi/MXLogger.git", :tag => "v#{s.version}" }
 
-  s.source_files =  "iOS/MXLogger/MXLogger/**/*.{h,mm}"
-  s.public_header_files = "iOS/MXLogger/MXLogger/include/MXLogger/MXLogger.h"
+  s.source_files =  "platform/iOS/MXLogger/MXLogger/**/*.{h,mm}"
+  s.public_header_files = "platform/iOS/MXLogger/MXLogger/include/MXLogger/MXLogger.h"
 
 
    s.frameworks   = "Foundation", "CoreFoundation"

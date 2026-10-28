@@ -101,11 +101,11 @@ SwiftPM では [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm.gi
 
 ### ネイティブ macOS デモ
 
-`macOS/MXLoggerDemo` は **AppKit + Swift + Main.storyboard** で構成されたネイティブアプリです。入口、ホーム、ファイル一覧、ログビューアー、再利用セルを Storyboard で編集できます。iOS / Android / Flutter のデモと同じ紫色のステータスカードと英語・中国語の切り替えを備え、iOS デモのロゴと言語リソースを共有しています。
+`platform/macOS/MXLoggerDemo` は **AppKit + Swift + Main.storyboard** で構成されたネイティブアプリです。入口、ホーム、ファイル一覧、ログビューアー、再利用セルを Storyboard で編集できます。iOS / Android / Flutter のデモと同じ紫色のステータスカードと英語・中国語の切り替えを備え、iOS デモのロゴと言語リソースを共有しています。
 
 ```bash
-pod install --project-directory=macOS/MXLoggerDemo
-open macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
+pod install --project-directory=platform/macOS/MXLoggerDemo
+open platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
 ```
 
 `MXLoggerDemo` スキームと `My Mac` を選んで実行します。現在のチェックアウトにあるネイティブ Pod を使うため、Flutter や公開済みの 2.2.0 は不要です。既定値は他のデモと同じく、`com.djy.mxlogger`、時間単位のファイル分割、AES-CFB-128、保存期間 7 日、上限 10 MB です。
@@ -120,7 +120,7 @@ Debug / Release をビルドし、複数プロセスの暗号化読み書き、T
 
 ### Flutter macOS デモ
 
-`flutter_mxlogger/example` はモバイル版と入口画面、紫色のステータスカード、機能のグループ分け、英語・中国語の切り替え、ファイル一覧、暗号化ログビューアーを共有します。macOS 向けにサイズ変更可能なウィンドウ、設定ダイアログ、独立した Finder 項目、手動クリーンアップの説明を追加しています。書き込み、10 万件の性能測定、isolate の並行処理、クリーンアップ、絞り込みを試せます。isolate は同じプロセスに属します。複数プロセスのデモには上記のネイティブ版を使ってください。
+`platform/flutter_mxlogger/example` はモバイル版と入口画面、紫色のステータスカード、機能のグループ分け、英語・中国語の切り替え、ファイル一覧、暗号化ログビューアーを共有します。macOS 向けにサイズ変更可能なウィンドウ、設定ダイアログ、独立した Finder 項目、手動クリーンアップの説明を追加しています。書き込み、10 万件の性能測定、isolate の並行処理、クリーンアップ、絞り込みを試せます。isolate は同じプロセスに属します。複数プロセスのデモには上記のネイティブ版を使ってください。
 
 リポジトリのルートで実行します。ネイティブ 2.2.0 の事前公開は不要です。
 
@@ -131,7 +131,7 @@ bash scripts/run_flutter_macos_demo.sh build --release
 bash scripts/run_flutter_macos_demo.sh test
 ```
 
-スクリプトはコマンドの実行中だけローカル CocoaPods を有効にし、デモのビルド対象をインストール済み Xcode SDK に合わせます。UI 検証は一時的なログを使用し、プレビューを `flutter_mxlogger/example/screenshots/macos-*.png` に保存します。[Flutter デモの説明](flutter_mxlogger/example/README.md)も参照してください。
+スクリプトはコマンドの実行中だけローカル CocoaPods を有効にし、デモのビルド対象をインストール済み Xcode SDK に合わせます。UI 検証は一時的なログを使用し、プレビューを `platform/flutter_mxlogger/example/screenshots/macos-*.png` に保存します。[Flutter デモの説明](platform/flutter_mxlogger/example/README.md)も参照してください。
 
 ### macOS の回帰検証とリリース準備
 

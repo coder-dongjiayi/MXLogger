@@ -28,7 +28,7 @@ dependencies:
 
   # 仅 lib/main_package.dart（真机嵌入调试入口）使用：写入真实 .mx 日志 + 设备信息文件头
   flutter_mxlogger:
-    path: ../../MXLogger/flutter_mxlogger
+    path: ../platform/flutter_mxlogger
   device_info_plus: ^11.3.0
 
 dev_dependencies:

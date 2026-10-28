@@ -21,7 +21,7 @@
 [English](./README.md) | [简体中文](./README_CN.md) | [日本語](./README_JA.md) | [한국어](./README_KO.md)
 
 <p align="center" >
-<img src="./flutter_mxlogger/example/assets/mxlogger_logo.png" alt="MXLogger"  title="MXLogger" width="180" />
+<img src="./platform/flutter_mxlogger/example/assets/mxlogger_logo.png" alt="MXLogger"  title="MXLogger" width="180" />
 </p>
 
 MXLogger 是基于 **mmap** 内存映射机制的跨平台日志库，支持 **AES-CFB-128** 加密，支持 iOS / macOS / Android /
@@ -91,6 +91,10 @@ mxlogger_analyzer 解析。
 
 # 安装引入
 
+各平台封装与示例统一位于 `platform/`：`Windows/`、`macOS/`、`iOS/`、`Android/` 和 `flutter_mxlogger/`。
+共享引擎 `Core/`、`scripts/`、`spm/` 及 CocoaPods 规格文件仍位于仓库根目录。
+已有工程迁移后，请从新路径重新打开 IDE；备份并重新生成相关 CMake 构建目录，再执行 `flutter pub get` / `pod install` 更新本地依赖路径。
+
 ## iOS
 
 ```ruby
@@ -114,14 +118,14 @@ Flutter macOS 已通过共享的 `darwin/` 插件接入（Flutter 3.7+、macOS 1
 
 ### 原生 macOS Demo
 
-原生示例位于 `macOS/MXLoggerDemo`，使用 **AppKit + Swift + Main.storyboard**，
+原生示例位于 `platform/macOS/MXLoggerDemo`，使用 **AppKit + Swift + Main.storyboard**，
 入口、主页、文件列表、日志详情以及列表单元格均可在 Storyboard 中编辑。
 界面沿用 iOS / Android / Flutter Demo 的 Logo、紫色状态卡、分组功能和中英文切换，
 并直接复用 iOS Demo 的 Logo 和语言资源。
 
 ```bash
-pod install --project-directory=macOS/MXLoggerDemo
-open macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
+pod install --project-directory=platform/macOS/MXLoggerDemo
+open platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
 ```
 
 在 Xcode 选择 `MXLoggerDemo` scheme 和 `My Mac` 后运行。
@@ -147,12 +151,12 @@ Debug 还会加载 Storyboard 检查页面连接、导航、双语及筛选，�
 
 ### 原生 Windows Demo
 
-原生示例位于 [`Windows/MXLoggerDemo`](Windows/MXLoggerDemo/README.md)，使用 **Win32 + C++17**，
+原生示例位于 [`platform/Windows/MXLoggerDemo`](platform/Windows/MXLoggerDemo/README.md)，使用 **Win32 + C++17**，
 直接链接本仓库 Core。包含中英文界面、初始化配置、五级日志与 JSON / Token 写入、
 线程 / 双进程数量及顺序校验、10 万条性能测试、清理重建和带筛选的日志浏览器。
 
 ```powershell
-cmake -S Windows/MXLoggerDemo -B build/windows-demo -A x64
+cmake -S platform/Windows/MXLoggerDemo -B build/windows-demo -A x64
 cmake --build build/windows-demo --config Debug --parallel
 .\build\windows-demo\bin\Debug\MXLoggerDemo.exe
 ```
@@ -164,7 +168,7 @@ Mac 可编辑代码并验证共用日志操作，Windows GUI 的编译和运行�
 
 ### Flutter macOS Demo
 
-Flutter 桌面示例位于 `flutter_mxlogger/example`，复用手机端的落地页、紫色状态卡、
+Flutter 桌面示例位于 `platform/flutter_mxlogger/example`，复用手机端的落地页、紫色状态卡、
 分组功能、中英文切换、文件列表及日志查看器，补充桌面窗口、设置弹窗和独立 Finder 入口。
 支持五级 / JSON / Token 写入、10 万条性能测试、多 isolate 并发校验、手动清理和日志筛选。
 macOS 隐藏后台清理开关；多 isolate 属于同一个进程，多进程演示见上方原生 Demo。
@@ -179,8 +183,8 @@ bash scripts/run_flutter_macos_demo.sh test
 ```
 
 启动脚本仅为当前命令启用本地 CocoaPods，Demo 自动适配本机 Xcode SDK 的最低构建版本。
-界面检查使用临时日志目录，并在 `flutter_mxlogger/example/screenshots/macos-*.png` 保存预览。
-详细说明见 [Flutter Demo](flutter_mxlogger/example/README.md)。
+界面检查使用临时日志目录，并在 `platform/flutter_mxlogger/example/screenshots/macos-*.png` 保存预览。
+详细说明见 [Flutter Demo](platform/flutter_mxlogger/example/README.md)。
 
 ### macOS 回归验证与发布准备
 
