@@ -130,7 +130,7 @@ long  base_file_sink::dir_size() const{
         
     }
     
-    return  current_cache_size;
+    return static_cast<long>(current_cache_size);
     
   
 }

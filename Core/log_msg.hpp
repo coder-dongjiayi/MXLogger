@@ -12,6 +12,7 @@
 #include <string>
 #include "log_enum.h"
 #include <chrono>
+#include <cstdint>
 
 using namespace std;
 namespace mxlogger {

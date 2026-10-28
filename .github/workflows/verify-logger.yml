@@ -72,8 +72,16 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Install NDK
-        run: sdkmanager 'ndk;27.0.12077973'
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK and NDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'ndk;27.0.12077973'
+          log-accepted-android-sdk-licenses: 'false'
       - name: Android Core and bridges, four ABIs
         run: |
           export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.0.12077973"
