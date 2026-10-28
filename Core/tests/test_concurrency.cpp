@@ -45,7 +45,7 @@ MX_TEST(concurrency, parallel_logging_no_loss) {
 
     std::vector<std::thread> threads;
     for (int t = 0; t < thread_count; t++) {
-        threads.emplace_back([t, logger]() {
+        threads.emplace_back([t, logger, per_thread]() {
             for (int i = 0; i < per_thread; i++) {
                 std::string msg = "t" + std::to_string(t) + "-" + std::to_string(i);
                 logger->log(1, "cc", msg.c_str(), "tag", false);
