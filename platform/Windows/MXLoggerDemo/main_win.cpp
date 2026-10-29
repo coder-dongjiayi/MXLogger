@@ -160,6 +160,8 @@ private:
     bool chinese_ = false, busy_ = false, closing_ = false, filling_ = false;
     bool self_test_ = false;
     int test_stage_ = -1, exit_code_ = 0, scroll_ = 0, operation_ = 0;
+    size_t test_records_before_cleanup_ = 0;
+    std::string test_active_file_;
     fs::path reports_;
     demo::Config initial_;
     Snapshot snapshot_;
@@ -666,12 +668,23 @@ private:
                 chinese_=false; translate(); capture_png(reports_/L"actions-en.png");
                 click(language); capture_png(reports_/L"actions-zh.png");
                 click(tab_config); capture_png(reports_/L"configuration-zh.png");
+                expect(snapshot_.files.size()==1,"UI cleanup starts with one active file");
+                test_active_file_=snapshot_.selected_file;
+                test_records_before_cleanup_=snapshot_.record_count;
+                fs::copy_file(fs::u8path(snapshot_.path)/fs::u8path(test_active_file_),
+                              fs::u8path(snapshot_.path)/L"inactive-ui.mx");
                 click(tab_actions); click(clear_all); break;
             }
-            case 15: expect(snapshot_.files.empty(),"Remove-all button"); click(write_sample); break;
-            case 16: expect(snapshot_.record_count==1,"UI write after removal"); click(rebuild); break;
+            case 15:
+                expect(snapshot_.files.size()==1 && demo::field(snapshot_.files.front(),"name")==test_active_file_,
+                       "Clean-unused button deletes inactive files and preserves the active file");
+                expect(snapshot_.record_count==test_records_before_cleanup_,"UI cleanup preserves existing records");
+                click(write_sample); break;
+            case 16:
+                expect(snapshot_.record_count==test_records_before_cleanup_+1,"UI append after cleanup");
+                click(rebuild); break;
             default: {
-                expect(snapshot_.record_count==1,"UI reopen after removal");
+                expect(snapshot_.record_count==test_records_before_cleanup_+1,"UI reopen after cleanup");
                 std::ofstream log(reports_/"ui-report.txt",std::ios::app);
                 log << "PASS native controls, settings, file/record viewer, filtering, concurrency, cleanup, languages\n";
                 if (!log.good()) throw std::runtime_error("UI report write failed");

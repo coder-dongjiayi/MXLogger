@@ -121,6 +121,33 @@ MX_TEST(mmap_sink, grows_beyond_page_size) {
     }
 }
 
+#if defined(_WIN32) || MXLOGGER_MACOS_MULTIPROCESS
+MX_TEST(mmap_sink, desktop_reservation_reduces_growth_and_preserves_records) {
+    const auto dir = mxtest::temp_dir("desktop_reservation");
+    mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+    const auto path = std::filesystem::u8path(mxtest::first_mx_path(dir));
+    auto capacity = std::filesystem::file_size(path);
+    EXPECT_EQ(capacity, uintmax_t(64 * 1024));
+    const std::string payload(512, 'R');
+    constexpr int count = 4000;
+    size_t growths = 0;
+    for (int i = 0; i < count; ++i) {
+        const auto message = std::to_string(i) + ":" + payload;
+        EXPECT_EQ(write_log(sink, level::info, message.c_str()), 0);
+        const auto updated = std::filesystem::file_size(path);
+        if (updated != capacity) { ++growths; capacity = updated; }
+    }
+    EXPECT_TRUE(growths > 0 && growths <= 10);
+    sink.flush();
+    const auto records = mxtest::parse_dir(dir);
+    EXPECT_EQ(records.size(), size_t(count));
+    for (size_t i = 0; i < records.size(); ++i) {
+        EXPECT_EQ(records[i].at("error_code"), std::string("0"));
+        EXPECT_EQ(records[i].at("msg"), std::to_string(i) + ":" + payload);
+    }
+}
+#endif
+
 MX_TEST(mmap_sink, level_filter_skips_write) {
     std::string dir = mxtest::temp_dir("mmap_level");
     mmap_sink sink(dir, "log", policy::yyyy_MM_dd);

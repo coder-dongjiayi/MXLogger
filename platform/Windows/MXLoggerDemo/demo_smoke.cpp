@@ -109,8 +109,12 @@ int smoke(const fs::path& report_dir) {
             fs::copy_file(current, directory / "inactive.mx");
             session.logger()->remove_before_all();
             expect(session.files().size() == 1, "Keep current cleanup");
+            const auto before_cleanup = session.all_records();
+            fs::copy_file(current, directory / "remove-all-inactive.mx");
             session.logger()->remove_all();
-            expect(session.files().size() == 1, "Remove all preserves active mapping");
+            expect(session.files().size() == 1 && fs::exists(current) && !fs::exists(directory / "remove-all-inactive.mx"),
+                   "Remove all deletes inactive files and preserves active mapping");
+            expect(session.all_records() == before_cleanup, "Remove all preserves existing records");
             session.write(1, "after remove all", "reopen");
             expect(count_tag(session.all_records(), "reopen") == 1, "Write after removal");
             session.rebuild();

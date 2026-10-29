@@ -342,8 +342,9 @@ int mmap_sink::truncate_(size_t size){
         return -1;
     }
     size_t capacity_size =  (( size / page_size_) + 1) * page_size_;
-#ifdef _WIN32
-    // Reserve 64 KiB initially; grow geometrically up to 1 MiB of headroom.
+#if defined(_WIN32) || MXLOGGER_MACOS_MULTIPROCESS
+    // Desktop files start at 64 KiB, then grow geometrically with at most
+    // 1 MiB added per ordinary growth. Mobile keeps its page-sized policy.
     // The committed-length header and record format remain unchanged.
     constexpr size_t granularity = 64 * 1024;
     const size_t headroom = std::min(std::max(file_size_, granularity), size_t(1024 * 1024));
