@@ -7,6 +7,7 @@
 
 #include "mxlogger.hpp"
 #include "mxlogger_version.hpp"
+#include "mxlogger_profile.hpp"
 
 #include <mutex>
 #include <unordered_map>
@@ -257,11 +258,14 @@ void mxlogger::flush(){
 }
 
 int mxlogger::log(int level,const char* name, const char* msg,const char* tag,bool is_main_thread){
+    MXP_SCOPE(profile_core, core_other);
     if (enable_ == false) {
         return 0;
     }
     
+    MXP_SCOPE(profile_mutex, thread_mutex);
     std::lock_guard<std::mutex> lock(logger_mutex);
+    MXP_STOP(profile_mutex);
     
     if (name == nullptr || strcmp(name, "") == 0) {
         name = "mxlogger";
@@ -269,7 +273,9 @@ int mxlogger::log(int level,const char* name, const char* msg,const char* tag,bo
    
     level::level_enum lvl = mxlogger_helper::level_(level);
 
+    MXP_SCOPE(profile_metadata, metadata);
     details::log_msg log_msg(lvl,name,tag,msg,is_main_thread);
+    MXP_STOP(profile_metadata);
     
     
     int result =  mmap_sink_ -> log(log_msg);

@@ -101,6 +101,7 @@ bool mmap_sink::recover_mmap_(){
 }
 #if MXLOGGER_MULTIPROCESS
 bool mmap_sink::refresh_mmap_() {
+    MXP_SCOPE(profile_refresh, mapping_refresh);
 #ifdef _WIN32
     // No cooperating exclusive transaction can touch this directory until it
     // has evicted our retained view. Avoid reopening the path and querying its
@@ -230,6 +231,7 @@ void mmap_sink::add_file_heder(const char* msg){
 
 
 int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
+    MXP_SCOPE(profile_serialize, serialization);
     flatbuffers::FlatBufferBuilder builder;
     
     auto root =  Createlog_serializeDirect(builder,msg.name,msg.tag,msg.msg,msg.level,(uint32_t)msg.thread_id,msg.is_main_thread,msg.time_stamp);
@@ -242,6 +244,7 @@ int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
     
     
     if (should_encrypt()) {
+        MXP_SCOPE(profile_encrypt, encryption);
         cfb128_encrypt(point, point, size);
     }
     
@@ -250,6 +253,7 @@ int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
 }
 
 int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_empty){
+    MXP_SCOPE(profile_transaction, transaction_other);
 #if MXLOGGER_MULTIPROCESS
     ipc::scoped_lock lock(process_lock_);
     if (!lock) {
@@ -315,6 +319,7 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_
         return -1;
     }
 #endif
+    MXP_SCOPE(profile_append, append);
     uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
     
     
@@ -356,6 +361,7 @@ size_t mmap_sink::get_actual_size_(){
 //扩容
 /// 0 成功  -1 扩容失败 -2 解除映射失败 -3 映射失败
 int mmap_sink::truncate_(size_t size){
+    MXP_EXACT(profile_growth, growth_other);
     if (page_size_ == 0 || size > std::numeric_limits<size_t>::max() - page_size_) {
         error_record = MXLoggerError("mapping capacity overflow\n");
         return -1;

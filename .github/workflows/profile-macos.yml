@@ -1,0 +1,52 @@
+name: profile-macos
+
+on:
+  workflow_dispatch:
+  # Bootstrap this disposable branch without first merging a workflow into main.
+  push:
+    branches: [macos-test]
+    paths:
+      - '.github/workflows/profile-macos.yml'
+      - 'scripts/build_macos_profile.sh'
+      - 'platform/macOS/MXLoggerProfile/**'
+      - 'platform/macOS/MXLoggerDemo/MXLoggerDemo/DemoSession.swift'
+      - 'platform/iOS/MXLogger/MXLogger/MXLogger.mm'
+      - 'Core/**'
+
+permissions:
+  contents: read
+
+jobs:
+  macos-profile:
+    name: macOS Release performance diagnostic
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build baseline and sampled universal workers, verify and package
+        run: bash scripts/build_macos_profile.sh
+      - name: Verify all scenarios with 100,000 records on the CI Mac
+        run: |
+          build/macos-profile/MXLoggerProfile.app/Contents/MacOS/MXLoggerProfile --run --rounds 1 --report-dir build/macos-profile/ci-100k 2>&1 | tee build/macos-profile/logs/ci-100k.log
+      - name: Upload standalone diagnostic DMG
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/macos-profile/MXLoggerProfile-macOS.dmg
+          archive: false
+          retention-days: 7
+          if-no-files-found: error
+      - name: Upload build logs and CI self-test reports
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: macos-profile-logs
+          path: |
+            build/macos-profile/logs/
+            build/macos-profile/self-test/summary.*
+            build/macos-profile/self-test/*/result.json
+            build/macos-profile/self-test/*/process.log
+            build/macos-profile/ci-100k/summary.*
+            build/macos-profile/ci-100k/*/result.json
+            build/macos-profile/ci-100k/*/process.log
+          retention-days: 7
+          if-no-files-found: warn

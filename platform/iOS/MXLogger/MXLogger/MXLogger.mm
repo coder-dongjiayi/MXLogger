@@ -12,6 +12,9 @@
 #endif
 #include <MXLoggerCore/mxlogger.hpp>
 #include <MXLoggerCore/mxlogger_util.hpp>
+#if defined(MXLOGGER_MACOS_PROFILING) && TARGET_OS_OSX
+#include "mxlogger_profile.hpp"
+#endif
 
 
 static NSMutableDictionary<NSString*,MXLogger *> *global_instanceDic = nil;
@@ -331,6 +334,9 @@ static NSString * _defaultDiskCacheDirectory;
 }
 
 -(NSInteger)innerLogWithLevel:(NSInteger)level name:(nullable NSString*)name msg:(nonnull NSString*)msg tag:(nullable NSString*)tag {
+#if defined(MXLOGGER_MACOS_PROFILING) && TARGET_OS_OSX
+    MXP_SCOPE(profile_objc, objc_bridge);
+#endif
     if (_logger == nullptr) return 0;
     BOOL isMainThread = [NSThread isMainThread];
   

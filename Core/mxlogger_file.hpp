@@ -2,6 +2,7 @@
 #define MXLOGGER_FILE_HPP
 
 #include "mxlogger_platform.hpp"
+#include "mxlogger_profile.hpp"
 #include <algorithm>
 #include <cerrno>
 #include <climits>
@@ -121,6 +122,7 @@ public:
 
     bool open(const std::string &path, bool read_only = false, bool create = false,
               bool share_delete = true) {
+        MXP_EXACT(profile_open, file_open);
         if (!close()) return false;
 #ifdef _WIN32
         const auto wide = to_wide(path.c_str());
@@ -138,6 +140,7 @@ public:
 
     bool close() {
         if (!valid()) return true;
+        MXP_EXACT(profile_close, file_close);
 #ifdef _WIN32
         if (!CloseHandle(handle_)) return record(false);
         handle_ = INVALID_HANDLE_VALUE;
@@ -151,6 +154,7 @@ public:
     }
 
     bool info(file_info &result) {
+        MXP_SCOPE(profile_info, file_info);
 #ifdef _WIN32
         BY_HANDLE_FILE_INFORMATION value{};
         if (!GetFileInformationByHandle(handle_, &value)) return record(false);
@@ -168,6 +172,7 @@ public:
     }
 
     bool resize(size_t size) {
+        MXP_EXACT(profile_resize, resize);
 #ifdef _WIN32
         LARGE_INTEGER position{};
         position.QuadPart = static_cast<LONGLONG>(size);
@@ -221,6 +226,7 @@ public:
 
 #if MXLOGGER_MULTIPROCESS
     bool lock(bool exclusive, bool wait = true, uint64_t offset = 0) {
+        MXP_SCOPE(profile_lock, directory_lock);
 #ifdef _WIN32
         OVERLAPPED position{};
         position.Offset = static_cast<DWORD>(offset);
@@ -237,6 +243,7 @@ public:
     }
 
     bool unlock(uint64_t offset = 0) {
+        MXP_SCOPE(profile_unlock, directory_unlock);
 #ifdef _WIN32
         OVERLAPPED position{};
         position.Offset = static_cast<DWORD>(offset);
@@ -271,6 +278,7 @@ private:
 };
 
 inline bool path_info(const std::string &path, file_info &info, std::error_code &error) {
+    MXP_SCOPE(profile_stat, path_stat);
 #ifdef _WIN32
     native_file file;
     const bool success = file.open(path, true) && file.info(info);
@@ -298,6 +306,7 @@ public:
     std::string error_message() const { return files::error_message(error_); }
 
     bool map(native_file &file, size_t size, bool writable = true) {
+        MXP_EXACT(profile_map, mapping);
         if (!unmap()) return false;
         if (!size || !file.valid()) { error_ = std::make_error_code(std::errc::invalid_argument); return false; }
 #ifdef _WIN32
@@ -322,6 +331,7 @@ public:
 
     bool unmap() {
         if (data_) {
+            MXP_EXACT(profile_unmap, unmapping);
 #ifdef _WIN32
             if (!UnmapViewOfFile(data_)) { error_ = system_error(); return false; }
 #else
