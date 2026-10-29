@@ -155,7 +155,8 @@ MX_TEST(mxlogger_api, remove_and_dir_size) {
     EXPECT_TRUE(logger->dir_size() > 0); // 当前文件保留
 
     logger->remove_all();
-    EXPECT_EQ(logger->dir_size(), 0L);
+    EXPECT_TRUE(logger->dir_size() > 0); // All cleanup methods retain current.
+    EXPECT_EQ(mxtest::parse_dir(std::string(logger->diskcache_path())).size(), size_t(1));
 
     mx_logger::delete_namespace("remove", API_DIR);
 }

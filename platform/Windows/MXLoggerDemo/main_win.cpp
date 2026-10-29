@@ -160,6 +160,8 @@ private:
     bool chinese_ = false, busy_ = false, closing_ = false, filling_ = false;
     bool self_test_ = false;
     int test_stage_ = -1, exit_code_ = 0, scroll_ = 0, operation_ = 0;
+    size_t test_records_before_cleanup_ = 0;
+    std::string test_active_file_;
     fs::path reports_;
     demo::Config initial_;
     Snapshot snapshot_;
@@ -281,7 +283,7 @@ private:
             {apply_settings,L"应用运行设置",L"Apply settings"}, {label_writes,L"日志写入",L"Write logs"}, {write_sample,L"通用日志",L"Write sample"},
             {write_json,L"网络 JSON",L"Network JSON"}, {write_token,L"Token 写入",L"Write via token"}, {label_tests,L"并发与性能（写入后校验）",L"Concurrency / performance"},
             {thread_test,L"四线程校验",L"4 threads"}, {process_test,L"双进程校验",L"2 processes"}, {benchmark,L"10 万条性能测试",L"100,000 writes"}, {flush,L"Flush 到磁盘",L"Flush to disk"},
-            {label_cleanup,L"清理与生命周期",L"Cleanup / lifecycle"}, {expire,L"清理过期",L"Expired"}, {keep_current,L"仅保留当前",L"Keep current"}, {clear_all,L"删除全部",L"Remove all"},
+            {label_cleanup,L"清理与生命周期",L"Cleanup / lifecycle"}, {expire,L"清理过期",L"Expired"}, {keep_current,L"仅保留当前",L"Keep current"}, {clear_all,L"清理闲置",L"Clean unused"},
             {rebuild,L"销毁并重建实例",L"Destroy and rebuild"}, {refresh,L"刷新",L"Refresh"}, {label_files,L"日志文件",L"Log files"},
             {label_records,L"日志浏览器 · 最近 1,000 条",L"Log viewer · latest 1,000 records"}, {label_details,L"完整日志详情",L"Full record details"}, {cancel_task,L"取消",L"Cancel"}
         };
@@ -666,12 +668,23 @@ private:
                 chinese_=false; translate(); capture_png(reports_/L"actions-en.png");
                 click(language); capture_png(reports_/L"actions-zh.png");
                 click(tab_config); capture_png(reports_/L"configuration-zh.png");
+                expect(snapshot_.files.size()==1,"UI cleanup starts with one active file");
+                test_active_file_=snapshot_.selected_file;
+                test_records_before_cleanup_=snapshot_.record_count;
+                fs::copy_file(fs::u8path(snapshot_.path)/fs::u8path(test_active_file_),
+                              fs::u8path(snapshot_.path)/L"inactive-ui.mx");
                 click(tab_actions); click(clear_all); break;
             }
-            case 15: expect(snapshot_.files.empty(),"Remove-all button"); click(write_sample); break;
-            case 16: expect(snapshot_.record_count==1,"UI write after removal"); click(rebuild); break;
+            case 15:
+                expect(snapshot_.files.size()==1 && demo::field(snapshot_.files.front(),"name")==test_active_file_,
+                       "Clean-unused button deletes inactive files and preserves the active file");
+                expect(snapshot_.record_count==test_records_before_cleanup_,"UI cleanup preserves existing records");
+                click(write_sample); break;
+            case 16:
+                expect(snapshot_.record_count==test_records_before_cleanup_+1,"UI append after cleanup");
+                click(rebuild); break;
             default: {
-                expect(snapshot_.record_count==1,"UI reopen after removal");
+                expect(snapshot_.record_count==test_records_before_cleanup_+1,"UI reopen after cleanup");
                 std::ofstream log(reports_/"ui-report.txt",std::ios::app);
                 log << "PASS native controls, settings, file/record viewer, filtering, concurrency, cleanup, languages\n";
                 if (!log.good()) throw std::runtime_error("UI report write failed");

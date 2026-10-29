@@ -164,7 +164,7 @@ const Map<String, String> _en = {
   'home.file.before.title': 'Remove Historical Files',
   'home.file.before.subtitle':
       'removeBeforeAllData, keeps the file currently being written',
-  'home.file.all.title': 'Remove All Logs',
+  'home.file.all.title': 'Clean Unused Logs',
 
   // Home - info section
   'home.section.info': 'Instance Info',
@@ -188,7 +188,7 @@ const Map<String, String> _en = {
   'toast.key.copied': 'loggerToken copied',
   'toast.path.copied': 'Path copied',
   'toast.rebuild.done': 'Instance rebuilt',
-  'toast.removeall.done': 'All logs removed',
+  'toast.removeall.done': 'Unused logs removed; active logs retained',
   'toast.write.success': '{0} written',
   'toast.network.success': 'Network log written',
   'toast.custom.success': 'log() written',
@@ -200,9 +200,9 @@ const Map<String, String> _en = {
   // Alerts & pickers
   'alert.write.failed': 'Write Failed ({0})',
   'alert.no.error': 'No error',
-  'alert.removeall.title': 'Remove all logs?',
+  'alert.removeall.title': 'Clean unused logs?',
   'alert.removeall.message':
-      'removeAll deletes all log files and cannot be undone.',
+      'Inactive log files will be deleted. Files currently in use are kept.',
   'picker.level.message': 'Logs below this level will not be written to disk',
   'picker.age.message': 'Maximum retention time of log files',
   'picker.size.message': 'Maximum disk usage of log files',
@@ -319,7 +319,7 @@ const Map<String, String> _zhHans = {
   'home.file.expire.title': '清理过期文件',
   'home.file.before.title': '清理历史文件',
   'home.file.before.subtitle': 'removeBeforeAllData，保留当前写入中的文件',
-  'home.file.all.title': '清空全部日志',
+  'home.file.all.title': '清理闲置日志',
 
   // 主页 - 实例信息
   'home.section.info': '实例信息',
@@ -343,7 +343,7 @@ const Map<String, String> _zhHans = {
   'toast.key.copied': 'loggerToken 已复制',
   'toast.path.copied': '路径已复制',
   'toast.rebuild.done': '实例已重建',
-  'toast.removeall.done': '日志已清空',
+  'toast.removeall.done': '闲置日志已清理，正在使用的文件已保留',
   'toast.write.success': '{0} 写入成功',
   'toast.network.success': '网络日志写入成功',
   'toast.custom.success': 'log() 写入成功',
@@ -355,8 +355,8 @@ const Map<String, String> _zhHans = {
   // 弹窗与选择器
   'alert.write.failed': '写入失败({0})',
   'alert.no.error': '暂无错误',
-  'alert.removeall.title': '清空全部日志？',
-  'alert.removeall.message': 'removeAll 将删除所有日志文件，且不可恢复。',
+  'alert.removeall.title': '清理闲置日志？',
+  'alert.removeall.message': '将删除闲置日志，保留正在使用的日志文件。',
   'picker.level.message': '低于该等级的日志不会写入磁盘文件',
   'picker.age.message': '日志文件最长保留时间',
   'picker.size.message': '日志文件占用磁盘上限',

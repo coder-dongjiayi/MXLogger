@@ -33,7 +33,6 @@ public:
     
     
     void flush() override;
-    void remove_all() override;
 
 private:
     
@@ -60,8 +59,8 @@ private:
 
     int write_data_(const void* buffer, size_t buffer_size, bool only_if_empty = false);
 #if MXLOGGER_MULTIPROCESS
-    // Requires the directory's exclusive lock; refreshes cached length, capacity
-    // and file identity before touching the mapping.
+    // Requires the directory's exclusive lock; refreshes committed length and
+    // capacity of the open file, without checking for path deletion/replacement.
     bool refresh_mmap_();
 #endif
 #ifdef _WIN32

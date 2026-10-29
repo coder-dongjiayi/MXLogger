@@ -366,7 +366,8 @@ pass it around a modularized app and write logs through the class methods withou
 object.
 
 The native macOS Core coordinates processes sharing a log directory. Before appending it takes a
-directory file lock and refreshes the committed length, file identity and mapping capacity. Reads
+directory file lock and refreshes the committed length and mapping capacity without checking
+the path for external deletion/replacement on each append. Reads
 copy a committed snapshot under a shared lock, then decode after unlocking. All participants must
 use this protocol, matching encryption parameters and an accessible shared directory. Separate
 directories do not block each other. iOS and Android retain their existing file access paths;
@@ -376,9 +377,10 @@ leases protecting active files. Actual Windows execution needs the manually disp
 `verify-logger` CI; Flutter Windows plugin integration is still separate work.
 
 The macOS/Windows Core `.mxlogger.lock` coordinator is excluded from log listings, size budgets and cleanup;
-do not manually delete it while loggers are alive. Age/size cleanup and `removeBeforeAllData`
-retain files held by other processes. Explicit `removeAllData` deletes all logs, and live loggers
-reopen files before their next write. The `.mx` format is unchanged; this does not add CRC or
+do not manually delete it while loggers are alive. Age/size cleanup, `removeBeforeAllData` and
+`removeAllData` retain current files and files held by other active loggers. Mobile cleanup also
+preserves its own current file. After an external POSIX unlink, existing loggers keep writing
+their old mappings; they do not recreate the path until reopened. The `.mx` format is unchanged; this does not add CRC or
 power-loss durability guarantees. macOS/Windows Core writes can return `-4` for a lock failure or the 32-bit
 committed-length limit; inspect `errorDesc` for details.
 
@@ -451,7 +453,7 @@ committed-length limit; inspect `errorDesc` for details.
 | `- logFiles` | array of dicts: `name` / `size` / `last_timestamp` / `create_timestamp` |
 | `- errorDesc` | description of the last write failure |
 | `- removeExpireData` | delete expired files, then the oldest ones while over `maxDiskSize` |
-| `- removeAllData` | delete every log file |
+| `- removeAllData` | remove inactive logs, preserving files in use |
 | `- removeBeforeAllData` | delete every file except the one being written |
 | `+ selectWithDiskCacheFilePath:cryptKey:iv:` | parse a file into entries (newest first): `name` / `msg` / `tag` / `level` / `timestamp` / `thread_id` / `is_main_thread` / `error_code` |
 
@@ -515,7 +517,7 @@ Note the parameter order — **tag comes first** on Android.
 | --- | --- |
 | `String[] logFiles()` | one JSON string per file: `name` / `size` / `last_timestamp` / `create_timestamp` |
 | `void removeExpireData()` | delete expired files, then the oldest ones while over `maxDiskSize`. Android has no lifecycle hook — call it yourself (e.g. in `onStop`) |
-| `void removeAll()` | delete every log file |
+| `void removeAll()` | remove inactive logs, preserving files in use |
 | `void removeBeforeAllData()` | delete every file except the one being written |
 | `static String[] selectWithFilePath(String diskCacheFilePath, String cryptKey, String iv)` | parse a file, one JSON string per entry (newest first) |
 
@@ -567,7 +569,7 @@ platform default directory during `initialize`.
 | `void setMaxDiskSize(int size)` | max total size in bytes, 0 = unlimited |
 | `void shouldRemoveExpiredDataWhenEnterBackground(bool should)` | auto cleanup on entering background on mobile, `true` by default; macOS requires explicit cleanup |
 | `void removeExpireData()` | delete expired files, then the oldest ones while over the size limit |
-| `void removeAll()` | delete every log file |
+| `void removeAll()` | remove inactive logs, preserving files in use |
 | `void removeBeforeAllData()` | delete every file except the one being written |
 | `int getLogSize()` / `String getDiskcachePath()` / `String? getLoggerToken()` / `List<MXFileEntity> getLogFiles()` | method forms of the getters above |
 

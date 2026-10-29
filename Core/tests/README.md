@@ -51,11 +51,15 @@ processes must use this protocol, matching encryption settings and an accessible
 shared local directory. Existing mobile file access remains single-process.
 
 Writers acquire the logger's thread mutex, then the directory's exclusive lock,
-refresh the current file identity/capacity/committed length, append a complete
+refresh the open file's capacity/committed length, append a complete
 record, and publish its length last. Readers copy only committed bytes under a
 shared directory lock and decode outside it. Shared-to-exclusive lock upgrades
 and recursive acquisition of a directory lock are intentionally unsupported.
 The `.mx` format is unchanged; no MMKV metadata/CRC format is introduced.
+Writes do not stat the path to detect external deletion or replacement. POSIX
+loggers continue writing through their existing fd/mapping after an external
+unlink; only reopening a logger creates a visible file again. Desktop recovery
+queries the open fd once to synchronize capacity after another writer grows it.
 
 Windows can retain a view under a separate byte-2 mapping lease. A competing
 transaction requests background eviction; a 500 ms timeout also bounds retention
@@ -78,8 +82,9 @@ must never be deleted while loggers exist. On Windows, byte zero coordinates
 transactions. Separate shared byte-range leases represent active OS file IDs,
 independent of data handles. Hash collisions conservatively preserve extra files
 during cleanup. macOS keeps its existing data-fd shared leases. Age/size cleanup
-and remove-before-all preserve active files; explicit remove-all deletes them,
-and the next append recreates them. Process termination releases leases through
+and both remove-before-all and remove-all preserve active files. The mobile
+backends also retain their own current file during all cleanup operations.
+Process termination releases leases through
 the OS; there are no PID files or persistent process registrations to repair.
 
 The process suite covers stale state/growth, concurrent plain and encrypted

@@ -141,10 +141,10 @@ public:
     /// macOS also skips files held by other cooperating logger processes.
     void remove_expire_data();
 
-    /// 删除所有日志文件
-    /// Remove all log files
-    /// macOS: 与其他进程协调删除；仍存活的 logger 在下次写入时重开文件。
-    /// macOS: coordinated across processes; live loggers reopen on their next write.
+    /// 清理日志文件，保留当前正在使用的文件
+    /// Remove inactive log files, preserving the current file.
+    /// macOS/Windows 也保留其他活跃 logger 持有的文件。
+    /// macOS/Windows also preserve files held by other active loggers.
     void remove_all();
 
     /// 删除除当前正在写入文件之外的所有日志文件

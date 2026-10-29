@@ -68,7 +68,7 @@
     <string name="home_file_expire_title">Remove Expired Files</string>
     <string name="home_file_before_title">Remove Historical Files</string>
     <string name="home_file_before_subtitle">removeBeforeAllData(), keeps the file currently being written</string>
-    <string name="home_file_all_title">Remove All Logs</string>
+    <string name="home_file_all_title">Clean Unused Logs</string>
 
     <!-- Home - info section -->
     <string name="home_section_info">Instance Info</string>
@@ -89,7 +89,7 @@
     <string name="toast_key_copied">loggerToken copied</string>
     <string name="toast_path_copied">Path copied</string>
     <string name="toast_rebuild_done">Instance rebuilt</string>
-    <string name="toast_removeall_done">All logs removed</string>
+    <string name="toast_removeall_done">Unused logs removed; active logs retained</string>
     <string name="toast_write_success">%1$s written</string>
     <string name="toast_network_success">Network log written</string>
     <string name="toast_custom_success">log() written</string>
@@ -101,8 +101,8 @@
     <!-- Alerts & pickers -->
     <string name="alert_write_failed">Write Failed (%1$d)</string>
     <string name="alert_no_error">No error</string>
-    <string name="alert_removeall_title">Remove all logs?</string>
-    <string name="alert_removeall_message">removeAll() deletes all log files and cannot be undone.</string>
+    <string name="alert_removeall_title">Clean unused logs?</string>
+    <string name="alert_removeall_message">Inactive log files will be deleted. Files currently in use are kept.</string>
     <string name="alert_verify_error">Verification error</string>
     <string name="duration_1min">1 minute</string>
     <string name="duration_1hour">1 hour</string>

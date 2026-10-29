@@ -64,7 +64,7 @@
     <string name="home_file_expire_title">清理过期文件</string>
     <string name="home_file_before_title">清理历史文件</string>
     <string name="home_file_before_subtitle">removeBeforeAllData()，保留当前写入中的文件</string>
-    <string name="home_file_all_title">清空全部日志</string>
+    <string name="home_file_all_title">清理闲置日志</string>
 
     <!-- 主页 - 实例信息 -->
     <string name="home_section_info">实例信息</string>
@@ -85,7 +85,7 @@
     <string name="toast_key_copied">loggerToken 已复制</string>
     <string name="toast_path_copied">路径已复制</string>
     <string name="toast_rebuild_done">实例已重建</string>
-    <string name="toast_removeall_done">日志已清空</string>
+    <string name="toast_removeall_done">闲置日志已清理，正在使用的文件已保留</string>
     <string name="toast_write_success">%1$s 写入成功</string>
     <string name="toast_network_success">网络日志写入成功</string>
     <string name="toast_custom_success">log() 写入成功</string>
@@ -97,8 +97,8 @@
     <!-- 弹窗与选择器 -->
     <string name="alert_write_failed">写入失败(%1$d)</string>
     <string name="alert_no_error">暂无错误</string>
-    <string name="alert_removeall_title">清空全部日志？</string>
-    <string name="alert_removeall_message">removeAll() 将删除所有日志文件，且不可恢复。</string>
+    <string name="alert_removeall_title">清理闲置日志？</string>
+    <string name="alert_removeall_message">将删除闲置日志，保留正在使用的日志文件。</string>
     <string name="alert_verify_error">校验异常</string>
     <string name="duration_1min">1 分钟</string>
     <string name="duration_1hour">1 小时</string>

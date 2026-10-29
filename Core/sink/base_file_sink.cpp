@@ -135,6 +135,24 @@ long  base_file_sink::dir_size() const{
   
 }
 
+bool base_file_sink::is_active_file_(const std::string &name) {
+    if (name == filename_) return true;
+    const std::string path = dir_path_ + name;
+    // Only cleanup checks identities, including a mapped file renamed by an
+    // external tool or reached through another spelling/link. No write-time stat.
+    if (file_.valid()) {
+        files::file_info opened, candidate;
+        std::error_code error;
+        if (!file_.info(opened) || !files::path_info(path, candidate, error)) return true;
+        if (opened.same_file(candidate)) return true;
+    }
+#if MXLOGGER_MULTIPROCESS
+    return !ipc::file_is_inactive(path);
+#else
+    return false;
+#endif
+}
+
 // 删除过期文件
 void base_file_sink::remove_expire_data(){
 
@@ -170,10 +188,7 @@ void base_file_sink::remove_expire_data(){
          int64_t size = std::stoll(map["size"]);
          int64_t last_time = std::stoll(map["last_timestamp"]);
 
-         bool can_expire = max_disk_age_ > 0 && last_time < expiration_tp && file_name.compare(filename_) != 0;
-#if MXLOGGER_MULTIPROCESS
-         can_expire = can_expire && ipc::file_is_inactive(dir_path_ + file_name);
-#endif
+         bool can_expire = max_disk_age_ > 0 && last_time < expiration_tp && !is_active_file_(file_name);
          if (can_expire) {
              /// 过期文件
              delete_urls.push_back(file_name);
@@ -217,13 +232,10 @@ void base_file_sink::remove_expire_data(){
              std::string delete_path = dir_path_ + file_name;
 
              // 如果需要清理的文件是当前正在写入的文件 则不进行清理
-             if( file_name.compare(filename_) == 0){
+             if(is_active_file_(file_name)){
                  MXLoggerInfo("%s is currently being mapped and will not be deleted",file_name.c_str());
                  continue;
              }
-#if MXLOGGER_MULTIPROCESS
-             if (!ipc::file_is_inactive(delete_path)) continue;
-#endif
              if (mxlogger::remove_file(delete_path.c_str()) == 0) {
                  current_cache_size = current_cache_size - file_size;
                  MXLoggerInfo("over limit size file : %s(%lld byte)",file_name.c_str(),static_cast<long long>(file_size));
@@ -241,19 +253,11 @@ void base_file_sink::remove_expire_data(){
 }
 
 
-int base_file_sink::remove_all_(bool skip_current){
+int base_file_sink::remove_all_(){
 #if MXLOGGER_MULTIPROCESS
     ipc::scoped_lock lock(process_lock_);
     if (!lock) {
         error_record = MXLoggerError("cleanup lock error:%s\n", lock.error_message().c_str());
-        return 0;
-    }
-#endif
-#ifdef _WIN32
-    // remove_all can delete this sink's current file too. The directory gate
-    // has already evicted other owners; release our own view before deletion.
-    if (!process_lock_.discard_mapping()) {
-        error_record = MXLoggerError("cleanup mapping release failed\n");
         return 0;
     }
 #endif
@@ -266,14 +270,9 @@ int base_file_sink::remove_all_(bool skip_current){
         std::map<std::string, std::string> map = destination[i];
         std::string file_name  = map["name"];
         /// 不删除当前正在写入日志的文件
-        if(skip_current == true && file_name == filename_){
+        if(is_active_file_(file_name)){
             continue;
         }
-#if MXLOGGER_MULTIPROCESS
-        if (skip_current && !ipc::file_is_inactive(dir_path_ + file_name)) continue;
-        // Explicit remove_all may unlink live files. Before their next write,
-        // every sink checks the inode and reopens the replacement under this lock.
-#endif
         std::string subdir = dir_path_ + file_name;
         if (mxlogger::remove_file(subdir.c_str()) == 0) {
             count_++;
@@ -284,13 +283,13 @@ int base_file_sink::remove_all_(bool skip_current){
     return count_;
 
 }
-// 删除所有日志文件
+// Both cleanup entry points preserve files owned by active loggers.
 void base_file_sink::remove_all(){
-   int files =  remove_all_(false);
+   int files = remove_all_();
     MXLoggerInfo("remove_all  files:(%d)",files);
 }
 void base_file_sink::remove_before_all(){
-     int files = remove_all_(true);
+     int files = remove_all_();
     MXLoggerInfo("remove_before_all  files:(%d)",files);
 }
 

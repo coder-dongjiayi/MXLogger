@@ -121,6 +121,33 @@ MX_TEST(mmap_sink, grows_beyond_page_size) {
     }
 }
 
+#if defined(_WIN32) || MXLOGGER_MACOS_MULTIPROCESS
+MX_TEST(mmap_sink, desktop_reservation_reduces_growth_and_preserves_records) {
+    const auto dir = mxtest::temp_dir("desktop_reservation");
+    mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+    const auto path = std::filesystem::u8path(mxtest::first_mx_path(dir));
+    auto capacity = std::filesystem::file_size(path);
+    EXPECT_EQ(capacity, uintmax_t(64 * 1024));
+    const std::string payload(512, 'R');
+    constexpr int count = 4000;
+    size_t growths = 0;
+    for (int i = 0; i < count; ++i) {
+        const auto message = std::to_string(i) + ":" + payload;
+        EXPECT_EQ(write_log(sink, level::info, message.c_str()), 0);
+        const auto updated = std::filesystem::file_size(path);
+        if (updated != capacity) { ++growths; capacity = updated; }
+    }
+    EXPECT_TRUE(growths > 0 && growths <= 10);
+    sink.flush();
+    const auto records = mxtest::parse_dir(dir);
+    EXPECT_EQ(records.size(), size_t(count));
+    for (size_t i = 0; i < records.size(); ++i) {
+        EXPECT_EQ(records[i].at("error_code"), std::string("0"));
+        EXPECT_EQ(records[i].at("msg"), std::to_string(i) + ":" + payload);
+    }
+}
+#endif
+
 MX_TEST(mmap_sink, level_filter_skips_write) {
     std::string dir = mxtest::temp_dir("mmap_level");
     mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
@@ -265,7 +292,7 @@ MX_TEST(file_sink, remove_before_all_keeps_current) {
     }
 }
 
-MX_TEST(file_sink, remove_all_clears_dir) {
+MX_TEST(file_sink, remove_all_keeps_current_mapping) {
     std::string dir = mxtest::temp_dir("remove_all");
     mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
     write_log(sink, level::info, "x");
@@ -275,16 +302,67 @@ MX_TEST(file_sink, remove_all_clears_dir) {
 
     record_list files;
     mxlogger::get_files(&files, dir.c_str());
-    EXPECT_EQ(files.size(), (size_t)0);
+    EXPECT_EQ(files.size(), (size_t)1);
+    EXPECT_FALSE(mxlogger::path_exists((dir + "old.mx").c_str()));
 
-    // The same sink must recreate a visible file instead of writing to the
-    // old mapping (or failing to delete it on Windows).
+    // Cleanup preserves the original record and the current writable mapping.
     EXPECT_EQ(write_log(sink, level::info, "after remove all"), 0);
     sink.flush();
     const auto records = mxtest::parse_dir(dir);
-    EXPECT_EQ(records.size(), (size_t)1);
-    if (!records.empty()) EXPECT_EQ(records[0].at("msg"), std::string("after remove all"));
+    EXPECT_EQ(records.size(), (size_t)2);
+    if (records.size() == 2) {
+        EXPECT_EQ(records[0].at("msg"), std::string("x"));
+        EXPECT_EQ(records[1].at("msg"), std::string("after remove all"));
+    }
 }
+
+#ifndef _WIN32
+MX_TEST(file_sink, cleanup_keeps_renamed_current_file) {
+    const auto dir = mxtest::temp_dir("renamed_current");
+    mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+    EXPECT_EQ(write_log(sink, level::info, "before rename"), 0);
+    const auto original = mxtest::first_mx_path(dir);
+    const auto renamed = dir + "renamed.mx";
+    std::filesystem::rename(std::filesystem::u8path(original), std::filesystem::u8path(renamed));
+    mxtest::set_mtime_days_ago(renamed, 10);
+    mxtest::write_dummy_file(dir + "inactive.mx", 128);
+    sink.set_max_disk_age(86400);
+    sink.set_max_disk_size(1);
+    sink.remove_expire_data();
+    sink.remove_before_all();
+    sink.remove_all();
+    EXPECT_TRUE(mxlogger::path_exists(renamed.c_str()));
+    EXPECT_FALSE(mxlogger::path_exists((dir + "inactive.mx").c_str()));
+    EXPECT_EQ(write_log(sink, level::info, "after rename"), 0);
+    EXPECT_FALSE(mxlogger::path_exists(original.c_str()));
+    EXPECT_EQ(mxtest::parse_dir(dir).size(), size_t(2));
+}
+
+MX_TEST(file_sink, external_unlink_keeps_existing_mapping_until_close) {
+    const auto dir = mxtest::temp_dir("external_unlink");
+    std::string path;
+    {
+        mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+        EXPECT_EQ(write_log(sink, level::info, "before unlink"), 0);
+        path = mxtest::first_mx_path(dir);
+        EXPECT_FALSE(path.empty());
+        EXPECT_EQ(mxlogger::remove_file(path.c_str()), 0);
+        EXPECT_EQ(write_log(sink, level::info, "after unlink"), 0);
+        // Extending and remapping an unlinked file must use the old fd too.
+        const std::string large(128 * 1024, 'x');
+        EXPECT_EQ(write_log(sink, level::info, large.c_str()), 0);
+        sink.flush();
+        EXPECT_FALSE(mxlogger::path_exists(path.c_str()));
+        EXPECT_TRUE(mxtest::first_mx_path(dir).empty());
+    }
+    // Explicitly opening a new logger creates a new visible file as usual.
+    mmap_sink reopened(dir, "log", policy::yyyy_MM_dd);
+    EXPECT_EQ(write_log(reopened, level::info, "new logger"), 0);
+    const auto records = mxtest::parse_dir(dir);
+    EXPECT_EQ(records.size(), size_t(1));
+    if (!records.empty()) EXPECT_EQ(records[0].at("msg"), std::string("new logger"));
+}
+#endif
 
 MX_TEST(file_sink, unicode_directory_cleanup_and_reopen) {
     const std::string dir = mxtest::temp_dir("中文 空格/日志");
@@ -315,9 +393,9 @@ MX_TEST(file_sink, unicode_directory_cleanup_and_reopen) {
             EXPECT_EQ(records[1].at("msg"), std::string("重新打开"));
         }
         sink.remove_all();
-        EXPECT_TRUE(mxtest::first_mx_path(dir).empty());
+        EXPECT_FALSE(mxtest::first_mx_path(dir).empty());
         EXPECT_EQ(write_log(sink, level::info, "删除后写入"), 0);
-        EXPECT_EQ(mxtest::parse_dir(dir, "key12345", "iv123").size(), (size_t)1);
+        EXPECT_EQ(mxtest::parse_dir(dir, "key12345", "iv123").size(), (size_t)3);
     }
 }
 
