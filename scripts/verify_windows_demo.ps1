@@ -21,6 +21,35 @@ ctest --test-dir (Join-Path $build 'core') -C $Configuration -R MXLoggerProfileC
 if ($LASTEXITCODE -ne 0) { throw "Profile collector tests failed: $LASTEXITCODE" }
 
 $exe = Join-Path $build "bin/$Configuration/MXLoggerDemo.exe"
+# Exercise the Explorer/no-argument entry point as well as the parameterized
+# CLI. Redirected stdin prevents any interactive pause in automation.
+$profileStart = [Diagnostics.ProcessStartInfo]::new((Join-Path $build "bin/$Configuration/MXLoggerProfile.exe"))
+$profileStart.UseShellExecute = $false
+$profileStart.RedirectStandardInput = $true
+$profileStart.RedirectStandardOutput = $true
+$profileStart.RedirectStandardError = $true
+$profileProcess = [Diagnostics.Process]::Start($profileStart)
+try {
+    $profileProcess.StandardInput.Close()
+    $profileOutputTask = $profileProcess.StandardOutput.ReadToEndAsync()
+    $profileErrorTask = $profileProcess.StandardError.ReadToEndAsync()
+    if (-not $profileProcess.WaitForExit(180000)) {
+        $profileProcess.Kill($true)
+        throw 'No-argument profile startup timed out'
+    }
+    $profileOutput = $profileOutputTask.GetAwaiter().GetResult()
+    ($profileOutput + $profileErrorTask.GetAwaiter().GetResult()) | Set-Content -LiteralPath (Join-Path $build 'profile-startup.log')
+    $profileReportMatch = [regex]::Match($profileOutput, '(?m)^PROFILE_REPORT=(.+)$')
+    if ($profileProcess.ExitCode -ne 0 -or -not $profileReportMatch.Success) {
+        throw 'No-argument profile startup failed; see profile-startup.log'
+    }
+    $profileReportPath = $profileReportMatch.Groups[1].Value.Trim()
+    $profileStartupReport = Get-Content -LiteralPath $profileReportPath -Raw | ConvertFrom-Json
+    if (-not $profileStartupReport.passed -or $profileStartupReport.backend -ne 'windows' -or
+        -not (Test-Path (Join-Path (Split-Path $profileReportPath) 'profile.txt'))) {
+        throw 'Default profile startup did not produce valid JSON/text reports'
+    }
+} finally { $profileProcess.Dispose() }
 function Invoke-DemoCheck([string]$Mode, [string]$ReportDirectory, [int]$Timeout) {
     New-Item -ItemType Directory -Force $ReportDirectory | Out-Null
     # A GUI subsystem executable needs an explicit wait to propagate failures.

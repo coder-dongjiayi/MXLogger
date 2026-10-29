@@ -69,7 +69,17 @@ Debug 也会编译诊断工具并验证统计器。
 pwsh -File scripts/verify_windows_demo.ps1 -Configuration Release -ProfileWrites
 ```
 
-下载并解压最新 Release 包后，在同一台 Windows 电脑上执行：
+下载并**解压整个 ZIP** 后，Debug / Release 的 `MXLoggerProfile.exe` 均支持直接双击：
+
+- 无参数自动诊断明文 / AES 各 100,000 条，不依赖 PowerShell。
+- 窗口先显示运行状态和报告位置，写入期间不刷新逐条进度，结束后显示耗时及分段结果。
+- 报告默认保存在 `%LOCALAPPDATA%\MXLoggerDemo\Profile\single-...\profile.json` 和 `profile.txt`。
+- 资源管理器双击创建的控制台会在成功或失败后保留，按 Enter 关闭；命令行 / CI 调用正常返回退出码。
+
+完整 7 轮普通 / 诊断对照可双击包内 `Run-Performance-Test.cmd`。
+它会显示预热、当前轮次及报告路径，结束或出错后保留窗口；缺少 PowerShell 7 时明确提示。
+这些状态在各轮测试之间输出，不进入写入循环的计时。
+也可在同一台 Windows 电脑的终端执行：
 
 ```powershell
 pwsh -File .\profile_windows_demo.ps1
@@ -137,6 +147,7 @@ Windows 会额外构建、自测并上传此 Demo，同时运行上述 100,000 �
 耗时、吞吐量和倍数在日志及 `benchmark/comparison.json` 中，不以固定耗时作为 CI 成败阈值。
 下载 `windows-demo-<配置>` 中的 zip，解压运行 `MXLoggerDemo.exe`；包中也包含诊断工具及脚本。
 Release 的分段评测报告位于 `windows-demo-Release-logs` 中的 `profile/run-*/`。
+两种配置都会额外验证诊断 exe 无参数启动，启动输出与单轮结果见 `profile-startup.log`。
 这验证原生 Windows Demo，Flutter Windows / FFI DLL 将在后续阶段接入。
 
 ## 在 Mac 上开发

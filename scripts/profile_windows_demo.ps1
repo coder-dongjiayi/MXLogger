@@ -15,6 +15,8 @@ foreach ($executable in @($normalExe, $diagnosticExe)) {
 }
 $runDirectory = Join-Path ([IO.Path]::GetFullPath($ReportDirectory)) ('run-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
 New-Item -ItemType Directory -Path $runDirectory | Out-Null
+Write-Host "MXLogger performance diagnostics. Reports: $runDirectory"
+Write-Host "Discarding warmups, then running $Rounds baseline/diagnostic pairs (plaintext + AES)."
 
 function Invoke-Measurement([string]$Executable, [string[]]$Arguments, [string]$LogPath) {
     $start = [Diagnostics.ProcessStartInfo]::new([IO.Path]::GetFullPath($Executable))
@@ -57,6 +59,7 @@ try {
     # Discard one warmup for each executable. Initialization, flush, validation,
     # child startup and report I/O are outside each executable's write timer.
     foreach ($kind in @('baseline', 'diagnostic')) {
+        Write-Host "Warmup: $kind"
         $directory = Join-Path $runDirectory "warmup-$kind"
         New-Item -ItemType Directory -Path $directory | Out-Null
         $executable = if ($kind -eq 'baseline') { $normalExe } else { $diagnosticExe }
@@ -72,6 +75,7 @@ try {
         $order = if ($round % 2) { @('diagnostic', 'baseline') } else { @('baseline', 'diagnostic') }
         $pair = [ordered]@{ round = $round + 1 }
         foreach ($kind in $order) {
+            Write-Host "Round $($round + 1)/${Rounds}: $kind (writing and verifying 100,000 plaintext + AES records)"
             $directory = Join-Path $runDirectory "round-$($round + 1)-$kind"
             New-Item -ItemType Directory -Path $directory | Out-Null
             if ($kind -eq 'baseline') {

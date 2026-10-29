@@ -5,9 +5,11 @@
 #include <algorithm>
 #include <array>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <numeric>
+#include <sstream>
 #include <stdexcept>
 
 namespace {
@@ -29,8 +31,21 @@ uint32_t number(const std::string& value, uint32_t maximum) {
     require(result <= maximum, "Numeric option exceeds its limit");
     return static_cast<uint32_t>(result);
 }
+fs::path default_directory() {
+    fs::path root;
+#ifdef _WIN32
+    std::wstring value(32768, L'\0');
+    const DWORD count = GetEnvironmentVariableW(L"LOCALAPPDATA", value.data(), static_cast<DWORD>(value.size()));
+    if (count && count < value.size()) { value.resize(count); root = value; }
+#endif
+    if (root.empty()) root = fs::temp_directory_path();
+    return root / "MXLoggerDemo" / "Profile" / fs::u8path("single-" + demo::unique_id());
+}
 Options parse(int argc, char** argv) {
     Options options;
+    // Explorer supplies no arguments. Give that entry point useful defaults
+    // instead of printing a usage error into a console that immediately closes.
+    if (argc == 1) { options.directory = default_directory(); return options; }
     for (int i = 1; i < argc; ++i) {
         const std::string key = argv[i];
         if (key == "--microbench") { options.microbench = true; continue; }
@@ -54,6 +69,35 @@ void save_json(const fs::path& path, cJSON* value) {
     std::unique_ptr<char, decltype(&cJSON_free)> owned(text, cJSON_free);
     std::ofstream output(path); output << text << '\n';
     require(output.good(), "Could not write " + path.u8string());
+}
+void save_text(const fs::path& path, cJSON* report) {
+    std::ostringstream output;
+    output << "MXLogger single-pass profile\n"
+           << "Stage times are diagnostic estimates; normal benchmark timing is separate.\n\n";
+    const auto* cases = cJSON_GetObjectItemCaseSensitive(report, "cases");
+    for (const auto* item = cases ? cases->child : nullptr; item; item = item->next) {
+        output << (cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(item, "encrypted")) ? "AES-CFB-128" : "Plaintext") << '\n';
+        const auto* error = cJSON_GetObjectItemCaseSensitive(item, "error");
+        if (cJSON_IsString(error)) { output << "FAIL: " << error->valuestring << "\n\n"; continue; }
+        const auto* seconds = cJSON_GetObjectItemCaseSensitive(item, "seconds");
+        const auto* records = cJSON_GetObjectItemCaseSensitive(item, "records");
+        if (cJSON_IsNumber(seconds) && cJSON_IsNumber(records))
+            output << records->valueint << " writes: " << std::fixed << std::setprecision(3) << seconds->valuedouble << " s\n";
+        const auto* stages = cJSON_GetObjectItemCaseSensitive(item, "stages");
+        for (const auto* row = stages ? stages->child : nullptr; row; row = row->next) {
+            const auto* name = cJSON_GetObjectItemCaseSensitive(row, "name");
+            const auto* milliseconds = cJSON_GetObjectItemCaseSensitive(row, "estimated_exclusive_ms");
+            if (!cJSON_IsString(name)) continue;
+            output << "  " << name->valuestring << ": ";
+            if (cJSON_IsNumber(milliseconds)) output << milliseconds->valuedouble << " ms";
+            else output << "not sampled";
+            output << '\n';
+        }
+        output << '\n';
+    }
+    std::ofstream file(path); file << output.str();
+    require(file.good(), "Could not write " + path.u8string());
+    std::cout << output.str();
 }
 double clock_pair_ns() {
     std::array<uint64_t, 1001> values{};
@@ -173,6 +217,14 @@ void microbench(const Options& options, cJSON* report) {
 }
 int run(int argc, char** argv) {
     const auto options = parse(argc, argv);
+    std::cout << "MXLogger write diagnostics ("
+#ifdef NDEBUG
+              << "Release"
+#else
+              << "Debug"
+#endif
+              << ")\nReports: " << options.directory.u8string() << '\n'
+              << "Please wait. Status is printed between tests, never inside the timed write loop.\n" << std::flush;
     fs::create_directories(options.directory);
     Json report(cJSON_CreateObject(), cJSON_Delete);
     require(report != nullptr, "Could not allocate profile report");
@@ -199,6 +251,8 @@ int run(int argc, char** argv) {
         cJSON_AddStringToObject(report.get(), "estimator", "exact_ns + sampled_ns * records / sampled_records; raw estimates may not sum to wall time; no timer-cost subtraction");
         auto* cases = cJSON_AddArrayToObject(report.get(), "cases");
         for (bool encrypted : {false, true}) {
+            std::cout << (encrypted ? "AES-CFB-128" : "Plaintext") << ": writing " << options.records
+                      << " records, then verifying...\n" << std::flush;
             auto* item = cJSON_CreateObject(); cJSON_AddItemToArray(cases, item);
             cJSON_AddBoolToObject(item, "encrypted", encrypted);
             try { run_case(options, encrypted, item); cJSON_AddBoolToObject(item, "passed", true); }
@@ -211,19 +265,31 @@ int run(int argc, char** argv) {
     cJSON_AddBoolToObject(report.get(), "passed", passed);
     const auto file = options.directory / (options.microbench ? "microbench.json" : "profile.json");
     save_json(file, report.get());
+    if (!options.microbench) save_text(options.directory / "profile.txt", report.get());
     std::cout << (passed ? "PASS " : "FAIL ") << file.u8string() << '\n';
+    std::cout << "PROFILE_REPORT=" << file.u8string() << '\n';
     return passed ? 0 : 1;
 }
 } // namespace
 #ifdef _WIN32
 int wmain(int argc, wchar_t** argv) {
+    DWORD clients[2]{}, console_mode = 0, output_mode = 0;
+    const bool own_console = GetConsoleProcessList(clients, 2) == 1 &&
+        GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &console_mode) &&
+        GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &output_mode);
+    if (own_console) SetConsoleOutputCP(CP_UTF8);
+    int result = 1;
     try {
         std::vector<std::string> values;
         for (int i = 0; i < argc; ++i) values.push_back(mxlogger::files::to_utf8(argv[i]));
         std::vector<char*> args;
         for (auto& value : values) args.push_back(value.data());
-        return run(argc, args.data());
-    } catch (const std::exception& error) { std::cerr << error.what() << '\n'; return 1; }
+        result = run(argc, args.data());
+    } catch (const std::exception& error) { std::cerr << "ERROR: " << error.what() << '\n'; }
+    // Redirected/headless invocations and calls from an existing terminal must
+    // exit normally. Only an Explorer-created interactive console stays open.
+    if (own_console) { std::cout << "\nPress Enter to close this window..." << std::flush; std::cin.get(); }
+    return result;
 }
 #else
 int main(int argc, char** argv) {
