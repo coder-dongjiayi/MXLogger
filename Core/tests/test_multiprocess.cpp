@@ -224,8 +224,24 @@ MX_TEST(multiprocess, killed_cached_writer_releases_view_and_mapping_lease) {
     const auto dir = mxtest::temp_dir("win_cache_crash");
     worker killed(dir, 1, 10);
     EXPECT_TRUE(killed.receive('R'));
+    const auto active = mxtest::first_mx_path(dir);
+    mxtest::set_mtime_days_ago(active, 10);
     EXPECT_TRUE(killed.send('W')); EXPECT_TRUE(killed.receive());
     EXPECT_TRUE(killed.kill_and_wait());
+    // A killed process cannot flush its final coalesced timestamp. The first
+    // append of that second must already have made the file recent for cleanup.
+    {
+        mmap_sink cleaner(dir, "cleaner", policy::yyyy_MM_dd);
+        cleaner.set_max_disk_age(86400);
+        cleaner.remove_expire_data();
+        EXPECT_TRUE(mxlogger::path_exists(active.c_str()));
+        cleaner.remove_all();
+    }
+    // Recreate an independent crash case for the existing gate/readback check.
+    worker again(dir, 1, 10);
+    EXPECT_TRUE(again.receive('R'));
+    EXPECT_TRUE(again.send('W')); EXPECT_TRUE(again.receive());
+    EXPECT_TRUE(again.kill_and_wait());
     worker survivor(dir, 2, 10);
     EXPECT_TRUE(survivor.receive('R'));
     EXPECT_TRUE(survivor.send('W')); EXPECT_TRUE(survivor.receive());

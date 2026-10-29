@@ -4,7 +4,8 @@ param(
     [string]$ExecutableDirectory = $PSScriptRoot,
     [string]$ReportDirectory = (Join-Path $PWD 'mxlogger-profile'),
     [ValidateRange(1, 31)][int]$Rounds = 7,
-    [ValidateRange(1, 65536)][int]$SampleStride = 64
+    [ValidateRange(1, 65536)][int]$SampleStride = 64,
+    [ValidateSet('Coalesced', 'PerRecord')][string]$FileTimeMode = 'Coalesced'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -53,9 +54,12 @@ function Get-Statistics([double[]]$Values) {
 }
 
 $previousCache = [Environment]::GetEnvironmentVariable('MXLOGGER_WINDOWS_MAPPING_CACHE', 'Process')
+$previousTime = [Environment]::GetEnvironmentVariable('MXLOGGER_WINDOWS_FILE_TIME_COALESCING', 'Process')
 $measurements = @()
 try {
     $env:MXLOGGER_WINDOWS_MAPPING_CACHE = '1'
+    $env:MXLOGGER_WINDOWS_FILE_TIME_COALESCING = if ($FileTimeMode -eq 'Coalesced') { '1' } else { '0' }
+    Write-Host "File modification time policy: $FileTimeMode"
     # Discard one warmup for each executable. Initialization, flush, validation,
     # child startup and report I/O are outside each executable's write timer.
     foreach ($kind in @('baseline', 'diagnostic')) {
@@ -88,6 +92,11 @@ try {
                 if ($pair[$kind].backend -ne 'windows') { throw 'Windows backend required for performance comparisons' }
             }
         }
+        foreach ($kind in @('baseline', 'diagnostic')) {
+            if ($pair[$kind].file_time_coalescing -ne ($FileTimeMode -eq 'Coalesced')) {
+                throw "File time policy mismatch: $kind. Use matching, up-to-date executable files."
+            }
+        }
         $measurements += [PSCustomObject]$pair
     }
     $apiDirectory = Join-Path $runDirectory 'api'
@@ -96,6 +105,7 @@ try {
     $api = Read-Report $apiDirectory 'microbench.json'
 } finally {
     [Environment]::SetEnvironmentVariable('MXLOGGER_WINDOWS_MAPPING_CACHE', $previousCache, 'Process')
+    [Environment]::SetEnvironmentVariable('MXLOGGER_WINDOWS_FILE_TIME_COALESCING', $previousTime, 'Process')
 }
 
 $cases = foreach ($encrypted in @($false, $true)) {
@@ -141,6 +151,7 @@ $summary = [ordered]@{
     sample_stride = $SampleStride
     configuration = $measurements[0].diagnostic.configuration
     mapping_cache = $true
+    file_time_mode = $FileTimeMode
     report_directory = $runDirectory
     scope = '100,000 synchronous log() calls per case; console off; no UI/progress; flush/readback excluded; one discarded warmup per executable'
     notes = @(
@@ -157,7 +168,7 @@ $summary = [ordered]@{
 $summary | ConvertTo-Json -Depth 16 | Set-Content -LiteralPath (Join-Path $runDirectory 'summary.json')
 $lines = [Collections.Generic.List[string]]::new()
 $lines.Add("MXLogger Windows write profile: $runDirectory")
-$lines.Add("Rounds: $Rounds; sample stride: $SampleStride; normal and diagnostic executables alternated")
+$lines.Add("Rounds: $Rounds; sample stride: $SampleStride; file time mode: $FileTimeMode; normal and diagnostic executables alternated")
 foreach ($case in $cases) {
     $label = if ($case.encrypted) { 'AES-CFB-128' } else { 'Plaintext' }
     $lines.Add("$label baseline seconds: median=$($case.baseline_seconds.median), min=$($case.baseline_seconds.minimum), max=$($case.baseline_seconds.maximum)")

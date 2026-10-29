@@ -341,6 +341,21 @@ MX_TEST(file_sink, mapped_append_refreshes_expiration_timestamp) {
     EXPECT_EQ(mxlogger::select_form_path(path.c_str(), &records, nullptr, nullptr), 0);
     EXPECT_EQ(records.size(), size_t(2));
 }
+
+MX_TEST(file_sink, mapped_append_flush_publishes_recent_timestamp) {
+    const auto dir = mxtest::temp_dir("win_mmap_mtime_flush");
+    mmap_sink sink(dir, "log", policy::yyyy_MM_dd);
+    EXPECT_EQ(write_log(sink, level::info, "first"), 0);
+    const auto path = mxtest::first_mx_path(dir);
+    mxtest::set_mtime_days_ago(path, 10);
+    EXPECT_EQ(write_log(sink, level::info, "recent"), 0);
+    sink.flush();
+    std::vector<std::map<std::string, std::string>> files;
+    EXPECT_EQ(mxlogger::get_files(&files, dir.c_str()), 0);
+    EXPECT_EQ(files.size(), size_t(1));
+    if (!files.empty()) EXPECT_TRUE(std::stoll(files.front()["last_timestamp"]) >= std::time(nullptr) - 60);
+    EXPECT_EQ(mxtest::parse_dir(dir).size(), size_t(2));
+}
 #endif
 
 MX_TEST(file_sink, expire_noop_when_no_limits) {

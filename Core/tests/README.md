@@ -57,11 +57,22 @@ shared directory lock and decode outside it. Shared-to-exclusive lock upgrades
 and recursive acquisition of a directory lock are intentionally unsupported.
 The `.mx` format is unchanged; no MMKV metadata/CRC format is introduced.
 
-Windows uses transient transaction mappings: data views, mapping objects and
-data handles are released before the directory lock is released. A cooperating
-idle process therefore cannot prevent growth, replacement or explicit deletion.
-Read snapshots also release their views before unlocking. This prioritizes
-correctness; the extra Windows open/map/unmap cost has not been benchmarked.
+Windows can retain a view under a separate byte-2 mapping lease. A competing
+transaction requests background eviction; a 500 ms timeout also bounds retention
+when notifications are unavailable. Contention briefly switches to transient
+views. Read snapshots release their views before unlocking. All exclusive
+directory transactions participate, including cleanup and non-caching writers.
+
+Windows explicitly maintains mapped-file mtime. The first append of each wall-
+clock second publishes mtime before committing the record; later appends in that
+second defer the final tick until flush, view release or close. Process termination
+therefore preserves the cleanup second even without a final callback. Timestamp
+state resets on file reopen; cross-second clock rollback and update failures force
+a new publish. This does not change the record format or power-loss durability.
+The portable `test_write_time.cpp` suite checks the policy with deterministic
+FILETIME ticks, including failure/retry and same-tick writes. Windows integration
+checks close/flush expiration timestamps and killed-writer cleanup. Set
+`MXLOGGER_WINDOWS_FILE_TIME_COALESCING=0` for the per-record diagnostic baseline.
 
 The persistent `.mxlogger.lock` is never a log or part of the size budget, and
 must never be deleted while loggers exist. On Windows, byte zero coordinates

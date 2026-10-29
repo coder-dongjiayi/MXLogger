@@ -8,6 +8,7 @@ add_executable(mxlogger_tests
     test_file_util.cpp
     test_concurrency.cpp
     test_multiprocess.cpp
+    test_write_time.cpp
 )
 target_link_libraries(mxlogger_tests PRIVATE MXLoggerCore)
 set_target_properties(mxlogger_tests PROPERTIES

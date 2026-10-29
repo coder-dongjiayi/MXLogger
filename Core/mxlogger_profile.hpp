@@ -14,16 +14,16 @@ namespace mxlogger { namespace profiling {
 enum class phase : size_t {
     other, message, thread_mutex, metadata, serialization, encryption,
     directory_lock, directory_unlock, cache_mutex, cache_coordination, handoff_wait,
-    mapping_refresh, file_open, file_close, mapping, unmapping, resize, file_time, append, count
+    mapping_refresh, file_open, file_close, mapping, unmapping, resize, file_time_check, file_time, append, count
 };
 inline constexpr const char* phase_names[] = {
     "other", "message", "thread_mutex_wait", "metadata", "serialization_and_allocation",
     "aes", "directory_lock", "directory_unlock", "cache_mutex_wait", "cache_coordination", "mapping_handoff_wait",
-    "mapping_refresh", "file_open", "file_close", "map", "unmap", "resize", "file_time", "append"
+    "mapping_refresh", "file_open", "file_close", "map", "unmap", "resize", "file_time_check", "file_time", "append"
 };
-enum class counter : size_t { cache_hit, cache_miss, handoff, ready_set, ready_reused, request_set, count };
+enum class counter : size_t { cache_hit, cache_miss, handoff, ready_set, ready_reused, request_set, time_update, time_coalesced, count };
 inline constexpr const char* counter_names[] = {
-    "cache_hits", "cache_misses", "mapping_handoffs", "ready_set_events", "ready_reused", "request_set_events"
+    "cache_hits", "cache_misses", "mapping_handoffs", "ready_set_events", "ready_reused", "request_set_events", "file_time_updates", "file_time_coalesced"
 };
 struct measurement {
     uint64_t calls = 0, sampled_calls = 0, exact_calls = 0;

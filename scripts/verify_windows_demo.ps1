@@ -86,10 +86,13 @@ foreach ($image in @('actions-en.png', 'actions-zh.png', 'configuration-zh.png')
 
 if ($Benchmark) {
     # Both runs use the exact same executable and log() loop. The baseline
-    # disables retention only; all locking and correctness checks remain on.
+    # disables retention only; keep per-record timestamp updates in BOTH runs
+    # so this comparison still isolates mapping retention after coalescing lands.
     $previous = [Environment]::GetEnvironmentVariable('MXLOGGER_WINDOWS_MAPPING_CACHE', 'Process')
+    $previousTime = [Environment]::GetEnvironmentVariable('MXLOGGER_WINDOWS_FILE_TIME_COALESCING', 'Process')
     $results = @{}
     try {
+        $env:MXLOGGER_WINDOWS_FILE_TIME_COALESCING = '0'
         foreach ($mode in @('transient', 'cached')) {
             $env:MXLOGGER_WINDOWS_MAPPING_CACHE = if ($mode -eq 'transient') { '0' } else { '1' }
             $directory = Join-Path $build "benchmark/$mode"
@@ -101,6 +104,7 @@ if ($Benchmark) {
         }
     } finally {
         [Environment]::SetEnvironmentVariable('MXLOGGER_WINDOWS_MAPPING_CACHE', $previous, 'Process')
+        [Environment]::SetEnvironmentVariable('MXLOGGER_WINDOWS_FILE_TIME_COALESCING', $previousTime, 'Process')
     }
     $comparison = for ($i = 0; $i -lt 2; $i++) {
         $before = $results['transient'].cases[$i]

@@ -87,6 +87,7 @@ add_library(MXLoggerCore
         mxlogger_platform.hpp
         mxlogger_interprocess.hpp
         mxlogger_windows_cache.hpp
+        mxlogger_windows_write_time.hpp
         mxlogger_profile.hpp
         mxlogger_helper.hpp
         mxlogger_util.cpp

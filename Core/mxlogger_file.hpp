@@ -46,6 +46,16 @@ inline bool is_missing(const std::error_code &error) {
 }
 
 #ifdef _WIN32
+inline uint64_t file_time_now() {
+    FILETIME value{};
+    GetSystemTimeAsFileTime(&value);
+    return (uint64_t(value.dwHighDateTime) << 32) | value.dwLowDateTime;
+}
+inline bool windows_file_time_coalescing_enabled() {
+    wchar_t value[4]{};
+    const DWORD size = GetEnvironmentVariableW(L"MXLOGGER_WINDOWS_FILE_TIME_COALESCING", value, 4);
+    return !(size == 1 && value[0] == L'0');
+}
 inline std::wstring to_wide(const char *utf8) {
     if (!utf8) return {};
     int count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8, -1, nullptr, 0);
@@ -178,10 +188,13 @@ public:
 
 #ifdef _WIN32
     bool update_write_time() {
-        MXLOGGER_PROFILE_SPAN(profile_time, file_time);
-        FILETIME now{};
-        GetSystemTimeAsFileTime(&now);
-        return record(SetFileTime(handle_, nullptr, nullptr, &now) != 0);
+        return update_write_time(file_time_now());
+    }
+    bool update_write_time(uint64_t ticks) {
+        MXLOGGER_PROFILE_EXACT(profile_time, file_time);
+        MXLOGGER_PROFILE_COUNT(time_update);
+        const FILETIME value{static_cast<DWORD>(ticks), static_cast<DWORD>(ticks >> 32)};
+        return record(SetFileTime(handle_, nullptr, nullptr, &value) != 0);
     }
 #endif
 

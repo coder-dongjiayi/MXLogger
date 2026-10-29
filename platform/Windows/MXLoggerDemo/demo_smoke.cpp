@@ -1,5 +1,6 @@
 #include "demo_model.hpp"
 #include "mxlogger_util.hpp"
+#include "mxlogger_file.hpp"
 #include "json/cJSON.h"
 #include <chrono>
 #include <cstdlib>
@@ -150,6 +151,9 @@ int benchmark_report(const fs::path& report_dir) {
     auto* cases = cJSON_AddArrayToObject(report.get(), "cases");
     const char* cache = std::getenv("MXLOGGER_WINDOWS_MAPPING_CACHE");
     cJSON_AddBoolToObject(report.get(), "mapping_cache", !(cache && std::string(cache) == "0"));
+#ifdef _WIN32
+    cJSON_AddBoolToObject(report.get(), "file_time_coalescing", mxlogger::files::windows_file_time_coalescing_enabled());
+#endif
 #ifdef NDEBUG
     cJSON_AddStringToObject(report.get(), "configuration", "Release");
 #else

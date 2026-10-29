@@ -42,6 +42,13 @@ Core 的 Windows 路径会在持有映射保护锁时复用文件句柄和映射
 是否可以复用由实际映射锁竞争决定，不依赖日志频率。通知不可达时，后台线程也会在
 500 ms 的租期结束后释放映射；竞争后暂缓缓存 250 ms，这些时间只影响复用策略。
 首次容量为 64 KiB，扩容时最多预留 1 MiB；文件长度可能大于实际日志数据，四字节提交长度及 `.mx` 格式保持不变。
+Windows 的映射写入可能不会自动更新文件修改时间，因此需要显式维护，见
+[微软文件映射说明](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createfilemappinga#remarks)。
+目前清理按秒比较时间：每个文件句柄首次写入、每个新的系统时间秒都会在提交记录前更新修改时间，
+同秒内其余写入合并更新。`flush`、解除映射（含扩容）、交接和正常关闭时，补齐最后一次成功写入的时间。
+进程被强制结束时，即使没机会补齐亚秒时间，已提交数据所在的秒也已发布；修改时间不等同于同步刷盘保证。
+时间回拨跨秒、重新打开或替换文件时重新更新时间；失败保留待补状态并在后续写入重试。
+未保留映射或存在持续争抢时，句柄频繁交接，合并空间也相应减少。
 macOS、iOS 和 Android 的映射策略保持原样。共享目录的所有进程应一起更新到本次构建，避免混用不同的协调协议。
 
 可以在同一台 Windows 机器上比较缓存开关下的真实写入耗时：
@@ -52,9 +59,21 @@ pwsh -File scripts/verify_windows_demo.ps1 -Configuration Release -Benchmark
 
 脚本使用同一个 exe、相同 `log()` 循环分别执行明文 / AES 各 100,000 条，并在计时结束后
 验证记录数量和顺序。`benchmark/transient/` 使用诊断变量 `MXLOGGER_WINDOWS_MAPPING_CACHE=0` 关闭映射复用，
-`benchmark/cached/` 开启复用；两组都保留跨进程锁、新的扩容策略和逐条文件时间更新。
+`benchmark/cached/` 开启复用；两组都保留跨进程锁、新的扩容策略，并临时固定为逐条文件时间更新。
 因此这个对照隔离的是映射复用的收益，不能作为与历史版本整体性能差异的精确对照。
 脚本结束后恢复环境变量，正常运行 Demo 默认开启复用。
+
+比较本次文件时间优化，可在同一台机器、同一磁盘执行：
+
+```powershell
+pwsh -File .\profile_windows_demo.ps1 -FileTimeMode PerRecord -Rounds 3
+pwsh -File .\profile_windows_demo.ps1 -FileTimeMode Coalesced -Rounds 3
+```
+
+对比两份 `summary.json` 的普通版本 `baseline_seconds`；`PerRecord` 保留逐条更新时间，
+`Coalesced` 使用默认的按秒合并策略。两个 exe、消息和跨进程锁均相同，仅修改时间策略变化。
+脚本使用当前进程的 `MXLOGGER_WINDOWS_FILE_TIME_COALESCING` 环境变量控制，并在结束后恢复；
+开发时也可将该变量设为 `0` 临时恢复逐条更新时间。默认不设置时启用合并。
 
 ## 写入分段诊断
 
@@ -105,6 +124,9 @@ pwsh -File .\profile_windows_demo.ps1
 所在前台线程；后台 CPU 不加入占比，前台等待后台释放资源的时间会被计入。
 `cache_hits`、`cache_misses`、`mapping_handoffs`、`ready_set_events` 和 `ready_reused`
 可检查实际路径和事件复用是否生效。初始化和结束后的 flush / 校验不进入这些统计。
+`file_time_check` 统计逐条读取时间和判断是否需要更新的开销；`file_time` 完整计时实际的
+`SetFileTime` 调用。`file_time_updates` 是写入循环前台实际调用次数，`file_time_coalesced`
+是合并的写入次数；后台回收及结束后的补写不进入前台计数。
 
 `profile.json` 保留每段调用数、抽样 / 完整计时数、实际采集耗时和估算值。
 完整计时部分直接采用，抽样部分按记录采样比例外推；未采到的条件分支显示 `null`。
@@ -121,6 +143,7 @@ pwsh -File .\profile_windows_demo.ps1 -SampleStride 256
 独立 API 复核可运行 `MXLoggerProfile.exe --microbench --report-dir .\api-profile`：
 在同盘临时文件上测量 100,000 次无竞争锁获取 / 释放，以及修改时间更新。
 微基准使用未映射的独立文件，其耗时用于复核热点，不能直接从真实日志耗时中相减。
+微基准仍逐次执行 `SetFileTime`，用来衡量系统调用成本，不启用日志写入的合并策略。
 报告目录保留测试数据，可在评测结束后自行删除。
 
 本轮先评测单进程单线程，定位约 2.95 秒耗时；确认热点后再增加双进程共享 / 独立目录对照。
@@ -183,3 +206,7 @@ with a 250 ms cooldown after contention. All cooperating writers should upgrade 
 platforms' mapping behavior are unchanged. The benchmark has no per-record progress/cancellation polling or UI timer;
 it reports total write time before manually loading previews. Pass `-Benchmark` to compare cache off/on using the same
 executable and verify 100,000 plaintext/AES records per case. Reports are under `benchmark/` in the build directory.
+That mapping comparison fixes both cases to per-record timestamp updates. Normal Windows writes coalesce modification
+time updates within a wall-clock second and publish the last committed tick on flush/view release/close. The first
+append in each new second publishes before committing, preserving second-based expiration after process termination.
+Use `-FileTimeMode PerRecord` versus `Coalesced` with `profile_windows_demo.ps1` to isolate this timestamp optimization.

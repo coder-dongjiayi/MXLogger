@@ -93,6 +93,12 @@ void save_text(const fs::path& path, cJSON* report) {
             else output << "not sampled";
             output << '\n';
         }
+        const auto* counters = cJSON_GetObjectItemCaseSensitive(item, "counters");
+        const auto* updates = cJSON_GetObjectItemCaseSensitive(counters, "file_time_updates");
+        const auto* coalesced = cJSON_GetObjectItemCaseSensitive(counters, "file_time_coalesced");
+        if (cJSON_IsNumber(updates) && cJSON_IsNumber(coalesced))
+            output << "Foreground SetFileTime calls: " << updates->valueint
+                   << "; coalesced appends: " << coalesced->valueint << '\n';
         output << '\n';
     }
     std::ofstream file(path); file << output.str();
@@ -178,7 +184,10 @@ void run_case(const Options& options, bool encrypted, cJSON* item) {
     require(calls(profile::phase::directory_lock) == result.records &&
             calls(profile::phase::directory_unlock) == result.records, "Directory lock instrumentation mismatch");
 #ifdef _WIN32
-    require(calls(profile::phase::file_time) == result.records, "File time instrumentation mismatch");
+    require(calls(profile::phase::file_time_check) == result.records, "File time check instrumentation mismatch");
+    require(calls(profile::phase::file_time) == result.counters[static_cast<size_t>(profile::counter::time_update)] &&
+            result.counters[static_cast<size_t>(profile::counter::time_coalesced)] <= result.records,
+            "File time update instrumentation mismatch");
     require(result.counters[static_cast<size_t>(profile::counter::cache_hit)] +
             result.counters[static_cast<size_t>(profile::counter::cache_miss)] == result.records,
             "Cache instrumentation mismatch");
@@ -213,7 +222,7 @@ void microbench(const Options& options, cJSON* report) {
         if (!file.update_write_time()) throw std::runtime_error("Microbenchmark SetFileTime failed");
     });
 #endif
-    cJSON_AddStringToObject(report, "scope", "Isolated unmapped temporary file; no profiler collection; not directly subtractable from real log() latency");
+    cJSON_AddStringToObject(report, "scope", "Isolated unmapped temporary file; each API call always executed, no timestamp coalescing or profiler collection; not directly subtractable from real log() latency");
 }
 int run(int argc, char** argv) {
     const auto options = parse(argc, argv);
@@ -228,9 +237,10 @@ int run(int argc, char** argv) {
     fs::create_directories(options.directory);
     Json report(cJSON_CreateObject(), cJSON_Delete);
     require(report != nullptr, "Could not allocate profile report");
-    cJSON_AddNumberToObject(report.get(), "schema_version", 1);
+    cJSON_AddNumberToObject(report.get(), "schema_version", 2);
 #ifdef _WIN32
     cJSON_AddStringToObject(report.get(), "backend", "windows");
+    cJSON_AddBoolToObject(report.get(), "file_time_coalescing", mxlogger::files::windows_file_time_coalescing_enabled());
 #else
     cJSON_AddStringToObject(report.get(), "backend", "macos-model-only");
 #endif

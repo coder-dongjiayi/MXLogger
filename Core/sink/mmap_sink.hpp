@@ -14,6 +14,9 @@
 #include <unistd.h>
 #endif
 #include "base_file_sink.hpp"
+#ifdef _WIN32
+#include "../mxlogger_windows_write_time.hpp"
+#endif
 
 namespace mxlogger{
 namespace sinks {
@@ -62,6 +65,8 @@ private:
     bool refresh_mmap_();
 #endif
 #ifdef _WIN32
+    files::windows_write_time write_time_;
+    bool flush_windows_write_time_();
     // Runs with the cache mutex held, including from its eviction thread.
     // Must not acquire the directory lock or mutate public logger state.
     bool release_windows_mapping_();

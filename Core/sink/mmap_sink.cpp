@@ -38,6 +38,9 @@ static size_t os_page_size(){
 namespace mxlogger{
 namespace sinks{
 mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,policy::storage_policy policy):base_file_sink(dir_path,filename,policy),page_size_(os_page_size()){
+#ifdef _WIN32
+    write_time_.set_coalescing(files::windows_file_time_coalescing_enabled());
+#endif
 
     /// 构造时失败(如目录暂不可写)不致命：write_data_每次写入前会走同一条恢复路径重试
     /// A failure here (e.g. the directory is temporarily unwritable) is not fatal:
@@ -135,7 +138,14 @@ bool mmap_sink::refresh_mmap_() {
             close();
         }
     }
-    if (!file_.valid() && !open()) return false;
+    if (!file_.valid()) {
+#ifdef _WIN32
+        // Timestamp state belongs to this OS file lifetime, never a reopened
+        // path (which may now identify a replacement file in the same second).
+        write_time_.reset();
+#endif
+        if (!open()) return false;
+    }
     if (!file_.info(opened) || opened.size > std::numeric_limits<size_t>::max()) {
         error_record = MXLoggerError("file size error:%s\n", file_.error_message().c_str());
         return false;
@@ -169,10 +179,18 @@ mmap_sink::transaction_cleanup::~transaction_cleanup() {
 }
 
 #ifdef _WIN32
+bool mmap_sink::flush_windows_write_time_() {
+    return write_time_.flush([this](uint64_t ticks) { return file_.update_write_time(ticks); });
+}
 bool mmap_sink::release_windows_mapping_() {
+    // This callback also runs on the eviction thread under the cache mutex.
+    // Leave public error_record alone; the cache reports callback failures.
+    if (!flush_windows_write_time_()) return false;
     const bool unmapped = mapping_.unmap();
     mmap_ptr_ = mapping_.data();
-    return unmapped && file_.close();
+    if (!unmapped || !file_.close()) return false;
+    write_time_.reset();
+    return true;
 }
 #endif
 
@@ -301,13 +319,16 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_
     }
 
 #ifdef _WIN32
-    // Mapped writes do not automatically update the file's last-write time.
-    // Update before publishing any record so age cleanup sees recent writes;
-    // a metadata failure still leaves the committed log unchanged.
-    if (!file_.update_write_time()) {
+    MXLOGGER_PROFILE_SPAN(profile_time_check, file_time_check);
+    const uint64_t write_time = files::file_time_now();
+    // First append in each wall-clock second publishes mtime before the record.
+    // Same-second appends defer the exact tick until flush/mapping release.
+    if (!write_time_.prepare(write_time, [this](uint64_t ticks) { return file_.update_write_time(ticks); })) {
         error_record = MXLoggerError("update write time error:%s\n", file_.error_message().c_str());
         return -1;
     }
+    if (write_time_.coalesced()) MXLOGGER_PROFILE_COUNT(time_coalesced);
+    MXLOGGER_PROFILE_STOP(profile_time_check);
 #endif
     MXLOGGER_PROFILE_SPAN(profile_append, append);
     uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
@@ -323,6 +344,9 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_
     
     ///5、更新文件真实大小
     write_actual_size_(total);
+#ifdef _WIN32
+    write_time_.commit(write_time);
+#endif
 
     return 0;
 }
@@ -396,6 +420,12 @@ int mmap_sink::truncate_(size_t size){
 }
 // 解除映射
 bool mmap_sink::munmap_(){
+#ifdef _WIN32
+    if (!flush_windows_write_time_()) {
+        error_record = MXLoggerError("update write time error:%s\n", file_.error_message().c_str());
+        return false;
+    }
+#endif
     const bool success = mapping_.unmap();
     mmap_ptr_ = mapping_.data();
     if (!success) {
@@ -425,6 +455,12 @@ void mmap_sink::flush() {
     transaction_cleanup cleanup{*this};
     if (!is_exit_path()) return;
     if (!refresh_mmap_()) return;
+#endif
+#ifdef _WIN32
+    if (!flush_windows_write_time_()) {
+        error_record = MXLoggerError("update write time error:%s\n", file_.error_message().c_str());
+        return;
+    }
 #endif
     async_();
 }
