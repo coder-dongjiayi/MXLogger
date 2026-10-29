@@ -71,7 +71,7 @@ MX_TEST(file_util, windows_coordinator_is_reserved_regardless_of_case) {
     sink.remove_all();
     files.clear();
     EXPECT_EQ(mxlogger::get_files(&files, dir.c_str()), 0);
-    EXPECT_TRUE(files.empty());
+    EXPECT_EQ(files.size(), size_t(1)); // The active log is preserved too.
     EXPECT_TRUE(mxlogger::path_exists((dir + ".MXLOGGER.LOCK").c_str()));
 }
 

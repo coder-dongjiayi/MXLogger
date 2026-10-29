@@ -495,7 +495,7 @@ public class MXLoggerInstrumentedTest {
     }
 
     @Test
-    public void removeAllDeletesEverything() throws IOException {
+    public void removeAllPreservesCurrentMapping() throws IOException {
         MXLogger logger = newLogger();
         logger.info(null, null, "a");
         File old = fakeOldFile(logger, 100);
@@ -505,9 +505,11 @@ public class MXLoggerInstrumentedTest {
 
         assertFalse(old.exists());
         File[] left = dir.listFiles((d, name) -> name.endsWith(".mx"));
-        assertTrue("removeAll删除全部文件且不重建", left == null || left.length == 0);
-        // 删除后继续写入不崩溃(README语义: 数据不再落盘)
+        assertNotNull(left);
+        assertEquals("保留当前正在映射的文件", 1, left.length);
+        assertEquals(1, recordCount(currentLogFile(logger)));
         assertEquals(0, logger.info(null, null, "after-clear"));
+        assertEquals(2, recordCount(currentLogFile(logger)));
     }
 
     // ------------------------------------------------------------------

@@ -115,27 +115,13 @@ bool mmap_sink::refresh_mmap_() {
         return true;
     }
 #endif
-    files::file_info opened, current;
-    if (file_.valid()) {
-        if (!file_.info(opened)) {
-            error_record = MXLoggerError("file info error:%s\n", file_.error_message().c_str());
-            return false;
-        }
-        std::error_code error;
-        const bool exists = files::path_info(log_disk_path_, current, error);
-        if (!exists && !files::is_missing(error)) {
-            error_record = MXLoggerError("path info error:%s\n", files::error_message(error).c_str());
-            return false;
-        }
-        if (!exists || !opened.same_file(current)) {
-            if (!munmap_()) return false;
-            close();
-        }
-    }
+    // Keep the existing handle/mapping even if an external tool unlinks or
+    // replaces its path. Only query the open file's capacity: cooperating
+    // processes may have grown it since our previous write.
+    files::file_info opened;
     if (!file_.valid()) {
 #ifdef _WIN32
-        // Timestamp state belongs to this OS file lifetime, never a reopened
-        // path (which may now identify a replacement file in the same second).
+        // Timestamp state belongs to this OS handle lifetime.
         write_time_.reset();
 #endif
         if (!open()) return false;
@@ -196,17 +182,6 @@ mmap_sink::~mmap_sink(){
     MXLoggerInfo("mmap_sink delloc");
 }
 
-void mmap_sink::remove_all() {
-#if !MXLOGGER_MULTIPROCESS
-    // Single-process POSIX sinks must stop appending into unlinked files.
-    // Windows releases views per transaction; macOS refreshes the file identity.
-    if (!munmap_()) return;
-    close();
-    file_size_ = 0;
-    actual_size_ = 0;
-#endif
-    base_file_sink::remove_all();
-}
 int mmap_sink::log(const details::log_msg& msg){
     if (should_log(msg.level) == false) {
         return 0;

@@ -63,7 +63,7 @@
 "home.file.expire.title" = "Remove Expired Files";
 "home.file.before.title" = "Remove Historical Files";
 "home.file.before.subtitle" = "removeBeforeAllData, keeps the file currently being written";
-"home.file.all.title" = "Remove All Logs";
+"home.file.all.title" = "Clean Unused Logs";
 
 /* Home - info section */
 "home.section.info" = "Instance Info";
@@ -84,7 +84,7 @@
 "toast.key.copied" = "loggerToken copied";
 "toast.path.copied" = "Path copied";
 "toast.rebuild.done" = "Instance rebuilt";
-"toast.removeall.done" = "All logs removed";
+"toast.removeall.done" = "Unused logs removed; active logs retained";
 "toast.write.success" = "%@ written";
 "toast.network.success" = "Network log written";
 "toast.custom.success" = "logWithLevel: written";
@@ -96,8 +96,8 @@
 /* Alerts & pickers */
 "alert.write.failed" = "Write Failed (%ld)";
 "alert.no.error" = "No error";
-"alert.removeall.title" = "Remove all logs?";
-"alert.removeall.message" = "removeAllData deletes all log files and cannot be undone.";
+"alert.removeall.title" = "Clean unused logs?";
+"alert.removeall.message" = "Inactive log files will be deleted. Files currently in use are kept.";
 "picker.level.message" = "Logs below this level will not be written to disk";
 "picker.age.message" = "Maximum retention time of log files";
 "picker.size.message" = "Maximum disk usage of log files";

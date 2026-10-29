@@ -110,7 +110,7 @@ int smoke(const fs::path& report_dir) {
             session.logger()->remove_before_all();
             expect(session.files().size() == 1, "Keep current cleanup");
             session.logger()->remove_all();
-            expect(session.files().empty(), "Remove all");
+            expect(session.files().size() == 1, "Remove all preserves active mapping");
             session.write(1, "after remove all", "reopen");
             expect(count_tag(session.all_records(), "reopen") == 1, "Write after removal");
             session.rebuild();

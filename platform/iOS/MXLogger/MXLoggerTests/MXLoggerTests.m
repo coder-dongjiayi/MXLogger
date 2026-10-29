@@ -475,9 +475,10 @@ static NSInteger ns_counter = 0;
     [logger removeAllData];
 
     XCTAssertFalse([self fileExists:old]);
-    XCTAssertEqual([logger logFiles].count, (NSUInteger)0, @"removeAllData删除全部文件且不重建");
-    // 删除后继续写入不崩溃(README语义: 数据不再落盘)
+    XCTAssertEqual([logger logFiles].count, (NSUInteger)1, @"保留当前正在映射的文件");
+    XCTAssertEqualObjects([self readBack:logger cryptKey:nil iv:nil].firstObject[@"msg"], @"a");
     XCTAssertEqual([logger infoWithName:nil msg:@"after-clear" tag:nil], (NSInteger)0);
+    XCTAssertEqual([self readBack:logger cryptKey:nil iv:nil].count, (NSUInteger)2);
 }
 
 #pragma mark - logFiles

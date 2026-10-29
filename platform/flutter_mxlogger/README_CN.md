@@ -260,7 +260,7 @@ void setMaxDiskSize(int bytes);   // 默认 0 = 不限制
 
 void removeExpireData();      // 按上面两个阈值清理
 void removeBeforeAllData();   // 删除除当前写入文件外的所有日志
-void removeAll();             // 删除所有日志文件
+void removeAll();             // 清理闲置日志，保留正在使用的文件
 ```
 
 `removeExpireData()` 的清理顺序：先按最后修改时间删掉超过 `maxDiskAge` 的文件；若总大小仍超过 `maxDiskSize`，再从最旧的开始继续删。**当前正在写入的文件永远不会被删除。**

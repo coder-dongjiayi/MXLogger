@@ -63,7 +63,7 @@
 "home.file.expire.title" = "清理过期文件";
 "home.file.before.title" = "清理历史文件";
 "home.file.before.subtitle" = "removeBeforeAllData，保留当前写入中的文件";
-"home.file.all.title" = "清空全部日志";
+"home.file.all.title" = "清理闲置日志";
 
 /* 主页 - 实例信息 */
 "home.section.info" = "实例信息";
@@ -84,7 +84,7 @@
 "toast.key.copied" = "loggerToken 已复制";
 "toast.path.copied" = "路径已复制";
 "toast.rebuild.done" = "实例已重建";
-"toast.removeall.done" = "日志已清空";
+"toast.removeall.done" = "闲置日志已清理，正在使用的文件已保留";
 "toast.write.success" = "%@ 写入成功";
 "toast.network.success" = "网络日志写入成功";
 "toast.custom.success" = "logWithLevel: 写入成功";
@@ -96,8 +96,8 @@
 /* 弹窗与选择器 */
 "alert.write.failed" = "写入失败(%ld)";
 "alert.no.error" = "暂无错误";
-"alert.removeall.title" = "清空全部日志？";
-"alert.removeall.message" = "removeAllData 将删除所有日志文件，且不可恢复。";
+"alert.removeall.title" = "清理闲置日志？";
+"alert.removeall.message" = "将删除闲置日志，保留当前及其他正在使用的日志文件。";
 "picker.level.message" = "低于该等级的日志不会写入磁盘文件";
 "picker.age.message" = "日志文件最长保留时间";
 "picker.size.message" = "日志文件占用磁盘上限";

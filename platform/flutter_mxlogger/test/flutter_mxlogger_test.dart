@@ -515,7 +515,7 @@ void main() {
       expect(readBack(logger).single['msg'], 'current');
     });
 
-    test('removeAll: 删除包括当前文件在内的所有日志文件', () {
+    test('removeAll: 删除闲置日志并保留当前映射文件', () {
       final logger =
           MXLogger(nameSpace: uniqueNs(), directory: newDir('all').path);
       logger.info('a');
@@ -525,9 +525,10 @@ void main() {
       logger.removeAll();
 
       expect(old.existsSync(), isFalse);
-      expect(logger.getLogFiles(), isEmpty, reason: 'removeAll删除全部文件且不重建');
-      // README语义: 运行中文件被删后继续写入不报错(写入已删除的映射, 不再落盘)
+      expect(logger.getLogFiles(), hasLength(1), reason: '保留当前正在映射的文件');
+      expect(readBack(logger), hasLength(2));
       expect(logger.info('after-clear'), 0);
+      expect(readBack(logger), hasLength(3));
     });
   });
 

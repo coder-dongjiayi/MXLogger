@@ -274,10 +274,10 @@ typedef NS_ENUM(NSInteger, MXStoragePolicyType) {
 /// macOS also skips log files still held by other cooperating processes.
 -(void)removeExpireData;
 
-/// 清理全部日志文件
-/// Remove all log files
-/// macOS 删除操作与其他进程协调；仍存活的 logger 在下次写入时重开文件。
-/// macOS coordinates deletion across processes; live loggers reopen on their next write.
+/// 清理日志文件，保留当前正在使用的文件
+/// Remove inactive log files, preserving the current file.
+/// macOS 也保留其他活跃 logger 持有的文件。
+/// macOS also retains files held by other active loggers.
 -(void)removeAllData;
 
 /// 删除除当前正在写入日志文件外的所有日志文件

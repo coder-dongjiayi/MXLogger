@@ -237,9 +237,9 @@ public class MXLogger {
    }
 
     /**
-     * 删除所有日志文件
+     * 清理日志文件，保留当前正在使用的文件
      * <p>
-     * Remove all log files
+     * Remove inactive log files, preserving the current file
      */
   public  void  removeAll(){
       native_removeAll(nativeHandle);

@@ -589,8 +589,8 @@ class MXLogger with WidgetsBindingObserver {
     _removeBeforeAllData(_handle);
   }
 
-  /// 删除所有日志文件
-  /// Remove all log files
+  /// 清理日志文件，保留当前正在使用的文件；桌面端也保留其他活跃 logger 的文件
+  /// Remove inactive logs, preserving current files and other desktop loggers' active files
   void removeAll() {
     if (enable == false) return;
     _removeAll(_handle);

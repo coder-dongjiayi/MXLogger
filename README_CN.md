@@ -357,16 +357,17 @@ debugPrint("日志目录 ${logger.diskcachePath}");
 去重；这一对的 md5 就是 **loggerToken**——大型 app 组件化时把它传给子模块，子模块用类方法写日志，不必传
 logger 对象。
 
-原生 macOS Core 支持多个进程协作访问同一日志目录：写入前获取目录级文件锁，刷新有效长度、
-文件身份和映射容量；读取时复制有效数据快照后解锁解析。各进程须使用本协议及一致的加密参数，
+原生 macOS Core 支持多个进程协作访问同一日志目录：写入前获取目录级文件锁，刷新有效长度和
+映射容量；不逐条检查路径是否被外部删除或替换。读取时复制有效数据快照后解锁解析。各进程须使用本协议及一致的加密参数，
 实际目录必须共享且可访问。不同日志目录互不阻塞；iOS、Android 保持原来的文件访问流程，
 Windows Core 已增加实验性的同目录多进程后端：使用 `LockFileEx`，每次事务结束前释放数据映射和句柄，
 活动文件保护由独立的协调文件锁维持。Windows 实际运行结果须由手动触发的 `verify-logger` CI 验证；
 这不代表 Flutter 插件已完成 Windows 接入。
 
 macOS / Windows Core 的 `.mxlogger.lock` 是协调文件，不计入日志列表或大小，也不会被清理；logger 存活时请勿手动删除。
-过期/容量清理及 `removeBeforeAllData` 会保留其他进程仍持有的日志文件；显式 `removeAllData` 删除全部日志，
-各进程在下次写入前重开文件。`.mx` 格式保持不变，没有新增 CRC 或断电持久性保证；
+过期/容量清理、`removeBeforeAllData` 和 `removeAllData` 均保留当前文件及其他活跃 logger 持有的文件。
+iOS / Android 的清理也保留自身当前文件。外部删除 POSIX 文件后，现有 logger 允许继续写旧映射，
+不自动按原路径重建；释放并重新初始化 logger 时正常打开文件。`.mx` 格式保持不变，没有新增 CRC 或断电持久性保证；
 macOS / Windows 写入返回码 `-4` 表示文件锁失败或超过 32 位有效长度上限，详情见 `errorDesc`。
 
 > **废弃说明。** `loggerToken` 之前叫 `loggerKey`，容易和加密用的 `cryptKey` 混淆。iOS / Android / Flutter
@@ -437,7 +438,7 @@ macOS / Windows 写入返回码 `-4` 表示文件锁失败或超过 32 位有效
 | `- logFiles` | 字典数组：`name` / `size` / `last_timestamp` / `create_timestamp` |
 | `- errorDesc` | 最近一次写入失败的错误信息 |
 | `- removeExpireData` | 先删过期文件，总大小仍超 `maxDiskSize` 则从最旧的继续删；正在写入的文件不删 |
-| `- removeAllData` | 删除全部日志文件 |
+| `- removeAllData` | 清理闲置日志，保留正在使用的文件 |
 | `- removeBeforeAllData` | 删除除当前正在写入外的所有文件 |
 | `+ selectWithDiskCacheFilePath:cryptKey:iv:` | 解析日志文件（时间倒序）：`name` / `msg` / `tag` / `level` / `timestamp` / `thread_id` / `is_main_thread` / `error_code` |
 
@@ -501,7 +502,7 @@ native 是唯一事实源）。
 | --- | --- |
 | `String[] logFiles()` | 每个元素是一个文件的 JSON 字符串：`name` / `size` / `last_timestamp` / `create_timestamp` |
 | `void removeExpireData()` | 先删过期文件，超出 `maxDiskSize` 再从最旧的继续删。Android 端没有生命周期钩子，需自行调用（如 `onStop`） |
-| `void removeAll()` | 删除全部日志文件 |
+| `void removeAll()` | 清理闲置日志，保留正在使用的文件 |
 | `void removeBeforeAllData()` | 删除除当前正在写入外的所有文件 |
 | `static String[] selectWithFilePath(String diskCacheFilePath, String cryptKey, String iv)` | 解析日志文件，每个元素是一条日志的 JSON 字符串（时间倒序） |
 
@@ -552,7 +553,7 @@ Android Java 仍使用以上大写枚举名。Flutter / Dart 使用 `yyyyMMdd`�
 | `void setMaxDiskSize(int size)` | 最大总字节数，0 不限制 |
 | `void shouldRemoveExpiredDataWhenEnterBackground(bool should)` | 移动端进入后台是否自动清理，默认 `true`；macOS 需手动清理 |
 | `void removeExpireData()` | 先删过期文件，超出大小限制再从最旧的继续删 |
-| `void removeAll()` | 删除全部日志文件 |
+| `void removeAll()` | 清理闲置日志，保留正在使用的文件 |
 | `void removeBeforeAllData()` | 删除除当前正在写入外的所有文件 |
 | `int getLogSize()` / `String getDiskcachePath()` / `String? getLoggerToken()` / `List<MXFileEntity> getLogFiles()` | 上面几个 getter 的方法形式 |
 

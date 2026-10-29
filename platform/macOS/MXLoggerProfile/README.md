@@ -1,6 +1,9 @@
 # macOS 写入性能诊断（临时分支）
 
-只用于定位原生 Release Demo 的 10 万条写入瓶颈。没有修改锁、映射、扩容、加密或提交策略。
+只用于定位原生 Release Demo 的 10 万条写入瓶颈。
+本轮已移除桌面写入时的路径删除/替换检查及重复 `fstat`，macOS 每条写入只保留一次句柄容量查询。
+诊断组的 `path_stat.calls` 应为 0，`file_info.calls` 应为写入条数。
+清理接口统一保留正在使用的文件；锁、扩容、加密及提交顺序未改。
 独立的 `profile-macos` GitHub Actions 只构建本工具，不运行 Windows、Android 或全平台回归。
 支持手动触发，并仅对当前临时分支 `macos-test` 的诊断相关文件推送自动触发，便于首次运行，
 无需先把诊断代码合入主分支。推送后在 Actions 查看 `profile-macos`，下载 `MXLoggerProfile-macOS.dmg`。

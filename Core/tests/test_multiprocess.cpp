@@ -171,11 +171,11 @@ MX_TEST(multiprocess, cached_mapping_handoff_within_one_process_and_cleanup) {
     EXPECT_EQ(first.log(one), 0);
     EXPECT_EQ(mxtest::parse_dir(dir).size(), size_t(3));
     second.remove_all();
-    EXPECT_TRUE(mxtest::first_mx_path(dir).empty());
+    EXPECT_FALSE(mxtest::first_mx_path(dir).empty());
     EXPECT_EQ(first.log(two), 0);
     auto records = mxtest::parse_dir(dir);
-    EXPECT_EQ(records.size(), size_t(1));
-    if (!records.empty()) EXPECT_EQ(records[0]["msg"], std::string("second"));
+    EXPECT_EQ(records.size(), size_t(4));
+    if (!records.empty()) EXPECT_EQ(records.back()["msg"], std::string("second"));
 }
 
 MX_TEST(multiprocess, idle_cached_process_allows_another_process_to_grow) {
@@ -237,6 +237,8 @@ MX_TEST(multiprocess, killed_cached_writer_releases_view_and_mapping_lease) {
         EXPECT_TRUE(mxlogger::path_exists(active.c_str()));
         cleaner.remove_all();
     }
+    // Cleanup preserves its own file while alive; it is closed now.
+    EXPECT_EQ(mxlogger::remove_file((dir + mxtest::today_prefix() + "_cleaner.mx").c_str()), 0);
     // Recreate an independent crash case for the existing gate/readback check.
     worker again(dir, 1, 10);
     EXPECT_TRUE(again.receive('R'));
@@ -316,29 +318,38 @@ MX_TEST(multiprocess, cleanup_preserves_other_process_live_files) {
     EXPECT_TRUE(mxlogger::path_exists((dir + mxlogger::ipc::lock_filename).c_str()));
 }
 
-MX_TEST(multiprocess, remove_all_reopens_live_mappings_in_every_process) {
+MX_TEST(multiprocess, remove_all_preserves_live_mappings_in_every_process) {
     std::string dir = mxtest::temp_dir("ipc_remove_all");
     worker a(dir, 1), b(dir, 2);
     EXPECT_TRUE(a.receive('R')); EXPECT_TRUE(b.receive('R'));
     EXPECT_TRUE(a.send('W')); EXPECT_TRUE(a.receive());
     EXPECT_TRUE(b.send('W')); EXPECT_TRUE(b.receive());
+    const auto active = mxtest::first_mx_path(dir);
+    auto read_active = [&] {
+        record_list records;
+        mxlogger::select_form_path(active.c_str(), &records, nullptr, nullptr);
+        return records;
+    };
     mmap_sink cleaner(dir, "cleaner", policy::yyyy_MM_dd);
-    // Deletion races with real appends. Records written before deletion may be
-    // intentionally removed, but every surviving record must remain readable.
+    const auto inactive = dir + "inactive.mx";
+    mxtest::write_dummy_file(inactive, 128);
+    // Cleanup races with real appends, but must never unlink active log files.
     EXPECT_TRUE(a.send('W')); EXPECT_TRUE(b.send('W'));
     cleaner.remove_all();
     EXPECT_TRUE(a.receive()); EXPECT_TRUE(b.receive());
-    for (auto &record : mxtest::parse_dir(dir)) {
-        EXPECT_EQ(record["error_code"], std::string("0"));
-    }
+    EXPECT_TRUE(mxlogger::path_exists(active.c_str()));
+    EXPECT_FALSE(mxlogger::path_exists(inactive.c_str()));
+    check_records(read_active(), 600);
     cleaner.remove_all();
     record_list files;
     mxlogger::get_files(&files, dir.c_str());
-    EXPECT_TRUE(files.empty());
+    EXPECT_EQ(files.size(), size_t(2)); // Shared writer file + cleaner's own file.
     EXPECT_TRUE(a.send('W')); EXPECT_TRUE(b.send('W'));
     EXPECT_TRUE(a.receive()); EXPECT_TRUE(b.receive());
-    check_records(mxtest::parse_dir(dir), 300, false, 2);
+    check_records(read_active(), 900);
     EXPECT_TRUE(a.finish()); EXPECT_TRUE(b.finish());
+    cleaner.remove_all(); // The closed workers' file is now eligible.
+    EXPECT_FALSE(mxlogger::path_exists(active.c_str()));
     log_msg msg(level::info, "after-cleanup", nullptr, "reopened", false);
     EXPECT_EQ(cleaner.log(msg), 0);
 }

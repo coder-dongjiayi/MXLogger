@@ -281,7 +281,7 @@ private:
             {apply_settings,L"应用运行设置",L"Apply settings"}, {label_writes,L"日志写入",L"Write logs"}, {write_sample,L"通用日志",L"Write sample"},
             {write_json,L"网络 JSON",L"Network JSON"}, {write_token,L"Token 写入",L"Write via token"}, {label_tests,L"并发与性能（写入后校验）",L"Concurrency / performance"},
             {thread_test,L"四线程校验",L"4 threads"}, {process_test,L"双进程校验",L"2 processes"}, {benchmark,L"10 万条性能测试",L"100,000 writes"}, {flush,L"Flush 到磁盘",L"Flush to disk"},
-            {label_cleanup,L"清理与生命周期",L"Cleanup / lifecycle"}, {expire,L"清理过期",L"Expired"}, {keep_current,L"仅保留当前",L"Keep current"}, {clear_all,L"删除全部",L"Remove all"},
+            {label_cleanup,L"清理与生命周期",L"Cleanup / lifecycle"}, {expire,L"清理过期",L"Expired"}, {keep_current,L"仅保留当前",L"Keep current"}, {clear_all,L"清理闲置",L"Clean unused"},
             {rebuild,L"销毁并重建实例",L"Destroy and rebuild"}, {refresh,L"刷新",L"Refresh"}, {label_files,L"日志文件",L"Log files"},
             {label_records,L"日志浏览器 · 最近 1,000 条",L"Log viewer · latest 1,000 records"}, {label_details,L"完整日志详情",L"Full record details"}, {cancel_task,L"取消",L"Cancel"}
         };
