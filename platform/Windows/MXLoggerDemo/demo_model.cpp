@@ -2,7 +2,6 @@
 #include "demo_process.hpp"
 #include "mxlogger_util.hpp"
 #include "mxlogger_build_config.h"
-#include "mxlogger_profile.hpp"
 #include "json/cJSON.h"
 #include <algorithm>
 #include <chrono>
@@ -145,7 +144,7 @@ void Session::rebuild() { close(); open(); }
 void Session::require_enabled() const {
     check(logger_->is_enable(), "Enable logging before running this action. / 请先开启日志写入。");
 }
-std::string Session::benchmark(int count, Progress& progress, double* elapsed) {
+std::string Session::benchmark(int count, Progress& progress) {
     require_enabled();
     progress.total = count; progress.completed = 0;
     const bool console = logger_->is_enable_console();
@@ -154,10 +153,7 @@ std::string Session::benchmark(int count, Progress& progress, double* elapsed) {
     const auto start = std::chrono::steady_clock::now();
     try {
         for (int i = 0; i < count; ++i) {
-            MXLOGGER_PROFILE_RECORD();
-            MXLOGGER_PROFILE_SPAN(profile_message, message);
             const auto message = "benchmark " + std::to_string(i);
-            MXLOGGER_PROFILE_STOP(profile_message);
             const int result = logger_->log(level, "MXLoggerDemo", message.c_str(), "Benchmark", false);
             if (result != 0) {
                 const char* error = logger_->error_desc();
@@ -168,7 +164,6 @@ std::string Session::benchmark(int count, Progress& progress, double* elapsed) {
     const auto seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
     logger_->set_enable_console(console);
     progress.completed = count;
-    if (elapsed) *elapsed = seconds;
     std::ostringstream text;
     text << count << " writes / 条, " << std::fixed << std::setprecision(3) << seconds << " s, "
          << static_cast<long long>(count / std::max(0.000001, seconds)) << " records/s (flush excluded)";

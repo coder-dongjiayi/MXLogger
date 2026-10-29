@@ -5,9 +5,9 @@
 int main(int argc, char** argv) {
     try {
         if (argc == 4 && std::string(argv[1]) == "--worker") return demo::run_worker(argv[2], argv[3]);
-        if (argc == 4 && (std::string(argv[1]) == "--self-test" || std::string(argv[1]) == "--benchmark") && std::string(argv[2]) == "--report-dir") {
+        if (argc == 4 && std::string(argv[1]) == "--self-test" && std::string(argv[2]) == "--report-dir") {
             const auto directory = std::filesystem::u8path(argv[3]);
-            const int result = std::string(argv[1]) == "--benchmark" ? demo::benchmark_report(directory) : demo::smoke(directory);
+            const int result = demo::smoke(directory);
             std::cout << (result == 0 ? "PASS" : "FAIL") << " Windows demo action model; reports: " << argv[3] << '\n';
             return result;
         }

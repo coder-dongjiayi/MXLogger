@@ -88,7 +88,6 @@ add_library(MXLoggerCore
         mxlogger_interprocess.hpp
         mxlogger_windows_cache.hpp
         mxlogger_windows_write_time.hpp
-        mxlogger_profile.hpp
         mxlogger_helper.hpp
         mxlogger_util.cpp
         mxlogger_util.hpp
@@ -119,29 +118,18 @@ add_library(MXLoggerCore
         sink/mmap_sink.hpp
         )
 
-option(MXLOGGER_BUILD_PROFILE "Build a separate instrumented Core for diagnostics" OFF)
-set(MXLOGGER_CORE_TARGETS MXLoggerCore)
-if(MXLOGGER_BUILD_PROFILE)
-    get_target_property(MXLOGGER_PROFILE_SOURCES MXLoggerCore SOURCES)
-    add_library(MXLoggerCoreProfile STATIC ${MXLOGGER_PROFILE_SOURCES})
-    target_compile_features(MXLoggerCoreProfile PUBLIC cxx_std_17)
-    target_compile_definitions(MXLoggerCoreProfile PUBLIC MXLOGGER_ENABLE_PROFILING=1)
-    list(APPEND MXLOGGER_CORE_TARGETS MXLoggerCoreProfile)
-endif()
-
 find_package(Threads REQUIRED)
-foreach(MXLOGGER_CORE_TARGET IN LISTS MXLOGGER_CORE_TARGETS)
 # ARM加速汇编：MSVC不支持GNU汇编语法，其余平台照常参与编译(源内有架构守卫)
 IF(NOT MSVC)
-    target_sources(${MXLOGGER_CORE_TARGET} PRIVATE
+    target_sources(MXLoggerCore PRIVATE
             aes/openssl/openssl_aes-armv4.S
             aes/openssl/openssl_aesv8-armx.S
             )
 ENDIF()
 
-target_include_directories(${MXLOGGER_CORE_TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(MXLoggerCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-set_target_properties(${MXLOGGER_CORE_TARGET} PROPERTIES
+set_target_properties(MXLoggerCore PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
@@ -149,19 +137,18 @@ set_target_properties(${MXLOGGER_CORE_TARGET} PROPERTIES
         )
 
 
-target_link_libraries(${MXLOGGER_CORE_TARGET} PUBLIC Threads::Threads)
+target_link_libraries(MXLoggerCore PUBLIC Threads::Threads)
 
 if(MSVC)
-    target_compile_options(${MXLOGGER_CORE_TARGET} PUBLIC /utf-8)
+    target_compile_options(MXLoggerCore PUBLIC /utf-8)
 endif()
 if(WIN32)
-    target_compile_definitions(${MXLOGGER_CORE_TARGET} PUBLIC
+    target_compile_definitions(MXLoggerCore PUBLIC
         _CRT_SECURE_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN)
 endif()
 if(APPLE)
-    target_compile_definitions(${MXLOGGER_CORE_TARGET} PUBLIC FORCE_POSIX $<$<CONFIG:Debug>:DEBUG=1>)
+    target_compile_definitions(MXLoggerCore PUBLIC FORCE_POSIX $<$<CONFIG:Debug>:DEBUG=1>)
 endif()
-endforeach()
 
 # Opt in explicitly so Android/Flutter consumers only build the library.
 option(MXLOGGER_BUILD_TESTS "Build the native Core tests" OFF)

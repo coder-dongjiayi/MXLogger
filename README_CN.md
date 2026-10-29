@@ -163,7 +163,7 @@ cmake --build build/windows-demo --config Debug --parallel
 
 Windows 10/11 x64，需 Visual Studio C++ 桌面开发工具和 CMake 3.20+。
 手动运行 `verify-logger` 会在 Windows Debug / Release 构建并运行真实窗口自测，
-上传 Demo zip、日志及界面截图；每次仍检查 Windows、Apple 和 Android 全平台。
+上传日志及界面截图；全部平台验证通过后，只上传 Release 的 `MXLoggerDemo.exe`。
 Mac 可编辑代码并验证共用日志操作，Windows GUI 的编译和运行由 Windows CI 验证。
 
 ### Flutter macOS Demo
@@ -217,8 +217,30 @@ Android 原生回归使用 NDK、CMake 和 Ninja，编译四种 ABI，并检查�
 ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_android_native.sh
 ```
 
-`.github/workflows/verify-logger.yml` 在相关 PR 和手动触发时执行上述检查，保留日志 7 天。
-Android 检查覆盖原生编译，设备上的运行验证需另行进行。
+`.github/workflows/verify-logger.yml` **仅手动触发**。第一阶段运行 Windows Debug / Release Core 测试与窗口自测、
+Apple 原生及 Flutter 回归、Android 库和 Demo 的 JVM 单元测试及四种 ABI 原生编译。
+全部验证通过后，第二阶段并行构建以下原生 Release Demo，任一验证失败均跳过打包：
+
+| 平台 | 文件 |
+|---|---|
+| Windows | `MXLoggerDemo.exe`（x64） |
+| macOS | `MXLoggerDemo-macOS-Release.dmg`（Apple Silicon + Intel） |
+| Android | `MXLoggerDemo-android-Release.apk`（包含四种 ABI） |
+
+安装文件通过 [`archive: false`](https://github.com/actions/upload-artifact/tree/v7#upload-an-individual-file-unzipped) 直接上传原文件，不增加 ZIP 包装；安装文件与测试日志保留 7 天。
+macOS DMG 支持拖入 Applications，采用 ad-hoc 签名，未进行 Apple 公证。
+Android APK 使用测试密钥签名，构建类型为 Release；不同 CI 运行的测试密钥可能不同，覆盖安装失败时需先卸载旧 Demo。
+Android 设备上的运行验证需另行进行。
+
+本地构建同样的安装文件：
+
+```bash
+bash scripts/build_macos_demo_dmg.sh
+ANDROID_HOME=/path/to/android-sdk bash scripts/verify_android_demo.sh test
+ANDROID_HOME=/path/to/android-sdk bash scripts/verify_android_demo.sh package
+```
+
+Android 使用 JDK 17、NDK `27.0.12077973`、CMake `3.22.1`、SDK 平台 31 / 33 和 Build Tools `34.0.0`。
 
 2.2.0 发布时，先同步 `mxlogger-spm` 镜像，并使主仓库和镜像的 `v2.2.0` 标签可用；
 随后发布 `MXLoggerCore`、`MXLogger` 和 Android 2.2.0，最后发布 Flutter 包。

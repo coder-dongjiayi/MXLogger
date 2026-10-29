@@ -71,8 +71,7 @@ state resets on file reopen; cross-second clock rollback and update failures for
 a new publish. This does not change the record format or power-loss durability.
 The portable `test_write_time.cpp` suite checks the policy with deterministic
 FILETIME ticks, including failure/retry and same-tick writes. Windows integration
-checks close/flush expiration timestamps and killed-writer cleanup. Set
-`MXLOGGER_WINDOWS_FILE_TIME_COALESCING=0` for the per-record diagnostic baseline.
+checks close/flush expiration timestamps and killed-writer cleanup.
 
 The persistent `.mxlogger.lock` is never a log or part of the size budget, and
 must never be deleted while loggers exist. On Windows, byte zero coordinates

@@ -7,6 +7,7 @@ android {
     defaultPublishConfig "DefaultCppRelease"
 
     compileSdk 31
+    ndkVersion "27.0.12077973"
 
     packagingOptions {
         jniLibs {
@@ -36,7 +37,7 @@ android {
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
-            version "3.10.2"
+            version "3.22.1"
         }
     }
     compileOptions {

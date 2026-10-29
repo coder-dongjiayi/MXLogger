@@ -51,104 +51,8 @@ Windows 的映射写入可能不会自动更新文件修改时间，因此需要
 未保留映射或存在持续争抢时，句柄频繁交接，合并空间也相应减少。
 macOS、iOS 和 Android 的映射策略保持原样。共享目录的所有进程应一起更新到本次构建，避免混用不同的协调协议。
 
-可以在同一台 Windows 机器上比较缓存开关下的真实写入耗时：
-
-```powershell
-pwsh -File scripts/verify_windows_demo.ps1 -Configuration Release -Benchmark
-```
-
-脚本使用同一个 exe、相同 `log()` 循环分别执行明文 / AES 各 100,000 条，并在计时结束后
-验证记录数量和顺序。`benchmark/transient/` 使用诊断变量 `MXLOGGER_WINDOWS_MAPPING_CACHE=0` 关闭映射复用，
-`benchmark/cached/` 开启复用；两组都保留跨进程锁、新的扩容策略，并临时固定为逐条文件时间更新。
-因此这个对照隔离的是映射复用的收益，不能作为与历史版本整体性能差异的精确对照。
-脚本结束后恢复环境变量，正常运行 Demo 默认开启复用。
-
-比较本次文件时间优化，可在同一台机器、同一磁盘执行：
-
-```powershell
-pwsh -File .\profile_windows_demo.ps1 -FileTimeMode PerRecord -Rounds 3
-pwsh -File .\profile_windows_demo.ps1 -FileTimeMode Coalesced -Rounds 3
-```
-
-对比两份 `summary.json` 的普通版本 `baseline_seconds`；`PerRecord` 保留逐条更新时间，
-`Coalesced` 使用默认的按秒合并策略。两个 exe、消息和跨进程锁均相同，仅修改时间策略变化。
-脚本使用当前进程的 `MXLOGGER_WINDOWS_FILE_TIME_COALESCING` 环境变量控制，并在结束后恢复；
-开发时也可将该变量设为 `0` 临时恢复逐条更新时间。默认不设置时启用合并。
-
-## 写入分段诊断
-
-验证脚本会额外构建控制台工具 `MXLoggerProfile.exe`，它链接独立的
-`MXLoggerCoreProfile`。普通 GUI 和正式 Benchmark 链接的 Core 不含采样代码；
-诊断不改变加锁、逐条修改时间更新、加密或提交逻辑。Release CI 会自动运行诊断，
-Debug 也会编译诊断工具并验证统计器。
-
-从仓库根目录构建、验证并运行完整评测：
-
-```powershell
-pwsh -File scripts/verify_windows_demo.ps1 -Configuration Release -ProfileWrites
-```
-
-下载并**解压整个 ZIP** 后，Debug / Release 的 `MXLoggerProfile.exe` 均支持直接双击：
-
-- 无参数自动诊断明文 / AES 各 100,000 条，不依赖 PowerShell。
-- 窗口先显示运行状态和报告位置，写入期间不刷新逐条进度，结束后显示耗时及分段结果。
-- 报告默认保存在 `%LOCALAPPDATA%\MXLoggerDemo\Profile\single-...\profile.json` 和 `profile.txt`。
-- 资源管理器双击创建的控制台会在成功或失败后保留，按 Enter 关闭；命令行 / CI 调用正常返回退出码。
-
-完整 7 轮普通 / 诊断对照可双击包内 `Run-Performance-Test.cmd`。
-它会显示预热、当前轮次及报告路径，结束或出错后保留窗口；缺少 PowerShell 7 时明确提示。
-这些状态在各轮测试之间输出，不进入写入循环的计时。
-也可在同一台 Windows 电脑的终端执行：
-
-```powershell
-pwsh -File .\profile_windows_demo.ps1
-```
-
-脚本默认使用脚本所在目录的两个 exe；可通过 `-ExecutableDirectory` 指定构建产物目录，
-通过 `-ReportDirectory` 指定报告及临时日志的父目录（应与之前测试使用同一磁盘）。
-每次建立独立的 `run-时间戳/`，不覆盖原有报告或使用 Demo 的日志目录。
-默认每个 exe 预热一轮，然后交替运行普通 / 诊断程序各 7 轮，每轮各写入
-100,000 条明文和 AES 日志。普通程序仍使用现有 `--benchmark` 循环。
-控制台、进度刷新、初始化、显式 flush、读取校验和报告输出均不进入写入计时；
-每轮计时后检查文件头、记录数量、消息顺序及解密。
-
-结果首先看 `summary.txt` / `summary.json`：普通版本的中位数、最小值和最大值，
-诊断相对耗时差异，各阶段估算耗时排序，以及独立 API 微基准。
-阶段包括消息构造、线程锁等待、元数据、FlatBuffers 构造与分配释放、AES、
-目录锁获取 / 释放、缓存互斥锁等待、缓存协调 / 映射交接等待、文件打开 / 关闭、
-映射检查 / 创建 / 解除、扩容、文件时间更新、数据复制和其他开销。
-
-默认每 64 条抽样一次，并在各轮错开起点；恢复映射、打开关闭文件、映射与扩容、
-实际交接等待等低频操作完整计时。嵌套阶段采用独占耗时，子阶段从父阶段扣除，
-不会把缓存交接同时算作目录锁调用。所有计数在线程本地内存累积，仅统计计时循环
-所在前台线程；后台 CPU 不加入占比，前台等待后台释放资源的时间会被计入。
-`cache_hits`、`cache_misses`、`mapping_handoffs`、`ready_set_events` 和 `ready_reused`
-可检查实际路径和事件复用是否生效。初始化和结束后的 flush / 校验不进入这些统计。
-`file_time_check` 统计逐条读取时间和判断是否需要更新的开销；`file_time` 完整计时实际的
-`SetFileTime` 调用。`file_time_updates` 是写入循环前台实际调用次数，`file_time_coalesced`
-是合并的写入次数；后台回收及结束后的补写不进入前台计数。
-
-`profile.json` 保留每段调用数、抽样 / 完整计时数、实际采集耗时和估算值。
-完整计时部分直接采用，抽样部分按记录采样比例外推；未采到的条件分支显示 `null`。
-估算占比不强制归一到 100%，不同轮次的阶段中位数也不一定加总为总耗时中位数。
-时钟调用成本单列，未机械扣减。诊断耗时不能作为正式 Benchmark 成绩；
-`other` 还包含未分段代码与部分统计记账开销，不能直接视为可消除的业务开销。
-如果诊断比普通版本慢超过 5%，先降低采样频率再复测：
-
-```powershell
-pwsh -File .\profile_windows_demo.ps1 -SampleStride 256
-```
-
-单次诊断可运行 `MXLoggerProfile.exe --report-dir .\single-profile`。
-独立 API 复核可运行 `MXLoggerProfile.exe --microbench --report-dir .\api-profile`：
-在同盘临时文件上测量 100,000 次无竞争锁获取 / 释放，以及修改时间更新。
-微基准使用未映射的独立文件，其耗时用于复核热点，不能直接从真实日志耗时中相减。
-微基准仍逐次执行 `SetFileTime`，用来衡量系统调用成本，不启用日志写入的合并策略。
-报告目录保留测试数据，可在评测结束后自行删除。
-
-本轮先评测单进程单线程，定位约 2.95 秒耗时；确认热点后再增加双进程共享 / 独立目录对照。
-CI 用来验证编译与结果完整性，性能对比应在同一台本地 Windows 电脑上完成。
-Mac 的诊断目标仅验证统计器和共用写入路径，报告明确标记 `macos-model-only`。
+在 Demo 中运行 100,000 条性能测试，写完后查看总耗时与吞吐量。
+计时不含显式 flush 和读取，循环内不刷新进度；对比时保持同一台机器、日志目录及加密配置。
 
 ## 自动验证与 CI 产物
 
@@ -159,18 +63,16 @@ pwsh -File scripts/verify_windows_demo.ps1 -Configuration Debug
 pwsh -File scripts/verify_windows_demo.ps1 -Configuration Release
 ```
 
-脚本构建实际 GUI exe，运行 `--self-test --report-dir <目录>`，再安装并生成 zip。
+脚本构建实际 GUI exe，运行 `--self-test --report-dir <目录>`。
 自测先执行共用操作的明文/加密回归，再创建真实窗口、点击原生控件，覆盖设置、浏览、筛选、
 线程/进程、性能、清理、重建及双语，并生成窗口 PNG。自测使用独立的含中文与空格目录，不清理用户日志。
 自动自测缩小写入数量：每线程 32 条、每进程 64 条、性能 500 条；共用模型另测每进程 128 条。
 结果在 `build/windows-native-demo/<Debug|Release>/self-test/`，包含 `model/report.json`、`ui-report.txt` 和截图。
 
 GitHub Actions 的 `verify-logger` **仅手动触发**。每次运行仍验证 Windows Debug/Release、Apple 和 Android；
-Windows 会额外构建、自测并上传此 Demo，同时运行上述 100,000 条对照测试。
-耗时、吞吐量和倍数在日志及 `benchmark/comparison.json` 中，不以固定耗时作为 CI 成败阈值。
-下载 `windows-demo-<配置>` 中的 zip，解压运行 `MXLoggerDemo.exe`；包中也包含诊断工具及脚本。
-Release 的分段评测报告位于 `windows-demo-Release-logs` 中的 `profile/run-*/`。
-两种配置都会额外验证诊断 exe 无参数启动，启动输出与单轮结果见 `profile-startup.log`。
+全部平台验证通过后，单独的 Release 阶段直接上传 `MXLoggerDemo.exe`，不生成 Debug 包或 zip。
+自测保留缩小规模的性能按钮检查；运行日志及截图位于对应的 `-logs` 产物。
+安装文件使用 `upload-artifact@v7` 的 `archive: false`，下载得到原始 exe。
 这验证原生 Windows Demo，Flutter Windows / FFI DLL 将在后续阶段接入。
 
 ## 在 Mac 上开发
@@ -195,8 +97,9 @@ logging/settings, validated thread/process runs, benchmarking, cleanup and insta
 lists files and the latest 1,000 records, with level/search filters and full record details. Settings are session-only.
 The default key/IV are public demo values; choose a new namespace when changing keys.
 
-`verify_windows_demo.ps1` builds, runs shared model checks and real window/control smoke checks, saves reports/PNGs,
-and produces a zip. Manual `verify-logger` CI runs this for Debug and Release alongside all other platforms.
+`verify_windows_demo.ps1` builds, runs shared model checks and real window/control smoke checks, and saves reports/PNGs.
+Manual `verify-logger` CI verifies Debug and Release alongside all other platforms, then uploads only the Release EXE
+after every verification job passes. It does not create a separate ZIP package.
 On macOS only the shared action model runs; native Windows compilation/UI verification requires Windows or Windows CI.
 
 Windows reuses mappings while it holds a separate interprocess lock, with background eviction for conflicting
@@ -204,9 +107,6 @@ writers/cleanup. Actual contention temporarily switches to transient views; idle
 Retention is bounded to 500 ms,
 with a 250 ms cooldown after contention. All cooperating writers should upgrade together; the log format and other
 platforms' mapping behavior are unchanged. The benchmark has no per-record progress/cancellation polling or UI timer;
-it reports total write time before manually loading previews. Pass `-Benchmark` to compare cache off/on using the same
-executable and verify 100,000 plaintext/AES records per case. Reports are under `benchmark/` in the build directory.
-That mapping comparison fixes both cases to per-record timestamp updates. Normal Windows writes coalesce modification
+it reports total write time before manually loading previews. Windows writes coalesce modification
 time updates within a wall-clock second and publish the last committed tick on flush/view release/close. The first
 append in each new second publishes before committing, preserving second-based expiration after process termination.
-Use `-FileTimeMode PerRecord` versus `Coalesced` with `profile_windows_demo.ps1` to isolate this timestamp optimization.

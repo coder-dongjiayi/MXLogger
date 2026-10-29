@@ -167,7 +167,7 @@ cmake --build build/windows-demo --config Debug --parallel
 
 Targets Windows 10/11 x64 with Visual Studio desktop C++ tools and CMake 3.20+.
 Manual `verify-logger` CI builds Debug/Release, exercises the actual window/controls,
-and uploads demo zips, logs and screenshots. Every manual run continues to check all platforms.
+and uploads logs and screenshots. Once all platforms pass, it uploads only the Release `MXLoggerDemo.exe`.
 On Mac you can edit the code and test shared log actions; Windows CI verifies the native GUI.
 
 ### Flutter macOS demo
@@ -229,9 +229,25 @@ an accidental dependency on the macOS process lock:
 ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_android_native.sh
 ```
 
-`.github/workflows/verify-logger.yml` runs these checks for relevant PRs and manual
-dispatches and retains logs for seven days. Android runtime behavior on a device
-requires separate verification.
+`.github/workflows/verify-logger.yml` is **manual-only**. Its first stage runs Windows Debug/Release Core tests
+and window checks, Apple native/Flutter regression checks, and Android library/Demo JVM unit tests plus four-ABI native builds.
+Only after every verification job succeeds does the Release stage build these native Demo deliverables:
+
+| Platform | File |
+|---|---|
+| Windows | `MXLoggerDemo.exe` (x64) |
+| macOS | `MXLoggerDemo-macOS-Release.dmg` (Apple Silicon + Intel) |
+| Android | `MXLoggerDemo-android-Release.apk` (all four ABIs) |
+
+Installers are uploaded directly with [`archive: false`](https://github.com/actions/upload-artifact/tree/v7#upload-an-individual-file-unzipped), without a ZIP wrapper.
+Artifacts and logs are retained for seven days. The macOS DMG supports dragging the app into Applications;
+it uses an ad-hoc signature and is not notarized. The non-debuggable Android Release APK uses a test signing key.
+Keys may differ between CI runs, requiring uninstalling an older Demo before installing a newer APK.
+Android runtime behavior on a device requires separate verification.
+
+To build locally, run `bash scripts/build_macos_demo_dmg.sh`, or run
+`ANDROID_HOME=/path/to/android-sdk bash scripts/verify_android_demo.sh test` followed by the same command with `package`.
+Android requires JDK 17, NDK `27.0.12077973`, CMake `3.22.1`, SDK platforms 31/33 and Build Tools `34.0.0`.
 
 For 2.2.0, synchronize the `mxlogger-spm` mirror and make the main and mirror `v2.2.0`
 tags available, then publish `MXLoggerCore`, `MXLogger` and Android 2.2.0 before the

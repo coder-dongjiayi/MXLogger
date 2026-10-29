@@ -52,7 +52,6 @@ MX_TEST(write_time, second_boundary_and_clock_rollback_publish_before_commit) {
     for (uint64_t value : {100 * second - 1, 100 * second, 99 * second, 100 * second}) {
         EXPECT_TRUE(time.prepare(value, [&](uint64_t tick) { return writer(tick); }));
         EXPECT_EQ(writer.published.back(), value);
-        EXPECT_FALSE(time.coalesced());
         time.commit(value);
     }
     EXPECT_EQ(writer.published.size(), size_t(4));
@@ -97,7 +96,6 @@ MX_TEST(write_time, failed_release_forces_retry_even_in_the_same_second) {
     EXPECT_FALSE(append(time, 100 * second + 2, writer));
     writer.fail = false;
     EXPECT_TRUE(append(time, 100 * second + 3, writer));
-    EXPECT_FALSE(time.coalesced());
     EXPECT_EQ(writer.published.back(), 100 * second + 3);
 }
 
@@ -108,18 +106,4 @@ MX_TEST(write_time, reopening_same_second_does_not_reuse_previous_file_state) {
     time.reset();
     EXPECT_TRUE(append(time, 100 * second, writer));
     EXPECT_EQ(writer.published.size(), size_t(2));
-}
-
-MX_TEST(write_time, diagnostic_opt_out_preserves_per_record_updates) {
-    windows_write_time time;
-    clock_writer writer;
-    time.set_coalescing(false);
-    for (int i = 0; i < 100; ++i) EXPECT_TRUE(append(time, 100 * second, writer));
-    EXPECT_EQ(writer.published.size(), size_t(100));
-    EXPECT_TRUE(flush(time, writer));
-    EXPECT_EQ(writer.published.size(), size_t(100));
-    time.reset();
-    EXPECT_TRUE(append(time, 100 * second, writer));
-    EXPECT_TRUE(append(time, 100 * second, writer));
-    EXPECT_EQ(writer.published.size(), size_t(102));
 }

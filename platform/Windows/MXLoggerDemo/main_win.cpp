@@ -765,17 +765,12 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR,int show) {
     if (!raw) return 1;
     std::vector<std::wstring> arguments(raw,raw+count); LocalFree(raw);
     if (count==4 && arguments[1]==L"--worker") return demo::run_worker(utf8(arguments[2]),utf8(arguments[3]));
-    bool self_test=false, benchmark_only=false; fs::path reports;
+    bool self_test=false; fs::path reports;
     if (count!=1) {
-        if (count!=4 || (arguments[1]!=L"--self-test" && arguments[1]!=L"--benchmark") || arguments[2]!=L"--report-dir") {
-            MessageBoxW(nullptr,L"Usage: MXLoggerDemo.exe [--self-test|--benchmark --report-dir <directory>]",L"MXLogger",MB_OK|MB_ICONERROR); return 2;
+        if (count!=4 || arguments[1]!=L"--self-test" || arguments[2]!=L"--report-dir") {
+            MessageBoxW(nullptr,L"Usage: MXLoggerDemo.exe [--self-test --report-dir <directory>]",L"MXLogger",MB_OK|MB_ICONERROR); return 2;
         }
-        benchmark_only=arguments[1]==L"--benchmark";
-        self_test=!benchmark_only; reports=fs::absolute(arguments[3]);
-    }
-    if (benchmark_only) {
-        try { return demo::benchmark_report(reports); }
-        catch (const std::exception& error) { std::ofstream(reports/"benchmark.txt") << "FAIL: " << error.what() << '\n'; return 1; }
+        self_test=true; reports=fs::absolute(arguments[3]);
     }
     const HRESULT com=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);
     if (FAILED(com)) return 1;

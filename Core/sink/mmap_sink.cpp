@@ -38,9 +38,6 @@ static size_t os_page_size(){
 namespace mxlogger{
 namespace sinks{
 mmap_sink::mmap_sink(const std::string &dir_path, const std::string &filename,policy::storage_policy policy):base_file_sink(dir_path,filename,policy),page_size_(os_page_size()){
-#ifdef _WIN32
-    write_time_.set_coalescing(files::windows_file_time_coalescing_enabled());
-#endif
 
     /// 构造时失败(如目录暂不可写)不致命：write_data_每次写入前会走同一条恢复路径重试
     /// A failure here (e.g. the directory is temporarily unwritable) is not fatal:
@@ -109,8 +106,6 @@ bool mmap_sink::refresh_mmap_() {
     // has evicted our retained view. Avoid reopening the path and querying its
     // identity/size on each record while that protection remains ours.
     if (mmap_ptr_ && process_lock_.cached_mapping()) {
-        MXLOGGER_PROFILE_SPAN(profile_refresh, mapping_refresh);
-        MXLOGGER_PROFILE_COUNT(cache_hit);
         actual_size_ = get_actual_size_();
         if (actual_size_ > file_size_ - offset_length) {
             error_record = MXLoggerError("invalid committed data length:%zu\n", actual_size_);
@@ -119,8 +114,6 @@ bool mmap_sink::refresh_mmap_() {
         return true;
     }
 #endif
-    MXLOGGER_PROFILE_EXACT(profile_recovery, mapping_refresh);
-    MXLOGGER_PROFILE_COUNT(cache_miss);
     files::file_info opened, current;
     if (file_.valid()) {
         if (!file_.info(opened)) {
@@ -237,9 +230,6 @@ void mmap_sink::add_file_heder(const char* msg){
 
 
 int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
-    // The outer span includes FlatBuffers allocation/free; nested spans remove
-    // encryption and the entire write transaction from its exclusive time.
-    MXLOGGER_PROFILE_SPAN(profile_serialize, serialization);
     flatbuffers::FlatBufferBuilder builder;
     
     auto root =  Createlog_serializeDirect(builder,msg.name,msg.tag,msg.msg,msg.level,(uint32_t)msg.thread_id,msg.is_main_thread,msg.time_stamp);
@@ -252,7 +242,6 @@ int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
     
     
     if (should_encrypt()) {
-        MXLOGGER_PROFILE_SPAN(profile_aes, encryption);
         cfb128_encrypt(point, point, size);
     }
     
@@ -261,7 +250,6 @@ int mmap_sink::log_(const details::log_msg& msg, bool only_if_empty){
 }
 
 int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_empty){
-    MXLOGGER_PROFILE_SPAN(profile_transaction, other);
 #if MXLOGGER_MULTIPROCESS
     ipc::scoped_lock lock(process_lock_);
     if (!lock) {
@@ -319,7 +307,6 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_
     }
 
 #ifdef _WIN32
-    MXLOGGER_PROFILE_SPAN(profile_time_check, file_time_check);
     const uint64_t write_time = files::file_time_now();
     // First append in each wall-clock second publishes mtime before the record.
     // Same-second appends defer the exact tick until flush/mapping release.
@@ -327,10 +314,7 @@ int mmap_sink::write_data_(const void* buffer, size_t buffer_size, bool only_if_
         error_record = MXLoggerError("update write time error:%s\n", file_.error_message().c_str());
         return -1;
     }
-    if (write_time_.coalesced()) MXLOGGER_PROFILE_COUNT(time_coalesced);
-    MXLOGGER_PROFILE_STOP(profile_time_check);
 #endif
-    MXLOGGER_PROFILE_SPAN(profile_append, append);
     uint8_t* write_ptr = mmap_ptr_  + offset_length + actual_size_;
     
     

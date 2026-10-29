@@ -49,7 +49,7 @@ public:
                bool token_api = false, bool main_thread = false);
     void sample(int level, bool json = false, bool token_api = false);
     void rebuild();
-    std::string benchmark(int count, Progress& progress, double* elapsed = nullptr);
+    std::string benchmark(int count, Progress& progress);
     std::string threads(int count_per_thread, Progress& progress);
     std::string processes(int count_per_process, Progress& progress);
     void sequence(const std::string& run, int worker, int count, Progress* progress = nullptr);
@@ -68,5 +68,4 @@ Config decode_config(const std::string& json);
 int run_worker(const std::string& input, const std::string& output);
 // Writes report.txt and report.json, returning a process exit code.
 int smoke(const std::filesystem::path& report_dir);
-int benchmark_report(const std::filesystem::path& report_dir);
 } // namespace demo

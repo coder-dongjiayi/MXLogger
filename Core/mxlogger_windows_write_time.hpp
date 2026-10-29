@@ -11,12 +11,10 @@ namespace mxlogger { namespace files {
 class windows_write_time {
 public:
     static constexpr uint64_t ticks_per_second = 10000000;
-    void set_coalescing(bool enabled) { coalescing_ = enabled; }
-
     template <typename Publish>
     bool prepare(uint64_t now, Publish publish) {
         prepared_published_ = false;
-        if (coalescing_ && valid_ && !retry_ && now / ticks_per_second == published_ / ticks_per_second)
+        if (valid_ && !retry_ && now / ticks_per_second == published_ / ticks_per_second)
             return true;
         // Publish BEFORE the record is committed, including after clock
         // rollback. Even process termination then preserves its cleanup second.
@@ -27,7 +25,6 @@ public:
         prepared_published_ = true;
         return true;
     }
-    bool coalesced() const { return !prepared_published_; }
     void commit(uint64_t now) {
         committed_ = now;
         // Mark every coalesced append dirty, even if the system clock returns
@@ -50,7 +47,7 @@ public:
     }
 private:
     uint64_t published_ = 0, committed_ = 0;
-    bool coalescing_ = true, valid_ = false, dirty_ = false, retry_ = false, prepared_published_ = false;
+    bool valid_ = false, dirty_ = false, retry_ = false, prepared_published_ = false;
 };
 
 }} // namespace mxlogger::files

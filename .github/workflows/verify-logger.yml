@@ -33,9 +33,9 @@ jobs:
         run: |
           ctest --test-dir build/windows-core -C ${{ matrix.configuration }} --output-on-failure --no-tests=error --output-junit test-results.xml 2>&1 | Tee-Object build/windows-core/ctest.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Native Windows demo, window smoke and package
+      - name: Native Windows demo and window smoke
         run: |
-          & './scripts/verify_windows_demo.ps1' -Configuration ${{ matrix.configuration }} -Benchmark -ProfileWrites:('${{ matrix.configuration }}' -eq 'Release')
+          & './scripts/verify_windows_demo.ps1' -Configuration ${{ matrix.configuration }}
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -45,21 +45,8 @@ jobs:
             build/windows-native-demo/${{ matrix.configuration }}/self-test/ui-report.txt
             build/windows-native-demo/${{ matrix.configuration }}/self-test/*.png
             build/windows-native-demo/${{ matrix.configuration }}/self-test/model/report.*
-            build/windows-native-demo/${{ matrix.configuration }}/benchmark/*/benchmark.*
-            build/windows-native-demo/${{ matrix.configuration }}/benchmark/comparison.json
-            build/windows-native-demo/${{ matrix.configuration }}/profile/run-*/summary.*
-            build/windows-native-demo/${{ matrix.configuration }}/profile/run-*/*/profile.json
-            build/windows-native-demo/${{ matrix.configuration }}/profile/run-*/*/benchmark.json
-            build/windows-native-demo/${{ matrix.configuration }}/profile/run-*/api/microbench.json
-            build/windows-native-demo/${{ matrix.configuration }}/profile/run-*/*/process.log
           retention-days: 7
           if-no-files-found: warn
-      - uses: actions/upload-artifact@v7
-        with:
-          name: windows-demo-${{ matrix.configuration }}
-          path: build/windows-native-demo/${{ matrix.configuration }}/MXLoggerDemo-windows-x64-${{ matrix.configuration }}.zip
-          retention-days: 7
-          if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -96,7 +83,7 @@ jobs:
 
   android:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -107,8 +94,10 @@ jobs:
       - name: Set up Android SDK and NDK
         uses: android-actions/setup-android@v4
         with:
-          packages: 'ndk;27.0.12077973'
+          packages: 'ndk;27.0.12077973 cmake;3.22.1 platforms;android-31 platforms;android-33 build-tools;34.0.0'
           log-accepted-android-sdk-licenses: 'false'
+      - name: Android library and Demo JVM unit tests
+        run: bash scripts/verify_android_demo.sh test
       - name: Android Core and bridges, four ABIs
         run: |
           export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.0.12077973"
@@ -117,6 +106,97 @@ jobs:
         if: always()
         with:
           name: android-verification-logs
-          path: build/android-validation/*.log
+          path: |
+            build/android-validation/*.log
+            build/android-demo/*.log
+            platform/Android/MXLogger/*/build/test-results/testDefaultCppReleaseUnitTest/
+            platform/Android/MXLogger/*/build/reports/tests/testDefaultCppReleaseUnitTest/
+          retention-days: 7
+          if-no-files-found: warn
+
+  # Release deliverables are produced only after ALL verification jobs pass,
+  # including both configurations of the Windows matrix.
+  windows-release:
+    name: Windows Release Demo EXE
+    needs: [windows, apple, android]
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and check Release Demo
+        shell: pwsh
+        run: "& './scripts/verify_windows_demo.ps1' -Configuration Release"
+      - name: Upload Release EXE directly
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/windows-native-demo/Release/bin/Release/MXLoggerDemo.exe
+          archive: false
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: windows-release-demo-build-logs
+          path: |
+            build/windows-native-demo/Release/*.log
+            build/windows-native-demo/Release/self-test/
+          retention-days: 7
+          if-no-files-found: warn
+
+  macos-release:
+    name: macOS Release Demo DMG
+    needs: [windows, apple, android]
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build universal Release Demo and DMG
+        run: bash scripts/build_macos_demo_dmg.sh
+      - name: Upload Release DMG directly
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/macos-native-demo/MXLoggerDemo-macOS-Release.dmg
+          archive: false
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: macos-release-demo-build-logs
+          path: build/macos-native-demo/dmg-*.log
+          retention-days: 7
+          if-no-files-found: warn
+
+  android-release:
+    name: Android Release Demo APK
+    needs: [windows, apple, android]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK and NDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'ndk;27.0.12077973 cmake;3.22.1 platforms;android-31 platforms;android-33 build-tools;34.0.0'
+          log-accepted-android-sdk-licenses: 'false'
+      - name: Build and verify installable Release Demo APK
+        run: bash scripts/verify_android_demo.sh package
+      - name: Upload Release APK directly
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/android-demo/MXLoggerDemo-android-Release.apk
+          archive: false
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: android-release-demo-build-logs
+          path: build/android-demo/*.log
           retention-days: 7
           if-no-files-found: warn
