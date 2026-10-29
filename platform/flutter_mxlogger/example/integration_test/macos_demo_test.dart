@@ -6,6 +6,7 @@ import 'package:example/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -66,6 +67,11 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        expect(MXLogger.coreVersion(), '2.3.0');
+        expect(
+          find.textContaining('Core ${MXLogger.coreVersion()}'),
+          findsOneWidget,
+        );
         await capture('macos-01-landing');
         await tester.tap(find.text(tr('landing.enter')));
         await waitFor(find.text(tr('home.section.write')));

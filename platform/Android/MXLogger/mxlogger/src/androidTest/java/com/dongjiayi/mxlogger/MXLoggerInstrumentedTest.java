@@ -58,6 +58,11 @@ public class MXLoggerInstrumentedTest {
     // ------------------------------------------------------------------
     // helpers
 
+    @Test
+    public void coreVersionWithoutLoggerInitialization() {
+        assertEquals("2.3.0", MXLogger.coreVersion());
+    }
+
     private String uniqueNs() {
         return "com.test.mxlogger.android.ns" + (nsCounter++);
     }

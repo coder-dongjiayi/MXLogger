@@ -30,6 +30,10 @@ static NSInteger ns_counter = 0;
 
 @implementation MXLoggerTests
 
+- (void)testCoreVersionWithoutLoggerInitialization {
+    XCTAssertEqualObjects([MXLogger coreVersion], @"2.3.0");
+}
+
 - (void)setUp {
     self.loggerTokens = [NSMutableArray array];
     self.rootDir = [NSTemporaryDirectory()

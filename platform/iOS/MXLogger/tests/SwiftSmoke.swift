@@ -1,5 +1,7 @@
 import Foundation
 
+precondition(MXLogger.coreVersion() == "2.3.0")
+
 // Exercise the public Swift names against the actual Objective-C/C++ implementation.
 let root = FileManager.default.temporaryDirectory
     .appendingPathComponent("mxlogger-swift-\(UUID().uuidString)", isDirectory: true)

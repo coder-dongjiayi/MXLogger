@@ -35,6 +35,10 @@ static NSString * _defaultDiskCacheDirectory;
 @end
 
 @implementation MXLogger
++(NSString *)coreVersion {
+    return [NSString stringWithUTF8String:mx_logger::version()];
+}
+
 +(instancetype)initializeWithNamespace:(nonnull NSString*)nameSpace{
     return  [self initializeWithNamespace:nameSpace fileHeader:nil];
 }

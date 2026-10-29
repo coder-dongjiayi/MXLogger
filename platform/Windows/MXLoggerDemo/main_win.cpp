@@ -369,7 +369,7 @@ private:
             DrawTextW(dc,value.c_str(),-1,&rect,DT_LEFT|DT_SINGLELINE|DT_END_ELLIPSIS|DT_VCENTER);
             SelectObject(dc,old);
         };
-        draw(L"MXLogger",124,32,width-270,38,title_);
+        draw(L"MXLogger  ·  Core " + wide(mx_logger::version()),124,32,width-270,38,title_);
         const auto subtitle = snapshot_.path.empty() ? std::wstring(tr(L"Windows 原生 Demo · 初始化中",L"Windows native demo · initializing")) :
             std::wstring(snapshot_.config.encrypted ? L"AES-CFB-128" : L"Plaintext") + L"  ·  " +
             (snapshot_.config.enabled ? tr(L"写入已开启",L"Logging enabled") : tr(L"写入已关闭",L"Logging disabled")) +

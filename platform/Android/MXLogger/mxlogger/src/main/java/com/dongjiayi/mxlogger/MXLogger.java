@@ -19,6 +19,17 @@ public class MXLogger {
     }
 
     /**
+     * 获取当前链接的 C++ Core 版本号，无需初始化 logger；与封装包版本号独立。
+     * Returns the linked C++ Core version without creating a logger.
+     */
+    @NonNull
+    public static String coreVersion() {
+        return native_coreVersion();
+    }
+
+    private static native String native_coreVersion();
+
+    /**
      * 配置(enable/consoleEnable/level/maxDiskSize/maxDiskAge)不在Java侧缓存：
      * 底层C++对象按nameSpace+diskCacheDirectory去重，多个Java实例可能共享同一个
      * native对象，任何一份Java缓存都会在别的实例修改配置后变成过期数据，

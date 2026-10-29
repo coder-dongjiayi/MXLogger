@@ -1,5 +1,6 @@
 #if DEBUG
 import AppKit
+import MXLogger
 
 /// Renders this app's own Storyboard views; it does not capture the desktop.
 /// Also exercises Storyboard outlets, prototypes, navigation, localization and filters.
@@ -8,6 +9,10 @@ enum DemoPreview {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         DemoL10n.forcedLanguage = "en"
         root.show("Landing", remember: false)
+        guard let landing = root.page as? DemoLandingViewController,
+              landing.versionLabel.stringValue.contains("Core \(MXLogger.coreVersion())") else {
+            throw DemoError(message: "Landing page did not display the linked Core version")
+        }
         try render(root.view, to: directory.appendingPathComponent("01-landing.png"))
         let temporary = FileManager.default.temporaryDirectory.appendingPathComponent("mxlogger-demo-preview-\(UUID().uuidString)")
         var config = DemoConfiguration()

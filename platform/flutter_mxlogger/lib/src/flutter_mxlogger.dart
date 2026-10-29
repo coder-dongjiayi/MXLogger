@@ -89,6 +89,10 @@ class MXFileEntity {
 }
 
 class MXLogger with WidgetsBindingObserver {
+  /// 当前链接的 C++ Core 版本号，无需初始化 logger；与 pub 包版本号独立。
+  /// The linked C++ Core version, available without creating a logger.
+  static String coreVersion() => _coreVersion().toDartString();
+
   Pointer<Void> _handle = nullptr;
 
   static const MethodChannel _channel = MethodChannel('flutter_mxlogger');
@@ -964,6 +968,11 @@ final DynamicLibrary _nativeLib = Platform.isAndroid
 String _mxloggerFunction(String funcName) {
   return "flutter_mxlogger_" + funcName;
 }
+
+// Borrowed native storage; do not pass this pointer to calloc.free.
+final Pointer<Utf8> Function() _coreVersion = _nativeLib.lookupFunction<
+    Pointer<Utf8> Function(),
+    Pointer<Utf8> Function()>(_mxloggerFunction('core_version'));
 
 /// native函数: 初始化logger，返回logger句柄
 /// Native function: initialize the logger and return its handle

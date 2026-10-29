@@ -1,4 +1,5 @@
 import AppKit
+import MXLogger
 
 class DemoPageController: NSViewController {
     weak var owner: DemoViewController?
@@ -112,7 +113,7 @@ final class DemoLandingViewController: DemoPageController {
         subtitle.stringValue = DemoL10n.choose("High-performance cross-platform logging built on mmap\nAES-CFB 128 encryption · iOS / macOS / Android / Flutter", "基于 mmap 的高性能跨平台日志库\nAES-CFB 128 加密 · iOS / macOS / Android / Flutter")
         enterButton.title = DemoL10n.text("entry.button")
         enterButton.needsDisplay = true
-        versionLabel.stringValue = "macOS Native Demo · MXLogger 2.2.0"
+        versionLabel.stringValue = "macOS Native Demo · Core \(MXLogger.coreVersion())"
     }
     @IBAction func enter(_ sender: Any?) { owner?.enter() }
 }

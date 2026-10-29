@@ -16,12 +16,20 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard Condition="'%(LanguageStandard)' == '' or '%(LanguageStandard)' == 'stdcpp14'">stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(_MXLoggerLibrary);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <!-- Update resolved source metadata, including per-file overrides. Defaults in
+       an ItemDefinitionGroup cannot override metadata already set on a source. -->
+  <Target Name="MXLoggerNativeLanguageStandard" BeforeTargets="ClCompile">
+    <ItemGroup>
+      <ClCompile Condition="'%(ClCompile.LanguageStandard)' == '' or '%(ClCompile.LanguageStandard)' == 'Default' or '%(ClCompile.LanguageStandard)' == 'stdcpp14'">
+        <LanguageStandard>stdcpp17</LanguageStandard>
+      </ClCompile>
+    </ItemGroup>
+  </Target>
   <Target Name="MXLoggerNativeValidate" BeforeTargets="PrepareForBuild">
     <Error Condition="'$(Platform)' != 'x64'" Text="MXLogger.Native currently supports x64 desktop C++ projects only." />
     <Error Condition="'$(MXLoggerRuntimeLibrary)' != 'MD' and '$(MXLoggerRuntimeLibrary)' != 'MT'" Text="Set MXLoggerRuntimeLibrary to MD (default) or MT to match the project's C++ runtime." />

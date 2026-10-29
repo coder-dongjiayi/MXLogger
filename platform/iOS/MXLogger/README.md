@@ -2,6 +2,9 @@
 
 `MXLogger.xcodeproj` builds the same Objective-C API for iOS and native macOS.
 The framework depends on `../../../Core/MXLoggerCore.xcodeproj` and uses C++17.
+Call `[MXLogger coreVersion]` in Objective-C or `MXLogger.coreVersion()` in Swift
+to read the linked C++ Core version (`2.3.0`) before creating a logger. This is
+independent of the CocoaPods/SwiftPM package version; both native Demos display it.
 The CocoaPods distribution declares iOS 9.0 and macOS 10.13. The checked-in Xcode
 projects use an iOS build baseline of 15.0; individual targets may select a higher version.
 

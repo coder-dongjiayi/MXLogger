@@ -10,6 +10,10 @@ See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) 
 - **Requirements**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
 - **Platforms**: iOS (>= 9.0), macOS (>= 10.14), Android (minSdk 21)
 
+`MXLogger.coreVersion()` returns the linked C++ Core version (currently `2.3.0`)
+without initializing a logger. This is independent of the pub package version.
+Web has no native Core and throws `UnsupportedError`.
+
 ## Contents
 
 - [Installation](#installation)

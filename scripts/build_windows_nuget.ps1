@@ -81,6 +81,16 @@ if ($LASTEXITCODE -ne 0) { throw 'Local NuGet restore failed' }
 $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
 $msbuild = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find 'MSBuild/**/Bin/MSBuild.exe' | Select-Object -First 1
 if (-not $msbuild) { throw 'MSBuild with C++ tools was not found' }
+# Check the targets restored from the nupkg, including explicit source metadata.
+# The normal consumer below still verifies real compilation, linking and I/O.
+foreach ($standard in @('', 'Default', 'stdcpp14', 'stdcpp17', 'stdcpp20', 'stdcpp23', 'stdcpplatest')) {
+    $label = if ($standard) { $standard } else { 'unset' }
+    & $msbuild (Join-Path $repo 'platform/Windows/tests/nuget_consumer/language_standard.proj') /nologo `
+        "/p:MXLoggerTargets=$(Join-Path $restored 'build/native/MXLogger.Native.targets')" `
+        "/p:ProjectLanguageStandard=$standard" `
+        2>&1 | Tee-Object (Join-Path $logs "nuget-language-$label.log")
+    if ($LASTEXITCODE -ne 0) { throw "NuGet language standard check failed: $label" }
+}
 foreach ($crt in @('MD', 'MT')) {
     foreach ($configuration in @('Debug', 'Release')) {
         & $msbuild (Join-Path $consumer 'consumer.vcxproj') /nologo /m "/p:Configuration=$configuration" /p:Platform=x64 `

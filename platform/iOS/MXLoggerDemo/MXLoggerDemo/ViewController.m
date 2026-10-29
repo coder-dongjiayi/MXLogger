@@ -9,6 +9,7 @@
 #import "MXDemoActionCell.h"
 #import "MXDemoHomeViewController.h"
 #import "MXDemoL10n.h"
+#import <MXLogger/MXLogger.h>
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *subtitleLabel;
@@ -61,7 +62,7 @@
 
 - (void)applyLocalization {
     self.navigationItem.rightBarButtonItem.title = [MXDemoL10n switchButtonTitle];
-    self.subtitleLabel.text = MXDemoStr(@"entry.subtitle");
+    self.subtitleLabel.text = [NSString stringWithFormat:@"%@\nCore %@", MXDemoStr(@"entry.subtitle"), [MXLogger coreVersion]];
     [self.entryButton setTitle:MXDemoStr(@"entry.button") forState:UIControlStateNormal];
 }
 

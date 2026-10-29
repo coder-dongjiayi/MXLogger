@@ -360,6 +360,17 @@ debugPrint("logs live in ${logger.diskcachePath}");
 
 # API reference
 
+Read the linked C++ Core version without creating a logger. The current value is
+`2.3.0`, independent of the wrapper/package version. Each native/Flutter Demo shows it.
+
+| Platform | API |
+|---|---|
+| Windows / C++ | `mx_logger::version()` |
+| iOS / macOS (Objective-C) | `[MXLogger coreVersion]` |
+| iOS / macOS (Swift) | `MXLogger.coreVersion()` |
+| Android (Java/Kotlin) | `MXLogger.coreVersion()` |
+| Flutter (native platforms) | `MXLogger.coreVersion()` |
+
 Common to all three platforms: a logger is identified by **nameSpace + diskCacheDirectory**, and the
 underlying C++ instance is deduplicated on that pair. The md5 of the pair is the **loggerToken** —
 pass it around a modularized app and write logs through the class methods without holding the logger

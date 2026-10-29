@@ -81,6 +81,10 @@ void main() {
     } catch (_) {}
   });
 
+  test('Core 版本号无需初始化 logger', () {
+    expect(MXLogger.coreVersion(), '2.3.0');
+  });
+
   // ---------------------------------------------------------------
   group('MXStoragePolicyType / MXFileEntity 纯Dart模型', () {
     test('枚举包含4种存储策略', () {

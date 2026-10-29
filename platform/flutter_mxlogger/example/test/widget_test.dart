@@ -5,8 +5,9 @@ import 'package:example/main.dart';
 
 void main() {
   testWidgets('落地页正常渲染', (tester) async {
-    await tester.pumpWidget(const MXDemoApp());
+    await tester.pumpWidget(const MXDemoApp(coreVersion: 'test-core'));
     expect(find.text('MXLogger'), findsOneWidget);
+    expect(find.textContaining('Core test-core'), findsOneWidget);
     // 文案跟随 demo 当前语言(默认英文)，用语言包取，避免写死某一种语言
     expect(find.text(tr('landing.enter')), findsOneWidget);
     expect(find.text(tr('landing.subtitle')), findsOneWidget);
@@ -14,7 +15,7 @@ void main() {
   });
 
   testWidgets('切换语言后落地页文案随之变化', (tester) async {
-    await tester.pumpWidget(const MXDemoApp());
+    await tester.pumpWidget(const MXDemoApp(coreVersion: 'test-core'));
     final before = tr('landing.enter');
     expect(find.text(before), findsOneWidget);
 
@@ -26,6 +27,7 @@ void main() {
     expect(after, isNot(before));
     expect(find.text(after), findsOneWidget);
     expect(find.text(before), findsNothing);
+    expect(find.textContaining('Core test-core'), findsOneWidget);
 
     DemoL10n.language.value = DemoL10n.en; // 还原，避免影响其他用例
   });

@@ -353,6 +353,17 @@ debugPrint("日志目录 ${logger.diskcachePath}");
 
 # API 一览
 
+无需创建 logger 即可读取当前链接的 C++ Core 版本，当前为 `2.3.0`。
+Core 版本与各平台封装包版本独立，各 Demo 会动态展示该值。
+
+| 平台 | 调用方式 |
+|---|---|
+| Windows / C++ | `mx_logger::version()` |
+| iOS / macOS（Objective-C） | `[MXLogger coreVersion]` |
+| iOS / macOS（Swift） | `MXLogger.coreVersion()` |
+| Android（Java/Kotlin） | `MXLogger.coreVersion()` |
+| Flutter（原生平台） | `MXLogger.coreVersion()` |
+
 三端共通的两个概念：一个 logger 由 **nameSpace + diskCacheDirectory** 唯一确定，底层 C++ 对象按这一对
 去重；这一对的 md5 就是 **loggerToken**——大型 app 组件化时把它传给子模块，子模块用类方法写日志，不必传
 logger 对象。

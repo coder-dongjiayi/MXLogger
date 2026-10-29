@@ -15,6 +15,11 @@ using namespace std;
 #define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #define MXLOGGERR_FUNC(func) flutter_mxlogger_ ## func
 
+/// Borrowed process-lifetime string from Core; callers must not free it.
+MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(core_version)() {
+    return mx_logger::version();
+}
+
 /// 初始化logger: 创建(或复用)C++核心对象，返回其指针作为Dart侧持有的句柄，
 /// ns或directory为空时返回0
 /// Initialize the logger: create (or reuse) the C++ core instance and return its

@@ -52,6 +52,11 @@ class MXFileEntity {
 
 class MXLogger {
 
+  /// Web 没有链接原生 C++ Core。
+  /// Web does not link a native C++ Core.
+  static String coreVersion() =>
+      throw UnsupportedError('MXLogger Core is not available on Web');
+
 
   bool get enable => _enable;
 

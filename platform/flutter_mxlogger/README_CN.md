@@ -269,6 +269,9 @@ iOS / Android App 进入后台时会自动调用，可通过 `shouldRemoveExpire
 
 ## 2.6 状态查询
 
+`MXLogger.coreVersion()` 返回当前链接的 C++ Core 版本（目前为 `2.3.0`），无需初始化 logger。
+该值与 pub 包版本号独立；Web 没有原生 Core，调用时抛出 `UnsupportedError`。
+
 | 成员 | 类型 | 说明 |
 |---|---|---|
 | `enable` | `bool` | 日志写入是否可用 |

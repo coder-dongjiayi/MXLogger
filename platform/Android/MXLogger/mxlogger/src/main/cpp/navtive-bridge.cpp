@@ -62,6 +62,9 @@ extern "C" JNIEXPORT JNICALL jint  JNI_OnLoad(JavaVM *vm, void *reserved) {
 #define MXLOGGER_JNI static
 namespace mxlogger{
 
+    MXLOGGER_JNI jstring native_coreVersion(JNIEnv *env, jclass) {
+        return env->NewStringUTF(mx_logger::version());
+    }
 
     /// 将std::string转成jstring
     /// Convert a std::string into a jstring
@@ -457,6 +460,7 @@ namespace mxlogger{
 /// Mapping table between Java native methods and C++ functions (name / JNI signature / pointer)
 static JNINativeMethod g_methods[] = {
 
+        {"native_coreVersion","()Ljava/lang/String;",(void *)mxlogger::native_coreVersion},
         {"jniInitialize","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J",(void *)mxlogger::jniInitialize},
         {"native_level","(JI)V",(void *)mxlogger::native_level},
         {"native_consoleEnable","(JZ)V",(void *)mxlogger::native_consoleEnable},

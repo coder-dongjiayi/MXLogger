@@ -14,10 +14,18 @@
 //
 
 #include <MXLogger/MXLogger.h>
+#include <string>
 
 
 #define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #define MXLOGGERR_FUNC(func) flutter_mxlogger_ ## func
+
+/// Keep a process-lifetime UTF-8 copy, independent of autorelease pools.
+/// Callers borrow this string and must not free it.
+MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(core_version)() {
+    static const std::string version = [MXLogger coreVersion].UTF8String;
+    return version.c_str();
+}
 
 
 /// 初始化logger: 创建(或复用)OC层MXLogger对象，返回其指针作为Dart侧持有的句柄

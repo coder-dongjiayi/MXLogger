@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_mxlogger/flutter_mxlogger.dart';
 
 import 'demo_home_page.dart';
 import 'demo_l10n.dart';
@@ -13,9 +14,10 @@ Future<void> main() async {
 }
 
 class MXDemoApp extends StatelessWidget {
-  const MXDemoApp({super.key, this.directory});
+  const MXDemoApp({super.key, this.directory, this.coreVersion});
 
   final String? directory;
+  final String? coreVersion;
 
   @override
   Widget build(BuildContext context) {
@@ -33,16 +35,20 @@ class MXDemoApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: LandingPage(directory: directory),
+      home: LandingPage(
+        directory: directory,
+        coreVersion: coreVersion ?? MXLogger.coreVersion(),
+      ),
     );
   }
 }
 
 /// 落地页(对齐 iOS demo 的 Main.storyboard 落地页)
 class LandingPage extends StatelessWidget {
-  const LandingPage({super.key, this.directory});
+  const LandingPage({super.key, this.directory, required this.coreVersion});
 
   final String? directory;
+  final String coreVersion;
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +120,7 @@ class LandingPage extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               Text(
-                '${Platform.isMacOS ? 'Flutter macOS' : 'Flutter'} Demo · flutter_mxlogger 2.2.0',
+                '${Platform.isMacOS ? 'Flutter macOS' : 'Flutter'} Demo · Core $coreVersion',
                 style: TextStyle(fontSize: 12, color: tertiaryText(context)),
               ),
               const SizedBox(height: 48),

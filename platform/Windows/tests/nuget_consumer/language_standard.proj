@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Evaluates the actual package targets without requiring the MSVC toolset. -->
+<Project DefaultTargets="Check" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ExpectedDefault Condition="'$(ProjectLanguageStandard)' == '' or '$(ProjectLanguageStandard)' == 'Default' or '$(ProjectLanguageStandard)' == 'stdcpp14'">stdcpp17</ExpectedDefault>
+    <ExpectedDefault Condition="'$(ExpectedDefault)' == ''">$(ProjectLanguageStandard)</ExpectedDefault>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile><LanguageStandard>$(ProjectLanguageStandard)</LanguageStandard></ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="inherited.cpp"><ExpectedStandard>$(ExpectedDefault)</ExpectedStandard></ClCompile>
+    <ClCompile Include="empty.cpp"><LanguageStandard></LanguageStandard><ExpectedStandard>stdcpp17</ExpectedStandard></ClCompile>
+    <ClCompile Include="default.cpp"><LanguageStandard>Default</LanguageStandard><ExpectedStandard>stdcpp17</ExpectedStandard></ClCompile>
+    <ClCompile Include="cpp14.cpp"><LanguageStandard>stdcpp14</LanguageStandard><ExpectedStandard>stdcpp17</ExpectedStandard></ClCompile>
+    <ClCompile Include="cpp17.cpp"><LanguageStandard>stdcpp17</LanguageStandard><ExpectedStandard>stdcpp17</ExpectedStandard></ClCompile>
+    <ClCompile Include="cpp20.cpp"><LanguageStandard>stdcpp20</LanguageStandard><ExpectedStandard>stdcpp20</ExpectedStandard></ClCompile>
+    <ClCompile Include="cpp23.cpp"><LanguageStandard>stdcpp23</LanguageStandard><ExpectedStandard>stdcpp23</ExpectedStandard></ClCompile>
+    <ClCompile Include="latest.cpp"><LanguageStandard>stdcpplatest</LanguageStandard><ExpectedStandard>stdcpplatest</ExpectedStandard></ClCompile>
+  </ItemGroup>
+  <Import Project="$(MXLoggerTargets)" />
+  <Target Name="PrepareForBuild" />
+  <Target Name="ClCompile">
+    <Error Condition="'%(ClCompile.LanguageStandard)' != '%(ClCompile.ExpectedStandard)'"
+           Text="%(ClCompile.Identity): expected %(ClCompile.ExpectedStandard), got '%(ClCompile.LanguageStandard)' (project '$(ProjectLanguageStandard)')" />
+    <Message Importance="high" Text="PASS %(ClCompile.Identity): %(ClCompile.LanguageStandard)" />
+  </Target>
+  <Target Name="Check" DependsOnTargets="ClCompile" />
+</Project>
