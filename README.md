@@ -170,6 +170,10 @@ Manual `verify-logger` CI builds Debug/Release, exercises the actual window/cont
 and uploads logs and screenshots. Once all platforms pass, it uploads only the Release `MXLoggerDemo.exe`.
 On Mac you can edit the code and test shared log actions; Windows CI verifies the native GUI.
 
+Native C++ consumers can use the **`MXLogger.Native` NuGet package** or the **`mxlogger` vcpkg overlay**.
+Manual CI builds the 2.3.0 nupkg for Windows x64, including MD/MT and Debug/Release variants.
+These are not yet published to the public NuGet/vcpkg registries; see the [Windows SDK guide](platform/Windows/README.md).
+
 ### Flutter macOS demo
 
 `platform/flutter_mxlogger/example` shares the mobile demo's landing page, purple status card,

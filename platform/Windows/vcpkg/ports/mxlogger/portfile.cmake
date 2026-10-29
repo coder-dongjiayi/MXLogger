@@ -1,0 +1,20 @@
+# This overlay deliberately builds the adjacent checkout, including unpublished
+# changes. Keep it in this repository; it is not a public-registry port.
+get_filename_component(SOURCE_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../.." ABSOLUTE)
+if(NOT EXISTS "${SOURCE_ROOT}/Core/mxlogger_version.hpp")
+    message(FATAL_ERROR "Use the mxlogger overlay from a complete MXLogger checkout.")
+endif()
+file(STRINGS "${SOURCE_ROOT}/Core/mxlogger_version.hpp" VERSION_LINE REGEX "^#define MXLOGGER_CORE_VERSION ")
+string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" SOURCE_VERSION "${VERSION_LINE}")
+if(NOT SOURCE_VERSION STREQUAL VERSION)
+    message(FATAL_ERROR "Update the overlay vcpkg.json version to match Core ${SOURCE_VERSION}.")
+endif()
+vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
+vcpkg_cmake_configure(SOURCE_PATH "${SOURCE_ROOT}/Core"
+    OPTIONS -DMXLOGGER_INSTALL=ON -DMXLOGGER_BUILD_TESTS=OFF -DCMAKE_INSTALL_LIBDIR=lib)
+vcpkg_cmake_install()
+vcpkg_cmake_config_fixup(PACKAGE_NAME MXLoggerCore CONFIG_PATH lib/cmake/MXLoggerCore)
+vcpkg_copy_pdbs()
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include" "${CURRENT_PACKAGES_DIR}/debug/share")
+vcpkg_install_copyright(FILE_LIST "${SOURCE_ROOT}/LICENSE.TXT")
+file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")

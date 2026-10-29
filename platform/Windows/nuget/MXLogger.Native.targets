@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MXLoggerRuntimeLibrary Condition="'$(MXLoggerRuntimeLibrary)' == ''">MD</MXLoggerRuntimeLibrary>
+    <MXLoggerUseDebugLibraries Condition="'$(MXLoggerUseDebugLibraries)' == '' and '$(UseDebugLibraries)' != ''">$(UseDebugLibraries)</MXLoggerUseDebugLibraries>
+    <MXLoggerUseDebugLibraries Condition="'$(MXLoggerUseDebugLibraries)' == '' and '$(Configuration)' == 'Debug'">true</MXLoggerUseDebugLibraries>
+    <MXLoggerUseDebugLibraries Condition="'$(MXLoggerUseDebugLibraries)' == ''">false</MXLoggerUseDebugLibraries>
+    <_MXLoggerConfiguration Condition="'$(MXLoggerUseDebugLibraries)' == 'true'">Debug</_MXLoggerConfiguration>
+    <_MXLoggerConfiguration Condition="'$(MXLoggerUseDebugLibraries)' != 'true'">Release</_MXLoggerConfiguration>
+    <_MXLoggerExpectedRuntime Condition="'$(MXLoggerRuntimeLibrary)' == 'MD'">MultiThreadedDLL</_MXLoggerExpectedRuntime>
+    <_MXLoggerExpectedRuntime Condition="'$(MXLoggerRuntimeLibrary)' == 'MT'">MultiThreaded</_MXLoggerExpectedRuntime>
+    <_MXLoggerExpectedRuntime Condition="'$(MXLoggerRuntimeLibrary)' == 'MD' and '$(MXLoggerUseDebugLibraries)' == 'true'">MultiThreadedDebugDLL</_MXLoggerExpectedRuntime>
+    <_MXLoggerExpectedRuntime Condition="'$(MXLoggerRuntimeLibrary)' == 'MT' and '$(MXLoggerUseDebugLibraries)' == 'true'">MultiThreadedDebug</_MXLoggerExpectedRuntime>
+    <_MXLoggerLibrary>$(MSBuildThisFileDirectory)lib\x64\$(MXLoggerRuntimeLibrary)\$(_MXLoggerConfiguration)\MXLoggerCore.lib</_MXLoggerLibrary>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard Condition="'%(LanguageStandard)' == '' or '%(LanguageStandard)' == 'stdcpp14'">stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(_MXLoggerLibrary);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Target Name="MXLoggerNativeValidate" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(Platform)' != 'x64'" Text="MXLogger.Native currently supports x64 desktop C++ projects only." />
+    <Error Condition="'$(MXLoggerRuntimeLibrary)' != 'MD' and '$(MXLoggerRuntimeLibrary)' != 'MT'" Text="Set MXLoggerRuntimeLibrary to MD (default) or MT to match the project's C++ runtime." />
+    <Error Condition="'$(MXLoggerUseDebugLibraries)' != 'true' and '$(MXLoggerUseDebugLibraries)' != 'false'" Text="MXLoggerUseDebugLibraries must be true or false." />
+    <Error Condition="!Exists('$(_MXLoggerLibrary)')" Text="MXLogger.Native library is missing: $(_MXLoggerLibrary). Restore the NuGet package." />
+    <Error Condition="'%(ClCompile.RuntimeLibrary)' != '' and '%(ClCompile.RuntimeLibrary)' != '$(_MXLoggerExpectedRuntime)'" Text="MXLogger.Native CRT mismatch: source %(ClCompile.Identity) uses %(ClCompile.RuntimeLibrary), but the package selects $(_MXLoggerExpectedRuntime). Set MXLoggerRuntimeLibrary=MD/MT and MXLoggerUseDebugLibraries to match your project." />
+  </Target>
+</Project>

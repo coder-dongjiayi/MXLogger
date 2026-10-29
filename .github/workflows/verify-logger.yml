@@ -116,6 +116,40 @@ jobs:
 
   # Release deliverables are produced only after ALL verification jobs pass,
   # including both configurations of the Windows matrix.
+  windows-sdk:
+    name: Windows native SDK (NuGet + vcpkg)
+    needs: [windows, apple, android]
+    # Build the distributable with VS 2022's toolset, rather than requiring the
+    # newer compiler that windows-latest may carry.
+    runs-on: windows-2022
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - uses: NuGet/setup-nuget@v2
+        with:
+          nuget-version: '6.x'
+      - name: Build, test, pack and restore native NuGet SDK
+        run: "& './scripts/build_windows_nuget.ps1'"
+      - name: Verify vcpkg consumers (MD and MT, Debug and Release)
+        run: "& './scripts/verify_windows_vcpkg.ps1'"
+      - name: Upload native NuGet package directly
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/windows-sdk/packages/MXLogger.Native.*.nupkg
+          archive: false
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: windows-sdk-verification-logs
+          path: build/windows-sdk/logs/*.log
+          retention-days: 7
+          if-no-files-found: warn
+
   windows-release:
     name: Windows Release Demo EXE
     needs: [windows, apple, android]

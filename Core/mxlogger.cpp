@@ -6,6 +6,7 @@
 //
 
 #include "mxlogger.hpp"
+#include "mxlogger_version.hpp"
 
 #include <mutex>
 #include <unordered_map>
@@ -30,7 +31,7 @@ std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::uno
 static std::mutex global_instance_mutex_;
 
 const char* mxlogger::version() noexcept {
-    return "2.3.0";
+    return MXLOGGER_CORE_VERSION;
 }
 
 

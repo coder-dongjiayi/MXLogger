@@ -1,0 +1,5 @@
+{
+  "name": "mxlogger-package-consumer",
+  "version-string": "1.0.0",
+  "dependencies": ["mxlogger"]
+}

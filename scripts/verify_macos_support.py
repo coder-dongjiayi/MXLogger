@@ -245,6 +245,7 @@ def main():
             raise RuntimeError("This verification script requires Flutter 3.44+; the plugin still supports 3.7+")
         if not args.skip_native:
             check.run("core", ["bash", ROOT / "Core/tests/run_tests.sh"])
+            check.run("core-installed-sdk", ["bash", ROOT / "scripts/verify_core_package.sh"])
             check.run("apple-native", ["bash", ROOT / "platform/iOS/MXLogger/tests/run_tests.sh"])
             check.ios_demo()
             check.run("native-demo", ["bash", ROOT / "scripts/verify_macos_demo.sh"])

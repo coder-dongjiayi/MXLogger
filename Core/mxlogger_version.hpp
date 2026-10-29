@@ -1,0 +1,6 @@
+#ifndef MXLOGGER_VERSION_HPP
+#define MXLOGGER_VERSION_HPP
+
+#define MXLOGGER_CORE_VERSION "2.3.0"
+
+#endif

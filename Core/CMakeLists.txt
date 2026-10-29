@@ -22,8 +22,13 @@
 
 cmake_minimum_required(VERSION 3.10.0)
 
+# The runtime API and distribution metadata share one version source.
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/mxlogger_version.hpp" MXLOGGER_VERSION_LINE
+    REGEX "^#define MXLOGGER_CORE_VERSION ")
+string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" MXLOGGER_CORE_VERSION "${MXLOGGER_VERSION_LINE}")
 # Identify the compiler before checking MSVC or enabling GNU-style assembly.
-project(MXLoggerCore LANGUAGES C CXX)
+project(MXLoggerCore VERSION ${MXLOGGER_CORE_VERSION} LANGUAGES C CXX)
+include(GNUInstallDirs)
 
 IF(APPLE)
     # tell ranlib to ignore empty compilation units
@@ -95,6 +100,7 @@ add_library(MXLoggerCore
         mxlogger_console.hpp
         mxlogger.cpp
         mxlogger.hpp
+        mxlogger_version.hpp
         aes/aes_crypt.hpp
         aes/aes_crypt.cpp
         aes/openssl/openssl_aes_core.cpp
@@ -127,13 +133,18 @@ IF(NOT MSVC)
             )
 ENDIF()
 
-target_include_directories(MXLoggerCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(MXLogger::Core ALIAS MXLoggerCore)
+target_include_directories(MXLoggerCore PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_compile_features(MXLoggerCore PUBLIC cxx_std_17)
 
 set_target_properties(MXLoggerCore PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
         POSITION_INDEPENDENT_CODE ON
+        EXPORT_NAME Core
         )
 
 
@@ -155,5 +166,27 @@ option(MXLOGGER_BUILD_TESTS "Build the native Core tests" OFF)
 if(MXLOGGER_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+# Explicit opt-in: embedded Android/Apple/Flutter builds do not install an SDK.
+option(MXLOGGER_INSTALL "Install the public C++ SDK and CMake package" OFF)
+if(MXLOGGER_INSTALL)
+    set_property(TARGET MXLoggerCore PROPERTY DEBUG_POSTFIX d)
+    include(CMakePackageConfigHelpers)
+    set(MXLOGGER_CONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/MXLoggerCore")
+    install(TARGETS MXLoggerCore EXPORT MXLoggerCoreTargets
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    install(FILES mxlogger.hpp mxlogger_util.hpp DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+    install(FILES ../LICENSE.TXT DESTINATION "${CMAKE_INSTALL_DATADIR}/MXLoggerCore")
+    configure_package_config_file(cmake/MXLoggerCoreConfig.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/MXLoggerCoreConfig.cmake"
+        INSTALL_DESTINATION "${MXLOGGER_CONFIG_DIR}")
+    write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/MXLoggerCoreConfigVersion.cmake"
+        VERSION "${PROJECT_VERSION}" COMPATIBILITY SameMajorVersion)
+    install(EXPORT MXLoggerCoreTargets NAMESPACE MXLogger::
+        DESTINATION "${MXLOGGER_CONFIG_DIR}")
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/MXLoggerCoreConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/MXLoggerCoreConfigVersion.cmake"
+        DESTINATION "${MXLOGGER_CONFIG_DIR}")
 endif()
 

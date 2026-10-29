@@ -166,6 +166,10 @@ Windows 10/11 x64，需 Visual Studio C++ 桌面开发工具和 CMake 3.20+。
 上传日志及界面截图；全部平台验证通过后，只上传 Release 的 `MXLoggerDemo.exe`。
 Mac 可编辑代码并验证共用日志操作，Windows GUI 的编译和运行由 Windows CI 验证。
 
+Windows C++ 工程可通过原生 **NuGet 包 `MXLogger.Native`** 或 **vcpkg overlay `mxlogger`** 接入。
+当前由手动 CI 生成 2.3.0 的 nupkg，支持 x64、MD / MT 与 Debug / Release；
+公共 NuGet / vcpkg registry 尚未发布，安装步骤见 [Windows SDK](platform/Windows/README.md)。
+
 ### Flutter macOS Demo
 
 Flutter 桌面示例位于 `platform/flutter_mxlogger/example`，复用手机端的落地页、紫色状态卡、

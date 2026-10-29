@@ -1,0 +1,8 @@
+MXLogger provides the CMake target MXLogger::Core:
+
+    find_package(MXLoggerCore CONFIG REQUIRED)
+    target_link_libraries(your_app PRIVATE MXLogger::Core)
+
+Use #include <mxlogger.hpp> and #include <mxlogger_util.hpp>.
+This local overlay builds its enclosing source checkout; disable binary caching
+and reinstall the port when testing changed source with the same version.

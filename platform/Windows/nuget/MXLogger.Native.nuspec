@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata minClientVersion="6.0.0">
+    <id>MXLogger.Native</id>
+    <version>$version$</version>
+    <authors>The MXLogger Authors</authors>
+    <description>Native C++17 MXLogger Core for Windows x64. Static libraries for Debug/Release with MD/MT runtimes. Includes AES-CFB-128, memory-mapped logging and multiprocess coordination.</description>
+    <projectUrl>https://github.com/coder-dongjiayi/MXLogger</projectUrl>
+    <repository type="git" url="https://github.com/coder-dongjiayi/MXLogger.git" />
+    <license type="file">LICENSE.TXT</license>
+    <readme>README.md</readme>
+    <tags>native C++ Windows x64 logging mmap MXLogger</tags>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+  </metadata>
+  <files>
+    <file src="build\**" target="build" />
+    <file src="LICENSE.TXT" target="" />
+    <file src="README.md" target="" />
+  </files>
+</package>
