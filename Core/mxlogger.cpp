@@ -29,6 +29,10 @@ std::unordered_map<std::string, mxlogger *> *global_instanceDic_ =  new std::uno
 /// 保护global_instanceDic_，logger_mutex是实例级的，护不住并发初始化/释放
 static std::mutex global_instance_mutex_;
 
+const char* mxlogger::version() noexcept {
+    return "2.3.0";
+}
+
 
  std::string mxlogger::md5(const char* ns,const char* directory){
      

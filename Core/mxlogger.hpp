@@ -57,6 +57,10 @@ private:
 
 public:
 
+    /// 返回当前链接的 Core 版本号，无需初始化 logger；返回值无需释放
+    /// Return the linked Core version without initializing a logger; do not free the result
+    static const char* version() noexcept;
+
 
     /// 初始化（或获取）指定命名空间的 logger：同一 ns + directory 只会创建一个实例，已存在时直接返回
     /// Initialize (or fetch) the logger for the given namespace: only one instance is created
