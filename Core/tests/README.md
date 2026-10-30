@@ -58,7 +58,7 @@ same generated C declarations. Regenerate Apple ABI/memory headers with
 `python3 scripts/sync_flutter_native.py`; CI uses `--check` to reject drift.
 Windows has no Core snapshot: `scripts/prepare_flutter_windows.py --package <nupkg>`
 stages versioned/hash-checked Debug/Release DLLs, also on macOS. The
-generated binaries are ignored by Git but included by the plugin's `.pubignore`.
+DLLs and manifest are versioned together in Git and included in the pub package.
 
 The Windows EXE, NuGet package, DMG and APK are uploaded directly. The vcpkg SDK
 artifact contains the local overlay **and its adjacent Core source**, keeping the

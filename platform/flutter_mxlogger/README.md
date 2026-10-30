@@ -64,8 +64,9 @@ The native SDK dependencies are pulled in automatically:
 
 ### Windows precompiled DLLs and local development
 
-The repository does not store Windows Core copies or generated DLLs. After Core
-changes, run the manual `verify-logger` workflow. Windows CI builds the checkout's
+The repository stores precompiled DLLs and their manifest in `windows/bin/x64/`,
+without a Windows Core source copy. After Core changes, run the manual
+`verify-logger` workflow. Windows CI builds the checkout's
 `Core/ffi`, tests the DLLs through real Dart FFI, and produces both
 `MXLogger.Native.2.3.0.nupkg` and `flutter_mxlogger-windows-prebuilt` (the plugin
 with both DLL configurations). No public NuGet feed is required.
@@ -79,8 +80,8 @@ python3 scripts/prepare_flutter_windows.py --check
 
 This extracts only known binary members, checks package identity, Core/ABI
 versions, PE architecture and hashes, and prepares `windows/bin/x64/`. Do this
-**before publishing to pub**; `.pubignore` includes these generated binaries
-even though Git ignores them. CMake fails clearly when binaries are missing or
+**before publishing to pub**, and commit both DLLs and the manifest together.
+The pub package includes these versioned binaries. CMake fails clearly when binaries are missing or
 inconsistent. Updating Core requires a new CI-built package and this preparation
 step; changing the sources alone does not update a precompiled DLL.
 

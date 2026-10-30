@@ -1,4 +1,4 @@
-# Keep in sync with .gitignore, except windows/bin MUST ship in the pub package.
+# Ignore development caches; windows/bin DLLs and manifest must ship in the package.
 .DS_Store
 .dart_tool/
 .packages

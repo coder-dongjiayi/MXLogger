@@ -58,7 +58,8 @@ dependencies:
 
 ### Windows 预编译 DLL 与本地开发
 
-仓库不保存 Windows Core 副本和生成的 DLL。修改 Core 后，手动运行 `verify-logger`：
+仓库在 `windows/bin/x64/` 保存预编译 DLL 和 manifest，不保存 Windows Core 源码副本。
+修改 Core 后，手动运行 `verify-logger`：
 Windows CI 从当前提交构建 `Core/ffi`，执行真实 Dart FFI 测试，最后产出
 `MXLogger.Native.2.3.0.nupkg` 和已装入两种 DLL 的 `flutter_mxlogger-windows-prebuilt` 插件包。
 不需要发布到 NuGet 公共仓库，也不需要自己有 Windows 电脑。
@@ -71,7 +72,7 @@ python3 scripts/prepare_flutter_windows.py --check
 ```
 
 脚本只提取约定的文件，检查包 ID、Core/ABI 版本、DLL 架构和哈希，放入 `windows/bin/x64/`。
-**发布 pub 前必须先准备这些文件**；`.pubignore` 会包含 Git 忽略的生成 DLL。
+**发布 pub 前必须先准备这些文件**，将两个 DLL 和 manifest 一起提交到 Git；pub 包也会包含它们。
 缺少 DLL 或校验不符时，CMake 会明确报错。以后修改 Core，需要重新跑 CI 并导入新包，DLL 才会更新。
 
 `MXLOGGER_LOCAL_NATIVE` 继续用于 Android/Apple 的本地原生依赖，Windows 始终使用二进制。

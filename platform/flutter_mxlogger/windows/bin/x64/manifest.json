@@ -1,0 +1,22 @@
+{
+  "core_version": "2.3.0",
+  "ffi_abi": 1,
+  "architecture": "x64",
+  "sha256": {
+    "Debug": "4ed5a13ae58099656ccdd32451bed3d42c83fb00e76ecc492ab9710e0bf4d614",
+    "Release": "768b3f82fe76be4affdf06a6d60f0216e63bb81f6cfa131f3316545ed4bb0f39"
+  },
+  "local_core": {
+    "checkout": "D:\\a\\MXLogger\\MXLogger",
+    "core": "D:\\a\\MXLogger\\MXLogger\\Core",
+    "version": "2.3.0",
+    "mxlogger_cpp_sha256": "94502c72703632f2a6231959e94cccf4495635c77863b1789fc6323fe2ff93c3",
+    "evidence": [
+      {
+        "kind": "cmake",
+        "cache": "D:\\a\\MXLogger\\MXLogger\\build\\windows-sdk\\ffi\\CMakeCache.txt",
+        "core": "D:/a/MXLogger/MXLogger/Core"
+      }
+    ]
+  }
+}

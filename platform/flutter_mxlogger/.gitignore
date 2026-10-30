@@ -14,5 +14,4 @@ test/native/build_tmp/
 darwin/flutter_mxlogger/.build/
 darwin/flutter_mxlogger/.swiftpm/
 darwin/FlutterFramework/
-# Generated from the local NuGet package; included in the pub release package.
-windows/bin/
+# Precompiled Windows DLLs and their manifest in windows/bin/ are versioned.
