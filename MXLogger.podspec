@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 # pod lib lint --allow-warnings --verbose --skip-import-validation
   s.name         = "MXLogger"
-  s.version      = "2.2.0"
+  s.version      = "2.3.0"
   s.summary      = "High-performance cross-platform logger built on mmap — the Objective-C API for iOS and macOS."
 
   s.description  = <<-DESC
@@ -41,7 +41,7 @@ Pod::Spec.new do |s|
    s.frameworks   = "Foundation", "CoreFoundation"
    s.ios.frameworks = "UIKit"
 
-   s.dependency 'MXLoggerCore', "2.2.0"
+   s.dependency 'MXLoggerCore', "2.3.0"
    s.libraries    = "z", "c++"
    
   s.pod_target_xcconfig = {
