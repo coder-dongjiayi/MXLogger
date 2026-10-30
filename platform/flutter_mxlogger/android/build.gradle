@@ -1,5 +1,5 @@
 group 'com.coderdjy.mxlogger'
-version '2.2.0'
+version '2.3.0'
 
 buildscript {
     repositories {
@@ -47,7 +47,7 @@ android {
             }
             implementation project(':mxlogger_local')
         } else {
-            implementation 'io.github.coder-dongjiayi:mxlogger:2.2.0'
+            implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
         }
 
     }

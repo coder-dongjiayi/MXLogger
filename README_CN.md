@@ -98,7 +98,7 @@ mxlogger_analyzer 解析。
 ## iOS
 
 ```ruby
-pod 'MXLogger', '~> 2.2.0'
+pod 'MXLogger', '~> 2.3.0'
 ```
 
 ## 原生 macOS
@@ -129,7 +129,7 @@ open platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
 ```
 
 在 Xcode 选择 `MXLoggerDemo` scheme 和 `My Mac` 后运行。
-Demo 从当前仓库加载原生 Pods，无需先发布 2.2.0，也不依赖 Flutter。
+Demo 从当前仓库加载原生 Pods，无需先发布 2.3.0，也不依赖 Flutter。
 默认参数与其他三个 Demo 一致：命名空间 `com.djy.mxlogger`、按小时切分、
 AES-CFB-128 加密、保留 7 天、大小上限 10 MB。
 
@@ -163,7 +163,7 @@ cmake --build build/windows-demo --config Debug --parallel
 
 Windows 10/11 x64，需 Visual Studio C++ 桌面开发工具和 CMake 3.20+。
 手动运行 `verify-logger` 会在 Windows Debug / Release 构建并运行真实窗口自测，
-上传日志及界面截图；全部平台验证通过后，只上传 Release 的 `MXLoggerDemo.exe`。
+日志在 GitHub Actions 步骤中查看；全部平台验证通过后，上传 Release 的 `MXLoggerDemo.exe`。
 Mac 可编辑代码并验证共用日志操作，Windows GUI 的编译和运行由 Windows CI 验证。
 
 Windows C++ 工程可通过原生 **NuGet 包 `MXLogger.Native`** 或 **vcpkg overlay `mxlogger`** 接入。
@@ -177,7 +177,7 @@ Flutter 桌面示例位于 `platform/flutter_mxlogger/example`，复用手机端
 支持五级 / JSON / Token 写入、10 万条性能测试、多 isolate 并发校验、手动清理和日志筛选。
 macOS 隐藏后台清理开关；多 isolate 属于同一个进程，多进程演示见上方原生 Demo。
 
-在仓库根目录运行，无需先发布原生 2.2.0：
+在仓库根目录运行，无需先发布原生 2.3.0：
 
 ```bash
 bash scripts/run_flutter_macos_demo.sh
@@ -204,7 +204,7 @@ python3 scripts/verify_macos_support.py --flutter /path/to/flutter/bin/flutter
 API 测试、原生 macOS Demo、Flutter 单元测试、桌面 Demo 界面流程、iOS 设备与模拟器桥接编译，以及 macOS CocoaPods / SwiftPM
 两种接入方式的 Debug 集成测试和 Release 加密读写。Release 还会检查所有桥接导出符号。
 
-测试工程生成在 `build/macos-validation/run-*/`，使用本地原生源码，因此原生 2.2.0
+测试工程生成在 `build/macos-validation/run-*/`，使用本地原生源码，因此原生 2.3.0
 尚未发布时也可验证。发布用的依赖地址、版本和示例锁文件不会被改写，Flutter 全局配置也不变。
 测试工程的部署目标会根据当前 Xcode SDK 的最低支持版本调整；库自身的 macOS 10.13
 和 Flutter 插件的 macOS 10.14 声明保持不变。该检查不能替代旧系统上的实际运行验证。
@@ -221,17 +221,21 @@ Android 原生回归使用 NDK、CMake 和 Ninja，编译四种 ABI，并检查�
 ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_android_native.sh
 ```
 
-`.github/workflows/verify-logger.yml` **仅手动触发**。第一阶段运行 Windows Debug / Release Core 测试与窗口自测、
-Apple 原生及 Flutter 回归、Android 库和 Demo 的 JVM 单元测试及四种 ABI 原生编译。
-全部验证通过后，第二阶段并行构建以下原生 Release Demo，任一验证失败均跳过打包：
+`.github/workflows/verify-logger.yml` **仅手动触发**，依次执行三个阶段：
+
+1. C++ Core 单元测试：Windows、macOS、Linux 的 Debug / Release。
+2. 各平台原生及 Flutter 接口测试：iOS、Android、macOS、Windows；全部 Core 测试通过后才开始。
+3. Release SDK 与 Demo 出包：全部接口测试通过后才开始。
 
 | 平台 | 文件 |
 |---|---|
 | Windows | `MXLoggerDemo.exe`（x64） |
 | macOS | `MXLoggerDemo-macOS-Release.dmg`（Apple Silicon + Intel） |
 | Android | `MXLoggerDemo-android-Release.apk`（包含四种 ABI） |
+| Flutter Windows | `MXLoggerFlutterDemo-windows-x64-Release`（EXE、DLL 和 `data/`） |
+| Windows SDK | `MXLogger.Native.2.3.0.nupkg`、本地 vcpkg SDK 和 `flutter_mxlogger-windows-prebuilt` |
 
-安装文件通过 [`archive: false`](https://github.com/actions/upload-artifact/tree/v7#upload-an-individual-file-unzipped) 直接上传原文件，不增加 ZIP 包装；安装文件与测试日志保留 7 天。
+安装文件通过 [`archive: false`](https://github.com/actions/upload-artifact/tree/v7#upload-an-individual-file-unzipped) 直接上传原文件，不增加 ZIP 包装；可下载产物保留 7 天，不再单独上传 Logs。Flutter Windows Demo 是包含运行依赖的完整目录包，解压后运行 `MXLoggerFlutterDemo.exe`。
 macOS DMG 支持拖入 Applications，采用 ad-hoc 签名，未进行 Apple 公证。
 Android APK 使用测试密钥签名，构建类型为 Release；不同 CI 运行的测试密钥可能不同，覆盖安装失败时需先卸载旧 Demo。
 Android 设备上的运行验证需另行进行。
@@ -246,21 +250,21 @@ ANDROID_HOME=/path/to/android-sdk bash scripts/verify_android_demo.sh package
 
 Android 使用 JDK 17、NDK `27.0.12077973`、CMake `3.22.1`、SDK 平台 31 / 33 和 Build Tools `34.0.0`。
 
-2.2.0 发布时，先同步 `mxlogger-spm` 镜像，并使主仓库和镜像的 `v2.2.0` 标签可用；
-随后发布 `MXLoggerCore`、`MXLogger` 和 Android 2.2.0，最后发布 Flutter 包。
+2.3.0 发布时，先同步 `mxlogger-spm` 镜像，并使主仓库和镜像的 `v2.3.0` 标签可用；
+随后发布 `MXLoggerCore`、`MXLogger` 和 Android 2.3.0，最后发布 Flutter 包。
 发布 Flutter 前运行 `scripts/pub_flutter_mxlogger.sh --dry-run`，并在依赖正式可用后验证远程接入。
 
 ## Android
 
 ```groovy
-implementation 'io.github.coder-dongjiayi:mxlogger:2.2.0'
+implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ```
 
 ## Flutter
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.2.0
+  flutter_mxlogger: ^2.3.0
   mxlogger_analyzer_lib: ^2.0.0   # 可选：app 内实时查看日志
 ```
 
@@ -371,9 +375,9 @@ logger 对象。
 原生 macOS Core 支持多个进程协作访问同一日志目录：写入前获取目录级文件锁，刷新有效长度和
 映射容量；不逐条检查路径是否被外部删除或替换。读取时复制有效数据快照后解锁解析。各进程须使用本协议及一致的加密参数，
 实际目录必须共享且可访问。不同日志目录互不阻塞；iOS、Android 保持原来的文件访问流程，
-Windows Core 已增加实验性的同目录多进程后端：使用 `LockFileEx`，每次事务结束前释放数据映射和句柄，
-活动文件保护由独立的协调文件锁维持。Windows 实际运行结果须由手动触发的 `verify-logger` CI 验证；
-这不代表 Flutter 插件已完成 Windows 接入。
+Windows Core 使用 `LockFileEx` 协调同目录多进程访问，可以在连续写入间保留映射，
+活动文件保护由独立的协调文件锁维持。原生和 Flutter Windows 接入均由手动触发的 `verify-logger` CI 验证；
+Flutter 使用预编译 DLL。
 
 macOS / Windows Core 的 `.mxlogger.lock` 是协调文件，不计入日志列表或大小，也不会被清理；logger 存活时请勿手动删除。
 过期/容量清理、`removeBeforeAllData` 和 `removeAllData` 均保留当前文件及其他活跃 logger 持有的文件。

@@ -238,7 +238,7 @@ jobs:
           path: |
             Core/
             platform/Windows/vcpkg/
-            platform/Windows/README.md
+            platform/Windows/README*.md
             LICENSE.TXT
           retention-days: 7
           if-no-files-found: error

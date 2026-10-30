@@ -15,6 +15,6 @@
   <files>
     <file src="build\**" target="build" />
     <file src="LICENSE.TXT" target="" />
-    <file src="README.md" target="" />
+    <file src="README*.md" target="" />
   </files>
 </package>

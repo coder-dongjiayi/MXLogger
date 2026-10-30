@@ -102,7 +102,7 @@ and run `flutter pub get` / `pod install` to refresh local dependency paths.
 ## iOS
 
 ```ruby
-pod 'MXLogger', '~> 2.2.0'
+pod 'MXLogger', '~> 2.3.0'
 ```
 
 ## Native macOS
@@ -134,7 +134,7 @@ open platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
 ```
 
 Run the `MXLoggerDemo` scheme on `My Mac`. It uses this checkout's native pods and
-does not require Flutter or a published 2.2.0 release. Its defaults match the other
+does not require Flutter or a published 2.3.0 release. Its defaults match the other
 demos: `com.djy.mxlogger`, hourly files, AES-CFB-128, seven-day retention and a 10 MB limit.
 
 The demo covers five log levels, network JSON, generic/token writes, configuration,
@@ -167,7 +167,7 @@ cmake --build build/windows-demo --config Debug --parallel
 
 Targets Windows 10/11 x64 with Visual Studio desktop C++ tools and CMake 3.20+.
 Manual `verify-logger` CI builds Debug/Release, exercises the actual window/controls,
-and uploads logs and screenshots. Once all platforms pass, it uploads only the Release `MXLoggerDemo.exe`.
+and shows test output in GitHub Actions. Once all platforms pass, it uploads the Release `MXLoggerDemo.exe`.
 On Mac you can edit the code and test shared log actions; Windows CI verifies the native GUI.
 
 Native C++ consumers can use the **`MXLogger.Native` NuGet package** or the **`mxlogger` vcpkg overlay**.
@@ -183,7 +183,7 @@ entry and explicit cleanup instructions. It covers writes, a 100,000-write bench
 concurrent isolates, cleanup and filtering. Isolates share one process; use the native
 demo above for multiple processes.
 
-Run from the repository root, without publishing native 2.2.0 first:
+Run from the repository root, without publishing native 2.3.0 first:
 
 ```bash
 bash scripts/run_flutter_macos_demo.sh
@@ -233,18 +233,22 @@ an accidental dependency on the macOS process lock:
 ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_android_native.sh
 ```
 
-`.github/workflows/verify-logger.yml` is **manual-only**. Its first stage runs Windows Debug/Release Core tests
-and window checks, Apple native/Flutter regression checks, and Android library/Demo JVM unit tests plus four-ABI native builds.
-Only after every verification job succeeds does the Release stage build these native Demo deliverables:
+`.github/workflows/verify-logger.yml` is **manual-only** and has three success gates:
+
+1. C++ Core unit tests on Windows, macOS and Linux, in Debug and Release.
+2. Native and Flutter API tests on iOS, Android, macOS and Windows. Every Core job must pass first.
+3. Release SDK and Demo artifacts, only after all API jobs pass.
 
 | Platform | File |
 |---|---|
 | Windows | `MXLoggerDemo.exe` (x64) |
 | macOS | `MXLoggerDemo-macOS-Release.dmg` (Apple Silicon + Intel) |
 | Android | `MXLoggerDemo-android-Release.apk` (all four ABIs) |
+| Flutter Windows | `MXLoggerFlutterDemo-windows-x64-Release` (EXE, DLLs and `data/`) |
+| Windows SDK | `MXLogger.Native.2.3.0.nupkg`, local vcpkg SDK and `flutter_mxlogger-windows-prebuilt` |
 
 Installers are uploaded directly with [`archive: false`](https://github.com/actions/upload-artifact/tree/v7#upload-an-individual-file-unzipped), without a ZIP wrapper.
-Artifacts and logs are retained for seven days. The macOS DMG supports dragging the app into Applications;
+Downloadable artifacts are retained for seven days; separate log artifacts are not uploaded. The Flutter Windows Demo is a complete directory bundle; extract it before running `MXLoggerFlutterDemo.exe`. The macOS DMG supports dragging the app into Applications;
 it uses an ad-hoc signature and is not notarized. The non-debuggable Android Release APK uses a test signing key.
 Keys may differ between CI runs, requiring uninstalling an older Demo before installing a newer APK.
 Android runtime behavior on a device requires separate verification.
@@ -253,22 +257,22 @@ To build locally, run `bash scripts/build_macos_demo_dmg.sh`, or run
 `ANDROID_HOME=/path/to/android-sdk bash scripts/verify_android_demo.sh test` followed by the same command with `package`.
 Android requires JDK 17, NDK `27.0.12077973`, CMake `3.22.1`, SDK platforms 31/33 and Build Tools `34.0.0`.
 
-For 2.2.0, synchronize the `mxlogger-spm` mirror and make the main and mirror `v2.2.0`
-tags available, then publish `MXLoggerCore`, `MXLogger` and Android 2.2.0 before the
+For 2.3.0, synchronize the `mxlogger-spm` mirror and make the main and mirror `v2.3.0`
+tags available, then publish `MXLoggerCore`, `MXLogger` and Android 2.3.0 before the
 Flutter package. Run `scripts/pub_flutter_mxlogger.sh --dry-run` before publishing
 Flutter, then verify remote dependency resolution once the native releases are available.
 
 ## Android
 
 ```groovy
-implementation 'io.github.coder-dongjiayi:mxlogger:2.2.0'
+implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ```
 
 ## Flutter
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.2.0
+  flutter_mxlogger: ^2.3.0
   mxlogger_analyzer_lib: ^2.0.0   # optional: the in-app log viewer
 ```
 
@@ -382,10 +386,11 @@ the path for external deletion/replacement on each append. Reads
 copy a committed snapshot under a shared lock, then decode after unlocking. All participants must
 use this protocol, matching encryption parameters and an accessible shared directory. Separate
 directories do not block each other. iOS and Android retain their existing file access paths;
-an experimental Windows Core backend now follows this directory protocol using `LockFileEx`.
-It releases data views and handles before unlocking each transaction, with separate coordinator
-leases protecting active files. Actual Windows execution needs the manually dispatched
-`verify-logger` CI; Flutter Windows plugin integration is still separate work.
+Windows Core follows this directory protocol using `LockFileEx` and can retain
+data mappings between writes while coordinating with other processes. Separate
+coordinator leases protect active files. Native and Flutter Windows integration
+are verified by the manually dispatched `verify-logger` CI; Flutter loads a
+precompiled DLL.
 
 The macOS/Windows Core `.mxlogger.lock` coordinator is excluded from log listings, size budgets and cleanup;
 do not manually delete it while loggers are alive. Age/size cleanup, `removeBeforeAllData` and

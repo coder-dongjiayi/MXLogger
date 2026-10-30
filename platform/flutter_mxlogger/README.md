@@ -6,7 +6,7 @@ MXLogger is a cross-platform logging library built on mmap memory mapping, with 
 
 See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) for the full project.
 
-- **Version**: 2.2.0
+- **Version**: 2.3.0
 - **Requirements**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
 - **Platforms**: iOS (>= 9.0), macOS (>= 10.14), Android (minSdk 21), Windows 10/11 x64
 
@@ -49,14 +49,14 @@ Web has no native Core and throws `UnsupportedError`.
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.2.0
+  flutter_mxlogger: ^2.3.0
 ```
 
 The native SDK dependencies are pulled in automatically:
 
-- iOS / macOS (CocoaPods): depends on `MXLogger 2.2.0` → `MXLoggerCore 2.2.0`
-- iOS / macOS (Swift Package Manager): when the host app has enabled Flutter's SwiftPM support (`flutter config --enable-swift-package-manager`), the plugin is integrated via `darwin/flutter_mxlogger/Package.swift` and depends on [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0` instead
-- Android: Gradle depends on `io.github.coder-dongjiayi:mxlogger:2.2.0`
+- iOS / macOS (CocoaPods): depends on `MXLogger 2.3.0` → `MXLoggerCore 2.3.0`
+- iOS / macOS (Swift Package Manager): when the host app has enabled Flutter's SwiftPM support (`flutter config --enable-swift-package-manager`), the plugin is integrated via `darwin/flutter_mxlogger/Package.swift` and depends on [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.3.0` instead
+- Android: Gradle depends on `io.github.coder-dongjiayi:mxlogger:2.3.0`
 - Windows: the prepared package ships precompiled x64 `mxlogger_ffi.dll` binaries.
   CMake verifies their version and SHA-256 and bundles the matching DLL beside
   the executable (Debug → Debug, Profile/Release → Release). No Core compilation

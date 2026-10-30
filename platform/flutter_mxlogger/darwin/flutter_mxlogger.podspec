@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_mxlogger'
-  s.version          = '2.2.0'
+  s.version          = '2.3.0'
   s.summary          = 'iOS and macOS implementation of the flutter_mxlogger plugin.'
   s.description      = <<-DESC
 iOS and macOS implementation of the flutter_mxlogger Flutter plugin. It exports the
@@ -22,7 +22,7 @@ flutter_mxlogger package to your pubspec instead.
   s.ios.dependency 'Flutter'
   s.osx.dependency 'FlutterMacOS'
   s.osx.frameworks = 'FlutterMacOS'
-  s.dependency 'MXLogger' ,'2.2.0'
+  s.dependency 'MXLogger' ,'2.3.0'
   s.ios.deployment_target = '9.0'
   s.osx.deployment_target = '10.14'
 

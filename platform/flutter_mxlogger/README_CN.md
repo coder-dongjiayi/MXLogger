@@ -6,7 +6,7 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
 
 更多说明见 [MXLogger 主仓库](https://github.com/coder-dongjiayi/MXLogger)。
 
-- **当前版本**：2.2.0
+- **当前版本**：2.3.0
 - **环境要求**：Dart SDK `>=2.19.0 <4.0.0`、Flutter `>=3.7.0`
 - **平台支持**：iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）、Windows 10/11 x64
 
@@ -46,14 +46,14 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.2.0
+  flutter_mxlogger: ^2.3.0
 ```
 
 原生 SDK 依赖会自动引入：
 
-- iOS / macOS（CocoaPods）：依赖 `MXLogger 2.2.0` → `MXLoggerCore 2.2.0`
-- iOS / macOS（Swift Package Manager）：宿主 App 开启了 Flutter 的 SwiftPM 支持（`flutter config --enable-swift-package-manager`）时，插件通过 `darwin/flutter_mxlogger/Package.swift` 接入，改为依赖 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0`
-- Android：Gradle 依赖 `io.github.coder-dongjiayi:mxlogger:2.2.0`
+- iOS / macOS（CocoaPods）：依赖 `MXLogger 2.3.0` → `MXLoggerCore 2.3.0`
+- iOS / macOS（Swift Package Manager）：宿主 App 开启了 Flutter 的 SwiftPM 支持（`flutter config --enable-swift-package-manager`）时，插件通过 `darwin/flutter_mxlogger/Package.swift` 接入，改为依赖 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.3.0`
+- Android：Gradle 依赖 `io.github.coder-dongjiayi:mxlogger:2.3.0`
 - Windows：准备好的插件包自带预编译 x64 `mxlogger_ffi.dll`，CMake 检查版本及 SHA-256 后随应用复制 DLL。Debug 使用 Debug DLL，Profile/Release 使用 Release DLL；Flutter 用户无需编译 Core 或安装 NuGet。
 
 ### Windows 预编译 DLL 与本地开发

@@ -1,6 +1,16 @@
 
 # MXLogger for Flutter Change Log
 
+# v2.3.0/2026-10-30
+* Add Windows 10/11 x64 support through precompiled `mxlogger_ffi.dll` binaries. Flutter bundles the Debug DLL for Debug builds and the Release DLL for Profile/Release builds; consuming apps do not compile Core or require NuGet installation.
+* Add `MXLogger.coreVersion()` to query the linked C++ Core version without initializing a logger. Show the Core version in the demos.
+* On Windows, resolve the default log directory through the DLL as `%LOCALAPPDATA%/MXLogger/<executable stem>/<nameSpace>`. Like macOS, Windows uses explicit cleanup through `removeExpireData()` rather than mobile background cleanup.
+* Share the pure C++ FFI bridge between Android and Windows, with common C declarations and pointer-sized logger handles.
+* Make native file-list buffers use the paired `flutter_mxlogger_free_logfiles` function instead of Dart-side frees. Keep native strings and parsed-log buffers paired with `free_string` and `free_logmsg`, and release file-list/parsed-log results in `finally` blocks so decoding failures also clean up native memory.
+* **Native dependency requirement:** use the matching 2.3.0 Android and Apple native SDKs and Windows DLLs. The new file-list release function is unavailable in older bridges; applications overriding native dependency versions must update them together with this package.
+* Preserve active mapped log files during cleanup and improve desktop Core write performance by reducing repeated filesystem metadata checks and mapping growth overhead.
+* Add the Flutter Windows feature demo, including encrypted log viewing, file browsing, explicit cleanup, Core version display, and concurrent-isolate writes. CI tests Debug/Release DLL loading, UTF-8 paths, allocation/free pairs, and relocated application bundles, and provides a complete interactive Windows Release Demo.
+
 # v2.2.0/2026-10-26
 * Complete the Flutter macOS demo with desktop layout, settings dialogs, manual cleanup guidance, a Finder entry, local-source launch commands, and UI regression previews.
 * Add macOS support, including the Flutter plugin, CocoaPods, SwiftPM, and cooperative multi-process access to a shared log directory.

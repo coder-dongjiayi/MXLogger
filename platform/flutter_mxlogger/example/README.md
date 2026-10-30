@@ -46,7 +46,7 @@ FLUTTER_BIN=/path/to/flutter/bin/flutter bash scripts/run_flutter_macos_demo.sh
 
 This starts the actual `lib/main.dart` app using this checkout's native CocoaPods.
 It scopes `MXLOGGER_LOCAL_NATIVE=1` and `FLUTTER_SWIFT_PACKAGE_MANAGER=false` to the
-command, without changing Flutter's global settings or requiring published 2.2.0
+command, without changing Flutter's global settings or requiring published 2.3.0
 dependencies. The demo's CocoaPods setup generates an ignored
 `macos/Runner/Configs/SDK.xcconfig` to match the installed Xcode SDK's build floor;
 the plugin's declared macOS minimum remains 10.14.
@@ -74,7 +74,7 @@ flutter run -d macos
 ```
 
 The native `MXLogger` / `MXLoggerCore` pods or `mxlogger-spm` package must be
-available at version 2.2.0. For CocoaPods development before publication, set
+available at version 2.3.0. For CocoaPods development before publication, set
 `MXLOGGER_LOCAL_NATIVE=1` to use the native sources from this checkout. When
 Flutter's SwiftPM integration is enabled, its package dependency must instead
 be resolved to a local `mxlogger-spm` checkout for unpublished builds.

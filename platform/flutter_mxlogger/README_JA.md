@@ -6,9 +6,9 @@ MXLogger は mmap メモリマッピングを基盤とし、AES-CFB-128 暗号�
 
 プロジェクト全体は [MXLogger メインリポジトリ](https://github.com/coder-dongjiayi/MXLogger) を参照してください。
 
-- **バージョン**: 2.2.0
+- **バージョン**: 2.3.0
 - **要件**: Dart SDK `>=2.19.0 <4.0.0`、Flutter `>=3.7.0`
-- **対応プラットフォーム**: iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）
+- **対応プラットフォーム**: iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）、Windows 10/11 x64
 
 ## 目次
 
@@ -45,14 +45,30 @@ MXLogger は mmap メモリマッピングを基盤とし、AES-CFB-128 暗号�
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.2.0
+  flutter_mxlogger: ^2.3.0
 ```
 
 ネイティブ SDK の依存関係は自動的に取り込まれます。
 
-- iOS / macOS（CocoaPods）: `MXLogger 2.2.0` → `MXLoggerCore 2.2.0` に依存
-- iOS / macOS（Swift Package Manager）: ホストアプリで Flutter の SwiftPM サポートを有効にしている場合（`flutter config --enable-swift-package-manager`）、プラグインは `darwin/flutter_mxlogger/Package.swift` 経由で統合され、代わりに [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0` に依存します
-- Android: Gradle が `io.github.coder-dongjiayi:mxlogger:2.2.0` に依存
+- iOS / macOS（CocoaPods）: `MXLogger 2.3.0` → `MXLoggerCore 2.3.0` に依存
+- iOS / macOS（Swift Package Manager）: ホストアプリで Flutter の SwiftPM サポートを有効にしている場合（`flutter config --enable-swift-package-manager`）、プラグインは `darwin/flutter_mxlogger/Package.swift` 経由で統合され、代わりに [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.3.0` に依存します
+- Android: Gradle が `io.github.coder-dongjiayi:mxlogger:2.3.0` に依存
+- Windows: 同梱のプリビルド `mxlogger_ffi.dll` を使用します。Debug は Debug DLL、Profile/Release は Release DLL を使い、CMake がバージョンと SHA-256 を検証して EXE の隣にコピーします。利用するアプリで Core をコンパイルしたり、NuGet をインストールしたりする必要はありません。
+
+### Windows DLL と 2.3.0 への更新
+
+Windows の既定ディレクトリは `%LOCALAPPDATA%/MXLogger/<実行ファイル名>/<nameSpace>` で、DLL が解決します。macOS と同じくクリーンアップは `removeExpireData()` で明示的に行います。iOS / Android / macOS だけをビルドする場合、Windows DLL を別途準備する必要はありません。
+
+DLL と `manifest.json` は `windows/bin/x64/` に含まれます。Core を変更したら手動の `verify-logger` CI で現在のソースから DLL をビルドし、取得したローカル NuGet パッケージから更新してください。次の準備処理は macOS でも実行できます。
+
+```bash
+python3 scripts/prepare_flutter_windows.py --package /path/to/MXLogger.Native.2.3.0.nupkg
+python3 scripts/prepare_flutter_windows.py --check
+```
+
+このコマンドはリポジトリのルートで実行します。Debug/Release DLL と manifest を一緒にコミットし、pub の公開パッケージにも含めてください。ファイル一覧はネイティブブリッジの `free_logfiles` で解放するため、Android/Apple SDK と Windows DLL も対応する 2.3.0 に更新する必要があります。
+
+CI は Core 単体テスト、全プラットフォームの API テスト、Release 成果物の順で実行します。`MXLoggerFlutterDemo-windows-x64-Release` をダウンロードして全体を展開し、`MXLoggerFlutterDemo.exe` を実行できます。DLL と `data/` を同じフォルダーに保ってください。ログだけの成果物はアップロードしません。
 
 iOS / macOS は `darwin/` を共有します（Flutter 3.7+）。macOS の既定ディレクトリは `<Application Support>/<bundle-id>/MXLogger/<nameSpace>` です。bundle ID がなければプロセス名を使います。macOS では `removeExpireData()` を明示的に呼び出してください。
 
@@ -156,7 +172,7 @@ static Future<MXLogger> initialize({
 | パラメータ | 説明 |
 |---|---|
 | `nameSpace` | ログファイルの名前空間。一意性のためドメインの逆順表記を推奨。最終的なディレクトリは `directory/nameSpace` |
-| `directory` | カスタムディレクトリ。省略時は MethodChannel でプラットフォーム既定値を取得: iOS `<Library>/com.mxlog.LoggerCache`、Android `<filesDir>/com.mxlog.LoggerCache`, macOS `<Application Support>/<bundle-id>/MXLogger` |
+| `directory` | カスタムディレクトリ。省略時は MethodChannel でプラットフォーム既定値を取得: iOS `<Library>/com.mxlog.LoggerCache`、Android `<filesDir>/com.mxlog.LoggerCache`, macOS `<Application Support>/<bundle-id>/MXLogger`。Windows は DLL が `%LOCALAPPDATA%/MXLogger/<実行ファイル名>` を解決します |
 | `consoleEnable` | コンソール出力の有無。debug ビルドでのみ有効 |
 | `storagePolicy` | ファイル分割ポリシー。2.2 を参照 |
 | `fileName` | カスタムファイル名。既定値は `mxlog` |
@@ -263,9 +279,11 @@ void removeAll();             // すべてのログファイルを削除
 
 `removeExpireData()` は 2 段階でクリーンアップします。まず最終更新時刻が `maxDiskAge` より古いファイルを削除し、それでも合計サイズが `maxDiskSize` を超えていれば、古いファイルから順に削除を続けます。**現在書き込み中のファイルは決して削除されません。**
 
-iOS / Android ではバックグラウンド移行時に自動実行され、`shouldRemoveExpiredDataWhenEnterBackground(false)` で無効化できます。macOS ではこの設定は無効です。`removeExpireData()` を明示的に呼び出してください。
+iOS / Android ではバックグラウンド移行時に自動実行され、`shouldRemoveExpiredDataWhenEnterBackground(false)` で無効化できます。macOS / Windows ではこの設定は無効です。`removeExpireData()` を明示的に呼び出してください。
 
 ## 2.6 状態
+
+`MXLogger.coreVersion()` は初期化せずにリンク済み C++ Core のバージョン（現在は `2.3.0`）を返します。pub パッケージのバージョンとは独立しています。
 
 | メンバー | 型 | 説明 |
 |---|---|---|

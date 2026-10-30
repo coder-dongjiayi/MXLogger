@@ -84,7 +84,7 @@ Chrome에서 스토어 링크를 열고 **Chrome에 추가** → **확장 프로
 ## iOS
 
 ```ruby
-pod 'MXLogger', '~> 2.2.0'
+pod 'MXLogger', '~> 2.3.0'
 ```
 
 ## 네이티브 macOS
@@ -108,7 +108,7 @@ pod install --project-directory=platform/macOS/MXLoggerDemo
 open platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
 ```
 
-`MXLoggerDemo` 스킴과 `My Mac`을 선택해 실행합니다. 현재 체크아웃의 네이티브 Pod를 사용하므로 Flutter나 이미 배포된 2.2.0이 필요하지 않습니다. 기본값은 다른 데모와 동일하게 `com.djy.mxlogger`, 시간별 파일 분할, AES-CFB-128, 보관 기간 7일, 용량 한도 10MB입니다.
+`MXLoggerDemo` 스킴과 `My Mac`을 선택해 실행합니다. 현재 체크아웃의 네이티브 Pod를 사용하므로 Flutter나 이미 배포된 2.3.0이 필요하지 않습니다. 기본값은 다른 데모와 동일하게 `com.djy.mxlogger`, 시간별 파일 분할, AES-CFB-128, 보관 기간 7일, 용량 한도 10MB입니다.
 
 5단계 로그, 네트워크 JSON, 일반·Token 기반 기록, 설정, 10만 건 성능 측정, 스레드·프로세스 동시 기록과 건수·순서 검증, 수동 정리, 인스턴스 재생성, 레벨·검색 필터가 있는 로그 뷰어를 제공합니다. macOS에서는 수동으로 정리하며 Release에서는 콘솔 스위치가 비활성화됩니다. `pod install`은 현재 Xcode SDK에 맞는 로컬 `Configurations/SDK.xcconfig`를 생성합니다.
 
@@ -118,11 +118,19 @@ bash scripts/verify_macos_demo.sh
 
 Debug / Release를 빌드하고 여러 프로세스의 암호화 읽기·쓰기, Token, 정리, 다시 열기를 검증합니다. Debug에서는 Storyboard를 불러와 outlet, 화면 이동, 언어 전환 및 필터를 확인하고 앱 자체 뷰의 미리보기를 생성합니다. 로그와 미리보기는 `build/macos-native-demo/`에 저장됩니다.
 
+### 네이티브 Windows 및 Flutter Windows 데모
+
+Windows 10/11 x64를 지원합니다. 네이티브 Win32 + C++17 데모는 `platform/Windows/MXLoggerDemo`, Flutter 데모는 `platform/flutter_mxlogger/example`에 있습니다. Windows C++ SDK는 로컬 `MXLogger.Native.2.3.0.nupkg` 또는 vcpkg overlay로 사용할 수 있습니다. NuGet / vcpkg 공개 레지스트리에는 아직 배포하지 않았습니다.
+
+Flutter는 `windows/bin/x64/`의 사전 빌드 DLL을 사용하며 Core 소스 복사본을 포함하지 않습니다. Debug는 Debug DLL, Profile/Release는 Release DLL을 사용합니다. 기본 로그 경로는 `%LOCALAPPDATA%/MXLogger/<실행 파일 이름>/<nameSpace>`이며 직접 정리해야 합니다. `MXLogger.coreVersion()`은 초기화 없이 Core 버전 `2.3.0`을 반환하며 데모에도 표시합니다.
+
+CI의 `MXLoggerFlutterDemo-windows-x64-Release`에는 실제 데모, Core DLL, Flutter 및 VC++ 런타임, `data/`가 포함됩니다. 전체를 압축 해제하고 `MXLoggerFlutterDemo.exe`를 실행하세요.
+
 ### Flutter macOS 데모
 
 `platform/flutter_mxlogger/example`은 모바일 버전과 시작 화면, 보라색 상태 카드, 기능 그룹, 영어·중국어 전환, 파일 목록 및 암호화 로그 뷰어를 공유합니다. macOS용으로 크기 조절 창, 설정 대화상자, 별도 Finder 항목과 수동 정리 설명을 추가했습니다. 기록, 10만 건 성능 측정, isolate 동시 처리, 정리와 필터를 체험할 수 있습니다. isolate는 같은 프로세스에 속합니다. 여러 프로세스의 동작은 위의 네이티브 데모에서 확인할 수 있습니다.
 
-저장소 루트에서 실행합니다. 네이티브 2.2.0을 먼저 배포할 필요가 없습니다.
+저장소 루트에서 실행합니다. 네이티브 2.3.0을 먼저 배포할 필요가 없습니다.
 
 ```bash
 bash scripts/run_flutter_macos_demo.sh
@@ -155,21 +163,27 @@ Android 검증에는 NDK, CMake와 Ninja가 필요합니다. 네 가지 ABI를 �
 ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_android_native.sh
 ```
 
-`.github/workflows/verify-logger.yml`은 관련 PR과 수동 실행에서 검증하며 로그를 7일간 보관합니다. Android 실기기의 동작은 별도로 검증해야 합니다.
+`.github/workflows/verify-logger.yml`은 **수동 실행 전용**이며 다음 순서로 진행합니다.
 
-2.2.0 배포 시에는 `mxlogger-spm` 미러를 동기화하고 메인 저장소와 미러의 `v2.2.0` 태그를 사용할 수 있게 합니다. 이후 `MXLoggerCore`, `MXLogger`, Android 2.2.0을 배포하고 마지막으로 Flutter 패키지를 배포합니다. Flutter 배포 전 `scripts/pub_flutter_mxlogger.sh --dry-run`을 실행하고, 네이티브 의존성 배포 후 원격 의존성 해석을 검증하세요.
+1. Windows / macOS / Linux의 C++ Core 단위 테스트(Debug / Release).
+2. iOS / Android / macOS / Windows의 네이티브 및 Flutter API 테스트. 모든 Core 테스트가 통과해야 시작합니다.
+3. 모든 API 테스트가 통과한 뒤 Release SDK와 데모를 생성합니다.
+
+결과물은 네이티브 Windows EXE, macOS DMG, Android APK, 로컬 NuGet / vcpkg SDK, DLL을 포함한 Flutter 플러그인, 완전한 Flutter Windows Release 데모입니다. `MXLoggerFlutterDemo-windows-x64-Release`를 전체 압축 해제한 뒤 `MXLoggerFlutterDemo.exe`를 실행하세요. DLL과 `data/`도 함께 있어야 합니다. 테스트 로그는 GitHub Actions의 각 단계에서 확인하며 별도의 로그 결과물은 업로드하지 않습니다.
+
+2.3.0 배포 시에는 `mxlogger-spm` 미러를 동기화하고 메인 저장소와 미러의 `v2.3.0` 태그를 사용할 수 있게 합니다. 이후 `MXLoggerCore`, `MXLogger`, Android 2.3.0을 배포하고 마지막으로 Flutter 패키지를 배포합니다. Flutter 배포 전 `scripts/pub_flutter_mxlogger.sh --dry-run`을 실행하고, 네이티브 의존성 배포 후 원격 의존성 해석을 검증하세요.
 
 ## Android
 
 ```groovy
-implementation 'io.github.coder-dongjiayi:mxlogger:2.2.0'
+implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ```
 
 ## Flutter
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.2.0
+  flutter_mxlogger: ^2.3.0
   mxlogger_analyzer_lib: ^2.0.0   # optional: the in-app log viewer
 ```
 
@@ -266,9 +280,9 @@ debugPrint("logs live in ${logger.diskcachePath}");
 
 모든 플랫폼에서 로거는 **nameSpace + diskCacheDirectory**로 식별되며, 같은 조합은 같은 C++ 인스턴스를 공유합니다. 이 조합의 MD5 값이 **loggerToken**입니다. 모듈 간에 이 값을 전달하면 로거 객체를 보관하지 않고 클래스 메서드로 기록할 수 있습니다.
 
-네이티브 macOS Core는 같은 로그 디렉터리를 공유하는 프로세스의 접근을 조정합니다. 추가 기록 전에 디렉터리 단위 파일 잠금을 획득하고 확정된 길이, 파일 식별 정보와 매핑 용량을 갱신합니다. 읽을 때는 공유 잠금 아래에서 확정된 스냅샷을 복사한 뒤 잠금을 풀고 복호화·분석합니다. 참여하는 모든 프로세스는 같은 방식과 암호화 설정, 접근 가능한 공유 디렉터리를 사용해야 합니다. 서로 다른 디렉터리는 서로를 기다리지 않습니다. iOS / Android의 기존 파일 접근 방식은 유지되며, Windows Core에는 같은 디렉터리 조정 방식을 사용하는 실험적 백엔드를 추가했습니다. LockFileEx와 임시 매핑을 사용하며 실행 검증은 수동 verify-logger CI에서 수행합니다. Flutter 플러그인의 Windows 통합은 별도 작업입니다.
+네이티브 macOS Core는 같은 로그 디렉터리를 공유하는 프로세스의 접근을 조정합니다. 추가 기록 전에 디렉터리 단위 파일 잠금을 획득하고 확정된 길이와 매핑 용량을 갱신합니다. 외부 삭제나 교체 여부를 확인하는 경로 검사를 매번 수행하지 않습니다. 읽을 때는 공유 잠금 아래에서 확정된 스냅샷을 복사한 뒤 잠금을 풀고 복호화·분석합니다. 참여하는 모든 프로세스는 같은 방식과 암호화 설정, 접근 가능한 공유 디렉터리를 사용해야 합니다. 서로 다른 디렉터리는 서로를 기다리지 않습니다. iOS / Android의 기존 파일 접근 방식은 유지되며, Windows Core도 `LockFileEx`로 같은 디렉터리의 접근을 조정하며 기록 사이에 매핑을 유지할 수 있습니다. 네이티브 및 Flutter Windows 통합을 수동 `verify-logger` CI에서 검증합니다. Flutter는 사전 빌드 DLL을 불러옵니다.
 
-macOS / Windows Core의 조정 파일 `.mxlogger.lock`은 로그 목록, 용량 계산과 정리 대상에서 제외됩니다. 로거가 살아 있는 동안 수동으로 삭제하지 마세요. 보관 기간·용량 기반 정리와 `removeBeforeAllData`는 다른 프로세스가 사용 중인 파일을 보존합니다. `removeAllData`는 모든 로그를 삭제하며, 실행 중인 로거는 다음 기록 전에 파일을 다시 엽니다. `.mx` 형식은 바뀌지 않았고, CRC나 전원 차단 내구성 보장이 추가되는 것은 아닙니다. macOS / Windows Core에서는 잠금 실패 또는 확정 길이가 32비트 한도에 도달하면 `-4`를 반환할 수 있습니다. 자세한 내용은 `errorDesc`를 확인하세요.
+macOS / Windows Core의 조정 파일 `.mxlogger.lock`은 로그 목록, 용량 계산과 정리 대상에서 제외됩니다. 로거가 살아 있는 동안 수동으로 삭제하지 마세요. 보관 기간·용량 기반 정리와 `removeBeforeAllData`는 다른 프로세스가 사용 중인 파일을 보존합니다. `removeAllData`도 사용 중인 파일을 보존하며 사용하지 않는 로그를 삭제합니다. `.mx` 형식은 바뀌지 않았고, CRC나 전원 차단 내구성 보장이 추가되는 것은 아닙니다. macOS / Windows Core에서는 잠금 실패 또는 확정 길이가 32비트 한도에 도달하면 `-4`를 반환할 수 있습니다. 자세한 내용은 `errorDesc`를 확인하세요.
 
 > **사용 중단 예정 API 안내.** `loggerToken`의 이전 이름은 `loggerKey`였으며, 암호화용 `cryptKey`와 혼동하기 쉬웠습니다. iOS / Android / Flutter의 각 `loggerKey` API는 현재도 대응하는 `loggerToken` API로 전달되지만 사용 중단 예정이며 **향후 릴리스에서 제거됩니다**. `loggerKey` → `loggerToken`, `xxxWithLoggerKey:` → `xxxWithLoggerToken:`, `getLoggerKey()` → `getLoggerToken()`, `logLoggerKey` → `logLoggerToken`, `destroyWithLoggerKey` → `destroyWithLoggerToken`으로 이전하세요.
 
@@ -336,7 +350,7 @@ macOS / Windows Core의 조정 파일 `.mxlogger.lock`은 로그 목록, 용량 
 | `- logFiles` | 딕셔너리 배열: `name` / `size` / `last_timestamp` / `create_timestamp` |
 | `- errorDesc` | 최근 기록 오류 설명 |
 | `- removeExpireData` | 기간이 지난 파일을 지운 뒤 `maxDiskSize`를 초과하면 오래된 파일부터 삭제 |
-| `- removeAllData` | 모든 로그 파일 삭제 |
+| `- removeAllData` | 사용하지 않는 로그를 삭제하고 사용 중인 파일은 보존 |
 | `- removeBeforeAllData` | 현재 기록 중인 파일을 제외한 모든 파일 삭제 |
 | `+ selectWithDiskCacheFilePath:cryptKey:iv:` | 파일을 분석해 최신순으로 반환: `name` / `msg` / `tag` / `level` / `timestamp` / `thread_id` / `is_main_thread` / `error_code` |
 
@@ -399,7 +413,7 @@ Android의 매개변수 순서에 주의하세요. **tag가 첫 번째**입니�
 | --- | --- |
 | `String[] logFiles()` | 파일마다 JSON 문자열 반환: `name` / `size` / `last_timestamp` / `create_timestamp` |
 | `void removeExpireData()` | 기간이 지난 파일을 지운 뒤 `maxDiskSize`를 초과하면 오래된 파일부터 삭제. Android에는 자동 수명 주기 훅이 없으므로 `onStop` 등에서 직접 호출 |
-| `void removeAll()` | 모든 로그 파일 삭제 |
+| `void removeAll()` | 사용하지 않는 로그를 삭제하고 사용 중인 파일은 보존 |
 | `void removeBeforeAllData()` | 현재 기록 중인 파일을 제외한 모든 파일 삭제 |
 | `static String[] selectWithFilePath(String diskCacheFilePath, String cryptKey, String iv)` | 파일을 분석하고 레코드마다 JSON 문자열을 최신순으로 반환 |
 
@@ -451,7 +465,7 @@ Android Java에서는 위의 대문자 열거형 값을 계속 사용합니다. 
 | `void setMaxDiskSize(int size)` | 최대 전체 크기(바이트). 0은 무제한 |
 | `void shouldRemoveExpiredDataWhenEnterBackground(bool should)` | 모바일에서 백그라운드 전환 시 자동 정리. 기본값은 `true`. macOS에서는 직접 호출해야 함 |
 | `void removeExpireData()` | 기간이 지난 파일을 지운 뒤 용량 한도를 초과하면 오래된 파일부터 삭제 |
-| `void removeAll()` | 모든 로그 파일 삭제 |
+| `void removeAll()` | 사용하지 않는 로그를 삭제하고 사용 중인 파일은 보존 |
 | `void removeBeforeAllData()` | 현재 기록 중인 파일을 제외한 모든 파일 삭제 |
 | `int getLogSize()` / `String getDiskcachePath()` / `String? getLoggerToken()` / `List<MXFileEntity> getLogFiles()` | 위 getter의 메서드 형태 |
 

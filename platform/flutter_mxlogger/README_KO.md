@@ -6,9 +6,9 @@ MXLogger는 mmap 메모리 매핑을 기반으로 하고 AES-CFB-128 암호화�
 
 전체 프로젝트는 [MXLogger 메인 저장소](https://github.com/coder-dongjiayi/MXLogger)를 참고하세요.
 
-- **버전**: 2.2.0
+- **버전**: 2.3.0
 - **요구 사항**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
-- **지원 플랫폼**: iOS(>= 9.0), macOS(>= 10.14), Android(minSdk 21)
+- **지원 플랫폼**: iOS(>= 9.0), macOS(>= 10.14), Android(minSdk 21), Windows 10/11 x64
 
 ## 목차
 
@@ -45,14 +45,30 @@ MXLogger는 mmap 메모리 매핑을 기반으로 하고 AES-CFB-128 암호화�
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.2.0
+  flutter_mxlogger: ^2.3.0
 ```
 
 네이티브 SDK 의존성은 자동으로 포함됩니다.
 
-- iOS / macOS(CocoaPods): `MXLogger 2.2.0` → `MXLoggerCore 2.2.0`에 의존
-- iOS / macOS(Swift Package Manager): 호스트 앱에서 Flutter의 SwiftPM 지원을 켠 경우(`flutter config --enable-swift-package-manager`) 플러그인은 `darwin/flutter_mxlogger/Package.swift`로 통합되며, 대신 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.2.0`에 의존합니다
-- Android: Gradle이 `io.github.coder-dongjiayi:mxlogger:2.2.0`에 의존
+- iOS / macOS(CocoaPods): `MXLogger 2.3.0` → `MXLoggerCore 2.3.0`에 의존
+- iOS / macOS(Swift Package Manager): 호스트 앱에서 Flutter의 SwiftPM 지원을 켠 경우(`flutter config --enable-swift-package-manager`) 플러그인은 `darwin/flutter_mxlogger/Package.swift`로 통합되며, 대신 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.3.0`에 의존합니다
+- Android: Gradle이 `io.github.coder-dongjiayi:mxlogger:2.3.0`에 의존
+- Windows: 패키지에 포함된 사전 빌드 `mxlogger_ffi.dll`을 사용합니다. Debug는 Debug DLL, Profile/Release는 Release DLL을 사용하며 CMake가 버전과 SHA-256을 확인한 뒤 EXE 옆에 복사합니다. 사용하는 앱에서 Core를 컴파일하거나 NuGet을 설치할 필요가 없습니다.
+
+### Windows DLL과 2.3.0 업데이트
+
+Windows 기본 경로는 `%LOCALAPPDATA%/MXLogger/<실행 파일 이름>/<nameSpace>`이며 DLL에서 결정합니다. macOS와 마찬가지로 `removeExpireData()`를 직접 호출해 정리합니다. iOS / Android / macOS만 빌드한다면 Windows DLL을 별도로 준비할 필요가 없습니다.
+
+DLL과 `manifest.json`은 `windows/bin/x64/`에 포함됩니다. Core를 수정하면 수동 `verify-logger` CI에서 현재 소스로 DLL을 빌드하고, 내려받은 로컬 NuGet 패키지로 갱신하세요. 다음 준비 과정은 macOS에서도 실행할 수 있습니다.
+
+```bash
+python3 scripts/prepare_flutter_windows.py --package /path/to/MXLogger.Native.2.3.0.nupkg
+python3 scripts/prepare_flutter_windows.py --check
+```
+
+저장소 루트에서 실행하세요. Debug/Release DLL과 manifest를 함께 커밋하고 pub 배포 패키지에도 포함해야 합니다. 파일 목록을 네이티브 브리지의 `free_logfiles`로 해제하므로 Android/Apple SDK와 Windows DLL도 대응하는 2.3.0으로 함께 업데이트해야 합니다.
+
+CI는 Core 단위 테스트, 모든 플랫폼 API 테스트, Release 결과물 생성 순서로 실행됩니다. `MXLoggerFlutterDemo-windows-x64-Release`를 내려받아 전체를 압축 해제하고 `MXLoggerFlutterDemo.exe`를 실행하세요. DLL과 `data/`를 EXE 옆에 유지해야 합니다. 별도의 로그 결과물은 업로드하지 않습니다.
 
 iOS / macOS는 `darwin/` 소스를 공유합니다(Flutter 3.7+). macOS 기본 경로는 `<Application Support>/<bundle-id>/MXLogger/<nameSpace>`이며 bundle ID가 없으면 프로세스 이름을 사용합니다. macOS에서는 `removeExpireData()`를 직접 호출하세요.
 
@@ -155,7 +171,7 @@ static Future<MXLogger> initialize({
 | 매개변수 | 설명 |
 |---|---|
 | `nameSpace` | 로그 파일의 네임스페이스. 고유성을 위해 역순 도메인 표기를 권장. 최종 디렉터리는 `directory/nameSpace` |
-| `directory` | 사용자 지정 디렉터리. 생략하면 MethodChannel로 플랫폼 기본값을 조회: iOS `<Library>/com.mxlog.LoggerCache`, Android `<filesDir>/com.mxlog.LoggerCache`, macOS `<Application Support>/<bundle-id>/MXLogger` |
+| `directory` | 사용자 지정 디렉터리. 생략하면 MethodChannel로 플랫폼 기본값을 조회: iOS `<Library>/com.mxlog.LoggerCache`, Android `<filesDir>/com.mxlog.LoggerCache`, macOS `<Application Support>/<bundle-id>/MXLogger`. Windows는 DLL에서 `%LOCALAPPDATA%/MXLogger/<실행 파일 이름>`을 결정합니다 |
 | `consoleEnable` | 콘솔 출력 여부. debug 빌드에서만 동작 |
 | `storagePolicy` | 파일 분할 정책. 2.2 참고 |
 | `fileName` | 사용자 지정 파일 이름. 기본값 `mxlog` |
@@ -262,9 +278,11 @@ void removeAll();             // 모든 로그 파일 삭제
 
 `removeExpireData()`는 두 단계로 정리합니다. 먼저 마지막 수정 시각이 `maxDiskAge`보다 오래된 파일을 삭제하고, 그래도 총 크기가 `maxDiskSize`를 넘으면 가장 오래된 파일부터 계속 삭제합니다. **현재 기록 중인 파일은 절대 삭제되지 않습니다.**
 
-iOS / Android는 백그라운드 전환 시 자동 호출되며 `shouldRemoveExpiredDataWhenEnterBackground(false)`로 끌 수 있습니다. macOS에서는 이 설정이 적용되지 않으므로 `removeExpireData()`를 직접 호출하세요.
+iOS / Android는 백그라운드 전환 시 자동 호출되며 `shouldRemoveExpiredDataWhenEnterBackground(false)`로 끌 수 있습니다. macOS / Windows에서는 이 설정이 적용되지 않으므로 `removeExpireData()`를 직접 호출하세요.
 
 ## 2.6 상태
+
+`MXLogger.coreVersion()`은 초기화 없이 연결된 C++ Core 버전(현재 `2.3.0`)을 반환합니다. pub 패키지 버전과는 독립적입니다.
 
 | 멤버 | 타입 | 설명 |
 |---|---|---|

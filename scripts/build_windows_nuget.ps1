@@ -77,7 +77,7 @@ Copy-Item (Join-Path $repo 'Core/mxlogger.hpp'), (Join-Path $repo 'Core/mxlogger
 Copy-Item (Join-Path $repo 'Core/ffi/mxlogger_ffi.h') $include -Force
 Copy-Item (Join-Path $repo 'platform/Windows/nuget/MXLogger.Native.targets') (Join-Path $stage 'build/native') -Force
 Copy-Item (Join-Path $repo 'LICENSE.TXT') $stage -Force
-Copy-Item (Join-Path $repo 'platform/Windows/README.md') (Join-Path $stage 'README.md') -Force
+Copy-Item (Join-Path $repo 'platform/Windows/README*.md') $stage -Force
 & $nuget pack (Join-Path $repo 'platform/Windows/nuget/MXLogger.Native.nuspec') -Version $version `
     -BasePath $stage -OutputDirectory $packages -NonInteractive 2>&1 | Tee-Object (Join-Path $logs 'nuget-pack.log')
 if ($LASTEXITCODE -ne 0) { throw 'NuGet pack failed' }

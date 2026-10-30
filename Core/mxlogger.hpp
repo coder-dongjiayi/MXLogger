@@ -186,8 +186,8 @@ public:
     /// Maximum age of log files in seconds, 0 means unlimited
     long long file_max_age() const;
 
-    /// 将缓冲区数据强制刷入磁盘，基于 mmap 写入通常不需要手动调用
-    /// Force-flush buffered data to disk; rarely needed since writes go through mmap
+    /// 主动请求映射数据写回，普通日志写入无需逐条调用；这不是同步持久化屏障
+    /// Request mapped-data write-back; not required per log and not a synchronous durability barrier
     void flush();
 
 
