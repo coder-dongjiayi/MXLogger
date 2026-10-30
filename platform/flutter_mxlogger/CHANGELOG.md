@@ -1,6 +1,7 @@
 
 # MXLogger for Flutter Change Log
-
+# v2.3.1/2026-10-30
+* Update description.
 # v2.3.0/2026-10-30
 * Add Windows 10/11 x64 support through precompiled `mxlogger_ffi.dll` binaries. Flutter bundles the Debug DLL for Debug builds and the Release DLL for Profile/Release builds; consuming apps do not compile Core or require NuGet installation.
 * Add `MXLogger.coreVersion()` to query the linked C++ Core version without initializing a logger. Show the Core version in the demos.
