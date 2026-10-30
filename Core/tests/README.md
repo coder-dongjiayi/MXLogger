@@ -37,8 +37,9 @@ and pull requests do not trigger it. The three stages have global success gates:
    and installed SDK consumers, Android Java/JNI and emulator instrumentation,
    Flutter macOS CocoaPods/SwiftPM, Flutter iOS CocoaPods/FFI, and Flutter Android
    Java/JNI/FFI integration. All Core jobs must pass before any of these starts.
-3. Release deliverables: macOS DMG, Windows EXE, native NuGet/local vcpkg SDK, and
-   Android APK. All API jobs must pass before any packaging job starts. Debug
+3. Release deliverables: macOS DMG, native Windows EXE, native NuGet/local vcpkg
+   SDK, a complete Flutter Windows Release Demo bundle, and Android APK.
+   All API jobs must pass before any packaging job starts. Debug
    Demo executables used by tests are not uploaded as deliverables.
 
 Windows Flutter has its own stage-2 Debug/Release matrix. It builds the shared
@@ -50,7 +51,11 @@ and destruction. An isolated copy of the pub package then builds a Flutter
 runner from precompiled DLLs and relocates it to verify DLL packaging and isolate
 token writes. It asserts the consumer never compiles Core. Every stage-3 job
 waits for this matrix too. Stage 3 validates the final NuGet DLLs through Dart
-again and uploads a prepared Flutter plugin with both DLLs.
+again and uploads a prepared Flutter plugin with both DLLs. Its Release run also
+preserves the interactive `lib/main.dart` app before the smoke build replaces
+the build directory, bundles the app-local VC runtime, and launches that Demo to
+check its first visible frame. Only then is the complete runtime directory
+uploaded as `MXLoggerFlutterDemo-windows-x64-Release`; it is not the smoke runner.
 
 `Core/ffi` is a separate bridge target, not part of the base C++ SDK's 28 API
 entries. Apple keeps its Objective-C implementation but compiles against the
@@ -67,8 +72,9 @@ layout required by `portfile.cmake`; it does not publish to the public registry.
 From
 a Mac, push the changes, open GitHub Actions, select `verify-logger`, then choose
 **Run workflow** and the branch to verify. The workflow must first be present in
-the repository's default branch for manual dispatch. Logs and JUnit results are
-retained as separate artifacts for each configuration.
+the repository's default branch for manual dispatch. Test output is shown in
+the GitHub Actions steps. Log files and reports are not uploaded as
+separate artifacts; only SDK and Demo deliverables are retained.
 
 CI builds MXLogger itself from the checkout. `scripts/check_local_core.py` checks
 resolved CMake source roots, CocoaPods external-source paths, the iOS Core Xcode

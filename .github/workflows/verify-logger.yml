@@ -28,17 +28,6 @@ jobs:
         run: python scripts/sync_flutter_native.py --check
       - name: Test precompiled DLL packaging rules
         run: python -m unittest discover -s scripts/tests -p 'test_flutter_windows_package.py' -v
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: core-${{ matrix.os }}-${{ matrix.configuration }}-logs
-          path: |
-            build/core-ci/${{ matrix.configuration }}/*.log
-            build/core-ci/${{ matrix.configuration }}/*.json
-            build/core-ci/${{ matrix.configuration }}/test-results.xml
-            build/core-ci/${{ matrix.configuration }}/Testing/Temporary/
-          retention-days: 7
-          if-no-files-found: warn
 
   windows-api:
     name: 2. Windows API tests (${{ matrix.configuration }})
@@ -57,16 +46,6 @@ jobs:
           & './scripts/verify_windows_demo.ps1' -Configuration ${{ matrix.configuration }}
           python scripts/check_local_core.py --cmake-cache build/windows-native-demo/${{ matrix.configuration }}/CMakeCache.txt --output build/windows-native-demo/${{ matrix.configuration }}/local-core.json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: windows-api-${{ matrix.configuration }}-logs
-          path: |
-            build/windows-native-demo/${{ matrix.configuration }}/*.log
-            build/windows-native-demo/${{ matrix.configuration }}/*.json
-            build/windows-native-demo/${{ matrix.configuration }}/self-test/
-          retention-days: 7
-          if-no-files-found: warn
 
   ios-api:
     name: 2. iOS API tests
@@ -83,18 +62,6 @@ jobs:
           for configuration in Debug Release; do
             xcodebuild -quiet -project platform/iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj -scheme MXLoggerDemo -configuration "$configuration" -destination 'generic/platform=iOS' -derivedDataPath "build/ios-demo-tests/$configuration" CODE_SIGNING_ALLOWED=NO build > "build/ios-demo-tests/$configuration.log" 2>&1 || { tail -n 80 "build/ios-demo-tests/$configuration.log"; exit 1; }
           done
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: ios-api-logs
-          path: |
-            build/ios-api-tests/run-*/*.log
-            build/ios-api-tests/run-*/summary.json
-            build/ios-api-tests/run-*/local-core.json
-            build/ios-api-tests/run-*/Tests.xcresult/
-            build/ios-demo-tests/*.log
-          retention-days: 7
-          if-no-files-found: warn
 
   macos-api:
     name: 2. macOS API tests
@@ -114,17 +81,6 @@ jobs:
         run: |
           bash scripts/verify_macos_demo.sh
           python3 scripts/check_local_core.py --pod-lock platform/macOS/MXLoggerDemo/Podfile.lock --output build/macos-native-demo/local-core.json
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: macos-api-logs
-          path: |
-            build/apple-api-tests/*.log
-            build/macos-native-demo/*.log
-            build/macos-native-demo/*.json
-            build/macos-native-demo/previews/
-          retention-days: 7
-          if-no-files-found: warn
 
   android-api:
     name: 2. Android API tests (JNI + device)
@@ -165,23 +121,6 @@ jobs:
           arch: x86_64
           disable-animations: true
           script: bash scripts/verify_android_device.sh
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: android-api-logs
-          path: |
-            build/android-validation/*.log
-            build/android-demo/*.log
-            build/android-api-host/*.log
-            build/android-api-host/*.json
-            build/android-device-tests/*.log
-            platform/Android/MXLogger/*/build/test-results/
-            platform/Android/MXLogger/*/build/reports/tests/
-            platform/Android/MXLogger/mxlogger/build/reports/jacoco/
-            platform/Android/MXLogger/mxlogger/build/reports/androidTests/
-            platform/Android/MXLogger/mxlogger/build/outputs/androidTest-results/
-          retention-days: 7
-          if-no-files-found: warn
 
   flutter-apple-api:
     name: 2. Flutter APIs (macOS + iOS, local Pods/SPM)
@@ -197,13 +136,6 @@ jobs:
           cache: true
       - name: Dart tests, macOS Pods/SPM and iOS integration
         run: python3 scripts/verify_macos_support.py --skip-native --ios-integration
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: flutter-apple-api-logs
-          path: build/macos-validation/run-*/logs/
-          retention-days: 7
-          if-no-files-found: warn
 
   flutter-android-api:
     name: 2. Flutter APIs (Android, local Java/JNI/Core)
@@ -238,15 +170,6 @@ jobs:
           arch: x86_64
           disable-animations: true
           script: python3 scripts/verify_flutter_android.py --device emulator-5554
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: flutter-android-api-logs
-          path: |
-            build/flutter-android-tests/run-*/*.log
-            build/flutter-android-tests/run-*/*.json
-          retention-days: 7
-          if-no-files-found: warn
 
   flutter-windows-api:
     name: 2. Flutter Windows FFI (${{ matrix.configuration }})
@@ -273,22 +196,10 @@ jobs:
       - name: Local NuGet restore, DLL exports, real Dart FFI and relocated Flutter runner
         shell: pwsh
         run: "& './scripts/verify_flutter_windows.ps1' -Configuration ${{ matrix.configuration }}"
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: flutter-windows-${{ matrix.configuration }}-logs
-          path: |
-            build/flutter-windows-tests/${{ matrix.configuration }}/*.log
-            build/flutter-windows-tests/${{ matrix.configuration }}/*.json
-            build/windows-sdk/logs/
-            build/windows-sdk/ffi/*.log
-            build/windows-sdk/ffi/*.json
-          retention-days: 7
-          if-no-files-found: warn
 
   # Stage 3 starts only after ALL stage-2 API jobs (including matrices) pass.
   windows-sdk:
-    name: 3. Windows SDK (NuGet + vcpkg)
+    name: 3. Windows SDK + Flutter Release Demo
     needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api, flutter-windows-api]
     # Build the distributable with VS 2022's toolset, rather than requiring the
     # newer compiler that windows-latest may carry.
@@ -312,10 +223,10 @@ jobs:
           & './scripts/build_windows_nuget.ps1'
           python scripts/check_local_core.py --cmake-cache build/windows-sdk/core-MD/CMakeCache.txt --cmake-cache build/windows-sdk/core-MT/CMakeCache.txt --cmake-cache build/windows-sdk/ffi/CMakeCache.txt --output build/windows-sdk/logs/local-core.json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Test the final NuGet DLLs through Dart and prepare Flutter binaries
+      - name: Test final NuGet DLLs and build the interactive Flutter Release Demo
         run: |
           & './scripts/verify_flutter_windows.ps1' -Configuration Debug -PackagePath build/windows-sdk/packages/MXLogger.Native.2.3.0.nupkg -SkipExample
-          & './scripts/verify_flutter_windows.ps1' -Configuration Release -PackagePath build/windows-sdk/packages/MXLogger.Native.2.3.0.nupkg -SkipExample
+          & './scripts/verify_flutter_windows.ps1' -Configuration Release -PackagePath build/windows-sdk/packages/MXLogger.Native.2.3.0.nupkg -DemoOutputDirectory build/flutter-windows-release/MXLoggerFlutterDemo-windows-x64-Release
           python scripts/prepare_flutter_windows.py --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify vcpkg consumers (MD and MT, Debug and Release)
@@ -338,6 +249,13 @@ jobs:
           archive: false
           retention-days: 7
           if-no-files-found: error
+      - name: Upload Flutter Windows Release Demo (complete runtime bundle)
+        uses: actions/upload-artifact@v7
+        with:
+          name: MXLoggerFlutterDemo-windows-x64-Release
+          path: build/flutter-windows-release/MXLoggerFlutterDemo-windows-x64-Release/
+          retention-days: 7
+          if-no-files-found: error
       - name: Upload prepared Flutter package with precompiled Windows DLLs
         uses: actions/upload-artifact@v7
         with:
@@ -358,19 +276,6 @@ jobs:
           include-hidden-files: true
           retention-days: 7
           if-no-files-found: error
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: windows-sdk-verification-logs
-          path: |
-            build/windows-sdk/logs/*.log
-            build/windows-sdk/logs/*.json
-            build/windows-sdk/ffi/*.log
-            build/windows-sdk/ffi/*.json
-            build/flutter-windows-tests/**/*.log
-            build/flutter-windows-tests/**/*.json
-          retention-days: 7
-          if-no-files-found: warn
 
   windows-release:
     name: 3. Windows Release EXE
@@ -392,16 +297,6 @@ jobs:
           archive: false
           retention-days: 7
           if-no-files-found: error
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: windows-release-demo-build-logs
-          path: |
-            build/windows-native-demo/Release/*.log
-            build/windows-native-demo/Release/*.json
-            build/windows-native-demo/Release/self-test/
-          retention-days: 7
-          if-no-files-found: warn
 
   macos-release:
     name: 3. macOS Release DMG
@@ -419,15 +314,6 @@ jobs:
           archive: false
           retention-days: 7
           if-no-files-found: error
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: macos-release-demo-build-logs
-          path: |
-            build/macos-native-demo/dmg-*.log
-            build/macos-native-demo/dmg-*.json
-          retention-days: 7
-          if-no-files-found: warn
 
   android-release:
     name: 3. Android Release APK
@@ -455,12 +341,3 @@ jobs:
           archive: false
           retention-days: 7
           if-no-files-found: error
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: android-release-demo-build-logs
-          path: |
-            build/android-demo/*.log
-            build/android-demo/*.json
-          retention-days: 7
-          if-no-files-found: warn

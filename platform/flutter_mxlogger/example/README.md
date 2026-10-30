@@ -19,6 +19,14 @@ bundles its DLL automatically and never compiles Core in the Flutter build. The
 repository's `scripts/verify_flutter_windows.ps1` tests Debug/Release DLLs and
 builds this Demo plus an isolated, relocated FFI smoke runner.
 
+After all API jobs pass, the final stage of `verify-logger` uploads
+`MXLoggerFlutterDemo-windows-x64-Release`. Download and extract the entire
+artifact, then run **MXLoggerFlutterDemo.exe**. Keep its DLLs and `data/` beside
+the EXE. This contains the interactive `lib/main.dart` Demo, the matching Release
+Core DLL and app-local Visual C++ runtime libraries. CI checks the relocated FFI
+runner and launches the actual Demo before uploading. Debug Demo packages and
+separate log artifacts are not uploaded; use the GitHub Actions step logs.
+
 Defaults match the native demos: namespace `com.djy.mxlogger`, hourly files,
 AES-CFB-128, seven-day retention and a 10 MB disk budget. Features include all five
 levels, JSON/generic/token writes, configuration, a 100,000-write benchmark,

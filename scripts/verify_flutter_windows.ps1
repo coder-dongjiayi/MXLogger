@@ -3,10 +3,15 @@
 param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
     [string]$PackagePath,
+    [string]$DemoOutputDirectory,
     [switch]$SkipExample
 )
 $ErrorActionPreference = 'Stop'
 if (-not $IsWindows) { throw 'Run the real Windows DLL tests on Windows.' }
+if ($DemoOutputDirectory -and ($Configuration -ne 'Release' -or $SkipExample)) {
+    throw 'DemoOutputDirectory requires Release with example verification enabled.'
+}
+if ($DemoOutputDirectory) { $DemoOutputDirectory = [IO.Path]::GetFullPath($DemoOutputDirectory) }
 $repo = Split-Path $PSScriptRoot -Parent
 $plugin = Join-Path $repo 'platform/flutter_mxlogger'
 $build = Join-Path $repo "build/flutter-windows-tests/$Configuration"
@@ -85,6 +90,39 @@ try {
             if ($LASTEXITCODE -ne 0) { throw 'Consumer pub get failed' }
             flutter build windows "--$mode" --no-pub 2>&1 | Tee-Object (Join-Path $build 'demo-build.log')
             if ($LASTEXITCODE -ne 0) { throw 'Windows Flutter Demo build failed' }
+            if ($DemoOutputDirectory) {
+                # Preserve the real lib/main.dart app BEFORE the smoke entrypoint
+                # overwrites the build directory. Never distribute the smoke runner.
+                $demoBundle = Join-Path $consumer 'MXLogger Flutter Release Demo'
+                Copy-Item (Join-Path $example 'build/windows/x64/runner/Release') $demoBundle -Recurse
+                Rename-Item (Join-Path $demoBundle 'example.exe') 'MXLoggerFlutterDemo.exe'
+                foreach ($required in @('MXLoggerFlutterDemo.exe', 'flutter_windows.dll', 'mxlogger_ffi.dll',
+                                        'data/icudtl.dat', 'data/app.so', 'data/flutter_assets')) {
+                    if (-not (Test-Path (Join-Path $demoBundle $required))) { throw "Incomplete Demo bundle: $required" }
+                }
+                if ((Get-FileHash (Join-Path $demoBundle 'mxlogger_ffi.dll')).Hash -ne (Get-FileHash $dll).Hash) {
+                    throw 'Release Demo bundled a different DLL'
+                }
+                # App-local VC runtime: a user's machine need not have VS installed.
+                $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+                $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+                if ($LASTEXITCODE -ne 0 -or -not $vs) { throw 'Visual Studio C++ installation not found' }
+                $redist = Get-ChildItem (Join-Path $vs 'VC/Redist/MSVC/*/x64/Microsoft.VC*.CRT') -Directory |
+                    Sort-Object { [version]$_.Parent.Parent.Name } -Descending | Select-Object -First 1
+                if (-not $redist) { throw 'Visual C++ redistributable DLL directory not found' }
+                Copy-Item (Join-Path $redist.FullName '*.dll') $demoBundle -Force
+                foreach ($runtime in @('msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll')) {
+                    if (-not (Test-Path (Join-Path $demoBundle $runtime))) { throw "Missing runtime: $runtime" }
+                }
+                Copy-Item (Join-Path $repo 'LICENSE.TXT') $demoBundle
+                @'
+MXLogger Flutter Demo - Windows x64 Release
+
+Extract the complete download to a folder, then run MXLoggerFlutterDemo.exe.
+Keep all DLLs and the data directory beside the executable.
+This is the interactive demo, built from example/lib/main.dart.
+'@ | Set-Content (Join-Path $demoBundle 'README.txt') -Encoding utf8
+            }
             flutter build windows "--$mode" --no-pub -t integration_test/windows_release_smoke.dart `
                 2>&1 | Tee-Object (Join-Path $build 'consumer-build.log')
             if ($LASTEXITCODE -ne 0) { throw 'Windows Flutter consumer build failed' }
@@ -112,6 +150,33 @@ try {
         $report = Get-Content $env:MXLOGGER_SMOKE_REPORT -Raw | ConvertFrom-Json
         if (-not $report.passed -or $report.coreVersion -ne '2.3.0' -or $report.records -ne 102) { throw 'Bad consumer report' }
         if (($Configuration -eq 'Release') -ne $report.release) { throw 'Wrong Flutter build mode' }
+        if ($DemoOutputDirectory) {
+            # Launch the preserved interactive app separately. A visible window
+            # is shown by the native runner only after Flutter renders a frame.
+            $start = [Diagnostics.ProcessStartInfo]::new((Join-Path $demoBundle 'MXLoggerFlutterDemo.exe'))
+            $start.UseShellExecute = $false
+            $start.WorkingDirectory = $demoBundle
+            $process = [Diagnostics.Process]::Start($start)
+            try {
+                $timer = [Diagnostics.Stopwatch]::StartNew()
+                while ($true) {
+                    $process.Refresh()
+                    if ($process.HasExited) { throw "Interactive Demo exited early: $($process.ExitCode)" }
+                    if ($process.MainWindowHandle -ne [IntPtr]::Zero -and $process.MainWindowTitle -eq 'MXLogger Flutter Demo') { break }
+                    if ($timer.Elapsed.TotalSeconds -ge 60) { throw 'Interactive Demo did not show its first frame' }
+                    Start-Sleep -Milliseconds 250
+                }
+                [ordered]@{ passed = $true; configuration = 'Release'; title = $process.MainWindowTitle } |
+                    ConvertTo-Json | Set-Content (Join-Path $build 'demo-window.json')
+            } finally {
+                if (-not $process.HasExited) { $process.Kill($true); $process.WaitForExit() }
+                $process.Dispose()
+            }
+            if (Test-Path $DemoOutputDirectory) { Remove-Item -LiteralPath $DemoOutputDirectory -Recurse -Force }
+            New-Item -ItemType Directory -Force (Split-Path $DemoOutputDirectory -Parent) | Out-Null
+            Copy-Item $demoBundle $DemoOutputDirectory -Recurse
+            Write-Host "PASS: interactive Release Demo: $DemoOutputDirectory"
+        }
     }
     Write-Host "PASS: Windows Flutter FFI $Configuration"
 } finally {
