@@ -6,6 +6,19 @@
 NuGet 패키지 ID는 `MXLogger.Native`, vcpkg port 이름은 `mxlogger`입니다.
 두 방식 모두 같은 Core를 사용합니다. NuGet에는 Flutter/Dart용 C ABI DLL도 포함되며 .NET 래퍼는 제공하지 않습니다.
 
+## 앱별 고유 네임스페이스 지정
+
+**`com.company.product`처럼 앱별로 고정된 역도메인 형식의 네임스페이스를 사용하세요.**
+예제를 자신의 도메인과 제품 이름으로 바꾸고, 서로 다른 앱에는 다른 네임스페이스를 지정해야 합니다.
+네이티브 C++의 `ns` 인자와 Flutter의 `nameSpace` 인자에 해당하며, Bundle ID나 Windows 패키지 ID를 자동으로 읽는 값은 아닙니다.
+
+Flutter Windows의 기본 로그 경로는
+`%LOCALAPPDATA%/MXLogger/<확장자를 제외한 EXE 이름>/<nameSpace>/`입니다.
+**EXE 이름만으로는 고유성을 보장할 수 없습니다.** 같은 Windows 사용자에서 EXE 이름과 네임스페이스가 모두 같으면 같은 디렉터리를 사용합니다.
+네이티브 C++ 또는 Flutter에서 `directory`를 지정하면 Core는 `directory/nameSpace/`를 사용하므로 기본 디렉터리도 앱별로 지정하세요.
+여러 프로세스가 의도적으로 로그를 공유할 때는 같은 디렉터리, 네임스페이스와 암호화 설정을 사용합니다.
+EXE 이름을 바꿔도 경로를 유지하려면 `directory`를 명시적으로 지정하세요.
+
 ## 로컬 NuGet 피드에서 설치
 
 `verify-logger`를 수동 실행하세요. 모든 플랫폼 API 테스트가 통과하면
@@ -31,7 +44,7 @@ NuGet이 네이티브 `.targets`, 공개 헤더 경로와 맞는 정적 라이�
 
 const char* version = mx_logger::version(); // "2.3.0"
 auto* logger = mx_logger::initialize_namespace(
-    "my.app", "C:/MyApp/Logs", "yyyy_MM_dd", "app", nullptr, nullptr, nullptr);
+    "com.company.product", "C:/MyApp/Logs", "yyyy_MM_dd", "app", nullptr, nullptr, nullptr);
 if (logger) {
     logger->log(1, "App", "Hello from Windows", "demo", true);
     mx_logger::destroy();

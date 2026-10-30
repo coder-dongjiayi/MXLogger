@@ -12,4 +12,6 @@
 /captures
 .externalNativeBuild
 .cxx
+# Legacy/exported keyring files are not part of the Android build or release.
+secring*.gpg
 local.properties

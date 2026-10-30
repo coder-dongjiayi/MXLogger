@@ -6,6 +6,19 @@
 NuGet パッケージ ID は `MXLogger.Native`、vcpkg port は `mxlogger` です。
 どちらも同じ Core を使います。NuGet には Flutter/Dart 用の C ABI DLL も含まれますが、.NET ラッパーではありません。
 
+## アプリ固有の名前空間を指定する
+
+**`com.company.product` のような、アプリ固有の固定された逆ドメイン形式の名前空間を使用してください。**
+この例を自分のドメインと製品名に置き換え、異なるアプリには異なる名前空間を指定します。
+これはネイティブ C++ の `ns` 引数と Flutter の `nameSpace` 引数であり、Bundle ID や Windows のパッケージ ID を自動取得するものではありません。
+
+Flutter Windows の既定ログパスは
+`%LOCALAPPDATA%/MXLogger/<拡張子を除いた EXE 名>/<nameSpace>/` です。
+**EXE 名だけでは一意性を保証できません。** 同じ Windows ユーザーのアプリで EXE 名と名前空間が同じ場合、同じディレクトリを使用します。
+ネイティブ C++ または Flutter で `directory` を指定すると Core は `directory/nameSpace/` を使うため、ベースディレクトリもアプリ固有に指定してください。
+複数プロセスで意図的にログを共有する場合は、同じディレクトリ、名前空間、暗号化設定を使います。
+EXE を改名してもパスを維持したい場合は、`directory` を明示指定してください。
+
 ## ローカル NuGet フィードからの導入
 
 `verify-logger` を手動実行してください。全プラットフォームの API テスト成功後、
@@ -31,7 +44,7 @@ NuGet がネイティブ `.targets`、公開ヘッダーの検索パス、対応
 
 const char* version = mx_logger::version(); // "2.3.0"
 auto* logger = mx_logger::initialize_namespace(
-    "my.app", "C:/MyApp/Logs", "yyyy_MM_dd", "app", nullptr, nullptr, nullptr);
+    "com.company.product", "C:/MyApp/Logs", "yyyy_MM_dd", "app", nullptr, nullptr, nullptr);
 if (logger) {
     logger->log(1, "App", "Hello from Windows", "demo", true);
     mx_logger::destroy();

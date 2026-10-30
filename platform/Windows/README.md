@@ -7,6 +7,24 @@ The NuGet package ID is `MXLogger.Native`; the vcpkg port is `mxlogger`.
 Both use the same Core. The NuGet package also contains precompiled C ABI DLLs
 for Flutter/Dart; it does not provide a .NET wrapper.
 
+## Choose an application-specific namespace
+
+**Use a stable reverse-DNS namespace that identifies your application**, such as
+`com.company.product`. Replace this example with your own domain and product;
+different applications should use different namespaces. This is the native C++
+`ns` argument and Flutter's `nameSpace` argument, not an automatically detected
+Bundle ID or Windows package identity.
+
+The default Flutter Windows log path is
+`%LOCALAPPDATA%/MXLogger/<EXE name without extension>/<nameSpace>/`.
+**The EXE name alone does not guarantee uniqueness.** Under the same Windows
+user, apps with the same EXE name and namespace use the same directory.
+With native C++ or a custom Flutter `directory`, Core stores logs under
+`directory/nameSpace/`, so choose an application-specific base directory too.
+If multiple processes intentionally share logs, use the same directory,
+namespace and encryption settings. Set `directory` explicitly if the log path
+must stay the same when the EXE is renamed.
+
 ## Install from a local NuGet feed
 
 Manually run `verify-logger`. After all platform API tests pass, the
@@ -34,7 +52,7 @@ copy a `.lib` manually or distribute an MXLogger DLL.
 
 const char* version = mx_logger::version(); // "2.3.0"
 auto* logger = mx_logger::initialize_namespace(
-    "my.app", "C:/MyApp/Logs", "yyyy_MM_dd", "app", nullptr, nullptr, nullptr);
+    "com.company.product", "C:/MyApp/Logs", "yyyy_MM_dd", "app", nullptr, nullptr, nullptr);
 if (logger) {
     logger->log(1, "App", "Hello from Windows", "demo", true);
     mx_logger::destroy();

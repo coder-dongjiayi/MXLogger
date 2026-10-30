@@ -6,6 +6,19 @@
 NuGet 包 ID 为 `MXLogger.Native`；vcpkg port 名为 `mxlogger`。
 源码、NuGet 和 vcpkg 使用相同的 Core。NuGet 另附供 Flutter/Dart 使用的 C ABI DLL，不包含 .NET 封装。
 
+## 使用应用专属的命名空间
+
+**`nameSpace` 应使用应用专属、固定的反向域名，例如 `com.company.product`。**
+请替换为自己的域名和产品名称，不同应用使用不同的命名空间。
+它对应原生 C++ 的 `ns` 参数和 Flutter 的 `nameSpace` 参数，并非自动读取的 Bundle ID 或 Windows 包身份。
+
+Flutter Windows 默认日志路径为
+`%LOCALAPPDATA%/MXLogger/<EXE 名称，不含扩展名>/<nameSpace>/`。
+**EXE 名称本身不能保证唯一性：同一 Windows 用户下，EXE 名称和命名空间都相同的应用会共用目录。**
+原生 C++ 或 Flutter 显式指定 `directory` 时，Core 使用 `directory/nameSpace/`，基础目录也应由应用独立指定。
+有意共享日志的多个进程应使用相同的目录、命名空间和加密配置。
+如果 EXE 改名后仍需保持日志路径不变，请显式指定 `directory`。
+
 ## NuGet 接入
 
 手动运行仓库的 `verify-logger` CI。全部平台回归通过后，`3. Windows SDK + Flutter Release Demo`
@@ -32,7 +45,7 @@ NuGet 自动导入原生 `.targets`，添加公开头文件和对应的静态库
 
 const char* version = mx_logger::version(); // "2.3.0"
 auto* logger = mx_logger::initialize_namespace(
-    "my.app", "C:/MyApp/Logs", "yyyy_MM_dd", "app", nullptr, nullptr, nullptr);
+    "com.company.product", "C:/MyApp/Logs", "yyyy_MM_dd", "app", nullptr, nullptr, nullptr);
 if (logger) {
     logger->log(1, "App", "Hello from Windows", "demo", true);
     mx_logger::destroy();
