@@ -210,6 +210,12 @@ jobs:
         shell: pwsh
     steps:
       - uses: actions/checkout@v4
+      - name: Read SDK version from Core
+        id: sdk_version
+        run: |
+          $header = Get-Content 'Core/mxlogger_version.hpp' -Raw
+          if ($header -notmatch '#define MXLOGGER_CORE_VERSION "(\d+\.\d+\.\d+)"') { throw 'Core version is missing' }
+          "version=$($Matches[1])" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
       - uses: NuGet/setup-nuget@v2
         with:
           nuget-version: '6.x'
@@ -234,7 +240,7 @@ jobs:
       - name: Upload local vcpkg SDK source and overlay
         uses: actions/upload-artifact@v7
         with:
-          name: MXLogger-vcpkg-local-sdk
+          name: MXLogger-vcpkg-local-sdk-${{ steps.sdk_version.outputs.version }}
           path: |
             Core/
             platform/Windows/vcpkg/

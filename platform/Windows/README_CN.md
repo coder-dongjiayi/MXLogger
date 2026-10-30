@@ -118,6 +118,8 @@ CI 不再单独上传 Logs，测试输出在 GitHub Actions 的步骤中查看�
 
 ## vcpkg 接入
 
+CI 产物名为 `MXLogger-vcpkg-local-sdk-2.3.0.zip`，版本号从 `Core/mxlogger_version.hpp` 自动读取，随 Core 版本更新。
+
 当前提供仓库内的 **overlay port**，直接编译相邻的 Core 源码；尚未提交到 vcpkg 公共 registry。
 请保留完整 MXLogger checkout，不能只复制 port 子目录。
 在不含 `vcpkg.json` 的目录执行 classic 模式安装，例如：

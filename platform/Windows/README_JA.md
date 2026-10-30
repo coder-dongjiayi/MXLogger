@@ -114,6 +114,8 @@ Core を変更したら新しいパッケージをビルド・取り込み直し
 
 ## vcpkg による導入
 
+CI 成果物名は `MXLogger-vcpkg-local-sdk-2.3.0.zip` です。バージョンは `Core/mxlogger_version.hpp` から自動取得し、Core の更新に追従します。
+
 リポジトリ内の **overlay port** は隣接する Core ソースをビルドします。公開 vcpkg registry には登録していません。
 port ディレクトリだけでなく、完全な checkout を保持してください。`vcpkg.json` のないディレクトリから classic モードで実行します。
 

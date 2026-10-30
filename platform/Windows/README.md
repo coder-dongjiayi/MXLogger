@@ -137,6 +137,9 @@ GitHub Actions steps; separate Logs artifacts are not uploaded.
 
 ## Install through vcpkg
 
+The CI artifact is named `MXLogger-vcpkg-local-sdk-2.3.0.zip`. Its version is read
+from `Core/mxlogger_version.hpp`, so future builds follow the Core version.
+
 The repository provides a local **overlay port**, which builds the adjacent
 Core sources. It has not been submitted to the public vcpkg registry. Keep the
 complete checkout, not only the port directory. From a directory without a
