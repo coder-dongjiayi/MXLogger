@@ -196,7 +196,10 @@ class Verification:
         identifier = self.run("ios-create", ["xcrun", "simctl", "create", "MXLogger-Flutter-API", device_type, runtime_id]).strip()
         try:
             self.run("ios-boot", ["xcrun", "simctl", "boot", identifier])
-            self.run("ios-bootstatus", ["xcrun", "simctl", "bootstatus", identifier, "-b"], timeout=180)
+            # Fresh CI devices perform system-data migrations before SpringBoard
+            # is ready. Allow cold boot to finish; the integration test keeps its
+            # own timeout and still only starts after bootstatus succeeds.
+            self.run("ios-bootstatus", ["xcrun", "simctl", "bootstatus", identifier, "-b"], timeout=600)
             yield identifier
         finally:
             for operation in ["shutdown", "delete"]:
