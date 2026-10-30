@@ -4,7 +4,7 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/../../../.." && pwd)
-BUILD="$ROOT/build/apple-native-tests"
+BUILD="${MXLOGGER_APPLE_TEST_BUILD_DIR:-$ROOT/build/apple-native-tests}"
 CORE="$ROOT/Core"
 APPLE="$ROOT/platform/iOS/MXLogger/MXLogger"
 TESTS="$ROOT/platform/iOS/MXLogger/tests"
@@ -12,11 +12,18 @@ SDK=$(xcrun --sdk macosx --show-sdk-path)
 DEVELOPER=$(xcode-select -p)
 TEST_FRAMEWORKS="$DEVELOPER/Platforms/MacOSX.platform/Developer/Library/Frameworks"
 mkdir -p "$BUILD/module-cache" "$BUILD/MXLoggerAppleTests.xctest/Contents/MacOS"
+PROFILE_FLAGS=""
+if [ "${COVERAGE:-0}" = 1 ]; then
+    PROFILE_FLAGS="-fprofile-instr-generate -fcoverage-mapping"
+    mkdir -p "$BUILD/coverage"
+    rm -f "$BUILD/coverage/"*.profraw
+    export LLVM_PROFILE_FILE="$BUILD/coverage/%p-%m.profraw"
+fi
 
 echo ">> building native Apple test library..."
-xcrun clang -isysroot "$SDK" -w -O1 -fPIC -c "$CORE/md5/md5.c" -o "$BUILD/md5.o"
-xcrun clang -isysroot "$SDK" -w -O1 -fPIC -c "$CORE/json/cJSON.c" -o "$BUILD/cJSON.o"
-xcrun clang++ -isysroot "$SDK" -std=c++17 -fobjc-arc -O1 -fPIC -dynamiclib \
+xcrun clang $PROFILE_FLAGS -isysroot "$SDK" -w -O1 -fPIC -c "$CORE/md5/md5.c" -o "$BUILD/md5.o"
+xcrun clang $PROFILE_FLAGS -isysroot "$SDK" -w -O1 -fPIC -c "$CORE/json/cJSON.c" -o "$BUILD/cJSON.o"
+xcrun clang++ $PROFILE_FLAGS -isysroot "$SDK" -std=c++17 -fobjc-arc -O1 -fPIC -dynamiclib \
     -I"$CORE/include" -I"$CORE" \
     "$APPLE/MXLogger.mm" \
     "$CORE/mxlogger.cpp" "$CORE/mxlogger_console.cpp" "$CORE/mxlogger_util.cpp" \
@@ -31,7 +38,7 @@ xcrun clang++ -isysroot "$SDK" -std=c++17 -fobjc-arc -O1 -fPIC -dynamiclib \
     -o "$BUILD/libMXLoggerAppleTests.dylib"
 
 echo ">> building Objective-C tests..."
-xcrun clang -isysroot "$SDK" -fobjc-arc -fmodules \
+xcrun clang $PROFILE_FLAGS -isysroot "$SDK" -fobjc-arc -fmodules \
     -fmodules-cache-path="$BUILD/module-cache" -bundle \
     -I"$APPLE/include" -F"$TEST_FRAMEWORKS" \
     "$ROOT/platform/iOS/MXLogger/MXLoggerTests/MXLoggerTests.m" \
@@ -82,3 +89,11 @@ for PLATFORM in iphoneos iphonesimulator; do
     done
 done
 echo ">> native Apple tests passed"
+if [ "${COVERAGE:-0}" = 1 ]; then
+    xcrun llvm-profdata merge -sparse "$BUILD/coverage/"*.profraw -o "$BUILD/coverage/coverage.profdata"
+    xcrun llvm-cov export "$BUILD/libMXLoggerAppleTests.dylib" \
+        -instr-profile="$BUILD/coverage/coverage.profdata" > "$BUILD/coverage/coverage.json"
+    xcrun llvm-profdata show --all-functions --counts "$BUILD/coverage/coverage.profdata" \
+        > "$BUILD/coverage/functions.txt"
+    echo ">> Apple coverage: $BUILD/coverage/coverage.json"
+fi

@@ -13,6 +13,8 @@
 #import <TargetConditionals.h>
 #if TARGET_OS_OSX
 #import <AppKit/AppKit.h>
+#else
+#import <UIKit/UIKit.h>
 #endif
 
 /// 与写入端约定的16字节加密参数
@@ -26,6 +28,7 @@ static NSInteger ns_counter = 0;
 @interface MXLoggerTests : XCTestCase
 @property (nonatomic, copy) NSString *rootDir;
 @property (nonatomic, strong) NSMutableArray<NSString *> *loggerTokens;
+@property (nonatomic, strong) NSMutableArray<NSString *> *defaultPaths;
 @end
 
 @implementation MXLoggerTests
@@ -36,6 +39,7 @@ static NSInteger ns_counter = 0;
 
 - (void)setUp {
     self.loggerTokens = [NSMutableArray array];
+    self.defaultPaths = [NSMutableArray array];
     self.rootDir = [NSTemporaryDirectory()
         stringByAppendingPathComponent:
             [NSString stringWithFormat:@"mxlogger_tests_%@", NSUUID.UUID.UUIDString]];
@@ -49,6 +53,9 @@ static NSInteger ns_counter = 0;
     for (NSString *token in self.loggerTokens) {
         [MXLogger destroyWithLoggerToken:token];
     }
+    for (NSString *path in self.defaultPaths) {
+        [NSFileManager.defaultManager removeItemAtPath:path error:nil];
+    }
     [NSFileManager.defaultManager removeItemAtPath:self.rootDir error:nil];
 }
 
@@ -56,7 +63,7 @@ static NSInteger ns_counter = 0;
 
 /// 每个用例独立namespace, 避免全局实例字典串扰
 - (NSString *)uniqueNs {
-    return [NSString stringWithFormat:@"com.test.mxlogger.ios.ns%ld", (long)ns_counter++];
+    return [NSString stringWithFormat:@"com.test.mxlogger.ios.%@.ns%ld", NSUUID.UUID.UUIDString, (long)ns_counter++];
 }
 
 - (NSString *)newDir:(NSString *)tag {
@@ -118,6 +125,121 @@ static NSInteger ns_counter = 0;
 
 #pragma mark - 初始化与属性
 
+- (void)testRemainingFactoryAndInitializerOverloadsReadBackTheirHeader {
+    NSArray *constructors = @[
+        ^MXLogger *(NSString *ns) {
+            return [MXLogger initializeWithNamespace:ns storagePolicy:MXStoragePolicyYYYYMM
+                fileName:@"factory" fileHeader:@"overload header"];
+        },
+        ^MXLogger *(NSString *ns) {
+            return [MXLogger initializeWithNamespace:ns storagePolicy:MXStoragePolicyYYYYWW
+                fileName:@"encrypted" fileHeader:@"overload header" cryptKey:kCryptKey iv:kIv];
+        },
+        ^MXLogger *(NSString *ns) { return [[MXLogger alloc] initWithNamespace:ns fileHeader:@"overload header"]; },
+        ^MXLogger *(NSString *ns) {
+            return [[MXLogger alloc] initWithNamespace:ns cryptKey:kCryptKey iv:kIv fileHeader:@"overload header"];
+        },
+        ^MXLogger *(NSString *ns) {
+            return [[MXLogger alloc] initWithNamespace:ns storagePolicy:MXStoragePolicyYYYYMMDDHH
+                fileName:@"initializer" fileHeader:@"overload header"];
+        }
+    ];
+    for (NSUInteger index = 0; index < constructors.count; ++index) {
+        NSString *ns = [self uniqueNs];
+        MXLogger *(^make)(NSString *) = constructors[index];
+        MXLogger *logger = make(ns);
+        XCTAssertNotNil(logger);
+        [self.loggerTokens addObject:logger.loggerToken];
+        [self.defaultPaths addObject:logger.diskCachePath];
+        XCTAssertEqualObjects(logger.diskCachePath,
+            [[[MXLogger defaultDiskCacheDirectory] stringByAppendingPathComponent:ns] stringByAppendingString:@"/"]);
+        XCTAssertEqual([logger logWithLevel:1 name:@"overload" msg:@"body" tag:@"api"], (NSInteger)0);
+        BOOL encrypted = index == 1 || index == 3;
+        NSArray *records = [self readBack:logger cryptKey:encrypted ? kCryptKey : nil iv:encrypted ? kIv : nil];
+        XCTAssertEqual(records.count, (NSUInteger)2);
+        XCTAssertEqualObjects(records.firstObject[@"msg"], @"overload header");
+        XCTAssertEqualObjects(records.lastObject[@"msg"], @"body");
+        XCTAssertEqualObjects(records.lastObject[@"error_code"], @"0");
+        XCTAssertEqual([MXLogger initializeWithNamespace:ns], logger, @"Overloads must reuse the registered instance");
+    }
+}
+
+- (void)testPropertyGettersAndConfigurationAffectWrites {
+    MXLogger *logger = [self newLogger];
+    XCTAssertTrue(logger.enable);
+    XCTAssertFalse(logger.consoleEnable);
+    XCTAssertEqual(logger.level, (NSInteger)0);
+    XCTAssertEqual(logger.maxDiskAge, (NSUInteger)0);
+    XCTAssertEqual(logger.maxDiskSize, (NSUInteger)0);
+    XCTAssertTrue(logger.shouldRemoveExpiredDataWhenEnterBackground);
+    logger.enable = NO;
+    logger.consoleEnable = YES;
+    logger.level = 3;
+    logger.maxDiskAge = 7200;
+    logger.maxDiskSize = 1234567;
+    logger.shouldRemoveExpiredDataWhenEnterBackground = NO;
+    XCTAssertFalse(logger.enable);
+    XCTAssertTrue(logger.consoleEnable);
+    XCTAssertEqual(logger.level, (NSInteger)3);
+    XCTAssertEqual(logger.maxDiskAge, (NSUInteger)7200);
+    XCTAssertEqual(logger.maxDiskSize, (NSUInteger)1234567);
+    XCTAssertFalse(logger.shouldRemoveExpiredDataWhenEnterBackground);
+    XCTAssertEqual([logger fatalWithName:nil msg:@"disabled" tag:nil], (NSInteger)0);
+    XCTAssertEqual([self readBack:logger cryptKey:nil iv:nil].count, (NSUInteger)0);
+    logger.enable = YES;
+    logger.consoleEnable = NO;
+    logger.shouldRemoveExpiredDataWhenEnterBackground = YES;
+    XCTAssertTrue(logger.shouldRemoveExpiredDataWhenEnterBackground);
+    XCTAssertEqual([logger infoWithName:nil msg:@"filtered" tag:nil], (NSInteger)0);
+    XCTAssertEqual([logger errorWithName:nil msg:@"stored" tag:nil], (NSInteger)0);
+    NSArray *records = [self readBack:logger cryptKey:nil iv:nil];
+    XCTAssertEqual(records.count, (NSUInteger)1);
+    XCTAssertEqualObjects(records.firstObject[@"msg"], @"stored");
+}
+
+- (void)testInvalidatedInstanceCannotChangeOrCleanReplacement {
+    NSString *ns = [self uniqueNs];
+    MXLogger *old = [MXLogger initializeWithNamespace:ns diskCacheDirectory:self.rootDir
+        storagePolicy:MXStoragePolicyYYYYMMDD fileName:nil fileHeader:nil cryptKey:nil iv:nil];
+    NSString *token = old.loggerToken;
+    [MXLogger destroyWithLoggerToken:token];
+    MXLogger *replacement = [MXLogger initializeWithNamespace:ns diskCacheDirectory:self.rootDir
+        storagePolicy:MXStoragePolicyYYYYMMDD fileName:nil fileHeader:nil cryptKey:nil iv:nil];
+    [self.loggerTokens addObject:replacement.loggerToken];
+    XCTAssertEqual([old logWithLevel:1 name:nil msg:@"ignored" tag:nil], (NSInteger)0);
+    old.enable = NO; old.consoleEnable = YES; old.level = 4;
+    old.maxDiskAge = 1; old.maxDiskSize = 1;
+    [old removeExpireData]; [old removeBeforeAllData]; [old removeAllData];
+    XCTAssertEqual(old.logSize, (NSUInteger)0);
+    XCTAssertEqual(old.logFiles.count, (NSUInteger)0);
+    XCTAssertNotNil(old.errorDesc);
+    XCTAssertTrue(replacement.enable);
+    XCTAssertFalse(replacement.consoleEnable);
+    XCTAssertEqual(replacement.level, (NSInteger)0);
+    XCTAssertEqual(replacement.maxDiskAge, (NSUInteger)0);
+    XCTAssertEqual(replacement.maxDiskSize, (NSUInteger)0);
+    XCTAssertEqual([replacement infoWithName:nil msg:@"replacement" tag:nil], (NSInteger)0);
+    XCTAssertEqual([self readBack:replacement cryptKey:nil iv:nil].count, (NSUInteger)1);
+}
+
+#if !TARGET_OS_OSX
+- (void)testIOSBackgroundCleanupHonorsTheOptOutFlag {
+    MXLogger *logger = [self newLogger];
+    NSString *expired = [logger.diskCachePath stringByAppendingPathComponent:@"expired.mx"];
+    [@"old" writeToFile:expired atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    [NSFileManager.defaultManager setAttributes:@{NSFileModificationDate: [NSDate dateWithTimeIntervalSince1970:0]}
+        ofItemAtPath:expired error:nil];
+    logger.maxDiskAge = 60;
+    logger.shouldRemoveExpiredDataWhenEnterBackground = NO;
+    [NSNotificationCenter.defaultCenter postNotificationName:UIApplicationDidEnterBackgroundNotification object:nil];
+    XCTAssertTrue([self fileExists:expired]);
+    logger.shouldRemoveExpiredDataWhenEnterBackground = YES;
+    [NSNotificationCenter.defaultCenter postNotificationName:UIApplicationDidEnterBackgroundNotification object:nil];
+    XCTAssertFalse([self fileExists:expired]);
+    XCTAssertEqual(logger.logFiles.count, (NSUInteger)1);
+}
+#endif
+
 - (void)testLoggerTokenIs32CharMd5AndStable {
     NSString *ns = [self uniqueNs];
     NSString *dir = [self newDir:@"key"];
@@ -156,6 +278,7 @@ static NSInteger ns_counter = 0;
     // 各简写工厂方法都能正常创建，并使用当前平台的默认目录。
     NSString *ns1 = [self uniqueNs];
     MXLogger *l1 = [MXLogger initializeWithNamespace:ns1];
+    [self.defaultPaths addObject:l1.diskCachePath];
     XCTAssertNotNil(l1);
     XCTAssertEqual([l1 debugWithName:@"n" msg:@"m" tag:@"t"], (NSInteger)0, @"%@", l1.errorDesc);
     XCTAssertEqualObjects(l1.diskCachePath,
@@ -166,12 +289,14 @@ static NSInteger ns_counter = 0;
 
     NSString *ns2 = [self uniqueNs];
     MXLogger *l2 = [MXLogger initializeWithNamespace:ns2 fileHeader:@"hdr"];
+    [self.defaultPaths addObject:l2.diskCachePath];
     XCTAssertNotNil(l2);
     [l2 removeAllData];
     [MXLogger destroyWithNamespace:ns2];
 
     NSString *ns3 = [self uniqueNs];
     MXLogger *l3 = [MXLogger initializeWithNamespace:ns3 cryptKey:kCryptKey iv:kIv fileHeader:nil];
+    [self.defaultPaths addObject:l3.diskCachePath];
     XCTAssertNotNil(l3);
     [l3 removeAllData];
     [MXLogger destroyWithNamespace:ns3];

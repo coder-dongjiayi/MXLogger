@@ -260,28 +260,36 @@ static NSString * _defaultDiskCacheDirectory;
 /// All methods below check _logger: calls after destroy short-circuit safely
 -(void)setEnable:(BOOL)enable{
     if (_logger == nullptr) return;
-    _enable = enable;
     _logger -> set_enable(enable);
+}
+-(BOOL)enable{
+    return _logger != nullptr && _logger->is_enable();
 }
 -(void)setConsoleEnable:(BOOL)consoleEnable{
     if (_logger == nullptr) return;
-    _consoleEnable = consoleEnable;
     _logger -> set_enable_console(consoleEnable);
+}
+-(BOOL)consoleEnable{
+    return _logger != nullptr && _logger->is_enable_console();
 }
 
 
 -(void)setMaxDiskAge:(NSUInteger)maxDiskAge{
     if (_logger == nullptr) return;
-    _maxDiskAge = maxDiskAge;
 
     _logger -> set_file_max_age([NSNumber numberWithUnsignedInteger:maxDiskAge].longValue);
 
 }
+-(NSUInteger)maxDiskAge{
+    return _logger == nullptr ? 0 : static_cast<NSUInteger>(_logger->file_max_age());
+}
 - (void)setMaxDiskSize:(NSUInteger)maxDiskSize{
     if (_logger == nullptr) return;
-    _maxDiskSize = maxDiskSize;
 
     _logger -> set_file_max_size([NSNumber numberWithUnsignedInteger:maxDiskSize].longValue);
+}
+-(NSUInteger)maxDiskSize{
+    return _logger == nullptr ? 0 : static_cast<NSUInteger>(_logger->file_max_size());
 }
 
 -(void)removeExpireData{
@@ -305,8 +313,10 @@ static NSString * _defaultDiskCacheDirectory;
 }
 -(void)setLevel:(NSInteger)level{
     if (_logger == nullptr) return;
-    _level = level;
     _logger -> set_log_level([NSNumber numberWithInteger:level].intValue);
+}
+-(NSInteger)level{
+    return _logger == nullptr ? 0 : _logger->log_level();
 }
 
 

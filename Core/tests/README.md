@@ -96,3 +96,98 @@ existing records must survive and writing must recover after the view is gone.
 These checks cover process termination, not power-loss durability. Actual MSVC
 execution still needs the manually triggered Windows CI; a macOS pass alone does
 not validate the Windows backend.
+
+## Public API coverage
+
+API entry coverage is checked against the published declarations, including
+overloads, deprecated forwarding methods, and property getters/setters:
+
+| Layer | Inventory | Execution evidence |
+| --- | --- | --- |
+| C++ Core / Windows native SDK | 28 entries in `mxlogger.hpp` and `mxlogger_util.hpp` | LLVM function counters from the Core tests |
+| iOS / macOS Objective-C API, imported by Swift | 57 entries in `MXLogger.h` | LLVM function counters; explicit XCTest assertions for three compiler-synthesized accessors |
+| Android Java API | 37 entries in `MXLogger.java` | JaCoCo method counters against real host JNI/Core |
+| Flutter native Dart API and models | 55 entries | First executable LCOV line per public method/getter |
+
+These counts describe the current declarations, not a fixed denominator. The
+checker discovers the inventory again on each run. Public Dart fields and
+compiler-generated enum members are not method entries; enum values and model
+fields are also asserted in the existing tests. Web remains a placeholder with
+its own tests, not a native Core implementation.
+
+**100% API entry execution does not mean 100% source lines, branches, input
+combinations, or operating-system failure paths.** For example, executing the
+Flutter `selectLogfiles` method on macOS only proves its non-iOS branch. Native
+Apple tests exercise the actual file-list API separately; Flutter's mobile bridge
+and lifecycle paths still require mobile integration tests. Windows-specific
+runtime behavior must pass MSVC/Windows CI.
+
+Regression assertions cover defaults, configuration readback, every constructor
+overload, all log levels, headers, plain/encrypted readback, wrong keys, metadata,
+cleanup preserving active files, shared instances, destruction, and recovery from
+an unwritable path. In particular, `delete_namespace(nullptr)` must not crash or
+destroy another logger, and Apple `enable` must agree with the Core default.
+
+Run the Android contract tests on the host with JDK 17 and an installed Android
+SDK (the same five contract cases also run under Android instrumentation):
+
+```sh
+bash scripts/verify_android_api_host.sh
+# Physical device/emulator: authorize installation on the device first.
+cd platform/Android/MXLogger
+bash gradlew :mxlogger:connectedDefaultCppDebugAndroidTest
+```
+
+The host tests replace only Android OS services (`Context`/`Looper`) using AGP's
+mockable android.jar. JNI registration, the Java SDK, Core, encryption, and file
+read/write all run for real. This does not replace the Android device tests. The
+manual `verify-logger` workflow runs the host contract tests before packaging,
+and retains JaCoCo XML/HTML with the Android test logs.
+
+Run `bash scripts/verify_ios_api.sh` with a compatible installed Xcode simulator
+runtime to execute the Apple API tests including iOS background cleanup. The
+script selects a compatible iPhone/runtime pair, creates a temporary simulator,
+and shuts down/deletes only that device when finished. The Apple CI job runs this
+check and retains its `.xcresult` coverage and test summary. macOS-only lifecycle
+behavior is tested separately by `platform/iOS/MXLogger/tests/run_tests.sh`.
+
+For the full local entry report, collect instrumented Core/Apple tests and Dart
+coverage in separate test build directories. Instrumentation is opt-in and never
+part of the distributed library:
+
+```sh
+cmake -S Core -B build/api-coverage/core -DMXLOGGER_BUILD_TESTS=ON \
+  -DCMAKE_BUILD_TYPE=Debug \
+  '-DCMAKE_CXX_FLAGS=-fprofile-instr-generate -fcoverage-mapping' \
+  '-DCMAKE_C_FLAGS=-fprofile-instr-generate -fcoverage-mapping'
+cmake --build build/api-coverage/core --parallel
+mkdir -p build/api-coverage/core/profiles
+rm -f build/api-coverage/core/profiles/*.profraw
+LLVM_PROFILE_FILE="$PWD/build/api-coverage/core/profiles/%p.profraw" \
+  ctest --test-dir build/api-coverage/core --output-on-failure --no-tests=error
+xcrun llvm-profdata merge -sparse build/api-coverage/core/profiles/*.profraw \
+  -o build/api-coverage/core/coverage.profdata
+xcrun llvm-cov export build/api-coverage/core/tests/mxlogger_tests \
+  -instr-profile=build/api-coverage/core/coverage.profdata \
+  > build/api-coverage/core/coverage.json
+
+mkdir -p build/api-coverage
+COVERAGE=1 MXLOGGER_APPLE_TEST_BUILD_DIR="$PWD/build/api-coverage/apple" \
+  bash platform/iOS/MXLogger/tests/run_tests.sh > build/api-coverage/apple.log 2>&1
+(cd platform/flutter_mxlogger && bash test/native/build_test_dylib.sh && \
+  flutter test --coverage --coverage-path=../../build/api-coverage/flutter.info)
+bash scripts/verify_android_api_host.sh
+
+python3 scripts/check_api_coverage.py \
+  --core-json build/api-coverage/core/coverage.json \
+  --apple-json build/api-coverage/apple/coverage/coverage.json \
+  --apple-log build/api-coverage/apple.log \
+  --java-xml platform/Android/MXLogger/mxlogger/build/reports/jacoco/apiCoverageReport/apiCoverageReport.xml \
+  --dart-lcov build/api-coverage/flutter.info \
+  --output build/api-coverage/summary.json
+```
+
+The checker exits nonzero for missing entries and writes both JSON and HTML with
+the API inventory and evidence used. Keep the raw LLVM, JaCoCo and LCOV reports
+when inspecting uncovered lines or branches; the entry report is not a substitute
+for those reports.

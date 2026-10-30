@@ -9,10 +9,114 @@
 #include "mx_test.hpp"
 #include "test_support.hpp"
 #include "mxlogger.hpp"
+#include "mxlogger_util.hpp"
 
 using mxtest::record_list;
 
 static const char* API_DIR = "mxtest_tmp/api";
+
+MX_TEST(mxlogger_api, version_and_shared_configuration_getters) {
+    const char* version = mx_logger::version();
+    EXPECT_TRUE(version != nullptr);
+    if (version) EXPECT_EQ(std::string(version), std::string("2.3.0"));
+    auto* logger = mx_logger::initialize_namespace("state", API_DIR, nullptr, nullptr, nullptr, nullptr, nullptr);
+    EXPECT_TRUE(logger != nullptr);
+    if (!logger) return;
+    EXPECT_TRUE(logger->is_enable());
+    EXPECT_FALSE(logger->is_enable_console());
+    EXPECT_EQ(logger->log_level(), 0);
+    EXPECT_EQ(logger->file_max_size(), 0LL);
+    EXPECT_EQ(logger->file_max_age(), 0LL);
+    auto* shared = mx_logger::initialize_namespace("state", API_DIR, nullptr, nullptr, nullptr, nullptr, nullptr);
+    EXPECT_TRUE(shared == logger);
+    logger->set_enable(false);
+    logger->set_enable_console(true);
+    logger->set_log_level(3);
+    logger->set_file_max_size(1234567);
+    logger->set_file_max_age(7200);
+    EXPECT_FALSE(shared->is_enable());
+    EXPECT_TRUE(shared->is_enable_console());
+    EXPECT_EQ(shared->log_level(), 3);
+    EXPECT_EQ(shared->file_max_size(), 1234567LL);
+    EXPECT_EQ(shared->file_max_age(), 7200LL);
+    EXPECT_EQ(shared->log(3, "state", "disabled", nullptr, false), 0);
+    EXPECT_TRUE(mxtest::parse_dir(logger->diskcache_path()).empty());
+    shared->set_enable(true);
+    shared->set_enable_console(false);
+    shared->set_file_max_size(0);
+    shared->set_file_max_age(0);
+    shared->set_log_level(0);
+    EXPECT_TRUE(logger->is_enable());
+    EXPECT_FALSE(logger->is_enable_console());
+    EXPECT_EQ(logger->log_level(), 0);
+    EXPECT_EQ(logger->file_max_size(), 0LL);
+    EXPECT_EQ(logger->file_max_age(), 0LL);
+    EXPECT_EQ(logger->log(1, "state", "enabled", nullptr, false), 0);
+    EXPECT_EQ(mxtest::parse_dir(logger->diskcache_path()).size(), size_t(1));
+    const std::string token = logger->logger_token();
+    mx_logger::delete_namespace(static_cast<const char*>(nullptr));
+    EXPECT_TRUE(mx_logger::global_for_loggerToken(token.c_str()) == logger);
+    mx_logger::delete_namespace(token.c_str());
+    EXPECT_TRUE(mx_logger::global_for_loggerToken(token.c_str()) == nullptr);
+}
+
+MX_TEST(mxlogger_api, public_utilities_list_and_decode_encrypted_records) {
+    auto* logger = mx_logger::initialize_namespace("util", API_DIR, "yyyy_MM_dd", "public",
+        "public header", "0123456789abcdef", "abcdef0123456789");
+    EXPECT_TRUE(logger != nullptr);
+    if (!logger) return;
+    EXPECT_EQ(logger->log(1, "util", "public utility roundtrip 中文", "api", true), 0);
+    logger->flush();
+    const std::string dir = logger->diskcache_path();
+    record_list files;
+    EXPECT_EQ(mxlogger::util::mxlogger_util::select_logfiles_dir(dir.c_str(), &files), 0);
+    EXPECT_EQ(files.size(), size_t(1));
+    if (files.size() == 1) {
+        EXPECT_TRUE(std::stoll(files[0].at("size")) > 0);
+        EXPECT_TRUE(std::stoll(files[0].at("last_timestamp")) > 0);
+        const auto path = dir + files[0].at("name");
+        record_list records;
+        mxlogger::util::mxlogger_util::select_log_form_path(path.c_str(), &records,
+            "0123456789abcdef", "abcdef0123456789");
+        EXPECT_EQ(records.size(), size_t(2));
+        if (records.size() == 2) {
+            EXPECT_EQ(records[0].at("msg"), std::string("public header"));
+            EXPECT_EQ(records[1].at("msg"), std::string("public utility roundtrip 中文"));
+            EXPECT_EQ(records[1].at("error_code"), std::string("0"));
+        }
+        record_list invalid;
+        mxlogger::util::mxlogger_util::select_log_form_path(path.c_str(), &invalid, "wrong", nullptr);
+        EXPECT_EQ(invalid.size(), size_t(2));
+        for (const auto& record : invalid) EXPECT_EQ(record.at("error_code"), std::string("1"));
+    }
+    record_list missing;
+    const auto absent = dir + "missing.mx";
+    mxlogger::util::mxlogger_util::select_log_form_path(absent.c_str(), &missing, nullptr, nullptr);
+    EXPECT_TRUE(missing.empty());
+    EXPECT_EQ(mxlogger::util::mxlogger_util::select_logfiles_dir((dir + "absent/").c_str(), &missing), -1);
+    EXPECT_TRUE(missing.empty());
+    mx_logger::delete_namespace("util", API_DIR);
+}
+
+MX_TEST(mxlogger_api, reports_open_failure_and_recovers_with_the_same_instance) {
+    const auto root = mxtest::temp_dir("api_recover");
+    const auto blocker = root + "blocker";
+    mxtest::write_dummy_file(blocker, 1);
+    auto* logger = mx_logger::initialize_namespace("recover", blocker.c_str(), nullptr, nullptr, nullptr, nullptr, nullptr);
+    EXPECT_TRUE(logger != nullptr);
+    if (!logger) return;
+    EXPECT_TRUE(logger->log(1, "api", "failed", nullptr, false) != 0);
+    EXPECT_FALSE(std::string(logger->error_desc()).empty());
+    std::filesystem::remove(std::filesystem::u8path(blocker));
+    std::filesystem::create_directories(std::filesystem::u8path(logger->diskcache_path()));
+    EXPECT_EQ(logger->log(1, "api", "recovered", nullptr, false), 0);
+    logger->flush();
+    EXPECT_TRUE(std::string(logger->error_desc()).empty());
+    const auto records = mxtest::parse_dir(logger->diskcache_path());
+    EXPECT_EQ(records.size(), size_t(1));
+    if (!records.empty()) EXPECT_EQ(records[0].at("msg"), std::string("recovered"));
+    mx_logger::delete_namespace("recover", blocker.c_str());
+}
 
 MX_TEST(mxlogger_api, singleton_registry_and_keys) {
     auto* a = mx_logger::initialize_namespace("ns1", API_DIR, nullptr, nullptr, nullptr, nullptr, nullptr);

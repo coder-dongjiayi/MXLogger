@@ -126,6 +126,7 @@ void mxlogger::delete_namespace(const char* ns,const char* directory){
 
 //释放指定的logger对象
 void mxlogger::delete_namespace_(const char* logger_token){
+    if (logger_token == nullptr) return;
     std::lock_guard<std::mutex> lock(global_instance_mutex_);
     auto itr = global_instanceDic_ -> find(logger_token);
     if (itr != global_instanceDic_ -> end()) {

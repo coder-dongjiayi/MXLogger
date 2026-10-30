@@ -1,6 +1,9 @@
 plugins {
     id 'com.android.library'
+    id 'jacoco'
 }
+
+jacoco { toolVersion = '0.8.12' }
 
 android {
     namespace  "com.dongjiayi.mxlogger"
@@ -8,6 +11,18 @@ android {
 
     compileSdk 31
     ndkVersion "27.0.12077973"
+
+    testOptions {
+        unitTests.returnDefaultValues = System.getenv('MXLOGGER_JNI_TEST_LIBRARY_DIR') != null
+        unitTests.all {
+            def hostJni = System.getenv('MXLOGGER_JNI_TEST_LIBRARY_DIR')
+            if (hostJni) systemProperty 'java.library.path', hostJni
+        }
+    }
+    sourceSets {
+        test.java.srcDir 'src/sharedTest/java'
+        androidTest.java.srcDir 'src/sharedTest/java'
+    }
 
     packagingOptions {
         jniLibs {
@@ -58,6 +73,19 @@ android {
             }
         }
 
+    }
+}
+
+tasks.register('apiCoverageReport', JacocoReport) {
+    dependsOn 'testDefaultCppReleaseUnitTest'
+    executionData fileTree(buildDir).include('jacoco/testDefaultCppReleaseUnitTest.exec')
+    classDirectories.setFrom(fileTree("$buildDir/intermediates/javac/DefaultCppRelease/compileDefaultCppReleaseJavaWithJavac/classes") {
+        include 'com/dongjiayi/mxlogger/MXLogger.class'
+    })
+    sourceDirectories.setFrom(files('src/main/java'))
+    reports {
+        xml.required = true
+        html.required = true
     }
 }
 

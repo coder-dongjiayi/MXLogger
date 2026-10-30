@@ -8,6 +8,10 @@ import 'package:flutter_mxlogger/src/flutter_mxlogger_web.dart' as web;
 
 void main() {
   group('web空实现: API契约', () {
+    test('Web 不提供原生 Core 版本，明确报告不支持', () {
+      expect(web.MXLogger.coreVersion, throwsUnsupportedError);
+    });
+
     late web.MXLogger logger;
 
     setUp(() {
@@ -91,6 +95,10 @@ void main() {
       expect(web.MXStoragePolicyType.values, hasLength(4));
       final e = web.MXFileEntity(name: 'a.mx', size: 1);
       expect(e.toString(), contains('a.mx'));
+      e.createTimeStamp = 10;
+      e.lastTimeStamp = 20;
+      expect(e.createTime, DateTime.fromMillisecondsSinceEpoch(10000));
+      expect(e.lastTime, DateTime.fromMillisecondsSinceEpoch(20000));
     });
   });
 }

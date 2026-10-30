@@ -824,6 +824,75 @@ void main() {
   });
 
   // ---------------------------------------------------------------
+  group('补充公开 API 与异常路径', () {
+    test('consoleEnable/setConsoleEnable 和控制台格式化不改变持久化内容', () {
+      final logger =
+          MXLogger(nameSpace: uniqueNs(), directory: newDir('console').path);
+      final original = debugPrint;
+      final output = <String>[];
+      debugPrint = (String? message, {int? wrapWidth}) {
+        if (message != null) output.add(message);
+      };
+      try {
+        expect(logger.consoleEnable, isFalse);
+        logger.setConsoleEnable(true);
+        expect(logger.consoleEnable, isTrue);
+        logger.info('{"answer":42}', name: 'console', tag: 'api');
+        logger.debug('plain', name: 'console');
+        logger.log(99, 'unknown-level');
+        expect(output.join('\n'), contains('answer'));
+        expect(output.join('\n'), contains('42'));
+        expect(output.join('\n'), contains('plain'));
+        expect(output.join('\n'), contains('unknown-level'));
+        final count = output.length;
+        logger.setConsoleEnable(false);
+        expect(logger.consoleEnable, isFalse);
+        logger.warn('silent');
+        expect(output, hasLength(count));
+        expect(readBack(logger).map((r) => r['msg']),
+            ['{"answer":42}', 'plain', 'unknown-level', 'silent']);
+      } finally {
+        debugPrint = original;
+        logger.setConsoleEnable(false);
+        MXLogger.destroyWithLoggerToken(logger.loggerToken!);
+      }
+    });
+
+    test('省略 directory 的销毁使用已注册目录，未知 token 操作不影响现有实例', () {
+      final ns = uniqueNs();
+      final dir = newDir('implicit_destroy');
+      final logger = MXLogger(nameSpace: ns, directory: dir.path);
+      logger.info('before');
+      MXLogger.destroy(nameSpace: ns);
+      expect(logger.enable, isFalse);
+      expect(logger.loggerToken, isNull);
+      final reopened = MXLogger(nameSpace: ns, directory: dir.path);
+      MXLogger.logLoggerToken(null, 1, 'ignored');
+      MXLogger.logLoggerToken('', 1, 'ignored');
+      MXLogger.logLoggerToken('unknown-token', 1, 'ignored');
+      MXLogger.destroyWithLoggerToken('unknown-token');
+      MXLogger.destroy(nameSpace: 'unknown-namespace', directory: dir.path);
+      reopened.info('after');
+      expect(readBack(reopened).map((r) => r['msg']), ['before', 'after']);
+      MXLogger.destroyWithLoggerToken(reopened.loggerToken!);
+    });
+
+    test('写入失败可读取真实错误，修复目录后同一实例恢复写入', () {
+      final root = newDir('recover_api');
+      final blocker = File('${root.path}/blocker')..writeAsStringSync('block');
+      final logger = MXLogger(nameSpace: uniqueNs(), directory: blocker.path);
+      final path = logger.diskcachePath;
+      expect(logger.info('failed'), isNot(0));
+      expect(logger.errorDesc, isNotEmpty);
+      blocker.deleteSync();
+      Directory(path).createSync(recursive: true);
+      expect(logger.info('recovered'), 0);
+      expect(logger.errorDesc, isNull);
+      expect(readBack(logger).single['msg'], 'recovered');
+      MXLogger.destroyWithLoggerToken(logger.loggerToken!);
+    });
+  });
+
   group('多实例隔离', () {
     test('不同namespace的日志互不影响', () {
       final a =
