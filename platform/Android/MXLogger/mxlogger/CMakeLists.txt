@@ -15,7 +15,7 @@ add_library(
         mxlogger
         SHARED
         src/main/cpp/navtive-bridge.cpp
-        src/main/cpp/flutter-bridge.cpp
+        ../../../../Core/ffi/mxlogger_ffi.cpp
 )
 
 set_target_properties(mxlogger PROPERTIES
@@ -27,6 +27,8 @@ find_library(
         log-lib
         log )
 
+
+target_compile_definitions(mxlogger PRIVATE MXLOGGER_FFI_BUILD=1)
 
 target_link_libraries(
         mxlogger

@@ -170,11 +170,11 @@ class MXLogger with WidgetsBindingObserver {
 
   /// 监听App生命周期：进入后台时按需清理过期日志文件
   /// Observe the app lifecycle: remove expired log files when entering background (if enabled)
-  /// macOS 由调用方手动清理，不响应生命周期事件。
-  /// macOS cleanup is explicit and does not follow app lifecycle events.
+  /// macOS/Windows 由调用方手动清理，不响应生命周期事件。
+  /// macOS/Windows cleanup is explicit and does not follow app lifecycle events.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!Platform.isMacOS &&
+    if ((Platform.isAndroid || Platform.isIOS) &&
         state == AppLifecycleState.paused &&
         _shouldRemoveExpiredDataWhenEnterBackground == true) {
       removeExpireData();
@@ -312,9 +312,24 @@ class MXLogger with WidgetsBindingObserver {
     String ns = nameSpace;
     String dr = directory ?? "";
 
-    Map<dynamic, dynamic> result = await _channel.invokeMethod(
-        "initialize", {"nameSpace": nameSpace, "directory": directory});
-    dr = result["directory"];
+    if (Platform.isWindows) {
+      if (directory == null) {
+        final nativePath = _windowsDefaultDirectory();
+        if (nativePath == nullptr) {
+          throw const FileSystemException(
+              'Cannot resolve the Windows log directory');
+        }
+        try {
+          dr = nativePath.toDartString();
+        } finally {
+          _freeString(nativePath.cast<Int8>());
+        }
+      }
+    } else {
+      final Map<dynamic, dynamic> result = await _channel.invokeMethod(
+          "initialize", {"nameSpace": nameSpace, "directory": directory});
+      dr = result["directory"];
+    }
 
     MXLogger mxLogger = MXLogger(
         nameSpace: ns,
@@ -357,6 +372,7 @@ class MXLogger with WidgetsBindingObserver {
       }
       _destroyNative(nameSpace, dr);
     }
+
     /// 没有匹配的Dart实例时保持原有透传行为
     /// Fall through to the plain native call when no Dart instance matches
     if (keys.isEmpty) {
@@ -764,56 +780,30 @@ class MXLogger with WidgetsBindingObserver {
     if (_handle == nullptr) return [];
     final arrayPtr = calloc<Pointer<Pointer<Pointer<Utf8>>>>();
     final sizeArrayPtr = calloc<Pointer<Pointer<Uint32>>>();
-    final count = _getLogfiles(_handle, arrayPtr, sizeArrayPtr);
-    List<MXFileEntity> _mxFileList = [];
-    if (count > 0) {
-      final arrayArray = arrayPtr[0];
-      final sizeArrayArray = sizeArrayPtr[0];
-      for (int i = 0; i < count; i++) {
-        final charArray = arrayArray[i];
-
-        final sizeArray = sizeArrayArray[i];
-
-        final pointName = charArray[0];
-        final pointSize = charArray[1];
-        final pointLastTimestamp = charArray[2];
-        final pointCreateTimestamp = charArray[3];
-
-        final pointNameSize = sizeArray[0];
-        final pointSizeSize = sizeArray[1];
-        final pointLastTimestampSize = sizeArray[2];
-        final pointCreateTimestampSize = sizeArray[3];
-
-        String? name = _buffer2String(pointName.cast(), pointNameSize);
-        String? size = _buffer2String(pointSize.cast(), pointSizeSize);
-        String? lastTimestamp =
-            _buffer2String(pointLastTimestamp.cast(), pointLastTimestampSize);
-
-        String? createTimestamp = _buffer2String(
-            pointCreateTimestamp.cast(), pointCreateTimestampSize);
-
-        MXFileEntity entity = MXFileEntity(
-            name: name,
-            size: int.parse(size ?? "0"),
-            createTimeStamp: int.parse(createTimestamp ?? "0"),
-            lastTimeStamp: int.parse(lastTimestamp ?? "0"));
-        _mxFileList.add(entity);
-
-        calloc.free(charArray[0]);
-        calloc.free(charArray[1]);
-        calloc.free(charArray[2]);
-        calloc.free(charArray[3]);
-
-        calloc.free(charArray);
-        calloc.free(sizeArray);
+    var count = 0;
+    try {
+      count = _getLogfiles(_handle, arrayPtr, sizeArrayPtr);
+      final files = <MXFileEntity>[];
+      for (var i = 0; i < count; ++i) {
+        final row = arrayPtr.value[i];
+        final lengths = sizeArrayPtr.value[i];
+        String field(int index) =>
+            _buffer2String(row[index].cast(), lengths[index]) ?? '';
+        files.add(MXFileEntity(
+          name: field(0),
+          size: int.parse(field(1)),
+          lastTimeStamp: int.parse(field(2)),
+          createTimeStamp: int.parse(field(3)),
+        ));
       }
-      calloc.free(arrayArray);
-      calloc.free(sizeArrayArray);
+      return files;
+    } finally {
+      // DLL/native owns every returned row, field and length array. Dart only
+      // owns the two output-pointer slots allocated above.
+      _freeLogfiles(count, arrayPtr.value, sizeArrayPtr.value);
+      calloc.free(arrayPtr);
+      calloc.free(sizeArrayPtr);
     }
-
-    calloc.free(arrayPtr);
-    calloc.free(sizeArrayPtr);
-    return _mxFileList;
   }
 
   /// 查询指定目录下的日志文件信息(name/size/timestamp)。
@@ -852,8 +842,7 @@ class MXLogger with WidgetsBindingObserver {
         }
       }
 
-      calloc.free(array);
-      calloc.free(sizeArray);
+      _freeLogmsg(count, array, sizeArray);
     }
 
     calloc.free(dirPtr);
@@ -888,36 +877,29 @@ class MXLogger with WidgetsBindingObserver {
     final arrayPtr = calloc<Pointer<Pointer<Utf8>>>();
     final sizeArrayPtr = calloc<Pointer<Uint32>>();
 
-    final result = _selectLogmsg(
-        pathPtr, cryptKeyPtr, ivPtr, numberPtr, arrayPtr, sizeArrayPtr);
-    final count = numberPtr.value;
-    if (result == 0 && count > 0) {
-      final array = arrayPtr[0];
-      final sizeArray = sizeArrayPtr[0];
-      for (int i = 0; i < count; i++) {
-        String? json = _buffer2String(array[i].cast(), sizeArray[i]);
-        if (json == null) continue;
-        try {
-          logList.add(Map<String, dynamic>.from(jsonDecode(json)));
-        } catch (_) {}
+    try {
+      final result = _selectLogmsg(
+          pathPtr, cryptKeyPtr, ivPtr, numberPtr, arrayPtr, sizeArrayPtr);
+      if (result == 0) {
+        for (var i = 0; i < numberPtr.value; ++i) {
+          final text =
+              _buffer2String(arrayPtr.value[i].cast(), sizeArrayPtr.value[i]);
+          if (text == null) continue;
+          try {
+            logList.add(Map<String, dynamic>.from(jsonDecode(text)));
+          } catch (_) {}
+        }
       }
-
-      /// native侧malloc的内存必须由native侧释放
-      /// Memory malloc-ed on the native side must be freed by the native side
-      _freeLogmsg(count, array, sizeArray);
-    }
-
-    calloc.free(pathPtr);
-    if (cryptKeyPtr != nullptr) {
+      return logList;
+    } finally {
+      _freeLogmsg(numberPtr.value, arrayPtr.value, sizeArrayPtr.value);
+      calloc.free(pathPtr);
       calloc.free(cryptKeyPtr);
-    }
-    if (ivPtr != nullptr) {
       calloc.free(ivPtr);
+      calloc.free(numberPtr);
+      calloc.free(arrayPtr);
+      calloc.free(sizeArrayPtr);
     }
-    calloc.free(numberPtr);
-    calloc.free(arrayPtr);
-    calloc.free(sizeArrayPtr);
-    return logList;
   }
 
   /// 将native返回的UTF-8字节缓冲转为Dart字符串
@@ -961,9 +943,26 @@ class MXLogger with WidgetsBindingObserver {
   }
 }
 
-final DynamicLibrary _nativeLib = Platform.isAndroid
-    ? DynamicLibrary.open("libmxlogger.so")
-    : DynamicLibrary.process();
+DynamicLibrary _loadNativeLibrary() {
+  if (Platform.isWindows) {
+    final override = Platform.environment['MXLOGGER_FFI_LIBRARY_PATH'];
+    final path = override != null && override.isNotEmpty
+        ? override
+        : File.fromUri(Uri.file(Platform.resolvedExecutable)
+                .resolve('mxlogger_ffi.dll'))
+            .path;
+    return DynamicLibrary.open(path);
+  }
+  return Platform.isAndroid
+      ? DynamicLibrary.open('libmxlogger.so')
+      : DynamicLibrary.process();
+}
+
+final DynamicLibrary _nativeLib = _loadNativeLibrary();
+
+final Pointer<Utf8> Function() _windowsDefaultDirectory = _nativeLib
+    .lookupFunction<Pointer<Utf8> Function(), Pointer<Utf8> Function()>(
+        'flutter_mxlogger_default_directory');
 
 String _mxloggerFunction(String funcName) {
   return "flutter_mxlogger_" + funcName;
@@ -996,10 +995,8 @@ final Pointer<Void> Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>,
 /// Native function: release the logger by nameSpace + directory
 /// (the native side returns void, and the declaration here must match)
 final void Function(Pointer<Utf8>, Pointer<Utf8>) _destroy = _nativeLib
-    .lookup<
-        NativeFunction<
-            Void Function(
-                Pointer<Utf8>, Pointer<Utf8>)>>(_mxloggerFunction("destroy"))
+    .lookup<NativeFunction<Void Function(Pointer<Utf8>, Pointer<Utf8>)>>(
+        _mxloggerFunction("destroy"))
     .asFunction();
 
 /// native函数: 通过loggerToken释放logger
@@ -1131,6 +1128,15 @@ final int Function(Pointer<Void>, Pointer<Pointer<Pointer<Pointer<Utf8>>>>,
                         Pointer<Pointer<Pointer<Uint32>>>)>>(
             _mxloggerFunction("get_logfiles"))
         .asFunction();
+
+// Paired native deallocator; never pass DLL-allocated rows to calloc.free.
+final void Function(
+        int, Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>)
+    _freeLogfiles = _nativeLib.lookupFunction<
+        Void Function(
+            Int32, Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>),
+        void Function(int, Pointer<Pointer<Pointer<Utf8>>>,
+            Pointer<Pointer<Uint32>>)>(_mxloggerFunction('free_logfiles'));
 
 /// native函数: 查询指定目录下的日志文件信息
 /// (iOS侧该符号为未实现的占位 始终返回0条，见[MXLogger.selectLogfiles])

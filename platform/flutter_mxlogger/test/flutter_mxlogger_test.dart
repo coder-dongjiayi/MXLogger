@@ -2,16 +2,18 @@
 ///
 /// 运行方式: 在 flutter_mxlogger 目录下执行 flutter test
 ///
-/// 测试策略: 不 mock FFI。setUpAll 中把 Android 桥接(纯C++) + Core
+/// 测试策略: 不 mock FFI。setUpAll 中把公共 C ABI 桥接 + Core
 /// 编译成宿主 dylib 并 DynamicLibrary.open 加载(macOS 的 dlopen 默认
 /// RTLD_GLOBAL), 插件内部的 DynamicLibrary.process() 即可解析到全部
 /// flutter_mxlogger_* 符号, 因此所有 FFI 接口都是真实执行、真实读写
 /// 磁盘文件的。仅 MXLogger.initialize 的 MethodChannel 部分使用 mock。
 ///
-/// 注意: 本测试依赖宿主机的 clang, 仅支持 macOS。
+/// macOS compiles the shared bridge locally; Windows CI loads the Debug/Release
+/// DLL specified by MXLOGGER_FFI_LIBRARY_PATH. Neither path mocks native I/O.
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
+import 'package:ffi/ffi.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -26,11 +28,17 @@ const String kIv = '0123456789abcdef';
 const String kFileHeaderName = 'com.djy.mxlogger.fileHeader';
 
 int _nsCounter = 0;
+final _createdNamespaces = <String>[];
 
 /// 每个用例用独立的namespace, 避免core全局实例字典串扰
-String uniqueNs() => 'com.test.mxlogger.ns${_nsCounter++}';
+String uniqueNs() {
+  final ns = 'com.test.mxlogger.ns${_nsCounter++}';
+  _createdNamespaces.add(ns);
+  return ns;
+}
 
 late Directory tempRoot;
+late DynamicLibrary testNative;
 
 /// 新建一个隔离目录
 Directory newDir(String tag) {
@@ -52,9 +60,7 @@ String currentLogFile(MXLogger logger) {
 List<Map<String, dynamic>> readBack(MXLogger logger,
     {String? cryptKey, String? iv}) {
   return MXLogger.selectLogmsg(
-          diskcacheFilePath: currentLogFile(logger),
-          cryptKey: cryptKey,
-          iv: iv)
+          diskcacheFilePath: currentLogFile(logger), cryptKey: cryptKey, iv: iv)
       .reversed
       .toList();
 }
@@ -63,6 +69,14 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
+    if (Platform.isWindows) {
+      final path = Platform.environment['MXLOGGER_FFI_LIBRARY_PATH'];
+      expect(path, isNotEmpty,
+          reason: 'Run scripts/verify_flutter_windows.ps1');
+      testNative = DynamicLibrary.open(path!);
+      tempRoot = Directory.systemTemp.createTempSync('mxlogger_test_');
+      return;
+    }
     // 编译并加载宿主测试dylib, 让 DynamicLibrary.process() 能找到符号
     final dylib = File('test/native/libmxlogger_test.dylib');
     if (!dylib.existsSync()) {
@@ -70,9 +84,16 @@ void main() {
       expect(r.exitCode, 0,
           reason: '构建测试dylib失败(需要macOS+clang):\n${r.stdout}\n${r.stderr}');
     }
-    DynamicLibrary.open(dylib.absolute.path);
+    testNative = DynamicLibrary.open(dylib.absolute.path);
 
     tempRoot = Directory.systemTemp.createTempSync('mxlogger_test_');
+  });
+
+  tearDown(() {
+    for (final namespace in _createdNamespaces) {
+      MXLogger.destroy(nameSpace: namespace);
+    }
+    _createdNamespaces.clear();
   });
 
   tearDownAll(() {
@@ -85,12 +106,99 @@ void main() {
     expect(MXLogger.coreVersion(), '2.3.0');
   });
 
+  test('FFI empty/error outputs and paired native frees are null-safe', () {
+    final files =
+        testNative.lookupFunction<
+                Int32 Function(
+                    Pointer<Void>,
+                    Pointer<Pointer<Pointer<Pointer<Utf8>>>>,
+                    Pointer<Pointer<Pointer<Uint32>>>),
+                int Function(
+                    Pointer<Void>,
+                    Pointer<Pointer<Pointer<Pointer<Utf8>>>>,
+                    Pointer<Pointer<Pointer<Uint32>>>)>(
+            'flutter_mxlogger_get_logfiles');
+    final freeFiles = testNative.lookupFunction<
+        Void Function(
+            Int32, Pointer<Pointer<Pointer<Utf8>>>, Pointer<Pointer<Uint32>>),
+        void Function(int, Pointer<Pointer<Pointer<Utf8>>>,
+            Pointer<Pointer<Uint32>>)>('flutter_mxlogger_free_logfiles');
+    final rows = calloc<Pointer<Pointer<Pointer<Utf8>>>>();
+    final sizes = calloc<Pointer<Pointer<Uint32>>>();
+    try {
+      expect(files(nullptr, rows, sizes), 0);
+      expect(rows.value, nullptr);
+      expect(sizes.value, nullptr);
+      freeFiles(0, rows.value, sizes.value);
+      expect(files(nullptr, nullptr, nullptr), 0);
+    } finally {
+      calloc.free(rows);
+      calloc.free(sizes);
+    }
+    final select = testNative.lookupFunction<
+        Int32 Function(
+            Pointer<Utf8>,
+            Pointer<Utf8>,
+            Pointer<Utf8>,
+            Pointer<Int32>,
+            Pointer<Pointer<Pointer<Utf8>>>,
+            Pointer<Pointer<Uint32>>),
+        int Function(
+            Pointer<Utf8>,
+            Pointer<Utf8>,
+            Pointer<Utf8>,
+            Pointer<Int32>,
+            Pointer<Pointer<Pointer<Utf8>>>,
+            Pointer<Pointer<Uint32>>)>('flutter_mxlogger_select_logmsg');
+    final count = calloc<Int32>();
+    final messages = calloc<Pointer<Pointer<Utf8>>>();
+    final lengths = calloc<Pointer<Uint32>>();
+    try {
+      expect(select(nullptr, nullptr, nullptr, count, messages, lengths), -1);
+      expect(count.value, 0);
+      expect(messages.value, nullptr);
+      expect(lengths.value, nullptr);
+    } finally {
+      calloc.free(count);
+      calloc.free(messages);
+      calloc.free(lengths);
+    }
+  });
+
+  test('repeated native strings, file lists and decoded arrays stay valid', () {
+    final logger = MXLogger(
+        nameSpace: uniqueNs(),
+        directory: newDir('中文 空格').path,
+        fileName: '日志文件',
+        cryptKey: kCryptKey,
+        iv: kIv,
+        fileHeader: 'ownership header');
+    final token = logger.loggerToken;
+    final path = logger.diskcachePath;
+    expect(logger.info('中文 and emoji 🟩'), 0);
+    for (var i = 0; i < 200; ++i) {
+      expect(logger.loggerToken, token);
+      expect(logger.diskcachePath, path);
+      expect(logger.errorDesc, isNull);
+      final files = logger.logFiles;
+      expect(files, hasLength(1));
+      expect(files.single.name, contains('日志文件'));
+      expect(files.single.size, greaterThan(0));
+      expect(files.single.lastTimeStamp, greaterThan(0));
+      final rows = MXLogger.selectLogmsg(
+          diskcacheFilePath: '$path/${files.single.name}',
+          cryptKey: kCryptKey,
+          iv: kIv);
+      expect(
+          rows.map((r) => r['msg']), ['中文 and emoji 🟩', 'ownership header']);
+    }
+  });
+
   // ---------------------------------------------------------------
   group('MXStoragePolicyType / MXFileEntity 纯Dart模型', () {
     test('枚举包含4种存储策略', () {
       expect(MXStoragePolicyType.values, hasLength(4));
-      expect(
-          MXStoragePolicyType.values.map((e) => e.name),
+      expect(MXStoragePolicyType.values.map((e) => e.name),
           containsAll(['yyyyMMdd', 'yyyyMMddHH', 'yyyyWw', 'yyyyMM']));
     });
 
@@ -148,8 +256,7 @@ void main() {
       expect(logger.getLoggerKey(), logger.loggerToken);
     });
 
-    test('diskcachePath = directory + nameSpace, diskcacheErrorPath 拼接正确',
-        () {
+    test('diskcachePath = directory + nameSpace, diskcacheErrorPath 拼接正确', () {
       final dir = newDir('path');
       final ns = uniqueNs();
       final logger = MXLogger(nameSpace: ns, directory: dir.path);
@@ -347,8 +454,7 @@ void main() {
           iv: kIv);
       logger.info('secret');
 
-      final bad =
-          readBack(logger, cryptKey: '0000000000000000', iv: kIv);
+      final bad = readBack(logger, cryptKey: '0000000000000000', iv: kIv);
       expect(bad, hasLength(1));
       expect(bad.single['error_code'], '1');
     });
@@ -458,8 +564,6 @@ void main() {
     });
   });
 
-
-
   // ---------------------------------------------------------------
   group('文件清理', () {
     /// 在日志目录伪造一个旧文件(旧mtime), 模拟历史日志
@@ -480,8 +584,7 @@ void main() {
       logger.removeExpireData();
 
       expect(old.existsSync(), isFalse, reason: '2020年的旧文件应被清理');
-      expect(readBack(logger).single['msg'], 'current',
-          reason: '当前写入文件不能被删');
+      expect(readBack(logger).single['msg'], 'current', reason: '当前写入文件不能被删');
     });
 
     test('removeExpireData: maxDiskSize超限时从最旧文件删起', () {
@@ -591,7 +694,8 @@ void main() {
     test('logLoggerToken 直接调用可写入', () {
       final logger =
           MXLogger(nameSpace: uniqueNs(), directory: newDir('lt2').path);
-      MXLogger.logLoggerToken(logger.loggerToken, 2, 'raw', name: 'n', tag: 't');
+      MXLogger.logLoggerToken(logger.loggerToken, 2, 'raw',
+          name: 'n', tag: 't');
       final records = readBack(logger);
       expect(records, hasLength(1));
       expect(records.first['level'], '2');
@@ -734,7 +838,7 @@ void main() {
 
       logger.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      expect(old.existsSync(), Platform.isMacOS,
+      expect(old.existsSync(), Platform.isMacOS || Platform.isWindows,
           reason: 'macOS 不应因 paused 自动清理，移动端保持自动清理');
       logger.removeExpireData();
       expect(old.existsSync(), isFalse, reason: '显式清理应删除过期文件');
@@ -809,11 +913,26 @@ void main() {
         return {'nameSpace': args['nameSpace'], 'directory': args['directory']};
       });
 
-      final logger = await MXLogger.initialize(
-          nameSpace: uniqueNs(), directory: dir.path);
+      final logger =
+          await MXLogger.initialize(nameSpace: uniqueNs(), directory: dir.path);
       expect(logger.diskcachePath, contains(dir.path));
     });
-  });
+  }, skip: Platform.isWindows);
+
+  test('Windows default directory and channel-free initialization', () async {
+    final logger = await MXLogger.initialize(nameSpace: uniqueNs());
+    final directory = Directory(logger.diskcachePath);
+    try {
+      expect(directory.path, contains('MXLogger'));
+      expect(directory.path.toLowerCase(),
+          startsWith(Platform.environment['LOCALAPPDATA']!.toLowerCase()));
+      expect(logger.info('Windows default 中文'), 0);
+      expect(readBack(logger).single['msg'], 'Windows default 中文');
+    } finally {
+      MXLogger.destroyWithLoggerToken(logger.loggerToken!);
+      directory.deleteSync(recursive: true);
+    }
+  }, skip: !Platform.isWindows);
 
   // ---------------------------------------------------------------
   group('selectLogfiles', () {

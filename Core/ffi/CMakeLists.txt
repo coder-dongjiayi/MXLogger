@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.14)
+project(MXLoggerFFI LANGUAGES C CXX)
+if(NOT TARGET MXLoggerCore)
+    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/core")
+endif()
+add_library(mxlogger_ffi SHARED mxlogger_ffi.cpp)
+target_compile_definitions(mxlogger_ffi PRIVATE MXLOGGER_FFI_BUILD=1)
+target_compile_features(mxlogger_ffi PUBLIC cxx_std_17)
+target_link_libraries(mxlogger_ffi PRIVATE MXLoggerCore)
+set_target_properties(mxlogger_ffi PROPERTIES
+    CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES CXX_EXTENSIONS NO
+    CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN YES)
+if(WIN32)
+    set_target_properties(mxlogger_ffi PROPERTIES PREFIX "")
+    target_sources(mxlogger_ffi PRIVATE mxlogger_ffi_windows.cpp)
+    target_link_libraries(mxlogger_ffi PRIVATE shell32 ole32 uuid)
+endif()
+file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/mxlogger-ffi-$<CONFIG>.txt" CONTENT "$<TARGET_FILE:mxlogger_ffi>")

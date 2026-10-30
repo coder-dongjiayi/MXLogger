@@ -24,6 +24,10 @@ jobs:
           python-version: '3.12'
       - name: Build and test this checkout's C++ Core
         run: python scripts/verify_core_ci.py --configuration ${{ matrix.configuration }}
+      - name: Check shared Flutter ABI headers
+        run: python scripts/sync_flutter_native.py --check
+      - name: Test precompiled DLL packaging rules
+        run: python -m unittest discover -s scripts/tests -p 'test_flutter_windows_package.py' -v
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -244,10 +248,48 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
+  flutter-windows-api:
+    name: 2. Flutter Windows FFI (${{ matrix.configuration }})
+    needs: [core-tests]
+    runs-on: windows-2022
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: NuGet/setup-nuget@v2
+        with:
+          nuget-version: '6.x'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.9
+          channel: stable
+          cache: true
+      - name: Local NuGet restore, DLL exports, real Dart FFI and relocated Flutter runner
+        shell: pwsh
+        run: "& './scripts/verify_flutter_windows.ps1' -Configuration ${{ matrix.configuration }}"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: flutter-windows-${{ matrix.configuration }}-logs
+          path: |
+            build/flutter-windows-tests/${{ matrix.configuration }}/*.log
+            build/flutter-windows-tests/${{ matrix.configuration }}/*.json
+            build/windows-sdk/logs/
+            build/windows-sdk/ffi/*.log
+            build/windows-sdk/ffi/*.json
+          retention-days: 7
+          if-no-files-found: warn
+
   # Stage 3 starts only after ALL stage-2 API jobs (including matrices) pass.
   windows-sdk:
     name: 3. Windows SDK (NuGet + vcpkg)
-    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api]
+    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api, flutter-windows-api]
     # Build the distributable with VS 2022's toolset, rather than requiring the
     # newer compiler that windows-latest may carry.
     runs-on: windows-2022
@@ -260,10 +302,21 @@ jobs:
       - uses: NuGet/setup-nuget@v2
         with:
           nuget-version: '6.x'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.9
+          channel: stable
+          cache: true
       - name: Build, test, pack and restore native NuGet SDK
         run: |
           & './scripts/build_windows_nuget.ps1'
-          python scripts/check_local_core.py --cmake-cache build/windows-sdk/core-MD/CMakeCache.txt --cmake-cache build/windows-sdk/core-MT/CMakeCache.txt --output build/windows-sdk/logs/local-core.json
+          python scripts/check_local_core.py --cmake-cache build/windows-sdk/core-MD/CMakeCache.txt --cmake-cache build/windows-sdk/core-MT/CMakeCache.txt --cmake-cache build/windows-sdk/ffi/CMakeCache.txt --output build/windows-sdk/logs/local-core.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Test the final NuGet DLLs through Dart and prepare Flutter binaries
+        run: |
+          & './scripts/verify_flutter_windows.ps1' -Configuration Debug -PackagePath build/windows-sdk/packages/MXLogger.Native.2.3.0.nupkg -SkipExample
+          & './scripts/verify_flutter_windows.ps1' -Configuration Release -PackagePath build/windows-sdk/packages/MXLogger.Native.2.3.0.nupkg -SkipExample
+          python scripts/prepare_flutter_windows.py --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify vcpkg consumers (MD and MT, Debug and Release)
         run: "& './scripts/verify_windows_vcpkg.ps1'"
@@ -285,6 +338,26 @@ jobs:
           archive: false
           retention-days: 7
           if-no-files-found: error
+      - name: Upload prepared Flutter package with precompiled Windows DLLs
+        uses: actions/upload-artifact@v7
+        with:
+          name: flutter_mxlogger-windows-prebuilt
+          path: |
+            platform/flutter_mxlogger/
+            !platform/flutter_mxlogger/**/build/**
+            !platform/flutter_mxlogger/**/.dart_tool/**
+            !platform/flutter_mxlogger/**/.flutter-plugins*
+            !platform/flutter_mxlogger/**/ephemeral/**
+            !platform/flutter_mxlogger/**/Pods/**
+            !platform/flutter_mxlogger/**/.symlinks/**
+            !platform/flutter_mxlogger/**/.gradle/**
+            !platform/flutter_mxlogger/**/.cxx/**
+            !platform/flutter_mxlogger/**/local.properties
+            !platform/flutter_mxlogger/test/native/*.dylib
+            !platform/flutter_mxlogger/test/native/build_tmp/**
+          include-hidden-files: true
+          retention-days: 7
+          if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -292,12 +365,16 @@ jobs:
           path: |
             build/windows-sdk/logs/*.log
             build/windows-sdk/logs/*.json
+            build/windows-sdk/ffi/*.log
+            build/windows-sdk/ffi/*.json
+            build/flutter-windows-tests/**/*.log
+            build/flutter-windows-tests/**/*.json
           retention-days: 7
           if-no-files-found: warn
 
   windows-release:
     name: 3. Windows Release EXE
-    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api]
+    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api, flutter-windows-api]
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
@@ -328,7 +405,7 @@ jobs:
 
   macos-release:
     name: 3. macOS Release DMG
-    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api]
+    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api, flutter-windows-api]
     runs-on: macos-latest
     timeout-minutes: 20
     steps:
@@ -354,7 +431,7 @@ jobs:
 
   android-release:
     name: 3. Android Release APK
-    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api]
+    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api, flutter-windows-api]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

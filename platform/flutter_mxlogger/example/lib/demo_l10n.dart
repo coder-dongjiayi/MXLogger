@@ -172,6 +172,9 @@ const Map<String, String> _en = {
       'loggerToken = md5(namespace + directory); retrieve the instance across modules via loggerToken.',
   'home.info.path.title': 'Cache Directory (diskcachePath)',
   'home.info.finder.title': 'Open in Finder',
+  'home.info.explorer.title': 'Open in Explorer',
+  'home.config.windows.cleanup':
+      'Windows cleanup is explicit. Use Remove Expired Files to apply the age and disk limits; entering background does not trigger cleanup.',
   'home.info.finder.subtitle': 'Open the current logger directory',
   'home.info.error.title': 'Last Error (errorDesc)',
   'home.info.error.subtitle': 'Error description when a write returns non-zero',
@@ -327,6 +330,9 @@ const Map<String, String> _zhHans = {
       'loggerToken = md5(namespace + directory)，跨模块通过 loggerToken 找回实例。',
   'home.info.path.title': '缓存目录 diskcachePath',
   'home.info.finder.title': '在 Finder 中打开',
+  'home.info.explorer.title': '在资源管理器中打开',
+  'home.config.windows.cleanup':
+      'Windows 需手动清理。点击“清理过期文件”应用保留时间和磁盘上限，进入后台不会触发清理。',
   'home.info.finder.subtitle': '打开当前 logger 的日志目录',
   'home.info.error.title': '查看最近错误 errorDesc',
   'home.info.error.subtitle': '写入返回非 0 时的错误描述',

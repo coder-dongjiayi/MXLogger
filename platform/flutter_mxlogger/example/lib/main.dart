@@ -120,7 +120,11 @@ class LandingPage extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               Text(
-                '${Platform.isMacOS ? 'Flutter macOS' : 'Flutter'} Demo · Core $coreVersion',
+                '${Platform.isWindows
+                    ? 'Flutter Windows'
+                    : Platform.isMacOS
+                    ? 'Flutter macOS'
+                    : 'Flutter'} Demo · Core $coreVersion',
                 style: TextStyle(fontSize: 12, color: tertiaryText(context)),
               ),
               const SizedBox(height: 48),

@@ -49,6 +49,7 @@ class DemoHomePage extends StatefulWidget {
 }
 
 class _DemoHomePageState extends State<DemoHomePage> {
+  bool get _isDesktop => Platform.isMacOS || Platform.isWindows;
   MXLogger? _logger;
   String _loggerToken = '';
   String _diskCachePath = '';
@@ -107,7 +108,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     logger.setMaxDiskAge(60 * 60 * 24 * 7); // 日志最多保留 7 天
     logger.setMaxDiskSize(1024 * 1024 * 10); // 日志最多占用 10 MB
     logger.setLevel(0); // 0:debug 全部写入
-    if (!Platform.isMacOS) {
+    if (!_isDesktop) {
       logger.shouldRemoveExpiredDataWhenEnterBackground(true);
     }
 
@@ -360,12 +361,12 @@ class _DemoHomePageState extends State<DemoHomePage> {
   Future<void> _pickDiskAge() async {
     final selected =
         await _showOptionsSheet<int>('maxDiskAge', tr('picker.age.message'), [
-      MapEntry(tr('duration.1min'), 60),
-      MapEntry(tr('duration.1hour'), 3600),
-      MapEntry(tr('duration.1day'), 86400),
-      MapEntry(tr('duration.7days'), 604800),
-      MapEntry(tr('common.unlimited'), 0),
-    ]);
+          MapEntry(tr('duration.1min'), 60),
+          MapEntry(tr('duration.1hour'), 3600),
+          MapEntry(tr('duration.1day'), 86400),
+          MapEntry(tr('duration.7days'), 604800),
+          MapEntry(tr('common.unlimited'), 0),
+        ]);
     if (selected == null) return;
     _logger?.setMaxDiskAge(selected);
     setState(() => _maxDiskAge = selected);
@@ -374,11 +375,11 @@ class _DemoHomePageState extends State<DemoHomePage> {
   Future<void> _pickDiskSize() async {
     final selected =
         await _showOptionsSheet<int>('maxDiskSize', tr('picker.size.message'), [
-      const MapEntry('1 MB', 1024 * 1024),
-      const MapEntry('10 MB', 1024 * 1024 * 10),
-      const MapEntry('100 MB', 1024 * 1024 * 100),
-      MapEntry(tr('common.unlimited'), 0),
-    ]);
+          const MapEntry('1 MB', 1024 * 1024),
+          const MapEntry('10 MB', 1024 * 1024 * 10),
+          const MapEntry('100 MB', 1024 * 1024 * 100),
+          MapEntry(tr('common.unlimited'), 0),
+        ]);
     if (selected == null) return;
     _logger?.setMaxDiskSize(selected);
     setState(() => _maxDiskSize = selected);
@@ -447,14 +448,28 @@ class _DemoHomePageState extends State<DemoHomePage> {
 
   Future<void> _openInFinder() async {
     try {
+      if (Platform.isWindows) {
+        if (!Directory(_diskCachePath).existsSync()) {
+          throw FileSystemException(
+            'Log directory does not exist',
+            _diskCachePath,
+          );
+        }
+        await Process.start('explorer.exe', [_diskCachePath]);
+        return;
+      }
       await const MethodChannel(
         'com.mxlogger.demo/desktop',
       ).invokeMethod<void>('openDirectory', _diskCachePath);
-    } on PlatformException catch (error) {
+    } catch (error) {
       if (!mounted) return;
       await _showAlert(
-        tr('home.info.finder.title'),
-        error.message ?? error.code,
+        tr(
+          Platform.isWindows
+              ? 'home.info.explorer.title'
+              : 'home.info.finder.title',
+        ),
+        error is PlatformException ? (error.message ?? error.code) : '$error',
       );
     }
   }
@@ -493,7 +508,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
                   _section(
                     tr('home.section.config'),
                     footer:
-                        '${tr(kConsoleAvailable ? 'home.section.config.footer' : 'home.section.config.footer.release')}${Platform.isMacOS ? '\n${tr('home.config.macos.cleanup')}' : ''}',
+                        '${tr(kConsoleAvailable ? 'home.section.config.footer' : 'home.section.config.footer.release')}${_isDesktop ? '\n${tr(Platform.isWindows ? 'home.config.windows.cleanup' : 'home.config.macos.cleanup')}' : ''}',
                     rows: _configRows(),
                   ),
                   _section(
@@ -713,7 +728,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
           showToast(context, tr(isOn ? 'toast.enable.on' : 'toast.enable.off'));
         },
       ),
-      if (!Platform.isMacOS)
+      if (!_isDesktop)
         _switchRow(
           icon: Icons.nightlight_round,
           tint: kBrandColor,
@@ -823,11 +838,15 @@ class _DemoHomePageState extends State<DemoHomePage> {
         subtitle: _diskCachePath,
         onTap: () => _copyText(_diskCachePath, tr('toast.path.copied')),
       ),
-      if (Platform.isMacOS)
+      if (_isDesktop)
         _actionRow(
           icon: Icons.folder,
           tint: kLevelColors[1],
-          title: tr('home.info.finder.title'),
+          title: tr(
+            Platform.isWindows
+                ? 'home.info.explorer.title'
+                : 'home.info.finder.title',
+          ),
           subtitle: tr('home.info.finder.subtitle'),
           push: true,
           onTap: _openInFinder,
@@ -1033,7 +1052,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
     String subtitle,
     List<MapEntry<String, T>> options,
   ) {
-    if (Platform.isMacOS) {
+    if (_isDesktop) {
       return showDialog<T>(
         context: context,
         builder: (dialogContext) => SimpleDialog(

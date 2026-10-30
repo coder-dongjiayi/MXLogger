@@ -2,11 +2,11 @@
 
 原生 C++17 SDK，当前 Core 版本为 **2.3.0**，支持 Windows 10/11 x64。
 NuGet 包 ID 为 `MXLogger.Native`；vcpkg port 名为 `mxlogger`。
-源码、NuGet 和 vcpkg 使用相同的 Core，不包含 .NET 或 Flutter 封装。
+源码、NuGet 和 vcpkg 使用相同的 Core。NuGet 另附供 Flutter/Dart 使用的 C ABI DLL，不包含 .NET 封装。
 
 ## NuGet 接入
 
-手动运行仓库的 `verify-logger` CI。全部平台回归通过后，`Windows native SDK (NuGet + vcpkg)`
+手动运行仓库的 `verify-logger` CI。全部平台回归通过后，`3. Windows SDK (NuGet + vcpkg)`
 任务构建、校验并上传 `MXLogger.Native.2.3.0.nupkg`。该文件可直接作为 NuGet 本地源中的包。
 目前不会自动向 nuget.org 发布；仓库中的构建配置不代表包已上架公共源。
 
@@ -21,7 +21,7 @@ Install-Package MXLogger.Native -Version 2.3.0 -Source D:\NuGetFeed
 ```
 
 NuGet 自动导入原生 `.targets`，添加公开头文件和对应的静态库。
-不需要手动复制 `.lib`，也不需要随应用分发 MXLogger DLL。
+使用原生 C++ 静态库时，不需要手动复制 `.lib`，也不需要随应用分发 MXLogger DLL。
 源码示例：
 
 ```cpp
@@ -74,6 +74,26 @@ pwsh -File scripts/build_windows_nuget.ps1
 脚本先跑 MD / MT × Debug / Release 的 Core 测试，再校验安装后的 CMake SDK，最后制作 NuGet 包。
 随后从本地源还原该包，使用独立 `.vcxproj` 验证四种配置的版本查询、加密写入和解密读取，
 并检查 CRT 不匹配时能否正确拒绝构建。它不会发布包。
+
+## Flutter 使用预编译 DLL
+
+同一个 nupkg 包含 `build/native/ffi/x64/{Debug,Release}/mxlogger_ffi.dll`、
+`manifest.json`（Core/ABI 版本、架构、哈希及本地源码来源）和 `build/native/include/mxlogger_ffi.h`。
+DLL 使用静态 CRT，字符串、数组由 DLL 的配对释放函数回收；调用方不能用自己的 `free` 释放。
+原生 C++ 静态库接入保持原有方式，不会自动链接或复制这份 FFI DLL。
+
+无需自己有 Windows 电脑：CI 在 Windows 构建并执行真实 Dart FFI 测试。
+Mac 下载 nupkg 后，在仓库根目录执行即可给 Flutter 准备 DLL：
+
+```bash
+python3 scripts/prepare_flutter_windows.py --package /path/to/MXLogger.Native.2.3.0.nupkg
+python3 scripts/prepare_flutter_windows.py --check
+```
+
+输出到 `platform/flutter_mxlogger/windows/bin/x64/`，Flutter CMake 只校验和复制二进制。
+发布 pub 前需准备这一步，`.pubignore` 会把 DLL 带入包；Windows 消费方不需要 NuGet 或 Core 源码。
+也可直接下载 CI 的 `flutter_mxlogger-windows-prebuilt` 插件包。
+以后 Core 有变动，需重新从 CI 获取 nupkg 并导入，不能只修改源码后沿用旧 DLL。
 
 ## vcpkg 接入
 

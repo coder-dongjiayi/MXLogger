@@ -14,7 +14,7 @@ cd "$(dirname "$0")"
 
 REPO=../../../..
 CORE=$REPO/Core
-BRIDGE=$REPO/platform/Android/MXLogger/mxlogger/src/main/cpp/flutter-bridge.cpp
+BRIDGE=$REPO/Core/ffi/mxlogger_ffi.cpp
 OUT=libmxlogger_test.dylib
 
 CC="${CC:-$(command -v clang)}"

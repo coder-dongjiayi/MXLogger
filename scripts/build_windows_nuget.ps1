@@ -1,6 +1,11 @@
 #requires -Version 7.0
 [CmdletBinding()]
-param([string]$Toolset = 'v143')
+param(
+    [string]$Toolset = 'v143',
+    # Used only for stage-2 test fixtures, after the global Core test gate.
+    # Stage-3 distribution always uses the full validation path.
+    [switch]$PackageOnly
+)
 
 $ErrorActionPreference = 'Stop'
 if (-not $IsWindows) { throw 'Build this MSVC native package on Windows.' }
@@ -15,6 +20,7 @@ $versionText = Get-Content (Join-Path $repo 'Core/mxlogger_version.hpp') -Raw
 if ($versionText -notmatch '#define MXLOGGER_CORE_VERSION "(\d+\.\d+\.\d+)"') { throw 'Core version is missing' }
 $version = $Matches[1]
 $nuget = (Get-Command nuget.exe -ErrorAction Stop).Source
+$buildTests = if ($PackageOnly) { 'OFF' } else { 'ON' }
 
 foreach ($crt in @('MD', 'MT')) {
     $nativeBuild = Join-Path $build "core-$crt"
@@ -22,15 +28,17 @@ foreach ($crt in @('MD', 'MT')) {
     $runtime = if ($crt -eq 'MD') { 'MultiThreaded$<$<CONFIG:Debug>:Debug>DLL' } else { 'MultiThreaded$<$<CONFIG:Debug>:Debug>' }
     cmake -S (Join-Path $repo 'Core') -B $nativeBuild -A x64 -T $Toolset `
         '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW' "-DCMAKE_MSVC_RUNTIME_LIBRARY=$runtime" `
-        '-DMXLOGGER_INSTALL=ON' '-DMXLOGGER_BUILD_TESTS=ON' '-DCMAKE_INSTALL_LIBDIR=lib' `
+        '-DMXLOGGER_INSTALL=ON' "-DMXLOGGER_BUILD_TESTS=$buildTests" '-DCMAKE_INSTALL_LIBDIR=lib' `
         2>&1 | Tee-Object (Join-Path $logs "configure-$crt.log")
     if ($LASTEXITCODE -ne 0) { throw "Core configure failed: $crt" }
     foreach ($configuration in @('Debug', 'Release')) {
         cmake --build $nativeBuild --config $configuration --parallel 2>&1 | Tee-Object (Join-Path $logs "build-$crt-$configuration.log")
         if ($LASTEXITCODE -ne 0) { throw "Core build failed: $crt/$configuration" }
-        ctest --test-dir $nativeBuild -C $configuration --output-on-failure '--no-tests=error' `
+        if (-not $PackageOnly) {
+            ctest --test-dir $nativeBuild -C $configuration --output-on-failure '--no-tests=error' `
             2>&1 | Tee-Object (Join-Path $logs "tests-$crt-$configuration.log")
-        if ($LASTEXITCODE -ne 0) { throw "Core tests failed: $crt/$configuration" }
+            if ($LASTEXITCODE -ne 0) { throw "Core tests failed: $crt/$configuration" }
+        }
         cmake --install $nativeBuild --config $configuration --prefix $prefix `
             2>&1 | Tee-Object (Join-Path $logs "install-$crt-$configuration.log")
         if ($LASTEXITCODE -ne 0) { throw "Core install failed: $crt/$configuration" }
@@ -39,6 +47,7 @@ foreach ($crt in @('MD', 'MT')) {
         $library = if ($configuration -eq 'Debug') { 'MXLoggerCored.lib' } else { 'MXLoggerCore.lib' }
         Copy-Item (Join-Path $prefix "lib/$library") (Join-Path $destination 'MXLoggerCore.lib') -Force
     }
+    if ($PackageOnly) { continue }
     # Consume the installed CMake SDK, without access to Core's source includes.
     $consumerBuild = Join-Path $build "cmake-consumer-$crt"
     cmake -S (Join-Path $repo 'platform/Windows/tests/package_consumer') -B $consumerBuild -A x64 -T $Toolset `
@@ -54,15 +63,28 @@ foreach ($crt in @('MD', 'MT')) {
     }
 }
 
+& (Join-Path $PSScriptRoot 'build_windows_ffi.ps1') -Toolset $Toolset `
+    -BuildDirectory (Join-Path $build 'ffi') -Destination (Join-Path $stage 'build/native/ffi/x64')
+# Prove the binary dependency came from this checkout, for all three builds.
+python (Join-Path $PSScriptRoot 'check_local_core.py') `
+    --cmake-cache (Join-Path $build 'core-MD/CMakeCache.txt') `
+    --cmake-cache (Join-Path $build 'core-MT/CMakeCache.txt') `
+    --cmake-cache (Join-Path $build 'ffi/CMakeCache.txt') --output (Join-Path $logs 'local-core.json')
+if ($LASTEXITCODE -ne 0) { throw 'NuGet did not use checkout Core' }
 $include = Join-Path $stage 'build/native/include'
 New-Item -ItemType Directory -Force $include | Out-Null
 Copy-Item (Join-Path $repo 'Core/mxlogger.hpp'), (Join-Path $repo 'Core/mxlogger_util.hpp') $include -Force
+Copy-Item (Join-Path $repo 'Core/ffi/mxlogger_ffi.h') $include -Force
 Copy-Item (Join-Path $repo 'platform/Windows/nuget/MXLogger.Native.targets') (Join-Path $stage 'build/native') -Force
 Copy-Item (Join-Path $repo 'LICENSE.TXT') $stage -Force
 Copy-Item (Join-Path $repo 'platform/Windows/README.md') (Join-Path $stage 'README.md') -Force
 & $nuget pack (Join-Path $repo 'platform/Windows/nuget/MXLogger.Native.nuspec') -Version $version `
     -BasePath $stage -OutputDirectory $packages -NonInteractive 2>&1 | Tee-Object (Join-Path $logs 'nuget-pack.log')
 if ($LASTEXITCODE -ne 0) { throw 'NuGet pack failed' }
+if ($PackageOnly) {
+    Write-Host 'Test fixture packed; full SDK validation is deferred to stage 3.'
+    return
+}
 
 # Restore the actual nupkg from a local feed and build a standalone .vcxproj.
 $consumer = Join-Path $build 'nuget-consumer'

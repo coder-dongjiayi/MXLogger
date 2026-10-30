@@ -1,0 +1,23 @@
+# Keep in sync with .gitignore, except windows/bin MUST ship in the pub package.
+.DS_Store
+.dart_tool/
+.packages
+.pub/
+build/
+/pubspec.lock
+.idea/
+test/native/libmxlogger_test.dylib
+test/native/build_tmp/
+darwin/flutter_mxlogger/.build/
+darwin/flutter_mxlogger/.swiftpm/
+darwin/FlutterFramework/
+# Native host build caches and signing/local configuration are never packaged.
+**/.gradle/
+**/.cxx/
+**/Pods/
+**/.symlinks/
+**/ephemeral/
+**/local.properties
+**/key.properties
+**/*.jks
+**/*.keystore

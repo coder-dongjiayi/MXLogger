@@ -15,6 +15,9 @@
 
 #include <MXLogger/MXLogger.h>
 #include <string>
+#include <limits.h>
+#include "include/flutter_mxlogger/mxlogger_ffi.h"
+#include "mxlogger_ffi_memory.hpp"
 
 
 #define MXLOGGER_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
@@ -31,8 +34,8 @@ MXLOGGER_EXPORT const char* MXLOGGERR_FUNC(core_version)() {
 /// 初始化logger: 创建(或复用)OC层MXLogger对象，返回其指针作为Dart侧持有的句柄
 /// Initialize the logger: create (or reuse) the Objective-C MXLogger instance and
 /// return its pointer as the handle held by the Dart side
-MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* directory,const char* storage_policy,const char* file_name, const char* file_header,const char* crypt_key, const char* iv){
-
+MXLOGGER_EXPORT void* MXLOGGERR_FUNC(initialize)(const char* ns,const char* directory,const char* storage_policy,const char* file_name, const char* file_header,const char* crypt_key, const char* iv){
+    if (!ns || !directory) return nullptr;
 
     NSString * _ns = [NSString stringWithUTF8String:ns];
     NSString * _directory = [NSString stringWithUTF8String:directory];
@@ -63,7 +66,7 @@ MXLOGGER_EXPORT int64_t MXLOGGERR_FUNC(initialize)(const char* ns,const char* di
     logger.consoleEnable = NO;
     logger.shouldRemoveExpiredDataWhenEnterBackground = NO;
 
-    return (int64_t)logger;
+    return (__bridge void*)logger;
 }
 
 /// 通过nameSpace+directory销毁logger对象
@@ -88,14 +91,14 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(destroyWithLoggerToken)(const char* logger_t
 /// Enable or disable native-side console output
 /// (currently not bound on the Dart side — console output goes through the Flutter
 /// layer's debugPrint; the symbol is kept for backward compatibility)
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_enable)(const void *handle,int enable){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_console_enable)(void *handle,int enable){
     MXLogger *logger = (__bridge MXLogger *) handle;
     logger.consoleEnable = enable;
 }
 
 /// 开启/禁用日志写入 非0开启 0禁用
 /// Enable or disable logging: non-zero to enable, 0 to disable
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_enable)(const void *handle,int enable){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_enable)(void *handle,int enable){
     MXLogger *logger = (__bridge MXLogger *) handle;
     logger.enable = enable != 0;
 }
@@ -109,8 +112,9 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_enable)(const void *handle,int enable){
 /// via array_ptr/size_array_ptr, with the count in number; the underlying
 /// selectWithDiskCacheFilePath already returns entries newest first.
 /// Returns 0 on success, -1 on failure; the output memory must be freed with free_logmsg
-MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_path, const char* crypt_key, const char* iv,int* number, char ***array_ptr,uint32_t **size_array_ptr){
-    *number = 0;
+MXLOGGER_EXPORT int32_t MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_path, const char* crypt_key, const char* iv,int* number, char ***array_ptr,uint32_t **size_array_ptr){
+    if (!number || !array_ptr || !size_array_ptr) return -1;
+    *number = 0; *array_ptr = nullptr; *size_array_ptr = nullptr;
     if(diskcache_file_path == nullptr){
         return -1;
     }
@@ -118,7 +122,8 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_pa
 
     NSArray<NSDictionary*> * resultArray =   [MXLogger selectWithDiskCacheFilePath:[NSString stringWithUTF8String:diskcache_file_path] cryptKey:crypt_key == nullptr ? NULL : [NSString stringWithUTF8String:crypt_key] iv:iv == nullptr ? NULL : [NSString stringWithUTF8String:iv]];
 
-    int count = (int)resultArray.count;
+    if (resultArray.count > INT32_MAX) return -1;
+    int32_t count = static_cast<int32_t>(resultArray.count);
     if(count <= 0) return 0;
 
     auto array = (char**)malloc(count * sizeof(char *));
@@ -136,6 +141,10 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(select_logmsg)(const char * diskcache_file_pa
         // NSData由ARC管理 函数返回后即失效 必须拷贝到native堆 由free_logmsg配对释放
         // NSData is ARC-managed and dies after this function returns — the bytes must be
         // copied onto the native heap and freed by the paired free_logmsg call
+        if (length > UINT32_MAX) {
+            MXLOGGERR_FUNC(free_logmsg)(i, array, size_array);
+            return -1;
+        }
         char *buffer = (char *)malloc(length > 0 ? length : 1);
         if(buffer == nullptr || logData == nil){
             for(int j = 0;j<i;j++) free(array[j]);
@@ -167,95 +176,57 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_logmsg)(int number, char **array, uint3
 }
 
 /// 获取日志文件列表: 每个文件输出4个字段(name/size/last_timestamp/create_timestamp)，
-/// 返回文件个数；输出的内存由Dart侧遍历释放
+/// 返回文件个数；输出的内存由 free_logfiles 配对释放
 /// Get the list of log files: each file yields 4 fields
 /// (name/size/last_timestamp/create_timestamp); returns the file count.
-/// The output memory is freed by the Dart side while iterating
-MXLOGGER_EXPORT int MXLOGGERR_FUNC(get_logfiles)(const void *handle,char ****array_ptr,uint32_t ***size_array_ptr){
-    MXLogger *logger = (__bridge MXLogger *) handle;
-    NSArray<NSDictionary<NSString*,NSString*>*>* fileArray =  [logger logFiles];
-    if(fileArray.count == 0) return 0;
-    auto array = (char***)malloc(fileArray.count * sizeof(void *));
-
-    auto size_array = (uint32_t **) malloc(fileArray.count * sizeof(uint32_t *));
-            /// 两块内存任一分配失败都要放弃，只检查array会在下方对空size_array解引用
-            /// Bail out if either allocation fails — checking only array would
-            /// dereference a null size_array below
-            if(!array || !size_array){
-                free(array);
-                free(size_array);
-                return 0;
-            }
-    *array_ptr = array;
-    *size_array_ptr = size_array;
-
-
-    for(int i=0; i< fileArray.count;i++){
-        NSDictionary<NSString*,NSString*>* map = fileArray[i];
-
-        NSString * name = [map valueForKey:@"name"];
-
-        NSString * size = [map valueForKey:@"size"];
-
-        NSString * last_timestamp = [map valueForKey:@"last_timestamp"];
-
-        NSString * create_timestamp  =  [map valueForKey:@"create_timestamp"];
-
-
-         char* c_name =  (char*)name.UTF8String;
-         char* c_size = (char*)size.UTF8String;
-         char* c_last_timestamp = (char*)last_timestamp.UTF8String;
-         char* c_create_timestamp = (char*)create_timestamp.UTF8String;
-
-        auto itemArray = (char**)malloc(4*sizeof(char*));
-
-        itemArray[0] = (char*)malloc(strlen(c_name));
-        memcpy(itemArray[0], c_name, strlen(c_name));
-
-
-        itemArray[1] = (char*)malloc(strlen(c_size));
-        memcpy(itemArray[1], c_size, strlen(c_size));
-
-        itemArray[2] = (char*)malloc(strlen(c_last_timestamp));
-        memcpy(itemArray[2], c_last_timestamp, strlen(c_last_timestamp));
-
-        itemArray[3] = (char*)malloc(strlen(c_create_timestamp));
-        memcpy(itemArray[3], c_create_timestamp, strlen(c_create_timestamp));
-
-
-
-        /// 元素类型是uint32_t，原来误写成sizeof(uint32_t*)多分配了一倍内存
-        /// The element type is uint32_t; sizeof(uint32_t*) over-allocated by 2x
-        auto item_size_array = (uint32_t *) malloc(4 * sizeof(uint32_t));
-
-        item_size_array[0] = static_cast<uint32_t>(strlen(c_name));
-        item_size_array[1] = static_cast<uint32_t>(strlen(c_size));
-        item_size_array[2] = static_cast<uint32_t>(strlen(c_last_timestamp));
-        item_size_array[3] = static_cast<uint32_t>(strlen(c_create_timestamp));
-
-        size_array[i] = item_size_array;
-        array[i] = itemArray;
+/// Free all returned rows/fields with free_logfiles in this native module
+MXLOGGER_EXPORT int32_t MXLOGGERR_FUNC(get_logfiles)(void *handle, char ****output, uint32_t ***sizes) {
+    if (!output || !sizes) return 0;
+    *output = nullptr; *sizes = nullptr;
+    MXLogger *logger = (__bridge MXLogger *)handle;
+    NSArray<NSDictionary<NSString*, NSString*>*> *files = [logger logFiles];
+    if (files.count == 0 || files.count > INT32_MAX) return 0;
+    const int32_t count = static_cast<int32_t>(files.count);
+    char*** rows = nullptr;
+    uint32_t** lengths = nullptr;
+    if (!mxlogger_ffi_detail::allocate_files(count, &rows, &lengths)) {
+        mxlogger_ffi_detail::free_files(count, rows, lengths); return 0;
     }
-    return (int)fileArray.count;
+    NSArray<NSString*> *keys = @[@"name", @"size", @"last_timestamp", @"create_timestamp"];
+    for (int32_t i = 0; i < count; ++i) {
+        for (int32_t field = 0; field < 4; ++field) {
+            if (!mxlogger_ffi_detail::set_file_field(rows[i], lengths[i], field, files[i][keys[field]].UTF8String)) {
+                mxlogger_ffi_detail::free_files(count, rows, lengths); return 0;
+            }
+        }
+    }
+    *output = rows; *sizes = lengths;
+    return count;
+}
+
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_logfiles)(int32_t count, char*** rows, uint32_t** lengths) {
+    mxlogger_ffi_detail::free_files(count, rows, lengths);
 }
 
 /// 未实现 保留导出仅为兼容Dart侧的符号绑定
 /// Not implemented; the export is kept only so the Dart-side symbol binding succeeds
 MXLOGGER_EXPORT uint32_t MXLOGGERR_FUNC(select_logfiles)(const char * directory, char ***array_ptr,uint32_t **size_array_ptr){
+    if (array_ptr) *array_ptr = nullptr;
+    if (size_array_ptr) *size_array_ptr = nullptr;
     return 0;
 }
 
 
 /// 设置写入文件的日志等级 低于该等级的日志不会写入
 /// Set the minimum level written to file; logs below this level are not written
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_level)(const void *handle,int level){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_level)(void *handle,int level){
     MXLogger *logger = (__bridge MXLogger *) handle;
     logger.level = [NSNumber numberWithInt:level].integerValue;
 }
 
 /// 设置日志文件最大存储时长(秒)
 /// Set the maximum age of log files in seconds
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_age)(const void *handle,int max_age){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_age)(void *handle,int max_age){
     MXLogger *logger = (__bridge MXLogger *) handle;
     logger.maxDiskAge = max_age;
 
@@ -266,7 +237,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_age)(const void *handle,int max
 /// Set the maximum total size of log files in bytes.
 /// The parameter is int32_t to exactly match Int32 on the Dart side (capped at ~2GB,
 /// plenty for logs), consistent with the Android bridge
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_size)(const void *handle,int32_t max_size){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_size)(void *handle,int32_t max_size){
     MXLogger *logger = (__bridge MXLogger *) handle;
     logger.maxDiskSize = (NSUInteger)max_size;
 }
@@ -276,9 +247,10 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(set_max_disk_size)(const void *handle,int32_
 /// Get the total size of stored logs in bytes; returns int32_t to exactly match Int32
 /// on the Dart side (the previous unsigned long was 8 bytes and mismatched
 /// the 32-bit Dart declaration)
-MXLOGGER_EXPORT int32_t MXLOGGERR_FUNC(get_log_size)(const void *handle){
+MXLOGGER_EXPORT int32_t MXLOGGERR_FUNC(get_log_size)(void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
-    return (int32_t)logger.logSize;
+    const NSUInteger size = logger.logSize;
+    return size > INT32_MAX ? INT32_MAX : static_cast<int32_t>(size);
 }
 
 /// UTF8String挂在autorelease pool上 不能直接跨FFI边界返回 必须拷贝到堆上 由free_string配对释放
@@ -292,7 +264,7 @@ static char * mx_copy_string_(NSString *str){
 
 /// 获取logger的唯一标识loggerToken (nameSpace+diskCacheDirectory的md5值)
 /// Get the logger's unique token (the md5 of nameSpace + diskCacheDirectory)
-MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerToken)(const void *handle){
+MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerToken)(void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
     return mx_copy_string_(logger.loggerToken);
 }
@@ -300,14 +272,14 @@ MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_loggerToken)(const void *handle){
 
 /// 获取日志文件磁盘缓存目录
 /// Get the disk-cache directory of the log files
-MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_diskcache_path)(const void *handle){
+MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_diskcache_path)(void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
     return mx_copy_string_(logger.diskCachePath);
 }
 
 /// 获取最近一次写入失败的错误信息
 /// Get the most recent write-error description
-MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_error_desc)(const void *handle){
+MXLOGGER_EXPORT char* MXLOGGERR_FUNC(get_error_desc)(void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
     return mx_copy_string_([logger errorDesc]);
 }
@@ -321,21 +293,21 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(free_string)(char *str){
 
 /// 删除除当前正在写入文件之外的所有日志文件
 /// Remove all log files except the one currently being written
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_before_all_data)(const void *handle){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_before_all_data)(void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
     [logger removeBeforeAllData];
 }
 
 /// 清理过期日志文件
 /// Remove expired log files
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_expire_data)(const void *handle){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_expire_data)(void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
     [logger removeExpireData];
 }
 
 /// 删除所有日志文件
 /// Remove all log files
-MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(const void *handle){
+MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(void *handle){
     MXLogger *logger = (__bridge MXLogger *) handle;
     [logger removeAllData];
 }
@@ -343,7 +315,7 @@ MXLOGGER_EXPORT void MXLOGGERR_FUNC(remove_all)(const void *handle){
 /// 通过loggerToken写入日志: 查找已初始化的logger对象进行写入，不存在时向nil发消息返回0
 /// Write a log entry via loggerToken: looks up the already-initialized logger and writes
 /// to it; when no logger matches, the message goes to nil and 0 is returned
-MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerToken)(const char* logger_token,const char* name, int lvl,const char* msg,const char* tag){
+MXLOGGER_EXPORT int32_t MXLOGGERR_FUNC(log_loggerToken)(const char* logger_token,const char* name, int lvl,const char* msg,const char* tag){
     if(logger_token == nullptr) return 0;
 
     MXLogger *logger = [MXLogger valueForLoggerToken:[NSString stringWithUTF8String:logger_token]];
@@ -361,7 +333,7 @@ MXLOGGER_EXPORT int MXLOGGERR_FUNC(log_loggerToken)(const char* logger_token,con
 /// 返回 0成功 -1扩容失败 -2解除映射失败 -3映射失败
 /// Write a log entry via the handle
 /// Returns 0 success, -1 file expansion failed, -2 unmap failed, -3 mmap failed
-MXLOGGER_EXPORT int MXLOGGERR_FUNC(log)(const void *handle,const char* name, int lvl,const char* msg,const char* tag){
+MXLOGGER_EXPORT int32_t MXLOGGERR_FUNC(log)(void *handle,const char* name, int lvl,const char* msg,const char* tag){
     MXLogger *logger = (__bridge MXLogger *) handle;
 
     NSString * _name = name == nullptr ? NULL : [NSString stringWithUTF8String:name];

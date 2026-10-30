@@ -41,6 +41,7 @@ mkdir -p "$STAGE/Sources/MXLoggerCore" "$STAGE/Sources/MXLogger"
 # C++ core: drop tests, CMake and Xcode project files that SwiftPM does not use
 rsync -a "$ROOT/Core/" "$STAGE/Sources/MXLoggerCore/" \
     --exclude tests \
+    --exclude ffi \
     --exclude CMakeLists.txt \
     --exclude build.sh \
     --exclude MXLoggerCore.xcodeproj \

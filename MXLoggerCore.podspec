@@ -30,6 +30,8 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/coder-dongjiayi/MXLogger.git", :tag => "v#{s.version}" }
   s.source_files = "Core", "Core/*.{h,cpp,hpp}", "Core/md5/*","Core/aes/*.{hpp,cpp}","Core/aes/openssl/*","Core/json/*","Core/flatbuffers/*","Core/sink/*"
+  # Flutter's C ABI is built by each bridge target, not by the base Core library.
+  s.exclude_files = "Core/ffi/**/*"
   s.public_header_files = "Core/mxlogger.hpp","Core/mxlogger_util.hpp"
    
 

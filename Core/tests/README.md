@@ -41,6 +41,25 @@ and pull requests do not trigger it. The three stages have global success gates:
    Android APK. All API jobs must pass before any packaging job starts. Debug
    Demo executables used by tests are not uploaded as deliverables.
 
+Windows Flutter has its own stage-2 Debug/Release matrix. It builds the shared
+`Core/ffi` C ABI as a DLL inside a local NuGet test fixture, restores only from
+that local feed without caches, verifies C export names, and runs the real Dart
+API suite against the restored DLL. The tests exercise native memory ownership (paired
+`free_string`, `free_logfiles`, `free_logmsg`), UTF-8 paths, encryption, cleanup,
+and destruction. An isolated copy of the pub package then builds a Flutter
+runner from precompiled DLLs and relocates it to verify DLL packaging and isolate
+token writes. It asserts the consumer never compiles Core. Every stage-3 job
+waits for this matrix too. Stage 3 validates the final NuGet DLLs through Dart
+again and uploads a prepared Flutter plugin with both DLLs.
+
+`Core/ffi` is a separate bridge target, not part of the base C++ SDK's 28 API
+entries. Apple keeps its Objective-C implementation but compiles against the
+same generated C declarations. Regenerate Apple ABI/memory headers with
+`python3 scripts/sync_flutter_native.py`; CI uses `--check` to reject drift.
+Windows has no Core snapshot: `scripts/prepare_flutter_windows.py --package <nupkg>`
+stages versioned/hash-checked Debug/Release DLLs, also on macOS. The
+generated binaries are ignored by Git but included by the plugin's `.pubignore`.
+
 The Windows EXE, NuGet package, DMG and APK are uploaded directly. The vcpkg SDK
 artifact contains the local overlay **and its adjacent Core source**, keeping the
 layout required by `portfile.cmake`; it does not publish to the public registry.

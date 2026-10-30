@@ -4,7 +4,7 @@
     <id>MXLogger.Native</id>
     <version>$version$</version>
     <authors>The MXLogger Authors</authors>
-    <description>Native C++17 MXLogger Core for Windows x64. Static libraries for Debug/Release with MD/MT runtimes. Includes AES-CFB-128, memory-mapped logging and multiprocess coordination.</description>
+    <description>Native C++17 MXLogger Core for Windows x64. Static libraries for Debug/Release with MD/MT runtimes, plus precompiled mxlogger_ffi.dll binaries with a C ABI for Flutter/Dart. Includes AES-CFB-128, memory-mapped logging and multiprocess coordination.</description>
     <projectUrl>https://github.com/coder-dongjiayi/MXLogger</projectUrl>
     <repository type="git" url="https://github.com/coder-dongjiayi/MXLogger.git" />
     <license type="file">LICENSE.TXT</license>

@@ -42,6 +42,7 @@ def check_spm(mirror):
     paths = [p for p in (ROOT / 'Core').rglob('*')
              if p.suffix in {'.h', '.hpp', '.c', '.cpp', '.S'}
              and 'tests' not in p.relative_to(ROOT / 'Core').parts
+             and 'ffi' not in p.relative_to(ROOT / 'Core').parts
              and 'MXLoggerCore.xcodeproj' not in p.relative_to(ROOT / 'Core').parts]
     for original in paths:
         copied = mirror / 'Sources/MXLoggerCore' / original.relative_to(ROOT / 'Core')

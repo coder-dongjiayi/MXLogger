@@ -1,4 +1,4 @@
-# MXLogger Flutter demo — iOS / Android / macOS
+# MXLogger Flutter demo — iOS / Android / macOS / Windows
 
 The example uses the plugin from the parent directory. The plugin requires
 Flutter 3.7+, while this example's dependencies require Dart 3.8+.
@@ -8,6 +8,16 @@ encrypted log viewer and English/Chinese switching as the mobile examples. It ad
 a resizable desktop window, readable content width, dialog-based settings, a
 separate **Open in Finder** row, and explicit cleanup instructions. The background
 cleanup switch is hidden on macOS. Release/profile builds disable the console switch.
+
+Windows uses the same desktop layout and explicit cleanup policy, with an
+**Open in Explorer** action. On Windows with Flutter and Visual Studio's Desktop
+development with C++ workload installed, run `flutter run -d windows` from this
+example. First prepare the precompiled binaries from the CI-produced local
+`MXLogger.Native.2.3.0.nupkg` with `scripts/prepare_flutter_windows.py --package`,
+or use the CI artifact `flutter_mxlogger-windows-prebuilt` directly. The package
+bundles its DLL automatically and never compiles Core in the Flutter build. The
+repository's `scripts/verify_flutter_windows.ps1` tests Debug/Release DLLs and
+builds this Demo plus an isolated, relocated FFI smoke runner.
 
 Defaults match the native demos: namespace `com.djy.mxlogger`, hourly files,
 AES-CFB-128, seven-day retention and a 10 MB disk budget. Features include all five
