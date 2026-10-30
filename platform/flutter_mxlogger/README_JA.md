@@ -126,25 +126,9 @@ logger.fatal("this is fatal message");
 
 # 1. アーキテクチャ
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│  Dart      lib/src/flutter_mxlogger.dart                     │
-│  · MethodChannel("flutter_mxlogger") — 既定ディレクトリの取得のみ│
-│  · dart:ffi — 読み書きはすべてここ、チャネルのオーバーヘッドなし │
-│  · WidgetsBindingObserver — バックグラウンド移行時のクリーンアップ│
-└──────────────┬───────────────────────────┬───────────────────┘
-               │ ffi lookup                │ ffi lookup
-               │ (flutter_mxlogger_ プレフィックスのシンボル)     │
-┌──────────────▼──────────────┐ ┌──────────▼───────────────────┐
-│ iOS  flutter-bridge.mm      │ │ Android flutter-bridge.cpp   │
-│ Objective-C MXLogger をブリッジ│ │ C++ mx_logger をブリッジ      │
-└──────────────┬──────────────┘ └──────────┬───────────────────┘
-               │                           │
-        ┌──────▼───────────────────────────▼──────┐
-        │  Core (C/C++): mmap + AES-CFB-128       │
-        │  + FlatBuffers シリアライズ              │
-        └─────────────────────────────────────────┘
-```
+<img src="./images/jiegoutu.webp" alt="MXLogger の構成：ネイティブプラットフォーム、Windows DLL、アナライザーの利用方法" width="960" />
+
+Flutter は `dart:ffi` で Core を呼び出します。Apple は Objective-C ブリッジ、Android と Windows は共通の C++ FFI ブリッジを使用し、Windows は `mxlogger_ffi.dll` を読み込みます。アナライザーは Chrome 拡張機能、Windows/macOS デスクトップアプリ、`mxlogger_analyzer_lib` Flutter パッケージとして利用できます。
 
 重要なのは、**ログ書き込みの経路に MethodChannel が存在しない**ことです。`log()` は Dart からディスクまで同期的な FFI 呼び出しで完結し、メッセージキューもコーデックのエンコードもプラットフォームスレッド待ちもありません。
 

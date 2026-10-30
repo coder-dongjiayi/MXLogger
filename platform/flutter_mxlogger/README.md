@@ -168,25 +168,9 @@ logger.fatal("this is fatal message");
 
 # 1. Architecture
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│  Dart      lib/src/flutter_mxlogger.dart                     │
-│  · MethodChannel("flutter_mxlogger") — default directory only│
-│  · dart:ffi — every read/write, zero channel overhead        │
-│  · WidgetsBindingObserver — cleanup when entering background │
-└──────────────┬───────────────────────────┬───────────────────┘
-               │ ffi lookup                │ ffi lookup
-               │ (symbols prefixed flutter_mxlogger_)          │
-┌──────────────▼──────────────┐ ┌──────────▼───────────────────┐
-│ iOS  flutter-bridge.mm      │ │ Android flutter-bridge.cpp   │
-│ bridges Objective-C MXLogger│ │ bridges C++ mx_logger        │
-└──────────────┬──────────────┘ └──────────┬───────────────────┘
-               │                           │
-        ┌──────▼───────────────────────────▼──────┐
-        │  Core (C/C++): mmap + AES-CFB-128       │
-        │  + FlatBuffers serialization            │
-        └─────────────────────────────────────────┘
-```
+<img src="./images/jiegoutu.webp" alt="MXLogger architecture: native platforms, Windows DLL and analyzer integrations" width="960" />
+
+Flutter calls Core through `dart:ffi`. Apple uses the Objective-C bridge; Android and Windows share the C++ FFI bridge, with Windows loading `mxlogger_ffi.dll`. The analyzer is available as a Chrome extension, a Windows/macOS desktop app, or the `mxlogger_analyzer_lib` Flutter package.
 
 The key point: **there is no MethodChannel on the log-writing path**. `log()` is a synchronous FFI call all the way from Dart to disk — no message queue, no codec encoding, and no waiting on the platform thread.
 

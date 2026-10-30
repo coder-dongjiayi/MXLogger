@@ -151,25 +151,9 @@ logger.fatal("this is fatal message");
 
 ## 1.1 整体结构
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│  Dart 层    lib/src/flutter_mxlogger.dart                    │
-│  · MethodChannel("flutter_mxlogger") — 仅用于取默认目录      │
-│  · dart:ffi — 所有读写操作，零 Channel 开销                  │
-│  · WidgetsBindingObserver — 进后台触发过期清理               │
-└──────────────┬───────────────────────────┬───────────────────┘
-               │ ffi lookup                │ ffi lookup
-               │ (符号前缀 flutter_mxlogger_)                  │
-┌──────────────▼──────────────┐ ┌──────────▼───────────────────┐
-│ iOS  flutter-bridge.mm      │ │ Android flutter-bridge.cpp   │
-│ 桥接 Objective-C MXLogger   │ │ 直接桥接 C++ mx_logger       │
-└──────────────┬──────────────┘ └──────────┬───────────────────┘
-               │                           │
-        ┌──────▼───────────────────────────▼──────┐
-        │  Core (C/C++)：mmap + AES-CFB-128       │
-        │  + FlatBuffers 序列化                   │
-        └─────────────────────────────────────────┘
-```
+<img src="./images/jiegoutu.webp" alt="MXLogger 架构：原生平台、Windows DLL 与解析器集成" width="960" />
+
+Flutter 通过 `dart:ffi` 调用 Core：Apple 使用 Objective-C 桥接，Android 与 Windows 共用 C++ FFI 桥接，Windows 加载 `mxlogger_ffi.dll`。解析器提供 Chrome 扩展、Windows/macOS 桌面应用，以及 `mxlogger_analyzer_lib` Flutter package 集成。
 
 关键点：**日志写入路径上没有 MethodChannel**。`log()` 从 Dart 到磁盘全程是 FFI 同步调用，不经过消息队列、不产生 codec 编解码，也不需要等待平台线程调度。
 

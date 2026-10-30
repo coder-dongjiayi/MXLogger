@@ -125,25 +125,9 @@ logger.fatal("this is fatal message");
 
 # 1. 아키텍처
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│  Dart      lib/src/flutter_mxlogger.dart                     │
-│  · MethodChannel("flutter_mxlogger") — 기본 디렉터리 조회 전용    │
-│  · dart:ffi — 모든 읽기/쓰기, 채널 오버헤드 없음                 │
-│  · WidgetsBindingObserver — 백그라운드 진입 시 정리              │
-└──────────────┬───────────────────────────┬───────────────────┘
-               │ ffi lookup                │ ffi lookup
-               │ (flutter_mxlogger_ 접두사 심벌)                │
-┌──────────────▼──────────────┐ ┌──────────▼───────────────────┐
-│ iOS  flutter-bridge.mm      │ │ Android flutter-bridge.cpp   │
-│ Objective-C MXLogger 브리지   │ │ C++ mx_logger 브리지          │
-└──────────────┬──────────────┘ └──────────┬───────────────────┘
-               │                           │
-        ┌──────▼───────────────────────────▼──────┐
-        │  Core (C/C++): mmap + AES-CFB-128       │
-        │  + FlatBuffers 직렬화                    │
-        └─────────────────────────────────────────┘
-```
+<img src="./images/jiegoutu.webp" alt="MXLogger 구조: 네이티브 플랫폼, Windows DLL 및 분석기 통합" width="960" />
+
+Flutter는 `dart:ffi`로 Core를 호출합니다. Apple은 Objective-C 브리지를, Android와 Windows는 공통 C++ FFI 브리지를 사용하며 Windows는 `mxlogger_ffi.dll`을 불러옵니다. 분석기는 Chrome 확장 프로그램, Windows/macOS 데스크톱 앱 또는 `mxlogger_analyzer_lib` Flutter 패키지로 사용할 수 있습니다.
 
 핵심은 **로그 기록 경로에 MethodChannel이 없다**는 점입니다. `log()`는 Dart에서 디스크까지 동기 FFI 호출로 끝나며, 메시지 큐도, 코덱 인코딩도, 플랫폼 스레드 대기도 없습니다.
 

@@ -35,7 +35,7 @@ MXLogger は **mmap** によるメモリマッピングを利用するクロス�
 
 ## 構成
 
-<img src="./icon/jiegoutu.webp" alt="構成図" width="640" />
+<img src="./icon/jiegoutu.webp" alt="構成図" width="960" />
 
 MXLogger はログの**書き込み**と**解析**を提供します。ログをいつアップロードするかはアプリ側で決めます。公開されているログディレクトリ（`diskCachePath`）から自分のサーバーへファイルを送信し、ダウンロード後に mxlogger_analyzer で解析できます。
 

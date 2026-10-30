@@ -35,7 +35,7 @@ MXLogger는 **mmap** 메모리 매핑을 사용하는 크로스 플랫폼 로그
 
 ## 구조
 
-<img src="./icon/jiegoutu.webp" alt="구조도" width="640" />
+<img src="./icon/jiegoutu.webp" alt="구조도" width="960" />
 
 MXLogger는 로그 **기록**과 **분석**을 제공합니다. 업로드 시점은 앱에서 결정합니다. 공개된 로그 디렉터리(`diskCachePath`)의 파일을 자체 서버로 전송한 뒤, 내려받아 mxlogger_analyzer로 분석할 수 있습니다.
 

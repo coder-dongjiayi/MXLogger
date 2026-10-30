@@ -42,7 +42,7 @@ Flutter。核心代码使用 C/C++ 实现，序列化使用 Google 开源的 **F
 
 ## 整体结构
 
-<img src="./icon/jiegoutu.webp" alt="结构图" width="640" />
+<img src="./icon/jiegoutu.webp" alt="结构图" width="960" />
 
 MXLogger 主要解决日志**写入**和日志**分析**两件事。至于日志上报时机应该由业务决定：MXLogger 已经把日志目录
 （`diskCachePath`）暴露出来，由开发调用原生平台的文件上传代码传到自己的服务器，下载后再用
