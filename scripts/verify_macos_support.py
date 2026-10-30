@@ -2,8 +2,10 @@
 """Run macOS regression checks against local sources, including unpublished releases."""
 
 import argparse
+from contextlib import contextmanager
 import json
 import os
+import platform
 from pathlib import Path
 import plistlib
 import re
@@ -35,10 +37,6 @@ def replace_once(path, before, after):
     path.write_text(text.replace(before, after, 1))
 
 
-def ruby_string(value):
-    return "'" + str(value).replace("\\", "\\\\").replace("'", "\\'") + "'"
-
-
 class Verification:
     def __init__(self, flutter, offline):
         output = ROOT / "build/macos-validation"
@@ -51,6 +49,7 @@ class Verification:
         self.env = os.environ.copy()
         self.env["COCOAPODS_DISABLE_STATS"] = "true"
         self.env["MXLOGGER_LOCAL_NATIVE"] = "1"
+        self.env["MXLOGGER_LOCAL_NATIVE_ROOT"] = str(ROOT)
         self.steps = []
         self.macos_sdk, macos_min = sdk_info("macosx")
         self.ios_sdk, ios_min = sdk_info("iphoneos")
@@ -138,8 +137,6 @@ class Verification:
             manifest.write_text(text)
         else:
             podfile = example / "macos/Podfile"
-            replace_once(podfile, "File.expand_path('../../../..', __dir__)",
-                         ruby_string(ROOT))
             replace_once(podfile,
                          "demo_target = [Gem::Version.new('10.14'), Gem::Version.new(sdk_minimum)].max.to_s",
                          f"demo_target = '{self.macos_target}'")
@@ -178,7 +175,34 @@ class Verification:
                     "-c", source / name, "-o", self.directory / f"{platform}-{name}.o",
                 ])
 
-    def flutter_checks(self, manager, unit_tests):
+    @contextmanager
+    def ios_simulator(self):
+        runtimes = json.loads(self.run("ios-runtimes", ["xcrun", "simctl", "list", "runtimes", "--json"]))["runtimes"]
+        device_type = runtime_id = None
+        for runtime in sorted(runtimes, key=lambda r: version(r["version"]), reverse=True):
+            if not runtime.get("isAvailable") or runtime.get("platform") != "iOS":
+                continue
+            architectures = runtime.get("supportedArchitectures", [])
+            if architectures and platform.machine() not in architectures:
+                continue
+            for device in runtime.get("supportedDeviceTypes", []):
+                if device.get("productFamily") == "iPhone":
+                    device_type, runtime_id = device["identifier"], runtime["identifier"]
+                    break
+            if device_type:
+                break
+        if not device_type:
+            raise RuntimeError("Install a compatible iOS simulator runtime in Xcode")
+        identifier = self.run("ios-create", ["xcrun", "simctl", "create", "MXLogger-Flutter-API", device_type, runtime_id]).strip()
+        try:
+            self.run("ios-boot", ["xcrun", "simctl", "boot", identifier])
+            self.run("ios-bootstatus", ["xcrun", "simctl", "bootstatus", identifier, "-b"], timeout=180)
+            yield identifier
+        finally:
+            for operation in ["shutdown", "delete"]:
+                subprocess.run(["xcrun", "simctl", operation, identifier], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def flutter_checks(self, manager, unit_tests, ios_integration=False):
         plugin = self.prepare(manager)
         if unit_tests:
             self.run("flutter-analyze", [self.flutter, "analyze", "--no-pub"], cwd=plugin)
@@ -206,6 +230,26 @@ class Verification:
         exported = set(re.findall(r"_flutter_mxlogger_(\w+)\s*$", symbols, re.MULTILINE))
         if not expected or expected - exported:
             raise RuntimeError(f"{manager}: missing FFI exports: {sorted(expected - exported)}")
+        audit = [sys.executable, ROOT / "scripts/check_local_core.py",
+                 "--output", self.logs / f"{manager}-local-core.json"]
+        if manager == "pods":
+            audit += ["--pod-lock", example / "macos/Podfile.lock"]
+        else:
+            audit += ["--spm-mirror", plugin.parent.parent / "mxlogger-spm"]
+        self.run(f"{manager}-local-core", audit)
+        if ios_integration and manager == "pods":
+            # The SwiftPM source mirror/manifest is shared across iOS and macOS;
+            # execute iOS's CocoaPods/FFI path too, rather than only compiling it.
+            self.run("ios-pub", [self.flutter, "pub", "get"] + (["--offline"] if self.offline else []), cwd=example)
+            from check_local_core import core_version
+            with self.ios_simulator() as device:
+                self.run("ios-flutter-integration", [self.flutter, "test",
+                         "integration_test/mobile_logger_test.dart", "-d", device,
+                         f"--dart-define=MXLOGGER_EXPECTED_CORE_VERSION={core_version()}",
+                         "--no-pub", "--reporter", "expanded"], cwd=example, timeout=900)
+            self.run("ios-local-core", [sys.executable, ROOT / "scripts/check_local_core.py",
+                     "--pod-lock", example / "ios/Podfile.lock",
+                     "--output", self.logs / "ios-local-core.json"])
 
     def summary(self, status):
         (self.logs / "summary.json").write_text(json.dumps({
@@ -231,6 +275,7 @@ def main():
     parser.add_argument("--skip-native", action="store_true", help="Skip Core/Objective-C/Swift tests")
     parser.add_argument("--offline", action="store_true", help="Use cached Dart packages")
     parser.add_argument("--keep-builds", action="store_true", help="Keep successful Flutter fixtures (several GB)")
+    parser.add_argument("--ios-integration", action="store_true", help="Also run Flutter's mobile API tests on a temporary iOS simulator")
     args = parser.parse_args()
     if sys.platform != "darwin":
         parser.error("Run this check on macOS with Xcode installed")
@@ -252,7 +297,7 @@ def main():
         check.run("flutter-precache", [flutter, "precache", "--ios", "--macos"])
         managers = ["pods", "spm"] if args.package_manager == "both" else [args.package_manager]
         for index, manager in enumerate(managers):
-            check.flutter_checks(manager, unit_tests=index == 0)
+            check.flutter_checks(manager, unit_tests=index == 0, ios_integration=args.ios_integration)
     except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
         check.summary("FAILED")
         print(str(error), file=sys.stderr)

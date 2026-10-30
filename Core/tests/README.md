@@ -29,12 +29,42 @@ reset their own `mxtest_tmp` directory and retain it for troubleshooting. The te
 runner returns failure if assertions fail, an exception escapes a case, or no
 cases are registered. CTest also fails if no tests are found.
 
-`.github/workflows/verify-logger.yml` runs MSVC x64 Debug and Release on Windows
-only when manually dispatched; pushes and pull requests do not trigger it. From
+`.github/workflows/verify-logger.yml` runs only when manually dispatched; pushes
+and pull requests do not trigger it. The three stages have global success gates:
+
+1. C++ Core unit tests: Windows/MSVC, macOS and Linux, each in Debug and Release.
+2. Platform API tests: Windows actions/window, iOS XCTest, macOS Objective-C/Swift
+   and installed SDK consumers, Android Java/JNI and emulator instrumentation,
+   Flutter macOS CocoaPods/SwiftPM, Flutter iOS CocoaPods/FFI, and Flutter Android
+   Java/JNI/FFI integration. All Core jobs must pass before any of these starts.
+3. Release deliverables: macOS DMG, Windows EXE, native NuGet/local vcpkg SDK, and
+   Android APK. All API jobs must pass before any packaging job starts. Debug
+   Demo executables used by tests are not uploaded as deliverables.
+
+The Windows EXE, NuGet package, DMG and APK are uploaded directly. The vcpkg SDK
+artifact contains the local overlay **and its adjacent Core source**, keeping the
+layout required by `portfile.cmake`; it does not publish to the public registry.
+
+From
 a Mac, push the changes, open GitHub Actions, select `verify-logger`, then choose
 **Run workflow** and the branch to verify. The workflow must first be present in
 the repository's default branch for manual dispatch. Logs and JUnit results are
 retained as separate artifacts for each configuration.
+
+CI builds MXLogger itself from the checkout. `scripts/check_local_core.py` checks
+resolved CMake source roots, CocoaPods external-source paths, the iOS Core Xcode
+project reference and every runtime source/header in the generated local SwiftPM
+mirror. Provenance reports include the Core version and source fingerprint.
+Versions alone are not treated as proof that local sources were used.
+
+Flutter mobile tests use `MXLOGGER_LOCAL_NATIVE=1` and
+`MXLOGGER_LOCAL_NATIVE_ROOT=<checkout>`. The example Android settings include the
+local native Gradle project; the plugin fails if it is missing, and verifies the
+resolved graph contains that project and no remote MXLogger Maven dependency.
+The iOS/macOS example Podfiles use explicit local paths for both `MXLogger` and
+`MXLoggerCore`. SwiftPM test fixtures replace the release URL with a local mirror
+generated from this checkout. Normal published-plugin dependencies are unchanged
+when local mode is off.
 
 Windows regression cases cover Unicode paths and filenames, drive roots and both
 path separators, mapping growth, reopening, encrypted read/write, deletion and

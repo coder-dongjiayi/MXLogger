@@ -23,3 +23,10 @@ plugins {
 }
 
 include(":app")
+
+if (System.getenv("MXLOGGER_LOCAL_NATIVE") == "1") {
+    val checkout = System.getenv("MXLOGGER_LOCAL_NATIVE_ROOT")
+        ?: error("MXLOGGER_LOCAL_NATIVE_ROOT must point to the checkout under test")
+    include(":mxlogger_local")
+    project(":mxlogger_local").projectDir = file("$checkout/platform/Android/MXLogger/mxlogger")
+}

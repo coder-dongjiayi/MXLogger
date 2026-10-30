@@ -10,7 +10,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath "com.android.tools.build:gradle:${System.getenv('MXLOGGER_LOCAL_NATIVE') == '1' ? '8.7.3' : '4.1.0'}"
 
     }
 }
@@ -20,10 +20,6 @@ rootProject.allprojects {
         google()
         mavenCentral()
         mavenLocal()
-        // 本地开发: 直接引用本仓库 Android 库构建产物(先执行 :mxlogger:assembleDefaultCppRelease)
-//        flatDir {
-//            dirs "/Users/dongjiayi/Documents/github/MXLogger/platform/Android/MXLogger/mxlogger/build/outputs/aar"
-//        }
     }
 }
 
@@ -41,13 +37,47 @@ android {
 
     defaultConfig {
         minSdkVersion 21
+        missingDimensionStrategy 'stl_mode', 'DefaultCpp'
     }
     dependencies {
 
-        // 本地开发走本地 AAR；发布 pub 包时换回 maven 坐标:
-         implementation 'io.github.coder-dongjiayi:mxlogger:2.2.0'
-//        implementation(name: "mxlogger-DefaultCpp-release", ext: "aar")
+        if (System.getenv('MXLOGGER_LOCAL_NATIVE') == '1') {
+            if (rootProject.findProject(':mxlogger_local') == null) {
+                throw new GradleException('Local Core required: include :mxlogger_local in the host settings.gradle')
+            }
+            implementation project(':mxlogger_local')
+        } else {
+            implementation 'io.github.coder-dongjiayi:mxlogger:2.2.0'
+        }
 
+    }
+}
+
+tasks.register('verifyLocalMXLoggerDependency') {
+    doLast {
+        if (System.getenv('MXLOGGER_LOCAL_NATIVE') != '1') {
+            throw new GradleException('This check requires MXLOGGER_LOCAL_NATIVE=1')
+        }
+        def checkout = new File(System.getenv('MXLOGGER_LOCAL_NATIVE_ROOT')).canonicalFile
+        def nativeProject = rootProject.project(':mxlogger_local')
+        if (nativeProject.projectDir.canonicalFile != new File(checkout, 'platform/Android/MXLogger/mxlogger').canonicalFile) {
+            throw new GradleException('Native Android project is not from this checkout')
+        }
+        def components = configurations.getByName('debugRuntimeClasspath').incoming.resolutionResult.allComponents
+        if (!components.any { it.id instanceof org.gradle.api.artifacts.component.ProjectComponentIdentifier && it.id.projectPath == ':mxlogger_local' }) {
+            throw new GradleException('Local MXLogger project missing from resolved dependencies')
+        }
+        if (components.any { it.id instanceof org.gradle.api.artifacts.component.ModuleComponentIdentifier && it.id.group == 'io.github.coder-dongjiayi' && it.id.module == 'mxlogger' }) {
+            throw new GradleException('Remote MXLogger Maven dependency found in local CI build')
+        }
+        def report = new File(buildDir, 'reports/local-core.json')
+        report.parentFile.mkdirs()
+        report.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
+            project: nativeProject.projectDir.canonicalPath,
+            core: new File(checkout, 'Core').canonicalPath,
+            resolved: components.collect { it.id.displayName }
+        ]))
+        println "PASS: local Java/JNI/Core dependency; report: $report"
     }
 }
 

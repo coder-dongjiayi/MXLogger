@@ -29,8 +29,11 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
-#    pod 'MXLogger', :path => '/Users/dongjiayi/Documents/github/MXLogger'
-#    pod 'MXLoggerCore', :path => '/Users/dongjiayi/Documents/github/MXLogger'
+  if ENV['MXLOGGER_LOCAL_NATIVE'] == '1'
+    native_root = ENV['MXLOGGER_LOCAL_NATIVE_ROOT'] || File.expand_path('../../../..', __dir__)
+    pod 'MXLogger', :path => native_root
+    pod 'MXLoggerCore', :path => native_root
+  end
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths

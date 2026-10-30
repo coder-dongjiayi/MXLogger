@@ -7,61 +7,183 @@ permissions:
   contents: read
 
 jobs:
-  windows:
-    name: Windows tests (${{ matrix.configuration }})
+  # Global stage barrier: every Core configuration must pass before ANY API job.
+  core-tests:
+    name: 1. Core unit tests (${{ matrix.os }}, ${{ matrix.configuration }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Build and test this checkout's C++ Core
+        run: python scripts/verify_core_ci.py --configuration ${{ matrix.configuration }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: core-${{ matrix.os }}-${{ matrix.configuration }}-logs
+          path: |
+            build/core-ci/${{ matrix.configuration }}/*.log
+            build/core-ci/${{ matrix.configuration }}/*.json
+            build/core-ci/${{ matrix.configuration }}/test-results.xml
+            build/core-ci/${{ matrix.configuration }}/Testing/Temporary/
+          retention-days: 7
+          if-no-files-found: warn
+
+  windows-api:
+    name: 2. Windows API tests (${{ matrix.configuration }})
+    needs: [core-tests]
     runs-on: windows-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         configuration: [Debug, Release]
-    defaults:
-      run:
-        shell: pwsh
     steps:
       - uses: actions/checkout@v4
-      - name: Configure Core and tests (MSVC x64)
-        run: |
-          New-Item -ItemType Directory -Force build/windows-core | Out-Null
-          cmake -S Core -B build/windows-core -A x64 -DMXLOGGER_BUILD_TESTS=ON 2>&1 | Tee-Object build/windows-core/configure.log
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Build C++ Core unit tests
-        run: |
-          cmake --build build/windows-core --config ${{ matrix.configuration }} --parallel 2>&1 | Tee-Object build/windows-core/build.log
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Run C++ Core unit tests
-        run: |
-          ctest --test-dir build/windows-core -C ${{ matrix.configuration }} --output-on-failure --no-tests=error --output-junit test-results.xml 2>&1 | Tee-Object build/windows-core/ctest.log
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Verify Demo actions and window (no package)
+      - name: Native API actions and Win32 window tests (no package)
+        shell: pwsh
         run: |
           & './scripts/verify_windows_demo.ps1' -Configuration ${{ matrix.configuration }}
+          python scripts/check_local_core.py --cmake-cache build/windows-native-demo/${{ matrix.configuration }}/CMakeCache.txt --output build/windows-native-demo/${{ matrix.configuration }}/local-core.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: windows-demo-${{ matrix.configuration }}-logs
+          name: windows-api-${{ matrix.configuration }}-logs
           path: |
             build/windows-native-demo/${{ matrix.configuration }}/*.log
-            build/windows-native-demo/${{ matrix.configuration }}/self-test/ui-report.txt
-            build/windows-native-demo/${{ matrix.configuration }}/self-test/*.png
-            build/windows-native-demo/${{ matrix.configuration }}/self-test/model/report.*
-          retention-days: 7
-          if-no-files-found: warn
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: windows-core-${{ matrix.configuration }}-logs
-          path: |
-            build/windows-core/*.log
-            build/windows-core/test-results.xml
-            build/windows-core/Testing/Temporary/
+            build/windows-native-demo/${{ matrix.configuration }}/*.json
+            build/windows-native-demo/${{ matrix.configuration }}/self-test/
           retention-days: 7
           if-no-files-found: warn
 
-  apple:
-    name: Apple tests (Core + platform APIs)
+  ios-api:
+    name: 2. iOS API tests
+    needs: [core-tests]
     runs-on: macos-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Native iOS XCTest and background cleanup
+        run: bash scripts/verify_ios_api.sh
+      - name: Native iOS Demo integration build (no package)
+        run: |
+          mkdir -p build/ios-demo-tests
+          for configuration in Debug Release; do
+            xcodebuild -quiet -project platform/iOS/MXLoggerDemo/MXLoggerDemo.xcodeproj -scheme MXLoggerDemo -configuration "$configuration" -destination 'generic/platform=iOS' -derivedDataPath "build/ios-demo-tests/$configuration" CODE_SIGNING_ALLOWED=NO build > "build/ios-demo-tests/$configuration.log" 2>&1 || { tail -n 80 "build/ios-demo-tests/$configuration.log"; exit 1; }
+          done
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ios-api-logs
+          path: |
+            build/ios-api-tests/run-*/*.log
+            build/ios-api-tests/run-*/summary.json
+            build/ios-api-tests/run-*/local-core.json
+            build/ios-api-tests/run-*/Tests.xcresult/
+            build/ios-demo-tests/*.log
+          retention-days: 7
+          if-no-files-found: warn
+
+  macos-api:
+    name: 2. macOS API tests
+    needs: [core-tests]
+    runs-on: macos-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Objective-C and Swift API tests from local sources
+        run: |
+          mkdir -p build/apple-api-tests
+          bash platform/iOS/MXLogger/tests/run_tests.sh > build/apple-api-tests/tests.log 2>&1 || { tail -n 100 build/apple-api-tests/tests.log; exit 1; }
+      - name: Installed C++ SDK API consumer, Debug and Release
+        run: |
+          bash scripts/verify_core_package.sh --skip-core-tests > build/apple-api-tests/installed-sdk.log 2>&1 || { tail -n 100 build/apple-api-tests/installed-sdk.log; exit 1; }
+      - name: Native Demo actions and window tests (no package)
+        run: |
+          bash scripts/verify_macos_demo.sh
+          python3 scripts/check_local_core.py --pod-lock platform/macOS/MXLoggerDemo/Podfile.lock --output build/macos-native-demo/local-core.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: macos-api-logs
+          path: |
+            build/apple-api-tests/*.log
+            build/macos-native-demo/*.log
+            build/macos-native-demo/*.json
+            build/macos-native-demo/previews/
+          retention-days: 7
+          if-no-files-found: warn
+
+  android-api:
+    name: 2. Android API tests (JNI + device)
+    needs: [core-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      MXLOGGER_JNI_TEST_LIBRARY_DIR: ${{ github.workspace }}/build/android-api-host/jni
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'ndk;27.0.12077973 cmake;3.22.1 platforms;android-31 platforms;android-33 build-tools;34.0.0'
+          log-accepted-android-sdk-licenses: 'false'
+      - name: Java API tests with real checkout JNI and Core
+        run: |
+          bash scripts/verify_android_api_host.sh --skip-core-tests
+          python3 scripts/check_local_core.py --cmake-cache build/android-api-host/CMakeCache.txt --output build/android-api-host/local-core.json
+          bash scripts/verify_android_demo.sh test
+      - name: Android Core and bridges, four ABIs
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.0.12077973"
+          bash scripts/verify_android_native.sh
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Android instrumentation on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          script: bash scripts/verify_android_device.sh
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: android-api-logs
+          path: |
+            build/android-validation/*.log
+            build/android-demo/*.log
+            build/android-api-host/*.log
+            build/android-api-host/*.json
+            build/android-device-tests/*.log
+            platform/Android/MXLogger/*/build/test-results/
+            platform/Android/MXLogger/*/build/reports/tests/
+            platform/Android/MXLogger/mxlogger/build/reports/jacoco/
+            platform/Android/MXLogger/mxlogger/build/reports/androidTests/
+            platform/Android/MXLogger/mxlogger/build/outputs/androidTest-results/
+          retention-days: 7
+          if-no-files-found: warn
+
+  flutter-apple-api:
+    name: 2. Flutter APIs (macOS + iOS, local Pods/SPM)
+    needs: [core-tests]
+    runs-on: macos-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -69,69 +191,63 @@ jobs:
           flutter-version: 3.44.9
           channel: stable
           cache: true
-      - name: iOS API and background-cleanup unit tests
-        run: bash scripts/verify_ios_api.sh
-      - name: Core, native Apple, Flutter CocoaPods and SwiftPM
-        run: python3 scripts/verify_macos_support.py
+      - name: Dart tests, macOS Pods/SPM and iOS integration
+        run: python3 scripts/verify_macos_support.py --skip-native --ios-integration
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: apple-verification-logs
-          path: |
-            build/macos-validation/run-*/logs/
-            build/macos-native-demo/*.log
-            build/macos-native-demo/previews/
-            build/ios-api-tests/run-*/*.log
-            build/ios-api-tests/run-*/summary.json
-            build/ios-api-tests/run-*/Tests.xcresult/
+          name: flutter-apple-api-logs
+          path: build/macos-validation/run-*/logs/
           retention-days: 7
           if-no-files-found: warn
 
-  android:
-    name: Android tests (APIs + native build)
+  flutter-android-api:
+    name: 2. Flutter APIs (Android, local Java/JNI/Core)
+    needs: [core-tests]
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      MXLOGGER_JNI_TEST_LIBRARY_DIR: ${{ github.workspace }}/build/android-api-host/jni
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v6
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'
-      - name: Set up Android SDK and NDK
-        uses: android-actions/setup-android@v4
+      - uses: android-actions/setup-android@v4
         with:
-          packages: 'ndk;27.0.12077973 cmake;3.22.1 platforms;android-31 platforms;android-33 build-tools;34.0.0'
+          packages: 'ndk;27.0.12077973 ndk;28.2.13676358 cmake;3.22.1 platforms;android-31 platforms;android-33 platforms;android-36 build-tools;34.0.0 build-tools;36.0.0'
           log-accepted-android-sdk-licenses: 'false'
-      - name: Android Java API tests with real host JNI and Core
-        run: bash scripts/verify_android_api_host.sh
-      - name: Android library and Demo JVM unit tests
-        run: bash scripts/verify_android_demo.sh test
-      - name: Android Core and bridges, four ABIs
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.9
+          channel: stable
+          cache: true
+      - name: Enable KVM
         run: |
-          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.0.12077973"
-          bash scripts/verify_android_native.sh
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Flutter mobile API integration and resolved dependency checks
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          script: python3 scripts/verify_flutter_android.py --device emulator-5554
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: android-verification-logs
+          name: flutter-android-api-logs
           path: |
-            build/android-validation/*.log
-            build/android-demo/*.log
-            build/android-api-host/*.log
-            platform/Android/MXLogger/mxlogger/build/reports/jacoco/apiCoverageReport/
-            platform/Android/MXLogger/*/build/test-results/testDefaultCppReleaseUnitTest/
-            platform/Android/MXLogger/*/build/reports/tests/testDefaultCppReleaseUnitTest/
+            build/flutter-android-tests/run-*/*.log
+            build/flutter-android-tests/run-*/*.json
           retention-days: 7
           if-no-files-found: warn
 
-  # Release deliverables are produced only after ALL verification jobs pass,
-  # including both configurations of the Windows matrix.
+  # Stage 3 starts only after ALL stage-2 API jobs (including matrices) pass.
   windows-sdk:
-    name: Windows native SDK (NuGet + vcpkg)
-    needs: [windows, apple, android]
+    name: 3. Windows SDK (NuGet + vcpkg)
+    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api]
     # Build the distributable with VS 2022's toolset, rather than requiring the
     # newer compiler that windows-latest may carry.
     runs-on: windows-2022
@@ -145,9 +261,23 @@ jobs:
         with:
           nuget-version: '6.x'
       - name: Build, test, pack and restore native NuGet SDK
-        run: "& './scripts/build_windows_nuget.ps1'"
+        run: |
+          & './scripts/build_windows_nuget.ps1'
+          python scripts/check_local_core.py --cmake-cache build/windows-sdk/core-MD/CMakeCache.txt --cmake-cache build/windows-sdk/core-MT/CMakeCache.txt --output build/windows-sdk/logs/local-core.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify vcpkg consumers (MD and MT, Debug and Release)
         run: "& './scripts/verify_windows_vcpkg.ps1'"
+      - name: Upload local vcpkg SDK source and overlay
+        uses: actions/upload-artifact@v7
+        with:
+          name: MXLogger-vcpkg-local-sdk
+          path: |
+            Core/
+            platform/Windows/vcpkg/
+            platform/Windows/README.md
+            LICENSE.TXT
+          retention-days: 7
+          if-no-files-found: error
       - name: Upload native NuGet package directly
         uses: actions/upload-artifact@v7
         with:
@@ -159,20 +289,25 @@ jobs:
         if: always()
         with:
           name: windows-sdk-verification-logs
-          path: build/windows-sdk/logs/*.log
+          path: |
+            build/windows-sdk/logs/*.log
+            build/windows-sdk/logs/*.json
           retention-days: 7
           if-no-files-found: warn
 
   windows-release:
-    name: Windows Release Demo EXE
-    needs: [windows, apple, android]
+    name: 3. Windows Release EXE
+    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api]
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Build and check Release Demo
         shell: pwsh
-        run: "& './scripts/verify_windows_demo.ps1' -Configuration Release"
+        run: |
+          & './scripts/verify_windows_demo.ps1' -Configuration Release
+          python scripts/check_local_core.py --cmake-cache build/windows-native-demo/Release/CMakeCache.txt --output build/windows-native-demo/Release/local-core.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload Release EXE directly
         uses: actions/upload-artifact@v7
         with:
@@ -186,13 +321,14 @@ jobs:
           name: windows-release-demo-build-logs
           path: |
             build/windows-native-demo/Release/*.log
+            build/windows-native-demo/Release/*.json
             build/windows-native-demo/Release/self-test/
           retention-days: 7
           if-no-files-found: warn
 
   macos-release:
-    name: macOS Release Demo DMG
-    needs: [windows, apple, android]
+    name: 3. macOS Release DMG
+    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api]
     runs-on: macos-latest
     timeout-minutes: 20
     steps:
@@ -210,13 +346,15 @@ jobs:
         if: always()
         with:
           name: macos-release-demo-build-logs
-          path: build/macos-native-demo/dmg-*.log
+          path: |
+            build/macos-native-demo/dmg-*.log
+            build/macos-native-demo/dmg-*.json
           retention-days: 7
           if-no-files-found: warn
 
   android-release:
-    name: Android Release Demo APK
-    needs: [windows, apple, android]
+    name: 3. Android Release APK
+    needs: [windows-api, ios-api, macos-api, android-api, flutter-apple-api, flutter-android-api]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -244,6 +382,8 @@ jobs:
         if: always()
         with:
           name: android-release-demo-build-logs
-          path: build/android-demo/*.log
+          path: |
+            build/android-demo/*.log
+            build/android-demo/*.json
           retention-days: 7
           if-no-files-found: warn

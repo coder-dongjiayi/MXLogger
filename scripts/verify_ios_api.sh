@@ -4,6 +4,9 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 mkdir -p "$ROOT/build/ios-api-tests"
 BUILD=$(mktemp -d "$ROOT/build/ios-api-tests/run-XXXXXX")
+python3 "$ROOT/scripts/check_local_core.py" \
+    --xcode-project "$ROOT/platform/iOS/MXLogger/MXLogger.xcodeproj" \
+    --output "$BUILD/local-core.json"
 xcrun simctl list runtimes --json > "$BUILD/runtimes.json"
 python3 - "$BUILD/runtimes.json" > "$BUILD/selection.txt" <<'PY'
 import json

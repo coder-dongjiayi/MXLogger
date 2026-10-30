@@ -53,5 +53,16 @@ with zipfile.ZipFile(sys.argv[1]) as apk:
 print('PASS: all four native ABIs are included')
 PY
 OUTPUT="$BUILD/MXLoggerDemo-android-Release.apk"
+python3 - "$ROOT" "$BUILD/local-core.json" <<'PY'
+from pathlib import Path
+import sys
+root = Path(sys.argv[1])
+sys.path.insert(0, str(root / 'scripts'))
+from check_local_core import check_cmake, write_report
+caches = list((root / 'platform/Android/MXLogger/mxlogger/.cxx').rglob('CMakeCache.txt'))
+if not caches:
+    raise SystemExit('Missing native Core build configuration for the Android APK')
+write_report(sys.argv[2], [check_cmake(p) for p in caches])
+PY
 cp "$APK" "$OUTPUT"
 echo ">> Installable Release Demo (test signing): $OUTPUT"

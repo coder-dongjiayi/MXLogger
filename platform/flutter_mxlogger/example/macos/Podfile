@@ -40,7 +40,7 @@ target 'Runner' do
   # Use this checkout while the matching native release is being developed:
   # MXLOGGER_LOCAL_NATIVE=1 flutter build macos
   if ENV['MXLOGGER_LOCAL_NATIVE'] == '1'
-    native_root = File.expand_path('../../../..', __dir__)
+    native_root = ENV['MXLOGGER_LOCAL_NATIVE_ROOT'] || File.expand_path('../../../..', __dir__)
     pod 'MXLogger', :path => native_root
     pod 'MXLoggerCore', :path => native_root
   end

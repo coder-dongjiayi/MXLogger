@@ -7,6 +7,8 @@ mkdir -p "$BUILD"
 pod install --project-directory="$ROOT/platform/macOS/MXLoggerDemo" > "$BUILD/dmg-pods.log" 2>&1 || {
     cat "$BUILD/dmg-pods.log"; exit 1;
 }
+python3 "$ROOT/scripts/check_local_core.py" \
+    --pod-lock "$ROOT/platform/macOS/MXLoggerDemo/Podfile.lock" --output "$BUILD/dmg-local-core.json"
 xcodebuild -quiet -workspace "$ROOT/platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace" \
     -scheme MXLoggerDemo -configuration Release -destination 'generic/platform=macOS' \
     -derivedDataPath "$BUILD" 'ARCHS=arm64 x86_64' ONLY_ACTIVE_ARCH=NO \
