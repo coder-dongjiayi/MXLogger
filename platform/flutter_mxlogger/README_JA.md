@@ -10,6 +10,8 @@ MXLogger は mmap メモリマッピングを基盤とし、AES-CFB-128 暗号�
 - **要件**: Dart SDK `>=2.19.0 <4.0.0`、Flutter `>=3.7.0`
 - **対応プラットフォーム**: iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）、Windows 10/11 x64
 
+<img src="https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/platform/flutter_mxlogger/images/jiegoutu.webp" alt="MXLogger の構成：ネイティブプラットフォーム、Windows DLL、アナライザーの利用方法" width="960" />
+
 ## 目次
 
 - [インストール](#インストール)
@@ -126,7 +128,6 @@ logger.fatal("this is fatal message");
 
 # 1. アーキテクチャ
 
-<img src="./images/jiegoutu.webp" alt="MXLogger の構成：ネイティブプラットフォーム、Windows DLL、アナライザーの利用方法" width="960" />
 
 Flutter は `dart:ffi` で Core を呼び出します。Apple は Objective-C ブリッジ、Android と Windows は共通の C++ FFI ブリッジを使用し、Windows は `mxlogger_ffi.dll` を読み込みます。アナライザーは Chrome 拡張機能、Windows/macOS デスクトップアプリ、`mxlogger_analyzer_lib` Flutter パッケージとして利用できます。
 

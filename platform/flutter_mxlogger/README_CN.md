@@ -10,6 +10,8 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
 - **环境要求**：Dart SDK `>=2.19.0 <4.0.0`、Flutter `>=3.7.0`
 - **平台支持**：iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）、Windows 10/11 x64
 
+<img src="https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/platform/flutter_mxlogger/images/jiegoutu.webp" alt="MXLogger 架构：原生平台、Windows DLL 与解析器集成" width="960" />
+
 ## 目录
 
 - [安装](#安装)
@@ -151,7 +153,6 @@ logger.fatal("this is fatal message");
 
 ## 1.1 整体结构
 
-<img src="./images/jiegoutu.webp" alt="MXLogger 架构：原生平台、Windows DLL 与解析器集成" width="960" />
 
 Flutter 通过 `dart:ffi` 调用 Core：Apple 使用 Objective-C 桥接，Android 与 Windows 共用 C++ FFI 桥接，Windows 加载 `mxlogger_ffi.dll`。解析器提供 Chrome 扩展、Windows/macOS 桌面应用，以及 `mxlogger_analyzer_lib` Flutter package 集成。
 

@@ -10,6 +10,8 @@ See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) 
 - **Requirements**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
 - **Platforms**: iOS (>= 9.0), macOS (>= 10.14), Android (minSdk 21), Windows 10/11 x64
 
+<img src="https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/platform/flutter_mxlogger/images/jiegoutu.webp" alt="MXLogger architecture: native platforms, Windows DLL and analyzer integrations" width="960" />
+
 `MXLogger.coreVersion()` returns the linked C++ Core version (currently `2.3.0`)
 without initializing a logger. This is independent of the pub package version.
 Web has no native Core and throws `UnsupportedError`.
@@ -168,7 +170,6 @@ logger.fatal("this is fatal message");
 
 # 1. Architecture
 
-<img src="./images/jiegoutu.webp" alt="MXLogger architecture: native platforms, Windows DLL and analyzer integrations" width="960" />
 
 Flutter calls Core through `dart:ffi`. Apple uses the Objective-C bridge; Android and Windows share the C++ FFI bridge, with Windows loading `mxlogger_ffi.dll`. The analyzer is available as a Chrome extension, a Windows/macOS desktop app, or the `mxlogger_analyzer_lib` Flutter package.
 
