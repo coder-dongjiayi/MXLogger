@@ -94,179 +94,37 @@ Full documentation for the analyzer: [mxlogger_analyzer_lib/README.md](./mxlogge
 
 # Install
 
-Platform integrations and demos live under `platform/`: `Windows/`, `macOS/`, `iOS/`, `Android/`, and `flutter_mxlogger/`.
-The shared `Core/`, `scripts/`, `spm/`, and CocoaPods specifications remain at the repository root.
-After updating an existing checkout, reopen projects from their new paths, preserve and regenerate affected CMake build directories,
-and run `flutter pub get` / `pod install` to refresh local dependency paths.
+## iOS / macOS
 
-## iOS
+**CocoaPods** — add to your `Podfile`, then run `pod install`:
 
 ```ruby
 pod 'MXLogger', '~> 2.3.0'
 ```
 
-## Native macOS
+**Swift Package Manager** — in Xcode, choose **File → Add Package Dependencies…** and enter:
 
-The source podspecs now support macOS 10.13+. Before this version is published, use
-the local checkout:
-
-```ruby
-platform :osx, '10.13'
-pod 'MXLogger', :path => '/path/to/MXLogger'
-pod 'MXLoggerCore', :path => '/path/to/MXLogger'
+```text
+https://github.com/coder-dongjiayi/mxlogger-spm.git
 ```
 
-SwiftPM uses [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm.git);
-the manifest in `spm/Package.swift` declares iOS 12+ and macOS 10.13+.
-Both platforms use the same native API. On macOS, call `removeExpireData` explicitly;
-`shouldRemoveExpiredDataWhenEnterBackground` has no effect. Flutter macOS uses the same Dart API through the shared `darwin/` plugin (Flutter 3.7+, macOS 10.14+).
-
-### Native macOS demo
-
-`platform/macOS/MXLoggerDemo` is a native **AppKit + Swift + Main.storyboard** app. Its landing,
-home, file list, log viewer and reusable cells are editable in Storyboard. The UI
-follows the iOS / Android / Flutter demos, including the purple status card and
-English/Chinese switching, and shares the iOS demo's logo and localization resources.
-
-```bash
-pod install --project-directory=platform/macOS/MXLoggerDemo
-open platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
-```
-
-Run the `MXLoggerDemo` scheme on `My Mac`. It uses this checkout's native pods and
-does not require Flutter or a published 2.3.0 release. Its defaults match the other
-demos: `com.djy.mxlogger`, hourly files, AES-CFB-128, seven-day retention and a 10 MB limit.
-
-The demo covers five log levels, network JSON, generic/token writes, configuration,
-a 100,000-write benchmark, concurrent threads/processes with count/order verification,
-manual cleanup, instance rebuilding, and a log viewer with level/search filters and
-full record details. macOS cleanup is explicit; the console switch is disabled in Release.
-`pod install` generates a local `Configurations/SDK.xcconfig` for the installed Xcode SDK.
-
-```bash
-bash scripts/verify_macos_demo.sh
-```
-
-This builds Debug and Release and exercises encrypted multi-process write/read,
-tokens, cleanup and reopening. The Debug check also loads the Storyboard to check
-outlets, navigation, localization and filters and renders the app's own views.
-Logs and previews are saved under `build/macos-native-demo/`.
-
-### Native Windows demo
-
-[`platform/Windows/MXLoggerDemo`](platform/Windows/MXLoggerDemo/README.md) is a native **Win32 + C++17** app,
-linked directly to this checkout's Core. It includes Chinese/English UI, configuration,
-five log levels, JSON/token writes, thread/process count and order checks, a 100,000-write
-benchmark, cleanup/rebuilding, and a searchable log viewer.
-
-```powershell
-cmake -S platform/Windows/MXLoggerDemo -B build/windows-demo -A x64
-cmake --build build/windows-demo --config Debug --parallel
-.\build\windows-demo\bin\Debug\MXLoggerDemo.exe
-```
-
-Targets Windows 10/11 x64 with Visual Studio desktop C++ tools and CMake 3.20+.
-Manual `verify-logger` CI builds Debug/Release, exercises the actual window/controls,
-and shows test output in GitHub Actions. Once all platforms pass, it uploads the Release `MXLoggerDemo.exe`.
-On Mac you can edit the code and test shared log actions; Windows CI verifies the native GUI.
-
-Native C++ consumers can use the **`MXLogger.Native` NuGet package** or the **`mxlogger` vcpkg overlay**.
-Manual CI builds the 2.3.0 nupkg for Windows x64, including MD/MT and Debug/Release variants.
-These are not yet published to the public NuGet/vcpkg registries; see the [Windows SDK guide](platform/Windows/README.md).
-
-### Flutter macOS demo
-
-`platform/flutter_mxlogger/example` shares the mobile demo's landing page, purple status card,
-grouped features, English/Chinese switching, file list and encrypted log viewer. The
-macOS app adds a resizable window, desktop settings dialogs, an independent Finder
-entry and explicit cleanup instructions. It covers writes, a 100,000-write benchmark,
-concurrent isolates, cleanup and filtering. Isolates share one process; use the native
-demo above for multiple processes.
-
-Run from the repository root, without publishing native 2.3.0 first:
-
-```bash
-bash scripts/run_flutter_macos_demo.sh
-# Set FLUTTER_BIN=/path/to/flutter/bin/flutter if Flutter is not on PATH.
-bash scripts/run_flutter_macos_demo.sh build --release
-bash scripts/run_flutter_macos_demo.sh test
-```
-
-The script scopes local CocoaPods to the command, and the demo follows the installed
-Xcode SDK's build floor. The UI check uses temporary logs and saves previews under
-`platform/flutter_mxlogger/example/screenshots/macos-*.png`. See the
-[Flutter demo guide](platform/flutter_mxlogger/example/README.md).
-
-### macOS regression checks and release preparation
-
-On a Mac with Xcode (including the iOS SDK), CocoaPods, Python 3 and Flutter 3.44+:
-
-```bash
-python3 scripts/verify_macos_support.py
-# If Flutter is not on PATH:
-python3 scripts/verify_macos_support.py --flutter /path/to/flutter/bin/flutter
-```
-
-This runs Core tests (including real cooperating processes, cleanup and process-exit
-recovery), Objective-C / Swift API tests, the native macOS demo, Flutter unit tests, iOS device/simulator
-bridge compilation, Flutter desktop demo UI flows, and macOS Debug integration and Release encrypted write/read
-checks through both CocoaPods and SwiftPM. All bridge exports are checked after stripping.
-
-Fixtures use local native sources under `build/macos-validation/run-*/`, so the native
-release need not be published first. Distribution manifests, example lockfiles and
-global Flutter settings are preserved. Fixture deployment targets follow the installed
-Xcode SDK's supported floor; the native macOS 10.13 and Flutter plugin macOS 10.14
-declarations stay unchanged. These checks do not establish runtime compatibility on older systems.
-
-Use `--package-manager pods` or `--package-manager spm` to check one integration,
-`--skip-native` to skip Core / native Apple tests, or `--offline` to use cached Dart
-packages (engine artifacts and CocoaPods metadata still need to be available).
-Results and logs are in each run's `logs/` directory. Flutter 3.44+ is required by this
-verification harness; the plugin itself still declares Flutter 3.7+.
-Successful Flutter fixtures are removed by default to reclaim several GB; logs remain.
-Pass `--keep-builds` to retain them. Failed fixtures are always retained for diagnosis.
-
-The Android check requires an NDK, CMake and Ninja. It compiles four ABIs and rejects
-an accidental dependency on the macOS process lock:
-
-```bash
-ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_android_native.sh
-```
-
-`.github/workflows/verify-logger.yml` is **manual-only** and has three success gates:
-
-1. C++ Core unit tests on Windows, macOS and Linux, in Debug and Release.
-2. Native and Flutter API tests on iOS, Android, macOS and Windows. Every Core job must pass first.
-3. Release SDK and Demo artifacts, only after all API jobs pass.
-
-| Platform | File |
-|---|---|
-| Windows | `MXLoggerDemo.exe` (x64) |
-| macOS | `MXLoggerDemo-macOS-Release.dmg` (Apple Silicon + Intel) |
-| Android | `MXLoggerDemo-android-Release.apk` (all four ABIs) |
-| Flutter Windows | `MXLoggerFlutterDemo-windows-x64-Release` (EXE, DLLs and `data/`) |
-| Windows SDK | `MXLogger.Native.2.3.0.nupkg`, local vcpkg SDK and `flutter_mxlogger-windows-prebuilt` |
-
-Installers are uploaded directly with [`archive: false`](https://github.com/actions/upload-artifact/tree/v7#upload-an-individual-file-unzipped), without a ZIP wrapper.
-Downloadable artifacts are retained for seven days; separate log artifacts are not uploaded. The Flutter Windows Demo is a complete directory bundle; extract it before running `MXLoggerFlutterDemo.exe`. The macOS DMG supports dragging the app into Applications;
-it uses an ad-hoc signature and is not notarized. The non-debuggable Android Release APK uses a test signing key.
-Keys may differ between CI runs, requiring uninstalling an older Demo before installing a newer APK.
-Android runtime behavior on a device requires separate verification.
-
-To build locally, run `bash scripts/build_macos_demo_dmg.sh`, or run
-`ANDROID_HOME=/path/to/android-sdk bash scripts/verify_android_demo.sh test` followed by the same command with `package`.
-Android requires JDK 17, NDK `27.0.12077973`, CMake `3.22.1`, SDK platforms 31/33 and Build Tools `34.0.0`.
-
-For 2.3.0, synchronize the `mxlogger-spm` mirror and make the main and mirror `v2.3.0`
-tags available, then publish `MXLoggerCore`, `MXLogger` and Android 2.3.0 before the
-Flutter package. Run `scripts/pub_flutter_mxlogger.sh --dry-run` before publishing
-Flutter, then verify remote dependency resolution once the native releases are available.
+Choose **Up to Next Major Version** starting at **2.3.0**, and add the **MXLogger** product to your app target.
 
 ## Android
 
 ```groovy
 implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ```
+
+## Windows
+
+Download `MXLogger.Native.2.3.0.nupkg` to a local feed folder such as `D:\NuGetFeed`, then run in Visual Studio's Package Manager Console:
+
+```powershell
+Install-Package MXLogger.Native -Version 2.3.0 -Source D:\NuGetFeed
+```
+
+For package downloads and vcpkg installation, see the [Windows SDK guide](platform/Windows/README.md).
 
 ## Flutter
 
@@ -276,8 +134,7 @@ dependencies:
   mxlogger_analyzer_lib: ^2.0.0   # optional: the in-app log viewer
 ```
 
-The native dependencies are pulled in automatically — CocoaPods depends on `MXLogger` →
-`MXLoggerCore`, Gradle on `io.github.coder-dongjiayi:mxlogger`.
+Run `flutter pub get`.
 
 ---
 

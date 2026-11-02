@@ -81,97 +81,21 @@ Chrome でストアのリンクを開き、**Chrome に追加** → **拡張機�
 
 # インストール
 
-## iOS
+## iOS / macOS
+
+**CocoaPods** — `Podfile` に追加し、`pod install` を実行します。
 
 ```ruby
 pod 'MXLogger', '~> 2.3.0'
 ```
 
-## ネイティブ macOS
+**Swift Package Manager** — Xcode で **File → Add Package Dependencies…** を選び、次の URL を入力します。
 
-ソースの podspec は macOS 10.13 以降に対応しています。このバージョンの公開前はローカルのチェックアウトを指定します。
-
-```ruby
-platform :osx, '10.13'
-pod 'MXLogger', :path => '/path/to/MXLogger'
-pod 'MXLoggerCore', :path => '/path/to/MXLogger'
+```text
+https://github.com/coder-dongjiayi/mxlogger-spm.git
 ```
 
-SwiftPM では [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm.git) を使用します。`spm/Package.swift` の対象は iOS 12 以降、macOS 10.13 以降です。両者は同じネイティブ API を使います。macOS では `removeExpireData` を明示的に呼び出してください。`shouldRemoveExpiredDataWhenEnterBackground` は動作しません。Flutter macOS は共有の `darwin/` プラグイン経由で同じ Dart API を提供します（Flutter 3.7 以降、macOS 10.14 以降）。
-
-### ネイティブ macOS デモ
-
-`platform/macOS/MXLoggerDemo` は **AppKit + Swift + Main.storyboard** で構成されたネイティブアプリです。入口、ホーム、ファイル一覧、ログビューアー、再利用セルを Storyboard で編集できます。iOS / Android / Flutter のデモと同じ紫色のステータスカードと英語・中国語の切り替えを備え、iOS デモのロゴと言語リソースを共有しています。
-
-```bash
-pod install --project-directory=platform/macOS/MXLoggerDemo
-open platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
-```
-
-`MXLoggerDemo` スキームと `My Mac` を選んで実行します。現在のチェックアウトにあるネイティブ Pod を使うため、Flutter や公開済みの 2.3.0 は不要です。既定値は他のデモと同じく、`com.djy.mxlogger`、時間単位のファイル分割、AES-CFB-128、保存期間 7 日、上限 10 MB です。
-
-5 段階のログ、ネットワーク JSON、汎用・Token 経由の書き込み、設定、10 万件の性能測定、スレッド・プロセス間の並行書き込みと件数・順序の検証、手動クリーンアップ、インスタンスの再生成、レベル・検索フィルター付きのログビューアーを備えています。macOS のクリーンアップは手動です。Release ではコンソール出力のスイッチを無効にします。`pod install` は現在の Xcode SDK に合わせたローカルの `Configurations/SDK.xcconfig` を生成します。
-
-```bash
-bash scripts/verify_macos_demo.sh
-```
-
-Debug / Release をビルドし、複数プロセスの暗号化読み書き、Token、クリーンアップ、再オープンを検証します。Debug では Storyboard を読み込み、outlet、画面遷移、言語切り替え、フィルターも確認し、アプリ自身のビューを画像に出力します。ログとプレビューは `build/macos-native-demo/` に保存されます。
-
-### ネイティブ Windows と Flutter Windows デモ
-
-Windows 10/11 x64 に対応しています。ネイティブ Win32 + C++17 デモは `platform/Windows/MXLoggerDemo`、Flutter デモは `platform/flutter_mxlogger/example` にあります。Windows C++ SDK はローカルの `MXLogger.Native.2.3.0.nupkg` または vcpkg overlay で利用できます。NuGet / vcpkg の公開レジストリにはまだ登録していません。
-
-Flutter は `windows/bin/x64/` にあるプリビルド DLL を使い、Core ソースのコピーを持ちません。Debug は Debug DLL、Profile/Release は Release DLL を使います。既定のログ保存先は `%LOCALAPPDATA%/MXLogger/<実行ファイル名>/<nameSpace>` で、クリーンアップは明示的に行います。`MXLogger.coreVersion()` は初期化せずに Core バージョン `2.3.0` を返し、デモにも表示します。
-
-CI の `MXLoggerFlutterDemo-windows-x64-Release` には対話型デモ、Core DLL、Flutter と VC++ のランタイム、`data/` が含まれます。全体を展開し `MXLoggerFlutterDemo.exe` を実行してください。
-
-### Flutter macOS デモ
-
-`platform/flutter_mxlogger/example` はモバイル版と入口画面、紫色のステータスカード、機能のグループ分け、英語・中国語の切り替え、ファイル一覧、暗号化ログビューアーを共有します。macOS 向けにサイズ変更可能なウィンドウ、設定ダイアログ、独立した Finder 項目、手動クリーンアップの説明を追加しています。書き込み、10 万件の性能測定、isolate の並行処理、クリーンアップ、絞り込みを試せます。isolate は同じプロセスに属します。複数プロセスのデモには上記のネイティブ版を使ってください。
-
-リポジトリのルートで実行します。ネイティブ 2.3.0 の事前公開は不要です。
-
-```bash
-bash scripts/run_flutter_macos_demo.sh
-# Set FLUTTER_BIN=/path/to/flutter/bin/flutter if Flutter is not on PATH.
-bash scripts/run_flutter_macos_demo.sh build --release
-bash scripts/run_flutter_macos_demo.sh test
-```
-
-スクリプトはコマンドの実行中だけローカル CocoaPods を有効にし、デモのビルド対象をインストール済み Xcode SDK に合わせます。UI 検証は一時的なログを使用し、プレビューを `platform/flutter_mxlogger/example/screenshots/macos-*.png` に保存します。[Flutter デモの説明](platform/flutter_mxlogger/example/README.md)も参照してください。
-
-### macOS の回帰検証とリリース準備
-
-Xcode（iOS SDK を含む）、CocoaPods、Python 3、Flutter 3.44 以降を導入した Mac で実行します。
-
-```bash
-python3 scripts/verify_macos_support.py
-# If Flutter is not on PATH:
-python3 scripts/verify_macos_support.py --flutter /path/to/flutter/bin/flutter
-```
-
-Core のテスト（実際の複数プロセス、クリーンアップ、プロセス終了後の復旧を含む）、Objective-C / Swift API、ネイティブ macOS デモ、Flutter 単体テスト、iOS 実機・シミュレーター向けブリッジのコンパイル、Flutter デスクトップデモの UI フローを確認します。さらに CocoaPods と SwiftPM の両方で macOS Debug 統合テストと Release の暗号化読み書きを行い、シンボル除去後のブリッジ公開シンボルも検査します。
-
-テスト用プロジェクトは `build/macos-validation/run-*/` に生成され、ローカルのネイティブソースを使用します。配布用マニフェスト、デモのロックファイル、Flutter のグローバル設定は変更しません。検証プロジェクトの配備対象は現在の Xcode SDK の最小対応バージョンに合わせますが、ライブラリの macOS 10.13、Flutter プラグインの macOS 10.14 という宣言は維持します。旧 OS での実行互換性を確認する検証ではありません。
-
-`--package-manager pods` / `--package-manager spm` で接続方式を選べます。`--skip-native` は Core とネイティブ Apple のテストを省略し、`--offline` は Dart のキャッシュを利用します（エンジンと CocoaPods メタデータは事前に必要）。結果は各実行ディレクトリの `logs/` に保存されます。この検証スクリプトには Flutter 3.44 以降が必要ですが、プラグインの最低要件は Flutter 3.7 のままです。成功した Flutter テストプロジェクトは容量確保のため削除し、ログを残します。`--keep-builds` でビルド内容を保持できます。失敗時は原因調査のため常に保持します。
-
-Android の検証には NDK、CMake、Ninja が必要です。4 種類の ABI をコンパイルし、macOS のプロセスロックが誤って混入していないことを確認します。
-
-```bash
-ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_android_native.sh
-```
-
-`.github/workflows/verify-logger.yml` は**手動実行のみ**で、次の順序で検証します。
-
-1. Windows / macOS / Linux の C++ Core 単体テスト（Debug / Release）。
-2. iOS / Android / macOS / Windows のネイティブおよび Flutter API テスト。すべての Core テスト成功後に開始します。
-3. すべての API テスト成功後に Release SDK とデモを生成します。
-
-成果物はネイティブ Windows EXE、macOS DMG、Android APK、ローカル NuGet / vcpkg SDK、DLL を含む Flutter プラグイン、完全な Flutter Windows Release デモです。`MXLoggerFlutterDemo-windows-x64-Release` は全体を展開して `MXLoggerFlutterDemo.exe` を実行してください。DLL と `data/` も必要です。テストログは GitHub Actions の各ステップで確認でき、ログだけの成果物はアップロードしません。
-
-2.3.0 の公開時は `mxlogger-spm` ミラーを同期し、メインとミラーの `v2.3.0` タグを利用可能にします。その後 `MXLoggerCore`、`MXLogger`、Android 2.3.0、最後に Flutter パッケージを公開します。Flutter 公開前に `scripts/pub_flutter_mxlogger.sh --dry-run` を実行し、ネイティブ依存関係の公開後にリモートからの解決を検証してください。
+**Up to Next Major Version** を選び、開始バージョンを **2.3.0** に設定して、**MXLogger** プロダクトをアプリのターゲットに追加します。
 
 ## Android
 
@@ -179,15 +103,25 @@ ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_andr
 implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ```
 
+## Windows
+
+`MXLogger.Native.2.3.0.nupkg` をローカルフィードのフォルダー（例：`D:\NuGetFeed`）にダウンロードし、Visual Studio の Package Manager Console で実行します。
+
+```powershell
+Install-Package MXLogger.Native -Version 2.3.0 -Source D:\NuGetFeed
+```
+
+パッケージのダウンロードと vcpkg でのインストールは [Windows SDK ガイド](platform/Windows/README_JA.md)を参照してください。
+
 ## Flutter
 
 ```yaml
 dependencies:
   flutter_mxlogger: ^2.3.0
-  mxlogger_analyzer_lib: ^2.0.0   # optional: the in-app log viewer
+  mxlogger_analyzer_lib: ^2.0.0   # 任意：アプリ内ログビューアー
 ```
 
-ネイティブ依存関係は自動で取得されます。CocoaPods は `MXLogger` → `MXLoggerCore`、Gradle は `io.github.coder-dongjiayi:mxlogger` に依存します。
+`flutter pub get` を実行します。
 
 ---
 

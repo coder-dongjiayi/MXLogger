@@ -91,174 +91,37 @@ mxlogger_analyzer 解析。
 
 # 安装引入
 
-各平台封装与示例统一位于 `platform/`：`Windows/`、`macOS/`、`iOS/`、`Android/` 和 `flutter_mxlogger/`。
-共享引擎 `Core/`、`scripts/`、`spm/` 及 CocoaPods 规格文件仍位于仓库根目录。
-已有工程迁移后，请从新路径重新打开 IDE；备份并重新生成相关 CMake 构建目录，再执行 `flutter pub get` / `pod install` 更新本地依赖路径。
+## iOS / macOS
 
-## iOS
+**CocoaPods** — 在 `Podfile` 中添加，然后运行 `pod install`：
 
 ```ruby
 pod 'MXLogger', '~> 2.3.0'
 ```
 
-## 原生 macOS
+**Swift Package Manager** — 在 Xcode 中选择 **File → Add Package Dependencies…**，输入：
 
-当前源码的 podspec 已支持 macOS 10.13+。本版本发布前可通过本地仓库接入：
-
-```ruby
-platform :osx, '10.13'
-pod 'MXLogger', :path => '/path/to/MXLogger'
-pod 'MXLoggerCore', :path => '/path/to/MXLogger'
+```text
+https://github.com/coder-dongjiayi/mxlogger-spm.git
 ```
 
-SwiftPM 使用 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm.git)，
-`spm/Package.swift` 已声明 iOS 12+、macOS 10.13+。两端共用原生 API；macOS 需显式调用
-`removeExpireData` 清理，`shouldRemoveExpiredDataWhenEnterBackground` 不生效。
-Flutter macOS 已通过共享的 `darwin/` 插件接入（Flutter 3.7+、macOS 10.14+），使用同一套 Dart API。
-
-### 原生 macOS Demo
-
-原生示例位于 `platform/macOS/MXLoggerDemo`，使用 **AppKit + Swift + Main.storyboard**，
-入口、主页、文件列表、日志详情以及列表单元格均可在 Storyboard 中编辑。
-界面沿用 iOS / Android / Flutter Demo 的 Logo、紫色状态卡、分组功能和中英文切换，
-并直接复用 iOS Demo 的 Logo 和语言资源。
-
-```bash
-pod install --project-directory=platform/macOS/MXLoggerDemo
-open platform/macOS/MXLoggerDemo/MXLoggerDemo.xcworkspace
-```
-
-在 Xcode 选择 `MXLoggerDemo` scheme 和 `My Mac` 后运行。
-Demo 从当前仓库加载原生 Pods，无需先发布 2.3.0，也不依赖 Flutter。
-默认参数与其他三个 Demo 一致：命名空间 `com.djy.mxlogger`、按小时切分、
-AES-CFB-128 加密、保留 7 天、大小上限 10 MB。
-
-功能包括五级日志、网络 JSON、通用写入、Token 写入、等级与开关设置、
-10 万条性能测试、多线程 / 多进程并发写入与数量及顺序校验、手动清理、实例重建，
-以及带等级 / 关键词筛选和完整内容查看的日志浏览器。
-macOS 不提供后台自动清理开关；Release 中控制台开关会置灰。
-`pod install` 会为本地 Xcode 生成 `Configurations/SDK.xcconfig`，使 Demo 的部署目标适配当前 SDK。
-
-单独验证 Demo：
-
-```bash
-bash scripts/verify_macos_demo.sh
-```
-
-该检查编译 Debug / Release，并实际执行双进程加密读写、Token、清理和重开校验。
-Debug 还会加载 Storyboard 检查页面连接、导航、双语及筛选，生成应用自身视图的预览。
-日志和预览位于 `build/macos-native-demo/`。
-
-### 原生 Windows Demo
-
-原生示例位于 [`platform/Windows/MXLoggerDemo`](platform/Windows/MXLoggerDemo/README.md)，使用 **Win32 + C++17**，
-直接链接本仓库 Core。包含中英文界面、初始化配置、五级日志与 JSON / Token 写入、
-线程 / 双进程数量及顺序校验、10 万条性能测试、清理重建和带筛选的日志浏览器。
-
-```powershell
-cmake -S platform/Windows/MXLoggerDemo -B build/windows-demo -A x64
-cmake --build build/windows-demo --config Debug --parallel
-.\build\windows-demo\bin\Debug\MXLoggerDemo.exe
-```
-
-Windows 10/11 x64，需 Visual Studio C++ 桌面开发工具和 CMake 3.20+。
-手动运行 `verify-logger` 会在 Windows Debug / Release 构建并运行真实窗口自测，
-日志在 GitHub Actions 步骤中查看；全部平台验证通过后，上传 Release 的 `MXLoggerDemo.exe`。
-Mac 可编辑代码并验证共用日志操作，Windows GUI 的编译和运行由 Windows CI 验证。
-
-Windows C++ 工程可通过原生 **NuGet 包 `MXLogger.Native`** 或 **vcpkg overlay `mxlogger`** 接入。
-当前由手动 CI 生成 2.3.0 的 nupkg，支持 x64、MD / MT 与 Debug / Release；
-公共 NuGet / vcpkg registry 尚未发布，安装步骤见 [Windows SDK](platform/Windows/README.md)。
-
-### Flutter macOS Demo
-
-Flutter 桌面示例位于 `platform/flutter_mxlogger/example`，复用手机端的落地页、紫色状态卡、
-分组功能、中英文切换、文件列表及日志查看器，补充桌面窗口、设置弹窗和独立 Finder 入口。
-支持五级 / JSON / Token 写入、10 万条性能测试、多 isolate 并发校验、手动清理和日志筛选。
-macOS 隐藏后台清理开关；多 isolate 属于同一个进程，多进程演示见上方原生 Demo。
-
-在仓库根目录运行，无需先发布原生 2.3.0：
-
-```bash
-bash scripts/run_flutter_macos_demo.sh
-# Flutter 不在 PATH 时，在命令前设置 FLUTTER_BIN=/path/to/flutter/bin/flutter
-bash scripts/run_flutter_macos_demo.sh build --release
-bash scripts/run_flutter_macos_demo.sh test
-```
-
-启动脚本仅为当前命令启用本地 CocoaPods，Demo 自动适配本机 Xcode SDK 的最低构建版本。
-界面检查使用临时日志目录，并在 `platform/flutter_mxlogger/example/screenshots/macos-*.png` 保存预览。
-详细说明见 [Flutter Demo](platform/flutter_mxlogger/example/README.md)。
-
-### macOS 回归验证与发布准备
-
-在安装了 Xcode（含 iOS SDK）、CocoaPods、Python 3 和 Flutter 3.44+ 的 Mac 上运行：
-
-```bash
-python3 scripts/verify_macos_support.py
-# Flutter 不在 PATH 时：
-python3 scripts/verify_macos_support.py --flutter /path/to/flutter/bin/flutter
-```
-
-脚本依次运行 Core 测试（包含真实多进程读写、清理、进程退出恢复）、Objective-C / Swift
-API 测试、原生 macOS Demo、Flutter 单元测试、桌面 Demo 界面流程、iOS 设备与模拟器桥接编译，以及 macOS CocoaPods / SwiftPM
-两种接入方式的 Debug 集成测试和 Release 加密读写。Release 还会检查所有桥接导出符号。
-
-测试工程生成在 `build/macos-validation/run-*/`，使用本地原生源码，因此原生 2.3.0
-尚未发布时也可验证。发布用的依赖地址、版本和示例锁文件不会被改写，Flutter 全局配置也不变。
-测试工程的部署目标会根据当前 Xcode SDK 的最低支持版本调整；库自身的 macOS 10.13
-和 Flutter 插件的 macOS 10.14 声明保持不变。该检查不能替代旧系统上的实际运行验证。
-
-可用 `--package-manager pods` 或 `--package-manager spm` 单独验证一种接入方式，
-`--skip-native` 跳过 Core / 原生 Apple 测试。`--offline` 仅表示 Dart 包使用本地缓存，
-Flutter 引擎缓存和 CocoaPods 索引仍需提前准备。日志和结果位于对应运行目录的 `logs/`。
-此脚本使用 Flutter 3.44+ 切换测试工程的接入方式；插件的最低 Flutter 要求仍为 3.7。
-成功后默认删除占用数 GB 的 Flutter 测试工程并保留日志；加 `--keep-builds` 可保留构建现场，失败时也会保留。
-
-Android 原生回归使用 NDK、CMake 和 Ninja，编译四种 ABI，并检查没有引入 macOS 的进程锁：
-
-```bash
-ANDROID_NDK_HOME=/path/to/android-sdk/ndk/27.0.12077973 bash scripts/verify_android_native.sh
-```
-
-`.github/workflows/verify-logger.yml` **仅手动触发**，依次执行三个阶段：
-
-1. C++ Core 单元测试：Windows、macOS、Linux 的 Debug / Release。
-2. 各平台原生及 Flutter 接口测试：iOS、Android、macOS、Windows；全部 Core 测试通过后才开始。
-3. Release SDK 与 Demo 出包：全部接口测试通过后才开始。
-
-| 平台 | 文件 |
-|---|---|
-| Windows | `MXLoggerDemo.exe`（x64） |
-| macOS | `MXLoggerDemo-macOS-Release.dmg`（Apple Silicon + Intel） |
-| Android | `MXLoggerDemo-android-Release.apk`（包含四种 ABI） |
-| Flutter Windows | `MXLoggerFlutterDemo-windows-x64-Release`（EXE、DLL 和 `data/`） |
-| Windows SDK | `MXLogger.Native.2.3.0.nupkg`、本地 vcpkg SDK 和 `flutter_mxlogger-windows-prebuilt` |
-
-安装文件通过 [`archive: false`](https://github.com/actions/upload-artifact/tree/v7#upload-an-individual-file-unzipped) 直接上传原文件，不增加 ZIP 包装；可下载产物保留 7 天，不再单独上传 Logs。Flutter Windows Demo 是包含运行依赖的完整目录包，解压后运行 `MXLoggerFlutterDemo.exe`。
-macOS DMG 支持拖入 Applications，采用 ad-hoc 签名，未进行 Apple 公证。
-Android APK 使用测试密钥签名，构建类型为 Release；不同 CI 运行的测试密钥可能不同，覆盖安装失败时需先卸载旧 Demo。
-Android 设备上的运行验证需另行进行。
-
-本地构建同样的安装文件：
-
-```bash
-bash scripts/build_macos_demo_dmg.sh
-ANDROID_HOME=/path/to/android-sdk bash scripts/verify_android_demo.sh test
-ANDROID_HOME=/path/to/android-sdk bash scripts/verify_android_demo.sh package
-```
-
-Android 使用 JDK 17、NDK `27.0.12077973`、CMake `3.22.1`、SDK 平台 31 / 33 和 Build Tools `34.0.0`。
-
-2.3.0 发布时，先同步 `mxlogger-spm` 镜像，并使主仓库和镜像的 `v2.3.0` 标签可用；
-随后发布 `MXLoggerCore`、`MXLogger` 和 Android 2.3.0，最后发布 Flutter 包。
-发布 Flutter 前运行 `scripts/pub_flutter_mxlogger.sh --dry-run`，并在依赖正式可用后验证远程接入。
+版本规则选择 **Up to Next Major Version**，起始版本设为 **2.3.0**，将 **MXLogger** 产品添加到 app target。
 
 ## Android
 
 ```groovy
 implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ```
+
+## Windows
+
+将 `MXLogger.Native.2.3.0.nupkg` 下载到本地源目录（如 `D:\NuGetFeed`），在 Visual Studio 的 Package Manager Console 中运行：
+
+```powershell
+Install-Package MXLogger.Native -Version 2.3.0 -Source D:\NuGetFeed
+```
+
+包下载及 vcpkg 安装方式见 [Windows SDK 安装说明](platform/Windows/README_CN.md)。
 
 ## Flutter
 
@@ -268,8 +131,7 @@ dependencies:
   mxlogger_analyzer_lib: ^2.0.0   # 可选：app 内实时查看日志
 ```
 
-原生依赖会自动引入，无需手动配置：iOS 端 CocoaPods 依赖 `MXLogger` → `MXLoggerCore`，
-Android 端 Gradle 依赖 `io.github.coder-dongjiayi:mxlogger`。
+运行 `flutter pub get`。
 
 ---
 
