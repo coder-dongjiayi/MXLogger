@@ -18,6 +18,7 @@ import 'package:mxlogger_analyzer_lib/src/screens/home/model/log_model.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/widget/header_dialog.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/widget/log_context_dialog.dart';
 import 'package:mxlogger_analyzer_lib/src/screens/home/widget/log_detail_dialog.dart';
+import 'package:mxlogger_analyzer_lib/src/screens/home/widget/log_timestamp_dialog.dart';
 
 /// 手机端卡片头部的紧凑尺寸：手机屏窄，折叠钮左边距、折叠钮宽度、
 /// 元素间距都压到最小，省下的宽度留给时间/tag/正文。
@@ -125,19 +126,26 @@ class LogCard extends MXConsumerWidget {
                       children: [
                         if (anchored) _AnchorBadge(),
                         LevelBadge(level: log.level),
-                        Text.rich(
-                          TextSpan(children: [
-                            // 时间恒显示完整年月日时分秒（毫秒跟在后面）：
-                            // 排查问题时只有时分秒不够用
-                            TextSpan(text: "${time.date} ${time.time}"),
-                            TextSpan(
-                                text: ".${time.ms}",
-                                style: TextStyle(color: tokens.faint)),
-                          ]),
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            color: tokens.muted,
-                            fontFamilyFallback: MXTheme.monoFontFallback,
+                        Tooltip(
+                          message: context.l10n.timestampTip,
+                          child: InkWell(
+                            onTap: () => showLogTimestampDialog(context, log: log),
+                            borderRadius: BorderRadius.circular(4),
+                            child: Text.rich(
+                              TextSpan(children: [
+                                // 时间恒显示完整年月日时分秒（毫秒跟在后面）：
+                                // 排查问题时只有时分秒不够用
+                                TextSpan(text: "${time.date} ${time.time}"),
+                                TextSpan(
+                                    text: ".${time.ms}",
+                                    style: TextStyle(color: tokens.faint)),
+                              ]),
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                color: tokens.muted,
+                                fontFamilyFallback: MXTheme.monoFontFallback,
+                              ),
+                            ),
                           ),
                         ),
                         _NameButton(log: log, highlight: hlName ? query : ""),

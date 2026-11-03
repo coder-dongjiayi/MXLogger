@@ -321,6 +321,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fieldTime => 'Time';
 
   @override
+  String get timestampTip => 'View raw timestamp';
+
+  @override
+  String get timestampTitle => 'Log timestamp';
+
+  @override
+  String get timestampRaw => 'Raw timestamp (microseconds, μs)';
+
+  @override
   String get fieldKind => 'Kind';
 
   @override

@@ -686,6 +686,24 @@ abstract class AppLocalizations {
   /// **'时间'**
   String get fieldTime;
 
+  /// No description provided for @timestampTip.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看原始时间戳'**
+  String get timestampTip;
+
+  /// No description provided for @timestampTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'日志时间戳'**
+  String get timestampTitle;
+
+  /// No description provided for @timestampRaw.
+  ///
+  /// In zh, this message translates to:
+  /// **'原始时间戳（微秒 μs）'**
+  String get timestampRaw;
+
   /// No description provided for @fieldKind.
   ///
   /// In zh, this message translates to:

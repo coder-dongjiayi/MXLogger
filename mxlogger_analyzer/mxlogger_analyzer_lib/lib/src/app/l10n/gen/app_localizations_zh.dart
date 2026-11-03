@@ -314,6 +314,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fieldTime => '时间';
 
   @override
+  String get timestampTip => '查看原始时间戳';
+
+  @override
+  String get timestampTitle => '日志时间戳';
+
+  @override
+  String get timestampRaw => '原始时间戳（微秒 μs）';
+
+  @override
   String get fieldKind => '类型';
 
   @override
