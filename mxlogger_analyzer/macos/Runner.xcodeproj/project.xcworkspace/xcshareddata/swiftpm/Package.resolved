@@ -1,0 +1,22 @@
+{
+  "pins" : [
+    {
+      "identity" : "csqlite",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/simolus3/CSQLite.git",
+      "state" : {
+        "revision" : "1ee46d19a4f451a7aa64ffc64fc99b4748131e62"
+      }
+    },
+    {
+      "identity" : "mxlogger-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/coder-dongjiayi/mxlogger-spm.git",
+      "state" : {
+        "revision" : "7f59ccd3e6e1078cec802f44e56ca1af8a4cf2b2",
+        "version" : "2.3.0"
+      }
+    }
+  ],
+  "version" : 2
+}
