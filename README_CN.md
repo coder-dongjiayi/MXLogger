@@ -107,6 +107,19 @@ https://github.com/coder-dongjiayi/mxlogger-spm.git
 
 版本规则选择 **Up to Next Major Version**，起始版本设为 **2.3.0**，将 **MXLogger** 产品添加到 app target。
 
+**Flutter 宿主应用：保留 FFI 符号** — 在 iOS / macOS 宿主应用的 **Runner** target 中，
+将 **Release** 和 **Profile** 的 **Build Settings → Strip Style** 设置为
+**Non-Global Symbols**，或在这两个构建配置使用的 `.xcconfig` 中添加：
+
+```xcconfig
+STRIP_STYLE = non-global
+```
+
+使用 SwiftPM 静态链接时，`DynamicLibrary.process()` 会从应用可执行文件中查找
+`flutter_mxlogger_*` C 函数。**All Symbols** 可能在归档时删除这些函数的全局符号名，
+导致 Debug 正常，而安装 release 包后报 `Failed to lookup symbol 'flutter_mxlogger_initialize'`。
+安装及宿主配置见 [Flutter 接入文档](./platform/flutter_mxlogger/README_CN.md#ios--macos)。
+
 ## Android
 
 ```groovy

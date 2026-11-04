@@ -46,82 +46,31 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
 
 ## 安装
 
+在 `pubspec.yaml` 中添加：
+
 ```yaml
 dependencies:
   flutter_mxlogger: ^2.3.0
 ```
 
-原生 SDK 依赖会自动引入：
-
-- iOS / macOS（CocoaPods）：依赖 `MXLogger 2.3.0` → `MXLoggerCore 2.3.0`
-- iOS / macOS（Swift Package Manager）：宿主 App 开启了 Flutter 的 SwiftPM 支持（`flutter config --enable-swift-package-manager`）时，插件通过 `darwin/flutter_mxlogger/Package.swift` 接入，改为依赖 [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.3.0`
-- Android：Gradle 依赖 `io.github.coder-dongjiayi:mxlogger:2.3.0`
-- Windows：准备好的插件包自带预编译 x64 `mxlogger_ffi.dll`，CMake 检查版本及 SHA-256 后随应用复制 DLL。Debug 使用 Debug DLL，Profile/Release 使用 Release DLL；Flutter 用户无需编译 Core 或安装 NuGet。
-
-### Windows 预编译 DLL 与本地开发
-
-仓库在 `windows/bin/x64/` 保存预编译 DLL 和 manifest，不保存 Windows Core 源码副本。
-修改 Core 后，手动运行 `verify-logger`：
-Windows CI 从当前提交构建 `Core/ffi`，执行真实 Dart FFI 测试，最后产出
-`MXLogger.Native.2.3.0.nupkg` 和已装入两种 DLL 的 `flutter_mxlogger-windows-prebuilt` 插件包。
-不需要发布到 NuGet 公共仓库，也不需要自己有 Windows 电脑。
-
-在 **Mac 或 Windows** 的仓库中使用，下载这个 nupkg 后执行：
-
 ```bash
-python3 scripts/prepare_flutter_windows.py --package /path/to/MXLogger.Native.2.3.0.nupkg
-python3 scripts/prepare_flutter_windows.py --check
+flutter pub get
 ```
 
-脚本只提取约定的文件，检查包 ID、Core/ABI 版本、DLL 架构和哈希，放入 `windows/bin/x64/`。
-**发布 pub 前必须先准备这些文件**，将两个 DLL 和 manifest 一起提交到 Git；pub 包也会包含它们。
-缺少 DLL 或校验不符时，CMake 会明确报错。以后修改 Core，需要重新跑 CI 并导入新包，DLL 才会更新。
+原生 SDK 依赖会自动引入。
 
-`MXLOGGER_LOCAL_NATIVE` 继续用于 Android/Apple 的本地原生依赖，Windows 始终使用二进制。
-也可将 `MXLOGGER_WINDOWS_BINARY_DIR` 指向已还原 NuGet 包的 `build/native/ffi/x64`，
-目录需包含 manifest 和 Debug/Release 两种 DLL。
-`scripts/sync_flutter_native.py` 仅同步 Apple 共用的 C ABI/内存辅助头文件，CI 用 `--check` 检查一致性。
-Windows 默认目录为 `%LOCALAPPDATA%/MXLogger/<可执行文件名>/<nameSpace>`，
-与 macOS 一样手动清理。分发应用时保留完整 Flutter 构建目录，包括 DLL、Flutter 运行库和 `data/`。
+### iOS / macOS
 
-在安装 VS 2022/v143、PowerShell 7、Python、NuGet CLI 和 Flutter 的 Windows 仓库根目录运行：
+在 Xcode 中选择宿主应用的 **Runner** target，将 **Release** 和 **Profile** 的
+**Build Settings → Strip Style** 设置为 **Non-Global Symbols**，
+或在这两个构建配置使用的 `.xcconfig` 中添加：
 
-```powershell
-pwsh -File scripts/verify_flutter_windows.ps1 -Configuration Debug
-pwsh -File scripts/verify_flutter_windows.ps1 -Configuration Release
+```xcconfig
+STRIP_STYLE = non-global
 ```
 
-测试从当前源码制作本地 NuGet 测试包，只从本地源还原并禁用缓存，再检查导出符号、真实 Dart 读写/加密/内存释放，
-以及移出仓库后的 Flutter 程序和多 isolate 写入。消费端只有 DLL，没有相邻 Core 源码，也不设置二进制路径覆盖。
-Windows 原生代码若要共享 Dart 的 token，应调用同一个 DLL 的 C 接口；另行静态链接的 Core 有独立实例表。
-这次新增的 Dart 原生释放接口，需要 Android/Apple 原生桥接在发布 2.3.0 时一起升级。
-
-iOS / macOS 共用 `darwin/` 实现（`sharedDarwinSource`，Flutter 3.7+）。Flutter 3.44+ 默认使用 SwiftPM，CocoaPods 仍受支持。macOS 默认目录为 `<Application Support>/<bundle-id>/MXLogger/<nameSpace>`，没有 bundle ID 时使用进程名；沙盒应用的 Application Support 位于容器内。macOS 清理需显式调用 `removeExpireData()`。
-
-### Apple release 归档：保留 FFI 符号
-
-在宿主应用的 **Runner** target 中，将 Release 和 Profile 的
-**Build Settings > Strip Style** 设置为 **Non-Global Symbols**
-（`STRIP_STYLE = non-global`）。示例已在 `example/ios/Flutter/Release.xcconfig`
-及 `example/macos/Runner/Configs/Release.xcconfig`
-中设置，Release / Profile 均使用对应文件。其他宿主应用需在对应的 release 配置中添加该设置，
-或直接在 Runner target 上设置。
-
-使用 SwiftPM 静态链接时，`DynamicLibrary.process()` 会从应用可执行文件中查找
-`flutter_mxlogger_*` C 函数。桥接层已经使用 `extern "C"`、默认可见性、`used`
-以及插件注册时调用的锚点函数。这些措施会在编译和链接阶段保留函数，但如果
-**Strip Style** 为 **All Symbols**，最终归档的符号裁剪步骤仍可能删除全局符号名。
-因此可能出现 Debug 正常，而安装 IPA 后报
-`Failed to lookup symbol 'flutter_mxlogger_initialize'` 的情况。
-
-release 构建后，可检查归档中的应用：
-
-```bash
-xcrun nm -gU build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Runner | rg ' _flutter_mxlogger_initialize$'
-```
-
-修改宿主配置后，需要重新构建并导出 IPA。参见 Flutter 官方的
-[FFI 符号裁剪说明](https://docs.flutter.dev/platform-integration/legacy-ffi-plugin#stripping-symbols)。
+此设置可避免归档时裁剪 FFI 符号，导致 release 包报
+`Failed to lookup symbol 'flutter_mxlogger_initialize'`。修改后重新构建应用。
 
 ## 快速开始
 

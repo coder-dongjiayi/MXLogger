@@ -45,60 +45,32 @@ MXLogger は mmap メモリマッピングを基盤とし、AES-CFB-128 暗号�
 
 ## インストール
 
+`pubspec.yaml` に追加します。
+
 ```yaml
 dependencies:
   flutter_mxlogger: ^2.3.0
 ```
 
+```bash
+flutter pub get
+```
+
 ネイティブ SDK の依存関係は自動的に取り込まれます。
 
-- iOS / macOS（CocoaPods）: `MXLogger 2.3.0` → `MXLoggerCore 2.3.0` に依存
-- iOS / macOS（Swift Package Manager）: ホストアプリで Flutter の SwiftPM サポートを有効にしている場合（`flutter config --enable-swift-package-manager`）、プラグインは `darwin/flutter_mxlogger/Package.swift` 経由で統合され、代わりに [mxlogger-spm](https://github.com/coder-dongjiayi/mxlogger-spm) `2.3.0` に依存します
-- Android: Gradle が `io.github.coder-dongjiayi:mxlogger:2.3.0` に依存
-- Windows: 同梱のプリビルド `mxlogger_ffi.dll` を使用します。Debug は Debug DLL、Profile/Release は Release DLL を使い、CMake がバージョンと SHA-256 を検証して EXE の隣にコピーします。利用するアプリで Core をコンパイルしたり、NuGet をインストールしたりする必要はありません。
+### iOS / macOS
 
-### Windows DLL と 2.3.0 への更新
+Xcode でホストアプリの **Runner** ターゲットを選び、**Release** と **Profile** の
+**Build Settings → Strip Style** を **Non-Global Symbols** に設定するか、
+両構成で使用する `.xcconfig` に次を追加してください。
 
-Windows の既定ディレクトリは `%LOCALAPPDATA%/MXLogger/<実行ファイル名>/<nameSpace>` で、DLL が解決します。macOS と同じくクリーンアップは `removeExpireData()` で明示的に行います。iOS / Android / macOS だけをビルドする場合、Windows DLL を別途準備する必要はありません。
-
-DLL と `manifest.json` は `windows/bin/x64/` に含まれます。Core を変更したら手動の `verify-logger` CI で現在のソースから DLL をビルドし、取得したローカル NuGet パッケージから更新してください。次の準備処理は macOS でも実行できます。
-
-```bash
-python3 scripts/prepare_flutter_windows.py --package /path/to/MXLogger.Native.2.3.0.nupkg
-python3 scripts/prepare_flutter_windows.py --check
+```xcconfig
+STRIP_STYLE = non-global
 ```
 
-このコマンドはリポジトリのルートで実行します。Debug/Release DLL と manifest を一緒にコミットし、pub の公開パッケージにも含めてください。ファイル一覧はネイティブブリッジの `free_logfiles` で解放するため、Android/Apple SDK と Windows DLL も対応する 2.3.0 に更新する必要があります。
-
-CI は Core 単体テスト、全プラットフォームの API テスト、Release 成果物の順で実行します。`MXLoggerFlutterDemo-windows-x64-Release` をダウンロードして全体を展開し、`MXLoggerFlutterDemo.exe` を実行できます。DLL と `data/` を同じフォルダーに保ってください。ログだけの成果物はアップロードしません。
-
-iOS / macOS は `darwin/` を共有します（Flutter 3.7+）。macOS の既定ディレクトリは `<Application Support>/<bundle-id>/MXLogger/<nameSpace>` です。bundle ID がなければプロセス名を使います。macOS では `removeExpireData()` を明示的に呼び出してください。
-
-### Apple の release アーカイブ：FFI シンボルの保持
-
-ホストアプリの **Runner** ターゲットで、Release と Profile の
-**Build Settings > Strip Style** を **Non-Global Symbols**
-（`STRIP_STYLE = non-global`）に設定してください。サンプルでは、両方の構成が使う
-`example/ios/Flutter/Release.xcconfig` と `example/macos/Runner/Configs/Release.xcconfig` に設定しています。ほかのホストアプリでは、
-対応する release 構成に設定を追加するか、Runner ターゲットで直接設定してください。
-
-SwiftPM で静的リンクする場合、`DynamicLibrary.process()` はアプリの実行ファイルから
-`flutter_mxlogger_*` C 関数を検索します。ブリッジではすでに `extern "C"`、
-デフォルトの可視性、`used`、プラグイン登録時に呼び出すアンカー関数を使用しています。
-これらはコンパイルとリンクの段階で関数を保持しますが、**Strip Style** が
-**All Symbols** の場合、最終的なアーカイブの strip 処理でグローバルシンボル名が
-削除されることがあります。そのため、Debug では正常でも、インストールした IPA では
-`Failed to lookup symbol 'flutter_mxlogger_initialize'` が発生する場合があります。
-
-release ビルド後に、アーカイブ内のアプリを確認できます：
-
-```bash
-xcrun nm -gU build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Runner | rg ' _flutter_mxlogger_initialize$'
-```
-
-ホスト側の設定を変更したら、再ビルドして IPA をエクスポートしてください。
-Flutter 公式の [FFI シンボルの strip に関する説明](https://docs.flutter.dev/platform-integration/legacy-ffi-plugin#stripping-symbols)
-も参照してください。
+アーカイブ時に FFI シンボルが削除され、リリースで
+`Failed to lookup symbol 'flutter_mxlogger_initialize'` が発生するのを防ぎます。
+変更後はアプリを再ビルドしてください。
 
 ## クイックスタート
 

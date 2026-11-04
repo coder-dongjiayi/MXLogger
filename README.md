@@ -110,6 +110,21 @@ https://github.com/coder-dongjiayi/mxlogger-spm.git
 
 Choose **Up to Next Major Version** starting at **2.3.0**, and add the **MXLogger** product to your app target.
 
+**Flutter host apps: preserve FFI symbols** — for iOS / macOS, set the host **Runner** target's
+**Build Settings → Strip Style** to **Non-Global Symbols** for both **Release** and **Profile**,
+or add the following to the `.xcconfig` used by those configurations:
+
+```xcconfig
+STRIP_STYLE = non-global
+```
+
+With static SwiftPM integration, `DynamicLibrary.process()` looks up the `flutter_mxlogger_*`
+C functions in the app executable. **All Symbols** can strip their global symbol names during
+archiving, causing Debug to work while the installed release reports
+`Failed to lookup symbol 'flutter_mxlogger_initialize'`.
+See the [Flutter integration guide](./platform/flutter_mxlogger/README.md#ios--macos)
+for installation and host configuration.
+
 ## Android
 
 ```groovy

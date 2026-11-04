@@ -97,6 +97,20 @@ https://github.com/coder-dongjiayi/mxlogger-spm.git
 
 **Up to Next Major Version** を選び、開始バージョンを **2.3.0** に設定して、**MXLogger** プロダクトをアプリのターゲットに追加します。
 
+**Flutter ホストアプリ：FFI シンボルの保持** — iOS / macOS のホストアプリの **Runner** ターゲットで、
+**Release** と **Profile** の **Build Settings → Strip Style** を **Non-Global Symbols** に設定するか、
+両構成で使用する `.xcconfig` に次を追加してください。
+
+```xcconfig
+STRIP_STYLE = non-global
+```
+
+SwiftPM の静的リンクでは、`DynamicLibrary.process()` がアプリの実行ファイルから
+`flutter_mxlogger_*` C 関数を検索します。**All Symbols** はアーカイブ時にこれらのグローバルシンボル名を
+削除する可能性があり、Debug では動作しても、インストールしたリリースで
+`Failed to lookup symbol 'flutter_mxlogger_initialize'` が発生することがあります。
+インストールとホスト側の設定は [Flutter 導入ガイド](./platform/flutter_mxlogger/README_JA.md#ios--macos) を参照してください。
+
 ## Android
 
 ```groovy
