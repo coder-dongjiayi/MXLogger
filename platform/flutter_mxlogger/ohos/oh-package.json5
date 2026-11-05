@@ -1,6 +1,6 @@
 {
   "name": "flutter_mxlogger",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "MXLogger Flutter binding for HarmonyOS",
   "main": "index.ets",
   "author": "dongjiayi",

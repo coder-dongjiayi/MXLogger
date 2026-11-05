@@ -6,9 +6,9 @@ MXLogger는 mmap 메모리 매핑을 기반으로 하고 AES-CFB-128 암호화�
 
 전체 프로젝트는 [MXLogger 메인 저장소](https://github.com/coder-dongjiayi/MXLogger)를 참고하세요.
 
-- **버전**: 2.3.0
+- **버전**: 2.3.2
 - **요구 사항**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
-- **지원 플랫폼**: iOS(>= 9.0), macOS(>= 10.14), Android(minSdk 21), Windows 10/11 x64, HarmonyOS (현재 저장소 개발 버전)
+- **지원 플랫폼**: iOS(>= 9.0), macOS(>= 10.14), Android(minSdk 21), Windows 10/11 x64, HarmonyOS
 
 <img src="https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/platform/flutter_mxlogger/images/jiegoutu.webp" alt="MXLogger 구조: iOS, macOS, Android, HarmonyOS, Windows, Flutter가 C/C++ Core, 로그 형식 및 분석기를 공유" width="960" />
 
@@ -49,7 +49,7 @@ MXLogger는 mmap 메모리 매핑을 기반으로 하고 AES-CFB-128 암호화�
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.3.0
+  flutter_mxlogger: ^2.3.2
 ```
 
 ```bash
@@ -72,9 +72,9 @@ STRIP_STYLE = non-global
 `Failed to lookup symbol 'flutter_mxlogger_initialize'` 오류가 발생하는 것을 방지합니다.
 변경 후 앱을 다시 빌드하세요.
 
-### HarmonyOS (현재 저장소 개발 버전)
+### HarmonyOS
 
-HarmonyOS Flutter 바인딩은 현재 저장소에 있으며 pub.dev에는 아직 배포되지 않았습니다. `platform/flutter_mxlogger`를 `path` 의존성으로 지정하거나 이 변경이 포함된 Git 커밋을 사용하세요.
+`flutter_mxlogger 2.3.2`부터 HarmonyOS를 지원합니다. 위의 pub.dev 의존성을 지정하여 설치하세요.
 HarmonyOS Flutter SDK(사용 버전: `3.41.9+ohos-1.0.2`)와 DevEco Studio가 필요하며 예제의 최소 API는 17입니다.
 플러그인은 OHPM 중앙 저장소의 `@djy/mxlogger@2.3.1`을 자동으로 가져옵니다. HAR 수동 설치나 Core 컴파일은 필요하지 않습니다.
 

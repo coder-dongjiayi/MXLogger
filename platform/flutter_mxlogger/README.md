@@ -6,9 +6,9 @@ MXLogger is a cross-platform logging library built on mmap memory mapping, with 
 
 See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) for the full project.
 
-- **Version**: 2.3.0
+- **Version**: 2.3.2
 - **Requirements**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
-- **Platforms**: iOS (>= 9.0), macOS (>= 10.14), Android (minSdk 21), Windows 10/11 x64, HarmonyOS (current repository development version)
+- **Platforms**: iOS (>= 9.0), macOS (>= 10.14), Android (minSdk 21), Windows 10/11 x64, HarmonyOS
 
 <img src="https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/platform/flutter_mxlogger/images/jiegoutu.webp" alt="MXLogger architecture: iOS, macOS, Android, HarmonyOS, Windows and Flutter share a C/C++ core, binary log files and analyzer" width="960" />
 
@@ -53,7 +53,7 @@ Add to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.3.0
+  flutter_mxlogger: ^2.3.2
 ```
 
 ```bash
@@ -76,9 +76,9 @@ This preserves FFI symbols during archiving and avoids errors such as
 `Failed to lookup symbol 'flutter_mxlogger_initialize'` in release builds.
 Rebuild the app after changing the setting.
 
-### HarmonyOS (current repository development version)
+### HarmonyOS
 
-The HarmonyOS Flutter binding is in this checkout and has not been published to pub.dev. Use a `path` dependency on `platform/flutter_mxlogger`, or a Git commit containing this change.
+HarmonyOS support is included starting with `flutter_mxlogger 2.3.2`. Install it using the pub.dev dependency above.
 Use a HarmonyOS Flutter SDK (tested toolchain: `3.41.9+ohos-1.0.2`) and DevEco Studio; the example requires API 17 or later.
 The plugin resolves `@djy/mxlogger@2.3.1` from the central OHPM registry automatically, without manually installing a HAR or compiling Core.
 

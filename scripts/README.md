@@ -282,7 +282,7 @@ bash scripts/verify_android_demo.sh package
 ### HarmonyOS Flutter
 
 插件的 `ohos/` 模块从中心仓依赖 `@djy/mxlogger@2.3.1`；Dart 通过 FFI 复用其原生库，消费者不编译 Core。
-需要鸿蒙 Flutter SDK（使用 `3.41.9+ohos-1.0.2`）和 DevEco Studio。当前绑定是仓库开发版，尚未发布到 pub.dev。
+需要鸿蒙 Flutter SDK（使用 `3.41.9+ohos-1.0.2`）和 DevEco Studio。Flutter 包从 `2.3.2` 起包含鸿蒙绑定。
 
 ```sh
 python3 scripts/verify_flutter_ohos.py --flutter /path/to/harmonyos/flutter/bin/flutter

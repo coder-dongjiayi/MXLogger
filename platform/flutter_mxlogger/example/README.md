@@ -36,9 +36,8 @@ one process; the separate native macOS demo also demonstrates multiple processes
 
 ## HarmonyOS
 
-The binding is currently available from this checkout, ahead of the next pub.dev
-release. Use a HarmonyOS Flutter SDK and DevEco Studio; upstream Flutter does not
-build HAPs. The example requires API 17 or later and uses the central OHPM package
+HarmonyOS support is included starting with `flutter_mxlogger 2.3.2`.
+Use a HarmonyOS Flutter SDK and DevEco Studio; upstream Flutter does not build HAPs. The example requires API 17 or later and uses the central OHPM package
 `@djy/mxlogger@2.3.1` automatically. No local HAR installation is needed.
 
 From this example directory:

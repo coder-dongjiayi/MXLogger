@@ -127,7 +127,7 @@ implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ohpm install @djy/mxlogger@2.3.1
 ```
 
-HAR에는 ArkTS API와 ARM64 / x86_64 네이티브 라이브러리가 포함됩니다. 최소 API는 12이며, API 26 / ARM64 실기기에서 검증했습니다. x86_64는 빌드만 확인했습니다. 네이티브 ArkTS SDK는 OHPM에 배포되었습니다. Flutter HarmonyOS 개발 버전은 현재 저장소에 있으며 pub.dev에는 아직 배포되지 않았습니다. [Flutter 안내](./platform/flutter_mxlogger/README_KO.md)를 참고하세요. [HarmonyOS SDK와 Demo 가이드](./platform/OHOS/README.md)를 참고하세요.
+HAR에는 ArkTS API와 ARM64 / x86_64 네이티브 라이브러리가 포함됩니다. 최소 API는 12이며, API 26 / ARM64 실기기에서 검증했습니다. x86_64는 빌드만 확인했습니다. 네이티브 ArkTS SDK는 OHPM에 배포되었습니다. `flutter_mxlogger 2.3.2`부터 Flutter HarmonyOS를 지원합니다. [Flutter 안내](./platform/flutter_mxlogger/README_KO.md)를 참고하세요. [HarmonyOS SDK와 Demo 가이드](./platform/OHOS/README.md)를 참고하세요.
 
 ## Windows
 
@@ -143,7 +143,7 @@ Install-Package MXLogger.Native -Version 2.3.0 -Source D:\NuGetFeed
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.3.0
+  flutter_mxlogger: ^2.3.2
   mxlogger_analyzer_lib: ^2.0.0   # 선택 사항: 앱 내 로그 뷰어
 ```
 

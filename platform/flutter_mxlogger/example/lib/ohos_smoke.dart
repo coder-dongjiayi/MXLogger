@@ -156,6 +156,11 @@ Future<void> main() async {
   // A single machine-readable record for the HDC verification script.
   // ignore: avoid_print
   print('$_marker${jsonEncode(report)}');
+  try {
+    await _native.invokeMethod<void>('report', {'report': jsonEncode(report)});
+  } catch (_) {
+    // A standalone launch can still display the report without the test bridge.
+  }
   runApp(
     MaterialApp(
       home: Scaffold(

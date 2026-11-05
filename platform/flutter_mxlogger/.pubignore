@@ -6,6 +6,7 @@
 build/
 /pubspec.lock
 .idea/
+**/*.iml
 test/native/libmxlogger_test.dylib
 test/native/build_tmp/
 darwin/flutter_mxlogger/.build/

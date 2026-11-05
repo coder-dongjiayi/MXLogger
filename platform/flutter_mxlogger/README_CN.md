@@ -6,9 +6,9 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
 
 更多说明见 [MXLogger 主仓库](https://github.com/coder-dongjiayi/MXLogger)。
 
-- **当前版本**：2.3.0
+- **当前版本**：2.3.2
 - **环境要求**：Dart SDK `>=2.19.0 <4.0.0`、Flutter `>=3.7.0`
-- **平台支持**：iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）、Windows 10/11 x64、HarmonyOS（当前仓库开发版）
+- **平台支持**：iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）、Windows 10/11 x64、HarmonyOS
 
 <img src="https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/platform/flutter_mxlogger/images/jiegoutu.webp" alt="MXLogger 架构：iOS、macOS、Android、HarmonyOS、Windows 和 Flutter 共用 C/C++ Core、二进制日志与解析器" width="960" />
 
@@ -50,7 +50,7 @@ MXLogger 是基于 mmap 内存映射机制的跨平台日志库，支持 AES CFB
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.3.0
+  flutter_mxlogger: ^2.3.2
 ```
 
 ```bash
@@ -72,9 +72,9 @@ STRIP_STYLE = non-global
 此设置可避免归档时裁剪 FFI 符号，导致 release 包报
 `Failed to lookup symbol 'flutter_mxlogger_initialize'`。修改后重新构建应用。
 
-### HarmonyOS（当前仓库开发版）
+### HarmonyOS
 
-鸿蒙 Flutter 适配位于当前仓库，尚未发布到 pub.dev；请通过 `path` 依赖本地的 `platform/flutter_mxlogger`，或使用包含该改动的 Git 提交。
+`flutter_mxlogger` 从 `2.3.2` 起支持鸿蒙，可按上面的 pub.dev 依赖方式安装。
 需要鸿蒙 Flutter SDK（本次使用 `3.41.9+ohos-1.0.2`）和 DevEco Studio，示例工程最低 API 17。
 插件自动从 OHPM 中心仓依赖 `@djy/mxlogger@2.3.1`，不需要手动安装 HAR，也不编译 Core。
 

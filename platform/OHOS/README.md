@@ -3,7 +3,7 @@
 提供 ArkTS SDK、Release HAR、原生 Demo，以及独立 HAR 消费工程的构建与真机验证脚本。
 开发工程默认包版本 `0.1.0`，发布包版本由打包脚本参数指定；Core 版本由 `MXLogger.coreVersion()` 返回（本次为 `2.3.0`）。
 OHPM 包名为 `@djy/mxlogger`，发布版本为 `2.3.1`，通过 OHPM 中心仓安装。
-本文介绍原生 ArkTS 接入。当前仓库也提供 Flutter 鸿蒙开发版绑定，见 [Flutter 示例与验证说明](../flutter_mxlogger/example/README.md#harmonyos)；Flutter 绑定尚未发布到 pub.dev。
+本文介绍原生 ArkTS 接入。`flutter_mxlogger 2.3.2` 起也提供 Flutter 鸿蒙绑定，见 [Flutter 示例与验证说明](../flutter_mxlogger/example/README.md#harmonyos)。
 
 ## 通过 OHPM 安装
 

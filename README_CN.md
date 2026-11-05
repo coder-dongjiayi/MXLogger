@@ -137,7 +137,7 @@ implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ohpm install @djy/mxlogger@2.3.1
 ```
 
-HAR 包含 ArkTS API 和 ARM64 / x86_64 原生库。声明最低 API 12，目前完成 API 26 / ARM64 真机验证；x86_64 仅完成构建。原生 ArkTS SDK 已发布到 OHPM；当前仓库已提供 Flutter 鸿蒙开发版适配，尚未发布到 pub.dev，详见 [Flutter 接入说明](./platform/flutter_mxlogger/README_CN.md#harmonyos当前仓库开发版)。详见[鸿蒙 SDK、Demo 和打包说明](./platform/OHOS/README.md)。
+HAR 包含 ArkTS API 和 ARM64 / x86_64 原生库。声明最低 API 12，目前完成 API 26 / ARM64 真机验证；x86_64 仅完成构建。原生 ArkTS SDK 已发布到 OHPM；`flutter_mxlogger` 从 `2.3.2` 起支持鸿蒙，详见 [Flutter 接入说明](./platform/flutter_mxlogger/README_CN.md#harmonyos)。详见[鸿蒙 SDK、Demo 和打包说明](./platform/OHOS/README.md)。
 
 ## Windows
 
@@ -153,7 +153,7 @@ Install-Package MXLogger.Native -Version 2.3.0 -Source D:\NuGetFeed
 
 ```yaml
 dependencies:
-  flutter_mxlogger: ^2.3.0
+  flutter_mxlogger: ^2.3.2
   mxlogger_analyzer_lib: ^2.0.0   # 可选：app 内实时查看日志
 ```
 

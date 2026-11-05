@@ -1,5 +1,5 @@
 name: flutter_mxlogger
-description: Cross-platform, high-performance logging.Persists logs to local files via mmap, with optional AES-CFB-128 encryption and a C/C++ core accessed via dart:ffi.
+description: Cross-platform logging for iOS, Android, macOS, Windows and HarmonyOS, using mmap, optional AES-CFB-128 encryption and a C/C++ core accessed via dart:ffi.
 version: 2.3.2
 homepage: https://github.com/coder-dongjiayi/MXLogger
 repository: https://github.com/coder-dongjiayi/MXLogger

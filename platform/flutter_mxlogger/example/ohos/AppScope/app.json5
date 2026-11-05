@@ -2,8 +2,8 @@
   "app": {
     "bundleName": "com.mxlogger.flutter.demo",
     "vendor": "example",
-    "versionCode": 2030100,
-    "versionName": "2.3.1",
+    "versionCode": 2030200,
+    "versionName": "2.3.2",
     "icon": "$media:app_icon",
     "label": "$string:app_name"
   }

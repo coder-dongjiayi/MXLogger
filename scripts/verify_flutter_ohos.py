@@ -35,7 +35,7 @@ def run(command, *, cwd, env, log):
 
 def prepare(args, out):
     plugin = out / 'flutter_mxlogger'
-    source = ROOT / 'platform/flutter_mxlogger'
+    source = args.plugin
     plugin.mkdir()
     for name in ('lib', 'ohos'):
         shutil.copytree(source / name, plugin / name, ignore=IGNORE)
@@ -128,7 +128,7 @@ def device(args, out, hap, bundle):
     try:
         for _ in range(2):
             call('shell', 'aa', 'force-stop', bundle)
-            old_logs = call('shell', 'hilog', '-x', '-T', 'XComFlutterOHOS_Native')
+            old_logs = call('shell', 'hilog', '-x', '-T', 'MXLoggerFlutter')
             seen = {item['pid'] for item in parse_reports(old_logs)}
             start = call('shell', 'aa', 'start', '-b', bundle, '-a', 'EntryAbility')
             if 'start ability successfully' not in start:
@@ -136,7 +136,7 @@ def device(args, out, hap, bundle):
             deadline = time.monotonic() + 45
             report = None
             while time.monotonic() < deadline:
-                logs = call('shell', 'hilog', '-x', '-T', 'XComFlutterOHOS_Native')
+                logs = call('shell', 'hilog', '-x', '-T', 'MXLoggerFlutter')
                 (out / 'device-hilog.txt').write_text(logs)
                 reports = [item for item in parse_reports(logs) if item['pid'] not in seen]
                 if reports:
@@ -181,6 +181,10 @@ def main():
                         help='Reuse this DevEco project signing config AND bundle ID in the isolated app')
     parser.add_argument('--restore-hap', type=Path, help='Restore this signed Demo HAP after device verification')
     parser.add_argument('--demo', action='store_true', help='Build the interactive lib/main.dart Demo instead of the smoke entry')
+    parser.add_argument('--mode', choices=('debug', 'profile', 'release'), default='debug',
+                        help='Flutter build mode; release verifies AOT and FFI symbol retention')
+    parser.add_argument('--plugin', type=Path, default=ROOT / 'platform/flutter_mxlogger',
+                        help='Plugin source, or an extracted pub package, to verify')
     args = parser.parse_args()
     if not args.flutter or not args.flutter.is_file():
         parser.error('Specify --flutter /path/to/harmonyos/flutter/bin/flutter')
@@ -191,6 +195,7 @@ def main():
     if args.demo and args.device:
         parser.error('--device runs the smoke entry; use --demo for a build-only interactive Demo check')
     args.flutter = args.flutter.resolve()
+    args.plugin = args.plugin.resolve()
     args.deveco = args.deveco.resolve()
     if args.signing_project:
         args.signing_project = args.signing_project.resolve()
@@ -210,7 +215,7 @@ def main():
     run(command + ['pub', 'get'], cwd=app, env=env, log=out / 'pub-get.log')
     target = 'lib/main.dart' if args.demo else 'lib/ohos_smoke.dart'
     signing_flags = [] if args.signing_project else ['--no-codesign']
-    run(command + ['build', 'hap', '--debug', '--target-platform', 'ohos-arm64',
+    run(command + ['build', 'hap', '--' + args.mode, '--target-platform', 'ohos-arm64',
          '-t', target, '--no-pub'] + signing_flags, cwd=app, env=env, log=out / 'build.log')
     haps = list((app / 'ohos/entry/build/default/outputs/default').glob('entry-default-*.hap'))
     if not haps:
@@ -222,7 +227,8 @@ def main():
     if list(app.rglob('*.cpp.o')) or list(app.rglob('CMakeCache.txt')):
         raise RuntimeError('Consumer unexpectedly compiled native source')
     report = {'bundleName': bundle, 'hap': str(hap), 'hapSha256': hashlib.sha256(hap.read_bytes()).hexdigest(),
-              'package': '@djy/mxlogger@2.3.1', 'compiledCore': False, 'buildPassed': True, 'target': target}
+              'package': '@djy/mxlogger@2.3.1', 'compiledCore': False, 'buildPassed': True,
+              'target': target, 'buildMode': args.mode, 'pluginSource': str(args.plugin)}
     (out / 'build-report.json').write_text(json.dumps(report, indent=2))
     print('PASS: Flutter HAP built from the central OHPM HAR, without compiling Core', flush=True)
     if args.device:
