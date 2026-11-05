@@ -43,7 +43,7 @@ Windows / HarmonyOS 原生 SDK 和 Flutter 插件。核心代码使用 C/C++ 实
 
 ## 整体结构
 
-<img src="./icon/jiegoutu.webp" alt="结构图" width="960" />
+<img src="./icon/jiegoutu.webp" alt="MXLogger 架构：iOS、macOS、Android、HarmonyOS、Windows 和 Flutter 共用 C/C++ Core、二进制日志与解析器" width="960" />
 
 MXLogger 主要解决日志**写入**和日志**分析**两件事。至于日志上报时机应该由业务决定：MXLogger 已经把日志目录
 （`diskCachePath`）暴露出来，由开发调用原生平台的文件上传代码传到自己的服务器，下载后再用

@@ -41,7 +41,7 @@ straight into your iOS/Android Flutter app as a floating ball.
 
 ## Structure
 
-<img src="./icon/jiegoutu.webp" alt="structure" width="960" />
+<img src="./icon/jiegoutu.webp" alt="MXLogger architecture: iOS, macOS, Android, HarmonyOS, Windows and Flutter share a C/C++ core, binary log files and analyzer" width="960" />
 
 MXLogger solves log **writing** and log **analysis**. When to upload logs is a business decision —
 MXLogger exposes the log directory (`diskCachePath`), and you upload the files from the native
