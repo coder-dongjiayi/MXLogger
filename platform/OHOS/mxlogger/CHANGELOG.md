@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.1
+
+- 调整 OHPM 组织名，包名为 `@djy/mxlogger`。
+- 补充 OHPM 包主页 `homepage`。
+- 发布包内提供 `example/`：可直接放入 Empty Ability 工程运行的 ArkTS 示例及接入说明。
+- 打包时检查 homepage、示例源码和文档是否完整包含在最终 HAR 中。
+
 ## 2.3.0
 
 - 首次提供 HarmonyOS 原生 ArkTS SDK，复用 MXLogger Core 2.3.0。

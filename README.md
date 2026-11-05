@@ -2,6 +2,7 @@
   <img src="https://img.shields.io/badge/iOS-9.0+-000000?style=for-the-badge&logo=apple&logoColor=white" alt="iOS" />
   <img src="https://img.shields.io/badge/macOS-10.13+-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS" />
   <img src="https://img.shields.io/badge/Android-minSdk%2021-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" />
+  <img src="https://img.shields.io/badge/HarmonyOS-API%2012%2B-0A59F7?style=for-the-badge" alt="HarmonyOS" />
   <img src="https://img.shields.io/badge/Flutter-3.7+-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
 </p>
 
@@ -21,9 +22,9 @@
 [English](./README.md) | [简体中文](./README_CN.md) | [日本語](./README_JA.md) | [한국어](./README_KO.md)
 
 MXLogger is a cross-platform logging library built on **mmap** memory mapping, with **AES-CFB-128**
-encryption. The core is written in C/C++ and serializes records with Google **FlatBuffers**; the
-Flutter side calls straight into it through `dart:ffi`, so performance is essentially identical to
-native. Writing 100,000 records (~134 bytes each) takes about **0.13s** on an iPhone 11.
+encryption, with native SDKs for iOS / macOS / Android / Windows / HarmonyOS and a Flutter plugin.
+The core is written in C/C++ and serializes records with Google **FlatBuffers**; the Flutter side calls straight into it through `dart:ffi`, so performance is essentially identical to
+native. Historical iPhone 11 measurements show about **0.13s** for 100,000 records (~134 bytes each).
 
 Along with the writers comes **mxlogger_analyzer**, an analyzer that imports, decrypts and searches
 the produced `.mx` binaries — as a Chrome extension, a desktop app (macOS/Windows/Linux), or embedded
@@ -33,7 +34,7 @@ straight into your iOS/Android Flutter app as a floating ball.
 - [Install](#install)
 - [Quick start](#quick-start)
 - [API reference](#api-reference)
-  - [iOS](#ios-api) · [Android](#android-api) · [Flutter](#flutter-api) · [Analyzer](#analyzer-api)
+  - [iOS](#ios-api) · [Android](#android-api) · [HarmonyOS](#harmonyos-api) · [Flutter](#flutter-api) · [Analyzer](#analyzer-api)
 - [Storage policy and levels](#storage-policy-and-levels)
 - [Performance](#performance)
 - [Notes](#notes)
@@ -62,6 +63,8 @@ into sqlite, which backs full-text search, level/time/Tag/Name filtering and a J
 For the Chrome extension, open the store link in Chrome and click **Add to Chrome** → **Add extension**.
 Then open **MXLogger Analyzer** from the extensions menu, select or drop your `.mx` files,
 configure KEY/IV if encrypted, and start the import.
+
+HarmonyOS uses the same `.mx` format. Export its files and open them in the Chrome or desktop analyzer with the same KEY/IV.
 
 **Data page** — level distribution bar plus level chips, search and time filters, a syntax-colored
 JSON tree inside every log card, click-to-filter `@name` / `#tag`, and per-record info / share /
@@ -130,6 +133,16 @@ for installation and host configuration.
 ```groovy
 implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ```
+
+## HarmonyOS (ArkTS)
+
+Install from the [OHPM central registry](https://ohpm.openharmony.cn/) in the consuming module directory, such as `entry/`:
+
+```sh
+ohpm install @djy/mxlogger@2.3.1
+```
+
+The HAR contains the ArkTS API and ARM64 / x86_64 native libraries. It declares API 12 as the minimum; runtime validation currently covers API 26 / ARM64. x86_64 is build-only. HarmonyOS support currently uses the native ArkTS SDK; Flutter HarmonyOS integration is pending. See the [HarmonyOS SDK and Demo guide](./platform/OHOS/README.md).
 
 ## Windows
 
@@ -207,6 +220,36 @@ logger.fatal("db,fatal", "database", "connection lost");
 Log.d("MXLogger", "logs live in " + logger.getDiskCachePath());
 ```
 
+## HarmonyOS (ArkTS)
+
+Inside an ArkUI component, obtain the host Context and initialize the logger:
+
+```typescript
+import { MXLogger, MXLogLevel, MXStoragePolicy } from '@djy/mxlogger';
+
+const context = this.getUIContext().getHostContext();
+if (!context) { throw new Error('Context unavailable'); }
+const logger = MXLogger.initialize(context, {
+  nameSpace: 'com.yourdomain.logger',
+  storagePolicy: MXStoragePolicy.Daily,
+  fileName: 'mxlog',
+  fileHeader: '{"app_version":"2.3.0"}',
+  cryptKey: 'abcuioqbsdguijlk',
+  iv: 'bccuioqbsdguijiv'
+});
+logger.setLevel(MXLogLevel.Debug);
+logger.setMaxDiskAge(7 * 24 * 60 * 60);
+logger.setMaxDiskSize(10 * 1024 * 1024);
+logger.debug('token check started', { name: 'login', tag: 'login,service' });
+logger.info('{"status":200}', { name: 'network', tag: 'network,POST' });
+logger.warn('retry #2', { name: 'network', tag: 'network' });
+logger.error('request failed', { name: 'network', tag: 'network' });
+logger.fatal('connection lost', { name: 'database', tag: 'db,fatal' });
+console.info(logger.diskCachePath);
+```
+
+The default base directory is `context.filesDir/com.mxlog.LoggerCache`; Core appends the namespace. HiLog is off by default and can be enabled with `setConsoleEnable(true)`. Use `removeExpireData()` explicitly for cleanup and `destroy()` when the shared session is no longer needed.
+
 ## Flutter
 
 ```dart
@@ -245,12 +288,15 @@ Read the linked C++ Core version without creating a logger. The current value is
 | iOS / macOS (Objective-C) | `[MXLogger coreVersion]` |
 | iOS / macOS (Swift) | `MXLogger.coreVersion()` |
 | Android (Java/Kotlin) | `MXLogger.coreVersion()` |
+| HarmonyOS (ArkTS) | `MXLogger.coreVersion()` |
 | Flutter (native platforms) | `MXLogger.coreVersion()` |
 
-Common to all three platforms: a logger is identified by **nameSpace + diskCacheDirectory**, and the
+Across the SDKs: a logger is identified by **nameSpace + diskCacheDirectory**, and the
 underlying C++ instance is deduplicated on that pair. The md5 of the pair is the **loggerToken** —
 pass it around a modularized app and write logs through the class methods without holding the logger
 object.
+
+HarmonyOS shares sessions within one process; multi-process concurrent writes have not been validated. Its `directory` option accepts an absolute base directory.
 
 The native macOS Core coordinates processes sharing a log directory. Before appending it takes a
 directory file lock and refreshes the committed length and mapping capacity without checking
@@ -415,6 +461,24 @@ Note the parameter order — **tag comes first** on Android.
 
 Android Java still uses these uppercase enum names. Flutter / Dart uses `yyyyMMdd`, `yyyyMMddHH`, `yyyyWw`, and `yyyyMM`; see the [Flutter API](#flutter-api).
 
+<a name="harmonyos-api"></a>
+
+## HarmonyOS — `@djy/mxlogger` (ArkTS)
+
+| API | Description |
+| --- | --- |
+| `initialize(context, options) / initializeWithDirectory(directory, options)` | Initialize with a Context or an absolute directory; options include namespace, policy, filename, header, key and IV |
+| `fromLoggerToken(token) / logWithToken(token, level, message, options?)` | Attach to or write through an existing process-local shared session |
+| `debug/info/warn/error/fatal / log` | Five convenience levels and custom-level writes; options contain `name` and `tag` |
+| `setLevel / setEnable / setConsoleEnable` | Minimum level, write switch and HiLog switch |
+| `setMaxDiskAge / setMaxDiskSize` | Retention in seconds / bytes; `0` means unlimited |
+| `state / isValid / loggerToken / diskCachePath / errorDesc / logSize` | Native state snapshot, validity, identity, path, last error and disk usage |
+| `level / enable / consoleEnable / maxDiskAge / maxDiskSize` | Read current shared configuration |
+| `logFiles / readLogFile(filename)` | File metadata and decoded records using this logger’s key / IV |
+| `flush / removeExpireData / removeBeforeAllData / removeAll / destroy` | Flush, cleanup and shared-session destruction; cleanup preserves the active file |
+
+`MXLogger.coreVersion()` returns the linked Core version. `MXStoragePolicy` provides `Daily`, `Hourly`, `Weekly` and `Monthly`; `MXLogLevel` provides Debug=0 through Fatal=4. Repeated initialization shares a session without resetting configuration; conflicting initialization options throw an error. `destroy()` invalidates all aliases; GC releases only the wrapper. See the [full API and lifecycle guide](./platform/OHOS/README.md#api).
+
 <a name="flutter-api"></a>
 ## Flutter — `flutter_mxlogger`
 
@@ -555,16 +619,15 @@ sqlite, so reopening after an app restart still shows the previous run.
 
 **Levels** are `0:debug 1:info 2:warn 3:error 4:fatal`. Setting the level to *n* means only logs of
 level >= *n* reach the file — with `level = 2`, debug and info are dropped and only warn / error /
-fatal are written. The level only gates **disk writes**: with console output on, the console still
-prints everything.
+fatal are written. Console filtering depends on the platform; HarmonyOS HiLog follows both
+`enable` and the level setting.
 
-**Console output** is meant for development. It costs write performance, so turn it off for
-benchmarks; in release builds it is compiled/tree-shaken away on all three platforms anyway.
+**Console output** affects write performance, so disable it for benchmarks. Availability depends on the platform. HarmonyOS Release HARs retain HiLog support, disabled by default; enable it explicitly with `setConsoleEnable(true)`.
 
-**Encryption** uses AES-CFB-128 (the assembly implementation from
-[MMKV](https://github.com/Tencent/MMKV/tree/master/Core/aes), which keeps writes fast). `cryptKey`
+**Encryption** uses AES-CFB-128, with code derived from
+[MMKV](https://github.com/Tencent/MMKV/tree/master/Core/aes). `cryptKey`
 and `iv` are 16 bytes — longer is truncated, shorter is zero-padded — and `iv` defaults to `cryptKey`
-when omitted. Keep them: the analyzer needs the same pair to read the file back.
+when omitted. Keep them: the analyzer needs the same pair to read the file back. HarmonyOS currently uses the portable C AES implementation.
 
 **File header** (`fileHeader`) is written once when a file is created. Put the environment there
 (app version, platform, device info); the analyzer expands it into a scalar grid plus a JSON tree.
@@ -572,6 +635,8 @@ when omitted. Keep them: the analyzer needs the same pair to read the file back.
 ---
 
 # Performance
+
+The current iOS / Android / macOS / Flutter / HarmonyOS Demo bulk benchmark uses 100,000 records with the same 61-byte message (`[000001] This is a benchmark loooooooooooooooooooooooooooooog`), `name=benchmark` and `tag=perf`. With Info/background-thread metadata, each serialized record is 152 B, or 156 B including its length field. HarmonyOS timing includes Worker startup and flush. The historical iOS comparison below uses a different workload and timing setup.
 
 Write benchmark, iOS only (the demo project is [here](./性能测试demo.zip)):
 
@@ -603,7 +668,7 @@ MXLogger roadmap.
   no need to pass the logger object around.
 - `maxDiskAge` / `maxDiskSize` are not enforced on every write: the cleanup runs in
   `removeExpireData` (automatic on entering background on iOS and Flutter mobile; call it yourself on
-  native Android and macOS).
+  native Android, macOS and HarmonyOS).
 
 
 # License

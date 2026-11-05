@@ -1,5 +1,5 @@
 import worker, { MessageEvents } from '@ohos.worker';
-import { MXLogger } from '@mxlogger/mxlogger';
+import { MXLogger } from '@djy/mxlogger';
 import { DemoWriteRequest, DemoWriteResult } from '../DemoSession';
 import { BENCHMARK_NAME, BENCHMARK_TAG, benchmarkMessage } from '../DemoBenchmark';
 

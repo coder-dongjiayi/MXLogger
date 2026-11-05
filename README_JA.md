@@ -2,6 +2,7 @@
   <img src="https://img.shields.io/badge/iOS-9.0+-000000?style=for-the-badge&logo=apple&logoColor=white" alt="iOS" />
   <img src="https://img.shields.io/badge/macOS-10.13+-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS" />
   <img src="https://img.shields.io/badge/Android-minSdk%2021-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" />
+  <img src="https://img.shields.io/badge/HarmonyOS-API%2012%2B-0A59F7?style=for-the-badge" alt="HarmonyOS" />
   <img src="https://img.shields.io/badge/Flutter-3.7+-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
 </p>
 
@@ -20,7 +21,7 @@
 
 [English](./README.md) | [简体中文](./README_CN.md) | [日本語](./README_JA.md) | [한국어](./README_KO.md)
 
-MXLogger は **mmap** によるメモリマッピングを利用するクロスプラットフォームのログライブラリです。**AES-CFB-128** 暗号化に対応し、iOS、macOS、Android、Flutter で利用できます。コアは C/C++ で実装され、Google **FlatBuffers** でシリアライズします。Flutter からは `dart:ffi` で直接呼び出すため、ネイティブに近い性能を得られます。iPhone 11 では、約 134 バイトのログ 10 万件を約 **0.13 秒**で書き込めます。
+MXLogger は **mmap** によるメモリマッピングを利用するクロスプラットフォームのログライブラリです。**AES-CFB-128** 暗号化に対応し、iOS、macOS、Android、Windows、HarmonyOS のネイティブ SDK と Flutter プラグインを利用できます。コアは C/C++ で実装され、Google **FlatBuffers** でシリアライズします。Flutter からは `dart:ffi` で直接呼び出すため、ネイティブに近い性能を得られます。過去の iPhone 11 テストでは、約 134 バイトのログ 10 万件を約 **0.13 秒**で書き込みました。
 
 付属の **mxlogger_analyzer** は、生成された `.mx` バイナリログの読み込み、復号、検索を行うツールです。Chrome 拡張機能、デスクトップアプリ（macOS / Windows / Linux）、iOS / Android の Flutter アプリに組み込むフローティングボタンとして利用できます。
 
@@ -28,7 +29,7 @@ MXLogger は **mmap** によるメモリマッピングを利用するクロス�
 - [インストール](#install)
 - [クイックスタート](#quick-start)
 - [API リファレンス](#api-reference)
-  - [iOS / macOS](#ios-api) · [Android](#android-api) · [Flutter](#flutter-api) · [解析ツール](#analyzer-api)
+  - [iOS / macOS](#ios-api) · [Android](#android-api) · [HarmonyOS](#harmonyos-api) · [Flutter](#flutter-api) · [解析ツール](#analyzer-api)
 - [保存ポリシーとログレベル](#storage-policy-and-levels)
 - [性能](#performance)
 - [注意事項](#notes)
@@ -52,6 +53,8 @@ MXLogger はログの**書き込み**と**解析**を提供します。ログを
 | Chrome 拡張機能 | Chrome で `.mx` ファイルを解析 | [Chrome ウェブストアからインストール](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
 | デスクトップアプリ | macOS / Windows / Linux 向け。ファイルを選択またはドロップして解析 | [Releases](https://github.com/coder-dongjiayi/MXLogger/releases)（CI で 3 プラットフォームの配布物を生成） |
 | アプリへの組み込み | iOS / Android の Flutter アプリ内にフローティングボタンとボトムシートを表示 | pub.dev の `mxlogger_analyzer_lib` |
+
+HarmonyOS も同じ `.mx` 形式を使用します。ファイルをエクスポートし、同じ KEY/IV を指定して Chrome またはデスクトップの解析ツールで読み込めます。
 
 Chrome でストアのリンクを開き、**Chrome に追加** → **拡張機能を追加**を選びます。拡張機能メニューから **MXLogger Analyzer** を開き、`.mx` ファイルを選択またはドロップしてください。暗号化されている場合は KEY / IV を設定して取り込みます。
 
@@ -116,6 +119,16 @@ SwiftPM の静的リンクでは、`DynamicLibrary.process()` がアプリの実
 ```groovy
 implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ```
+
+## HarmonyOS (ArkTS)
+
+利用するモジュール（例：`entry/`）のディレクトリで [OHPM 中心倉](https://ohpm.openharmony.cn/)からインストールします。
+
+```sh
+ohpm install @djy/mxlogger@2.3.1
+```
+
+HAR には ArkTS API と ARM64 / x86_64 ネイティブライブラリが含まれます。最小 API は 12、実機検証は API 26 / ARM64 で実施済みです。x86_64 はビルドのみ確認しています。現在はネイティブ ArkTS SDK に対応し、Flutter の HarmonyOS 統合は未対応です。[HarmonyOS SDK / Demo ガイド](./platform/OHOS/README.md)を参照してください。
 
 ## Windows
 
@@ -195,6 +208,36 @@ logger.fatal("db,fatal", "database", "connection lost");
 Log.d("MXLogger", "logs live in " + logger.getDiskCachePath());
 ```
 
+## HarmonyOS (ArkTS)
+
+ArkUI コンポーネント内でホスト Context を取得して初期化します。
+
+```typescript
+import { MXLogger, MXLogLevel, MXStoragePolicy } from '@djy/mxlogger';
+
+const context = this.getUIContext().getHostContext();
+if (!context) { throw new Error('Context unavailable'); }
+const logger = MXLogger.initialize(context, {
+  nameSpace: 'com.yourdomain.logger',
+  storagePolicy: MXStoragePolicy.Daily,
+  fileName: 'mxlog',
+  fileHeader: '{"app_version":"2.3.0"}',
+  cryptKey: 'abcuioqbsdguijlk',
+  iv: 'bccuioqbsdguijiv'
+});
+logger.setLevel(MXLogLevel.Debug);
+logger.setMaxDiskAge(7 * 24 * 60 * 60);
+logger.setMaxDiskSize(10 * 1024 * 1024);
+logger.debug('token check started', { name: 'login', tag: 'login,service' });
+logger.info('{"status":200}', { name: 'network', tag: 'network,POST' });
+logger.warn('retry #2', { name: 'network', tag: 'network' });
+logger.error('request failed', { name: 'network', tag: 'network' });
+logger.fatal('connection lost', { name: 'database', tag: 'db,fatal' });
+console.info(logger.diskCachePath);
+```
+
+既定の基本ディレクトリは `context.filesDir/com.mxlog.LoggerCache` で、Core が namespace を追加します。HiLog は既定で無効です。`setConsoleEnable(true)` で有効化できます。削除は `removeExpireData()` を明示的に呼び、共有セッションが不要になったら `destroy()` を呼びます。
+
 ## Flutter
 
 ```dart
@@ -227,6 +270,8 @@ debugPrint("logs live in ${logger.diskcachePath}");
 # API リファレンス
 
 各プラットフォーム共通で、ロガーは **nameSpace + diskCacheDirectory** によって識別され、同じ組み合わせには同じ C++ インスタンスが使われます。その組み合わせの MD5 が **loggerToken** です。モジュール間でこの値を渡せば、ロガーオブジェクトを保持せずにクラスメソッドで書き込めます。
+
+HarmonyOS は同一プロセスでのセッション共有に対応します。複数プロセスの同時書き込みは未検証です。初期化オプション `directory` は絶対パスの基本ディレクトリです。
 
 ネイティブ macOS Core は、同じディレクトリを共有するプロセス間でアクセスを調整します。追記前にディレクトリ単位のファイルロックを取得し、確定済みの長さとマッピング容量を更新します。外部からの削除や置換を確認するためのパス検査は、毎回の追記では行いません。読み込みは共有ロック下で確定済みスナップショットをコピーし、解除後に復号・解析します。参加するすべてのプロセスで同じ方式、暗号化設定、アクセス可能な共有ディレクトリを使ってください。異なるディレクトリ間では待ち合わせません。iOS / Android のファイルアクセス方式は従来どおりで、Windows Core も `LockFileEx` で同じディレクトリを調整し、書き込みの間でマッピングを保持できます。ネイティブと Flutter Windows の両方を手動の `verify-logger` CI で検証します。Flutter はプリビルド DLL を読み込みます。
 
@@ -371,6 +416,24 @@ Android の引数の順番に注意してください。**tag が最初**です�
 
 Android Java では上記の大文字の列挙値を引き続き使用します。Flutter / Dart では `yyyyMMdd`、`yyyyMMddHH`、`yyyyWw`、`yyyyMM` を使用します。[Flutter API](#flutter-api) を参照してください。
 
+<a name="harmonyos-api"></a>
+
+## HarmonyOS — `@djy/mxlogger`（ArkTS）
+
+| API | 説明 |
+| --- | --- |
+| `initialize(context, options) / initializeWithDirectory(directory, options)` | Context または絶対パスで初期化。namespace、保存ポリシー、ファイル名、ヘッダー、key、IV を指定可能 |
+| `fromLoggerToken(token) / logWithToken(token, level, message, options?)` | 同一プロセスの共有セッションを取得、または token で書き込み |
+| `debug/info/warn/error/fatal / log` | 5 レベルの簡易メソッドと任意レベル。options に `name`、`tag` を指定 |
+| `setLevel / setEnable / setConsoleEnable` | 最小レベル、書き込みスイッチ、HiLog スイッチ |
+| `setMaxDiskAge / setMaxDiskSize` | 保存期間は秒、サイズはバイト。`0` は無制限 |
+| `state / isValid / loggerToken / diskCachePath / errorDesc / logSize` | ネイティブ状態、有効性、識別子、パス、エラー、ディスク使用量 |
+| `level / enable / consoleEnable / maxDiskAge / maxDiskSize` | 現在の共有設定を取得 |
+| `logFiles / readLogFile(filename)` | ファイル情報と、同じ key / IV で復号したレコード |
+| `flush / removeExpireData / removeBeforeAllData / removeAll / destroy` | flush、削除、共有セッションの破棄。使用中のファイルは保持 |
+
+`MXLogger.coreVersion()` は Core バージョンを返します。`MXStoragePolicy` は `Daily / Hourly / Weekly / Monthly`、`MXLogLevel` は Debug=0 ～ Fatal=4 です。再初期化では設定を維持してセッションを共有し、初期化設定が競合すると例外になります。`destroy()` はすべての別名を無効にし、GC はラッパーのみを解放します。[API とライフサイクルの詳細](./platform/OHOS/README.md#api)を参照してください。
+
 <a name="flutter-api"></a>
 
 ## Flutter — `flutter_mxlogger`
@@ -509,11 +572,11 @@ MXAnalyzer.dismiss();
 | 週単位 | `2023-01-02w_mxlog.mx` | `02w` はその年の第 2 週 |
 | 月単位 | `2023-01_mxlog.mx` | 1 か月につき 1 ファイル |
 
-**ログレベル**は `0:debug 1:info 2:warn 3:error 4:fatal` です。レベルを *n* に設定すると、*n* 以上のログだけをファイルに保存します。例えば `level = 2` なら debug と info は除外され、warn / error / fatal を記録します。この設定が制御するのは**ディスクへの書き込み**のみです。コンソール出力が有効なら、コンソールにはすべてのレベルを出力します。
+**ログレベル**は `0:debug 1:info 2:warn 3:error 4:fatal` です。レベルを *n* に設定すると、*n* 以上のログだけをファイルに保存します。例えば `level = 2` なら debug と info は除外され、warn / error / fatal を記録します。コンソールのフィルター動作はプラットフォームによって異なり、HarmonyOS の HiLog は `enable` とレベル設定の両方に従います。
 
-**コンソール出力**は開発用です。書き込み性能に影響するため、性能測定時は無効にしてください。Release ビルドではコンパイルまたは tree shaking によって除去されます。
+**コンソール出力**は書き込み性能に影響するため、性能測定時は無効にしてください。利用可否はプラットフォームによって異なります。HarmonyOS の Release HAR は HiLog を保持し、既定では無効です。`setConsoleEnable(true)` で有効にします。
 
-**暗号化**には AES-CFB-128 を使用します。高速な書き込みのため、[MMKV](https://github.com/Tencent/MMKV/tree/master/Core/aes) のアセンブリ実装を利用しています。`cryptKey` と `iv` は 16 バイトで、長い場合は切り詰め、短い場合はゼロで埋めます。`iv` の省略時は `cryptKey` と同じ値になります。解析時に同じ組が必要なので、保存しておいてください。
+**暗号化**には AES-CFB-128 を使用します。[MMKV](https://github.com/Tencent/MMKV/tree/master/Core/aes) 由来の実装を利用しています。`cryptKey` と `iv` は 16 バイトで、長い場合は切り詰め、短い場合はゼロで埋めます。`iv` の省略時は `cryptKey` と同じ値になります。解析時に同じ組が必要なので、保存しておいてください。 HarmonyOS では現在、ポータブルな C の AES 実装を使用します。
 
 **ファイルヘッダー**（`fileHeader`）はファイル作成時に 1 回だけ書き込まれます。アプリのバージョン、プラットフォーム、端末情報などの環境情報を入れる用途に適しています。解析ツールではスカラー値の一覧と JSON ツリーに展開して表示します。
 
@@ -522,6 +585,8 @@ MXAnalyzer.dismiss();
 <a id="performance"></a>
 
 # 性能
+
+現在の iOS / Android / macOS / Flutter / HarmonyOS Demo は、同じ 61 バイトのメッセージ（`[000001] This is a benchmark loooooooooooooooooooooooooooooog`）、`name=benchmark`、`tag=perf` で 100,000 件を記録します。Info / バックグラウンドスレッドではシリアライズ後 152 B、長さフィールドを含めて 156 B です。HarmonyOS の計測には Worker 起動と flush が含まれます。以下の過去の iOS 比較は、データと計測条件が異なります。
 
 iOS での書き込み性能測定（デモは[こちら](./性能测试demo.zip)）：
 
@@ -548,7 +613,7 @@ Logan と Xlog はデータを圧縮するため、ファイルサイズが小�
 - **nameSpace + diskCacheDirectory** ごとにネイティブロガーは 1 つです。再初期化したラッパーも同じインスタンスを参照するため、設定変更はすべてに反映されます。
 - nameSpace は逆ドメイン形式で指定し、重複を避けてください。
 - モジュール化したアプリでは、サブモジュールに **loggerToken** を渡し、クラスメソッドで書き込めます。ロガーオブジェクトを渡す必要はありません。
-- `maxDiskAge` / `maxDiskSize` は書き込みごとには適用されません。削除は `removeExpireData` で行います。iOS と Flutter モバイルではバックグラウンド移行時に自動実行し、ネイティブ Android と macOS では明示的な呼び出しが必要です。
+- `maxDiskAge` / `maxDiskSize` は書き込みごとには適用されません。削除は `removeExpireData` で行います。iOS と Flutter モバイルではバックグラウンド移行時に自動実行し、ネイティブ Android、macOS、HarmonyOS では明示的な呼び出しが必要です。
 
 
 <a id="license"></a>

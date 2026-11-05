@@ -10,6 +10,7 @@ import shutil
 import sys
 import tarfile
 import tempfile
+from urllib.parse import urlsplit
 
 import verify_ohos_sdk as sdk
 
@@ -52,6 +53,12 @@ def validate_publish_metadata(package):
     if (not isinstance(keywords, list) or not 1 <= len(keywords) <= 10 or
             any(not isinstance(word, str) or not word.strip() or len(word) > 20 for word in keywords)):
         raise RuntimeError('OHPM 发布必须填写 keywords：1–10 项，每项 1–20 个字符')
+    homepage = package.get('homepage')
+    if not isinstance(homepage, str):
+        raise RuntimeError('OHPM 发布必须填写 homepage 项目主页')
+    url = urlsplit(homepage)
+    if url.scheme not in ('https', 'http') or not url.hostname:
+        raise RuntimeError('homepage 必须是有效的 HTTP(S) 项目主页地址')
 
 
 def stage_project(work, version):
@@ -93,6 +100,14 @@ def inspect_har(har, manifest):
             entry = archive.extractfile('package/' + name)
             if entry is None or not entry.read().strip():
                 raise RuntimeError('HAR 缺少非空发布文件：' + name)
+        for name in ('example/README.md', 'example/Index.ets'):
+            member = members.get('package/' + name)
+            if member is None or not member.isfile():
+                raise RuntimeError('HAR 缺少 example 示例文件：' + name)
+            content = archive.extractfile(member).read()
+            source = PROJECT / 'mxlogger' / name
+            if not content.strip() or content != source.read_bytes():
+                raise RuntimeError('HAR 中的 example 与示例源码不一致：' + name)
         types = package.get('types') or package.get('main')
         if not types or 'package/' + types not in members:
             raise RuntimeError('HAR 缺少公开 API 入口声明')
@@ -115,7 +130,8 @@ def build(version):
     work_root = ROOT / 'build/ohos-release/.work'
     work_root.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix=version + '-', dir=work_root))
-    print('构建 @mxlogger/mxlogger ' + version + '（Release · ARM64 / x86_64）', flush=True)
+    package_name = json.loads((PROJECT / 'mxlogger/oh-package.json5').read_text())['name']
+    print('构建 ' + package_name + ' ' + version + '（Release · ARM64 / x86_64）', flush=True)
     print('构建日志目录：' + str(work), flush=True)
     try:
         project, manifest = stage_project(work, version)
@@ -146,6 +162,7 @@ def build(version):
         shutil.copytree(sdk.OUTPUT / 'har-libs', output / 'har-libs', dirs_exist_ok=True)
         report = {'name': package['name'], 'version': version, 'coreVersion': core_version,
                   'author': package['author'], 'keywords': package['keywords'],
+                  'homepage': package['homepage'], 'exampleFiles': ['example/README.md', 'example/Index.ets'],
                   'har': str(destination), 'sha256': digest, 'buildMode': 'release',
                   'architectures': ['arm64-v8a', 'x86_64'], 'prepublishPassed': True,
                   'published': False}

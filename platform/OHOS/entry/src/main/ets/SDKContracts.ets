@@ -1,4 +1,4 @@
-import { MXLogger, MXLogLevel, MXStoragePolicy, MXLoggerOptions, MXLogRecord } from '@mxlogger/mxlogger';
+import { MXLogger, MXLogLevel, MXStoragePolicy, MXLoggerOptions, MXLogRecord } from '@djy/mxlogger';
 import common from '@ohos.app.ability.common';
 import process from '@ohos.process';
 import fs from '@ohos.file.fs';

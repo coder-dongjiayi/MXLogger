@@ -1,4 +1,4 @@
-import { MXLogger, MXLoggerOptions, MXStoragePolicy } from '@mxlogger/mxlogger';
+import { MXLogger, MXLoggerOptions, MXStoragePolicy } from '@djy/mxlogger';
 import common from '@ohos.app.ability.common';
 import worker, { MessageEvents } from '@ohos.worker';
 

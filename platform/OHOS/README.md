@@ -1,8 +1,30 @@
 # MXLogger HarmonyOS SDK
 
-第二阶段交付：ArkTS SDK、本地 Release HAR、Demo，以及独立 HAR 消费工程的构建与真机验证脚本。
+提供 ArkTS SDK、Release HAR、原生 Demo，以及独立 HAR 消费工程的构建与真机验证脚本。
 开发工程默认包版本 `0.1.0`，发布包版本由打包脚本参数指定；Core 版本由 `MXLogger.coreVersion()` 返回（本次为 `2.3.0`）。
-未发布到 OHPM；当前继续完善与 iOS / Android 对齐的原生鸿蒙 Demo。
+OHPM 包名为 `@djy/mxlogger`，发布版本为 `2.3.1`，通过 OHPM 中心仓安装。
+当前为原生 ArkTS 接入，Flutter 鸿蒙绑定尚未完成。
+
+## 通过 OHPM 安装
+
+在业务模块目录（例如 `entry/`）执行：
+
+```sh
+ohpm install @djy/mxlogger@2.3.1
+```
+
+或在模块的 `oh-package.json5` 添加以下依赖，再执行 `ohpm install`：
+
+```json
+{
+  "dependencies": {
+    "@djy/mxlogger": "2.3.1"
+  }
+}
+```
+
+安装后使用 `import { MXLogger } from '@djy/mxlogger'`。
+声明最低 API 12；已完成 API 26 / ARM64 真机验证，x86_64 已构建但未运行，完整环境见文末。
 
 ## 原生 Demo
 
@@ -61,26 +83,17 @@ python3 scripts/verify_ohos_demo.py --device DEVICE_ID
 两种 Worker 写入、文件及记录分页、清理、销毁重建和明文 / AES 初始化。
 步骤报告、布局及截图输出到 `build/ohos-sdk/demo-ui/<run>/`，测试结束恢复按小时 / AES 示例。
 
-## 接入本地 HAR
+## 使用示例
 
-将 `build/ohos-sdk/mxlogger-0.1.0.har` 复制到业务工程的 `libs/`，在 entry 的
-`oh-package.json5` 中添加（路径相对该文件）：
-
-```json
-{
-  "dependencies": {
-    "@mxlogger/mxlogger": "file:../libs/mxlogger-0.1.0.har"
-  }
-}
-```
-
-运行 `ohpm install`。业务工程需要 ArkTS 工具链，不需要 MXLogger Core 源码或 CMake 配置。
+业务工程需要 ArkTS 工具链，不需要 MXLogger Core 源码或 CMake 配置。
 HAR 自带 ARM64 / x86_64 的 `libmxlogger.so`；当前 DevEco 默认生成字节码 HAR，含公开类型声明与 `.abc`。
 
 ```typescript
-import { MXLogger, MXLogLevel, MXStoragePolicy } from '@mxlogger/mxlogger';
+import { MXLogger, MXLogLevel, MXStoragePolicy } from '@djy/mxlogger';
 
-const logger = MXLogger.initialize(this.context, {
+const context = this.getUIContext().getHostContext();
+if (!context) { throw new Error('Context unavailable'); }
+const logger = MXLogger.initialize(context, {
   nameSpace: 'com.example.app',
   storagePolicy: MXStoragePolicy.Daily,
   fileHeader: '{"app_version":"1.0.0"}'
@@ -159,31 +172,32 @@ ArkTS 的 Native 对象 finalizer 会自动 release。后续 Flutter 鸿蒙绑�
 从仓库根目录执行，或在任意目录用脚本的绝对路径执行：
 
 ```sh
-sh scripts/ohos_release.sh 2.3.0
+sh scripts/ohos_release.sh 2.3.1
 ```
 
 需要 Python 3 和已安装 SDK 的 DevEco Studio。默认使用 macOS 的
 `/Applications/DevEco-Studio.app/Contents`，其他安装路径可指定：
 
 ```sh
-DEVECO_HOME="/path/to/DevEco-Studio.app/Contents" sh scripts/ohos_release.sh 2.3.0
+DEVECO_HOME="/path/to/DevEco-Studio.app/Contents" sh scripts/ohos_release.sh 2.3.1
 ```
 
 脚本将版本号写入隔离构建副本的 `oh-package.json5`，重新编译 Release HAR，
-检查包内版本、作者、关键词、公开 API、ARM64 / x86_64 动态库及 C ABI 导出，随后运行 `ohpm prepublish` 本地校验。
-发布文档包括模块的 README、CHANGELOG 和仓库根目录的完整许可证。
+检查包内版本、作者、关键词、项目主页、公开 API、ARM64 / x86_64 动态库及 C ABI 导出，随后运行 `ohpm prepublish` 本地校验。
+发布包包含模块的 README、CHANGELOG、仓库根目录的完整许可证及 `example/` 示例源码和运行说明；
+脚本同时核对包内示例与源码一致，避免只在仓库里添加目录而没有实际发布。
 不会修改源码版本、Core 版本、本机签名配置或执行上传。
 
-产物目录为 `build/ohos-release/2.3.0/`：
+产物目录为 `build/ohos-release/2.3.1/`：
 
-- `mxlogger-2.3.0.har`：用于发布的 SDK。
-- `mxlogger-2.3.0.har.sha256`、`release-report.json`：摘要及版本 / 架构 / 校验结果。
+- `mxlogger-2.3.1.har`：用于发布的 SDK。
+- `mxlogger-2.3.1.har.sha256`、`release-report.json`：摘要及版本 / 架构 / 校验结果。
 - `build.log`、`prepublish.log`、`har-contents.txt`、`har-libs/`：构建和包内容证据。
 
-配置 OHPM 账号、`@mxlogger` 组织发布权限及认证后，可手动发布：
+配置 OHPM 账号、`@djy` 组织发布权限及认证后，可手动发布：
 
 ```sh
-ohpm publish build/ohos-release/2.3.0/mxlogger-2.3.0.har
+ohpm publish build/ohos-release/2.3.1/mxlogger-2.3.1.har
 ```
 
 `prepublish` 仅验证包内容，不验证组织权限或发布认证，也不替代中心仓审核。

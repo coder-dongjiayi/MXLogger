@@ -1,5 +1,5 @@
 import worker, { MessageEvents } from '@ohos.worker';
-import { MXLogger } from '@mxlogger/mxlogger';
+import { MXLogger } from '@djy/mxlogger';
 
 const port = worker.workerPort;
 port.onmessage = (event: MessageEvents): void => {

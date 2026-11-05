@@ -117,7 +117,9 @@ def consumer(deveco, har):
     (project / 'libs').mkdir()
     shutil.copy2(har, project / 'libs/mxlogger.har')
     manifest = json.loads((project / 'entry/oh-package.json5').read_text())
-    manifest['dependencies'] = {'@mxlogger/mxlogger': 'file:../libs/mxlogger.har'}
+    with tarfile.open(har) as archive:
+        package_name = json.loads(archive.extractfile('package/oh-package.json5').read())['name']
+    manifest['dependencies'] = {package_name: 'file:../libs/mxlogger.har'}
     (project / 'entry/oh-package.json5').write_text(json.dumps(manifest, indent=2))
     hvigor(project, deveco, 'entry', 'assembleHap', 'debug')
     if list(project.rglob('CMakeCache.txt')) or list(project.rglob('*.cpp.o')):

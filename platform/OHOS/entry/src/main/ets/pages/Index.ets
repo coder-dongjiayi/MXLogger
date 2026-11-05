@@ -1,5 +1,5 @@
 import { DemoAction, DemoToggle, DemoStat, DemoHeader, DemoSection, DemoField } from '../DemoComponents';
-import { MXLogger, MXLogLevel, MXLogOptions, MXLogFile, MXLogRecord } from '@mxlogger/mxlogger';
+import { MXLogger, MXLogLevel, MXLogOptions, MXLogFile, MXLogRecord } from '@djy/mxlogger';
 import { promptAction } from '@kit.ArkUI';
 import { pasteboard } from '@kit.BasicServicesKit';
 import { BENCHMARK_COUNT } from '../DemoBenchmark';
@@ -328,7 +328,7 @@ struct Index {
           DemoAction({ title: this.t('运行 SDK 自动验收', 'Run SDK verification'), subtitle: this.t('独立测试目录 · 共享实例 / AES / Worker', 'Separate fixtures · shared state / AES / Worker'), icon: '✓', color: '#22A06B', identifier: 'demo.verify', onAction: () => {
             this.getUIContext().getRouter().pushUrl({ url: 'pages/Verification' }).catch((error: Object) => this.failure(error));
           }, disabled: this.busy })
-          Text('Core ' + MXLogger.coreVersion() + ' · HarmonyOS · @mxlogger/mxlogger')
+          Text('Core ' + MXLogger.coreVersion() + ' · HarmonyOS · @djy/mxlogger')
             .fontSize(11).fontColor('#9295A0').padding({ top: 24, bottom: 32 })
         }.width('100%').padding({ left: 16, right: 16, top: 10 })
       }.layoutWeight(1).width('100%')

@@ -1,4 +1,4 @@
-import { MXLogger } from '@mxlogger/mxlogger';
+import { MXLogger } from '@djy/mxlogger';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { verifySDK, verifyPersistence } from '../SDKContracts';
 

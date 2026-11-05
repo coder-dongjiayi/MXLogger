@@ -1,6 +1,6 @@
 # scripts 目录使用说明
 
-本目录集中放置 MXLogger 的构建、打包、发布、源码同步和跨平台验证脚本。本文按当前脚本实现整理，覆盖根目录的 32 个脚本，以及 `tests/` 下的 1 个测试文件。
+本目录集中放置 MXLogger 的构建、打包、发布、源码同步和跨平台验证脚本。本文按当前实现整理常用入口和 `tests/` 下的测试文件。
 
 ## 运行约定
 
@@ -12,15 +12,18 @@
 | `.py` | `python3 scripts/文件名.py` | Python 3；Windows 可使用 `python` |
 | `.ps1` | `pwsh -File scripts/文件名.ps1` | PowerShell 7；这些脚本用于 Windows 原生构建和验证 |
 
-实际依赖取决于脚本：Apple 构建需要 macOS、Xcode，涉及 Pods 时还需要 CocoaPods；Android 构建需要相应的 JDK、SDK、NDK；Windows 构建需要 Visual Studio C++ 工具链、CMake，打包时还需要 `nuget.exe`。
+`ohos_release.sh` 使用 POSIX shell，可按 `sh scripts/ohos_release.sh 2.3.0` 调用。
 
-先分清三个工程，避免运行错入口：
+实际依赖取决于脚本：Apple 构建需要 macOS、Xcode，涉及 Pods 时还需要 CocoaPods；Android 构建需要相应的 JDK、SDK、NDK；Windows 构建需要 Visual Studio C++ 工具链、CMake，打包时还需要 `nuget.exe`；HarmonyOS 构建需要 Python 3、DevEco Studio 及其 SDK，设备验证还需要 HDC 可访问的真机或模拟器。
+
+先分清以下工程，避免运行错入口：
 
 | 工程 | 用途 |
 | --- | --- |
 | `mxlogger_analyzer/` | 日志解析器的桌面和普通 Web 应用 |
 | `platform/flutter_mxlogger/example/` | Flutter 日志 SDK 的演示应用，能够写入日志、修改配置、查看文件等 |
 | `platform/macOS/MXLoggerDemo/`、`platform/Windows/MXLoggerDemo/`、`platform/Android/MXLogger/mxloggerdemo/` | 各平台原生日志 SDK 的 Demo |
+| `platform/OHOS/` | 鸿蒙原生 ArkTS SDK 和 `entry` Demo；用 DevEco Studio 打开，当前独立于 Flutter 插件 |
 
 `build_macos_demo_dmg.sh` 打包的是原生 macOS Demo；`run_flutter_macos_demo.sh` 启动的是 Flutter SDK Demo。解析器本身的桌面打包入口在 [`mxlogger_analyzer/tool/build_desktop.dart`](../mxlogger_analyzer/tool/build_desktop.dart)。
 
@@ -36,6 +39,8 @@
 | 生成 Chrome 扩展安装包 | `bash scripts/build_analyzer_chrome_extension.sh 1.0.0`，版本号按实际填写 |
 | 准备普通 Web 解析器资源 | `bash scripts/prepare_analyzer_web.sh` |
 | 发布 Flutter 日志 SDK | 先运行 `bash scripts/pub_flutter_mxlogger.sh --dry-run` |
+| 生成鸿蒙 OHPM 发布包 | `sh scripts/ohos_release.sh 2.3.0`，仅构建和本地校验，不上传 |
+| 验证鸿蒙 SDK 与独立 HAR 接入 | `python3 scripts/verify_ohos_sdk.py --device DEVICE_ID` |
 | 发布可嵌入的解析器内核包 | 先运行 `bash scripts/pub_mxlogger_analyzer.sh --dry-run` |
 | 给 Flutter 包准备 Windows DLL | 从 Windows 生成的 NuGet 包运行 `prepare_flutter_windows.py --package ...` |
 
@@ -144,6 +149,21 @@ bash scripts/android_release.sh 2.3.0
 
 产物：`scripts/release/<版本>_mxlogger.zip`。脚本**不会自动上传 Maven Central**，也没有先运行全部测试。
 
+### [ohos_release.sh](ohos_release.sh)
+
+按传入的 SemVer 版本生成鸿蒙 Release HAR：
+
+```sh
+sh scripts/ohos_release.sh 2.3.0
+```
+
+通过 `build_ohos_har.py` 在隔离工程中编译 ARM64 / x86_64，写入包版本，检查作者、关键词、公开 API、
+项目主页、`example/` 示例源码及说明、文档、许可证和 C ABI 导出，并运行 `ohpm prepublish`。不修改源码版本或签名配置，不自动发布。
+
+默认使用 `/Applications/DevEco-Studio.app/Contents`，可通过 `DEVECO_HOME` 指定其他路径。
+输出为 `build/ohos-release/<版本>/mxlogger-<版本>.har`，同目录包含摘要、报告和构建日志。
+配置中心仓发布认证后，可手动执行 `ohpm publish build/ohos-release/2.3.0/mxlogger-2.3.0.har`。
+
 ## 四、源码同步、二进制准备与环境辅助
 
 ### [sync_flutter_native.py](sync_flutter_native.py)
@@ -237,8 +257,16 @@ python3 scripts/check_local_core.py \
 | [verify_android_demo.sh](verify_android_demo.sh) | 默认运行 Android 库和 Demo 的 Release JVM 测试；`package` 模式构建 Demo APK，校验签名、四种 ABI 和 Core 来源 | 参数 `test` 或 `package`，默认 `test`；SDK 环境涉及 Android 31/33 和 Build Tools 34.0.0；日志在 `build/android-demo/` |
 | [verify_ios_api.sh](verify_ios_api.sh) | 自动选择可用 iOS runtime，创建临时 iPhone 模拟器，运行原生 XCTest、生命周期测试及代码覆盖率，并检查测试无跳过 | 需要 Xcode 和兼容的 iOS 模拟器 runtime；结束时关闭并删除临时模拟器；输出 `build/ios-api-tests/run-*/`，包括 `Tests.xcresult`、日志和摘要 |
 | [verify_macos_demo.sh](verify_macos_demo.sh) | 安装本地 Pods，构建原生 macOS Demo 的 Debug/Release，运行功能冒烟和 UI 冒烟检查 | 需要 macOS、Xcode、CocoaPods；日志和 UI 预览在 `build/macos-native-demo/`，不生成 DMG |
+| [verify_ohos_poc.py](verify_ohos_poc.py) | 最小调用链和明文 / AES 重启读取验证 | `--host`、`--native`、`--device DEVICE_ID`；真机需要签名 debug HAP；输出 `build/ohos-poc/` |
+| [verify_ohos_sdk.py](verify_ohos_sdk.py) | 构建 Release HAR、独立消费工程，并可运行真机 SDK / Worker 验收 | `--host` 运行主机 ASan；`--device DEVICE_ID` 运行设备验收；输出 `build/ohos-sdk/` |
+| [verify_ohos_demo.py](verify_ohos_demo.py) | 对已安装原生 Demo 执行真实 UI 操作与状态检查 | `--device DEVICE_ID`；测试写入、配置、文件、生命周期和明文 / AES 初始化，输出 `build/ohos-sdk/demo-ui/` |
 | [verify_windows_demo.ps1](verify_windows_demo.ps1) | 构建 Windows 原生 Demo，运行模型及窗口自测，并检查 PASS 报告和截图 | `-Configuration Debug` 或 `Release`，默认 Debug；输出 `build/windows-native-demo/<配置>/`，程序在其 `bin/<配置>/`，报告在 `self-test/` |
 | [verify_windows_vcpkg.ps1](verify_windows_vcpkg.ps1) | 验证本地 vcpkg overlay，覆盖 x64-windows、x64-windows-static 两种 triplet 的 Debug/Release 消费者编译和读写 | `-VcpkgRoot` 默认取 `VCPKG_INSTALLATION_ROOT`；构建在 `build/windows-sdk/vcpkg/`，日志在 `build/windows-sdk/logs/`；会重新安装测试依赖并临时关闭二进制缓存 |
+
+鸿蒙导出日志可用现有解析器复验：`verify_ohos_logs.dart` 检查重启日志报告；
+`verify_ohos_benchmark.dart EXPORTED_DEMO_DIRECTORY --aes` 检查最近一轮十万条基准的内容、顺序及逐条大小。
+两者需通过 `dart --packages=mxlogger_analyzer/mxlogger_analyzer_lib/.dart_tool/package_config.json scripts/<脚本名>` 运行。
+完整命令和运行边界见[鸿蒙 SDK 文档](../platform/OHOS/README.md)。
 
 Android Demo 打包命令与产物：
 

@@ -6,32 +6,37 @@ ARM64 / x86_64 的 `libmxlogger.so`；接入方不需要 MXLogger Core 源码或
 源码：[coder-dongjiayi/MXLogger](https://github.com/coder-dongjiayi/MXLogger)。
 包版本见 `oh-package.json5`，Core 版本通过 `MXLogger.coreVersion()` 获取。
 
+## 示例
+
+发布包内附带 [`example/`](./example/README.md)，包含可直接放入 Empty Ability 工程运行的 ArkUI 页面，
+展示初始化、五级日志、token 共享、配置、文件读取与销毁。
+完整功能面板、文件查看器与 Worker 演示见仓库的[原生 Demo](https://github.com/coder-dongjiayi/MXLogger/tree/main/platform/OHOS)。
+
 ## 安装
 
-OHPM 中心仓上架后，在业务模块目录执行：
+在业务模块目录（例如 `entry/`）安装 OHPM 版本：
 
 ```sh
-ohpm install @mxlogger/mxlogger
+ohpm install @djy/mxlogger@2.3.1
 ```
 
-也可以将 HAR 放到工程的 `libs/`，在 `entry/oh-package.json5` 中引用：
+也可以在业务模块的 `oh-package.json5` 中声明中心仓依赖，再执行 `ohpm install`：
 
 ```json
 {
   "dependencies": {
-    "@mxlogger/mxlogger": "file:../libs/mxlogger.har"
+    "@djy/mxlogger": "2.3.1"
   }
 }
 ```
 
-执行 `ohpm install`。源码工程内调试可以依赖 `file:../mxlogger`。
-
 ## 使用
 
 ```typescript
-import { MXLogger, MXLogLevel, MXStoragePolicy } from '@mxlogger/mxlogger';
+import { MXLogger, MXLogLevel, MXStoragePolicy } from '@djy/mxlogger';
 
-// context 是应用的 Context，例如 this.getUIContext().getHostContext()。
+const context = this.getUIContext().getHostContext();
+if (!context) { throw new Error('Context unavailable'); }
 const logger = MXLogger.initialize(context, {
   nameSpace: 'com.example.app',
   storagePolicy: MXStoragePolicy.Hourly,

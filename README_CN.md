@@ -2,6 +2,7 @@
   <img src="https://img.shields.io/badge/iOS-9.0+-000000?style=for-the-badge&logo=apple&logoColor=white" alt="iOS" />
   <img src="https://img.shields.io/badge/macOS-10.13+-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS" />
   <img src="https://img.shields.io/badge/Android-minSdk%2021-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" />
+  <img src="https://img.shields.io/badge/HarmonyOS-API%2012%2B-0A59F7?style=for-the-badge" alt="HarmonyOS" />
   <img src="https://img.shields.io/badge/Flutter-3.7+-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
 </p>
 
@@ -25,8 +26,8 @@
 </p>
 
 MXLogger 是基于 **mmap** 内存映射机制的跨平台日志库，支持 **AES-CFB-128** 加密，支持 iOS / macOS / Android /
-Flutter。核心代码使用 C/C++ 实现，序列化使用 Google 开源的 **FlatBuffers**，Flutter 端通过 `dart:ffi`
-直接调用，性能几乎与原生一致。iPhone 11 上写入 10 万条（每条约 134 字节）耗时约 **0.13s**。
+Windows / HarmonyOS 原生 SDK 和 Flutter 插件。核心代码使用 C/C++ 实现，序列化使用 Google 开源的 **FlatBuffers**，Flutter 端通过 `dart:ffi`
+直接调用，性能几乎与原生一致。历史测试中，iPhone 11 写入 10 万条（每条约 134 字节）耗时约 **0.13s**。
 
 配套提供 **mxlogger_analyzer** 日志解析器：导入、解密、检索产出的 `.mx` 二进制日志，支持 Chrome 扩展、
 桌面 app（macOS/Windows/Linux），也能以悬浮球的形式直接嵌进你的 iOS/Android Flutter app 里看端上日志。
@@ -35,7 +36,7 @@ Flutter。核心代码使用 C/C++ 实现，序列化使用 Google 开源的 **F
 - [安装引入](#安装引入)
 - [快速开始](#快速开始)
 - [API 一览](#api-一览)
-  - [iOS](#ios-api) · [Android](#android-api) · [Flutter](#flutter-api) · [解析器](#analyzer-api)
+  - [iOS](#ios-api) · [Android](#android-api) · [HarmonyOS](#harmonyos-api) · [Flutter](#flutter-api) · [解析器](#analyzer-api)
 - [存储策略与日志等级](#存储策略与日志等级)
 - [性能测试](#性能测试)
 - [注意事项](#注意事项)
@@ -60,6 +61,8 @@ mxlogger_analyzer 解析。
 | Chrome 扩展 | 在 Chrome 浏览器中解析 `.mx` 日志 | [从 Chrome 应用商店安装](https://chromewebstore.google.com/detail/mxlogger-analyzer/bpjhmakllccpeiglbfngmdbelimlghfi) |
 | 桌面 app | macOS/Windows/Linux 客户端，拖入或选择日志文件即可分析 | [Releases](https://github.com/coder-dongjiayi/MXLogger/releases)（CI 三端出包） |
 | 嵌入宿主 app | iOS/Android Flutter app 内的悬浮球 + 底部弹窗 | pub.dev 依赖 `mxlogger_analyzer_lib` |
+
+鸿蒙产出的 `.mx` 文件格式相同，导出后可直接使用 Chrome 扩展或桌面解析器；加密文件需提供相同 KEY/IV。
 
 安装 Chrome 扩展：在 Chrome 中打开上方商店链接，点击「添加至 Chrome」→「添加扩展程序」。
 安装后从扩展菜单打开 **MXLogger Analyzer**，选择或拖入 `.mx` 文件，按需填写解密 KEY/IV，然后开始导入。
@@ -125,6 +128,16 @@ STRIP_STYLE = non-global
 ```groovy
 implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ```
+
+## HarmonyOS (ArkTS)
+
+在业务模块目录（例如 `entry/`）通过 [OHPM 中心仓](https://ohpm.openharmony.cn/)安装：
+
+```sh
+ohpm install @djy/mxlogger@2.3.1
+```
+
+HAR 包含 ArkTS API 和 ARM64 / x86_64 原生库。声明最低 API 12，目前完成 API 26 / ARM64 真机验证；x86_64 仅完成构建。当前鸿蒙支持为原生 ArkTS SDK，Flutter 鸿蒙接入尚未完成。详见[鸿蒙 SDK、Demo 和打包说明](./platform/OHOS/README.md)。
 
 ## Windows
 
@@ -203,6 +216,36 @@ logger.fatal("db,fatal", "database", "数据库连接丢失");
 Log.d("MXLogger", "日志目录 " + logger.getDiskCachePath());
 ```
 
+## HarmonyOS (ArkTS)
+
+在 ArkUI 组件内获取宿主 Context 后初始化：
+
+```typescript
+import { MXLogger, MXLogLevel, MXStoragePolicy } from '@djy/mxlogger';
+
+const context = this.getUIContext().getHostContext();
+if (!context) { throw new Error('Context unavailable'); }
+const logger = MXLogger.initialize(context, {
+  nameSpace: 'com.yourdomain.logger',
+  storagePolicy: MXStoragePolicy.Daily,
+  fileName: 'mxlog',
+  fileHeader: '{"app_version":"2.3.0"}',
+  cryptKey: 'abcuioqbsdguijlk',
+  iv: 'bccuioqbsdguijiv'
+});
+logger.setLevel(MXLogLevel.Debug);
+logger.setMaxDiskAge(7 * 24 * 60 * 60);
+logger.setMaxDiskSize(10 * 1024 * 1024);
+logger.debug('token check started', { name: 'login', tag: 'login,service' });
+logger.info('{"status":200}', { name: 'network', tag: 'network,POST' });
+logger.warn('retry #2', { name: 'network', tag: 'network' });
+logger.error('request failed', { name: 'network', tag: 'network' });
+logger.fatal('connection lost', { name: 'database', tag: 'db,fatal' });
+console.info(logger.diskCachePath);
+```
+
+默认基础目录为 `context.filesDir/com.mxlog.LoggerCache`，Core 追加 namespace。HiLog 默认关闭，可通过 `setConsoleEnable(true)` 开启。过期清理需主动调用 `removeExpireData()`；共享会话不再使用时调用 `destroy()`。
+
 ## Flutter
 
 ```dart
@@ -241,11 +284,14 @@ Core 版本与各平台封装包版本独立，各 Demo 会动态展示该值。
 | iOS / macOS（Objective-C） | `[MXLogger coreVersion]` |
 | iOS / macOS（Swift） | `MXLogger.coreVersion()` |
 | Android（Java/Kotlin） | `MXLogger.coreVersion()` |
+| HarmonyOS (ArkTS) | `MXLogger.coreVersion()` |
 | Flutter（原生平台） | `MXLogger.coreVersion()` |
 
-三端共通的两个概念：一个 logger 由 **nameSpace + diskCacheDirectory** 唯一确定，底层 C++ 对象按这一对
+各 SDK 共通的两个概念：一个 logger 由 **nameSpace + diskCacheDirectory** 唯一确定，底层 C++ 对象按这一对
 去重；这一对的 md5 就是 **loggerToken**——大型 app 组件化时把它传给子模块，子模块用类方法写日志，不必传
 logger 对象。
+
+鸿蒙支持同进程共享会话，多进程并发写入尚未验收；初始化的 `directory` 参数为绝对基础目录。
 
 原生 macOS Core 支持多个进程协作访问同一日志目录：写入前获取目录级文件锁，刷新有效长度和
 映射容量；不逐条检查路径是否被外部删除或替换。读取时复制有效数据快照后解锁解析。各进程须使用本协议及一致的加密参数，
@@ -402,6 +448,24 @@ native 是唯一事实源）。
 
 Android Java 仍使用以上大写枚举名。Flutter / Dart 使用 `yyyyMMdd`、`yyyyMMddHH`、`yyyyWw`、`yyyyMM`，详见 [Flutter API](#flutter-api)。
 
+<a name="harmonyos-api"></a>
+
+## HarmonyOS —— `@djy/mxlogger`（ArkTS）
+
+| API | 说明 |
+| --- | --- |
+| `initialize(context, options) / initializeWithDirectory(directory, options)` | 通过 Context 或绝对路径初始化；支持 namespace、策略、文件名、文件头、key 和 IV |
+| `fromLoggerToken(token) / logWithToken(token, level, message, options?)` | 关联同进程共享会话，或通过 token 静态写入 |
+| `debug/info/warn/error/fatal / log` | 五级快捷写入和自定义等级；options 支持 `name`、`tag` |
+| `setLevel / setEnable / setConsoleEnable` | 最低等级、写入开关和 HiLog 开关 |
+| `setMaxDiskAge / setMaxDiskSize` | 保留时长（秒）和大小（字节）；`0` 为不限 |
+| `state / isValid / loggerToken / diskCachePath / errorDesc / logSize` | 原生状态快照、有效性、标识、目录、错误描述及磁盘大小 |
+| `level / enable / consoleEnable / maxDiskAge / maxDiskSize` | 读取当前共享配置 |
+| `logFiles / readLogFile(filename)` | 文件元数据，以及使用本实例 key / IV 解码的记录 |
+| `flush / removeExpireData / removeBeforeAllData / removeAll / destroy` | flush、清理和销毁共享会话；清理保留活跃文件 |
+
+`MXLogger.coreVersion()` 返回链接的 Core 版本。`MXStoragePolicy` 包含 `Daily / Hourly / Weekly / Monthly`，`MXLogLevel` 从 Debug=0 到 Fatal=4。重复初始化共享会话且不重置配置，初始化参数冲突时抛出错误。`destroy()` 使全部别名失效，GC 只释放包装对象。详见[完整 API 与生命周期说明](./platform/OHOS/README.md#api)。
+
 <a name="flutter-api"></a>
 ## Flutter —— `flutter_mxlogger`
 
@@ -539,14 +603,14 @@ MXAnalyzer.dismiss();
 | 按月 | `2023-01_mxlog.mx` | 一个月一个文件 |
 
 **日志等级**为 `0:debug 1:info 2:warn 3:error 4:fatal`。设置 level = n 表示只有 >= n 的日志会被写入
-文件：比如 `level = 2`，`debug` 和 `info` 会被丢弃，只写入 `warn` `error` `fatal`。该字段只针对**磁盘
-写入**生效，开启控制台输出后控制台仍会打印全部日志。
+文件：比如 `level = 2`，`debug` 和 `info` 会被丢弃，只写入 `warn` `error` `fatal`。控制台过滤行为取决于平台；
+鸿蒙 HiLog 同时遵循 logger 的 `enable` 和等级设置。
 
-**控制台输出**只面向开发期。它会影响写入效率，做性能测试时务必关闭；线上包三端都会在编译期把这段裁掉。
+**控制台输出**会影响写入效率，性能测试时应关闭。是否保留控制台能力取决于平台；鸿蒙 Release HAR 保留 HiLog，默认关闭，需通过 `setConsoleEnable(true)` 显式开启。
 
 **加密**使用 AES-CFB-128，代码来自 [MMKV](https://github.com/Tencent/MMKV/tree/master/Core/aes)，
-汇编实现，最大程度保障写入性能。`cryptKey` 和 `iv` 为 16 字节——超过自动截断，不足补 0；`iv` 不填时默认
-与 `cryptKey` 一致。这两个值要留好：解析器需要同一组参数才能读回文件。
+`cryptKey` 和 `iv` 为 16 字节——超过自动截断，不足补 0；`iv` 不填时默认
+与 `cryptKey` 一致。这两个值要留好：解析器需要同一组参数才能读回文件。 鸿蒙当前使用通用 C AES 实现。
 
 **文件头信息**（`fileHeader`）在文件创建时写入一次，适合放环境信息（app 版本、平台、设备信息），
 解析器会把它展开成标量紧凑网格 + JSON 树。
@@ -554,6 +618,8 @@ MXAnalyzer.dismiss();
 ---
 
 # 性能测试
+
+当前 iOS / Android / macOS / Flutter / HarmonyOS Demo 的批量基准均写入 100,000 条，使用相同的 61 字节 message（`[000001] This is a benchmark loooooooooooooooooooooooooooooog`）、`name=benchmark`、`tag=perf`。在 Info / 后台线程元数据下，每条序列化记录为 152 B，含长度字段共 156 B。鸿蒙耗时包含 Worker 启动和 flush；下方历史 iOS 对比使用了不同载荷和计时设置。
 
 ### 对比 Xlog 和 Logan
 
@@ -583,7 +649,7 @@ Logan 和 Xlog 对数据做了压缩，实际体积会小很多。日志压缩�
 - `nameSpace` 建议使用域名反转保证唯一性。
 - 组件化工程把 **loggerToken** 传给子模块，子模块用类方法写日志，不必传 logger 对象。
 - `maxDiskAge` / `maxDiskSize` 不是每次写入都校验：清理发生在 `removeExpireData`（iOS 与 Flutter 进入
-  后台自动调用，Android 需自行调用）。
+  后台自动调用，原生 Android、macOS 和鸿蒙需自行调用）。
 
   
 
