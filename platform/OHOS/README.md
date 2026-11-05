@@ -1,7 +1,7 @@
 # MXLogger HarmonyOS SDK
 
 第二阶段交付：ArkTS SDK、本地 Release HAR、Demo，以及独立 HAR 消费工程的构建与真机验证脚本。
-当前包版本 `0.1.0`，Core 版本由 `MXLogger.coreVersion()` 返回（本次为 `2.3.0`）。
+开发工程默认包版本 `0.1.0`，发布包版本由打包脚本参数指定；Core 版本由 `MXLogger.coreVersion()` 返回（本次为 `2.3.0`）。
 未发布到 OHPM；当前继续完善与 iOS / Android 对齐的原生鸿蒙 Demo。
 
 ## 原生 Demo
@@ -153,6 +153,43 @@ ArkTS 的 Native 对象 finalizer 会自动 release。后续 Flutter 鸿蒙绑�
 独立路径的 legacy `select_logmsg` 不持有会话锁；并发读取活跃 logger 请使用 SDK 的 `readLogFile`。
 
 ## 构建与验证
+
+### 生成 OHPM 发布 HAR
+
+从仓库根目录执行，或在任意目录用脚本的绝对路径执行：
+
+```sh
+sh scripts/ohos_release.sh 2.3.0
+```
+
+需要 Python 3 和已安装 SDK 的 DevEco Studio。默认使用 macOS 的
+`/Applications/DevEco-Studio.app/Contents`，其他安装路径可指定：
+
+```sh
+DEVECO_HOME="/path/to/DevEco-Studio.app/Contents" sh scripts/ohos_release.sh 2.3.0
+```
+
+脚本将版本号写入隔离构建副本的 `oh-package.json5`，重新编译 Release HAR，
+检查包内版本、作者、关键词、公开 API、ARM64 / x86_64 动态库及 C ABI 导出，随后运行 `ohpm prepublish` 本地校验。
+发布文档包括模块的 README、CHANGELOG 和仓库根目录的完整许可证。
+不会修改源码版本、Core 版本、本机签名配置或执行上传。
+
+产物目录为 `build/ohos-release/2.3.0/`：
+
+- `mxlogger-2.3.0.har`：用于发布的 SDK。
+- `mxlogger-2.3.0.har.sha256`、`release-report.json`：摘要及版本 / 架构 / 校验结果。
+- `build.log`、`prepublish.log`、`har-contents.txt`、`har-libs/`：构建和包内容证据。
+
+配置 OHPM 账号、`@mxlogger` 组织发布权限及认证后，可手动发布：
+
+```sh
+ohpm publish build/ohos-release/2.3.0/mxlogger-2.3.0.har
+```
+
+`prepublish` 仅验证包内容，不验证组织权限或发布认证，也不替代中心仓审核。
+发新版本前应更新模块的 `CHANGELOG.md`。
+
+### 开发验收
 
 从仓库根目录执行：
 

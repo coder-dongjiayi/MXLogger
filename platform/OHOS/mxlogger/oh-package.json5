@@ -2,7 +2,13 @@
   "name": "@mxlogger/mxlogger",
   "version": "0.1.0",
   "description": "MXLogger HarmonyOS ArkTS SDK with a shared C++ logging core",
+  "author": {
+    "name": "dongjiayi",
+    "email": "mr.dongjiayi@gmail.com"
+  },
+  "keywords": ["mxlogger", "logging", "mmap", "encryption"],
   "main": "Index.ets",
   "license": "BSD-3-Clause",
+  "repository": "https://github.com/coder-dongjiayi/MXLogger",
   "dependencies": { "libmxlogger.so": "file:./src/main/cpp/types/libmxlogger" }
 }

@@ -72,7 +72,8 @@ def build_har(deveco):
     candidates = list((poc.PROJECT / 'mxlogger/build/default/outputs/default').glob('*.har'))
     if not candidates:
         raise RuntimeError('HAR was not generated')
-    har = OUTPUT / 'mxlogger-0.1.0.har'
+    version = json.loads((poc.PROJECT / 'mxlogger/oh-package.json5').read_text())['version']
+    har = OUTPUT / ('mxlogger-' + version + '.har')
     shutil.copy2(max(candidates, key=lambda path: path.stat().st_mtime_ns), har)
     with tarfile.open(har) as archive:
         names = archive.getnames()
