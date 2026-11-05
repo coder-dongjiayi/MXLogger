@@ -1,0 +1,8 @@
+{
+  "modelVersion": "6.0.0",
+  "name": "mxlogger-ohos-poc",
+  "version": "0.1.0",
+  "description": "MXLogger HarmonyOS minimum-call-chain probe",
+  "dependencies": {},
+  "devDependencies": {}
+}

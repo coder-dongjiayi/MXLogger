@@ -1,0 +1,9 @@
+.hvigor/
+.cxx/
+.clangd/
+.idea/
+oh_modules/
+node_modules/
+local.properties
+/build-profile.json5
+oh-package-lock.json5
