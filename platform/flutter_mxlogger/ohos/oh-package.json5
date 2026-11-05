@@ -1,0 +1,11 @@
+{
+  "name": "flutter_mxlogger",
+  "version": "2.3.1",
+  "description": "MXLogger Flutter binding for HarmonyOS",
+  "main": "index.ets",
+  "author": "dongjiayi",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "@djy/mxlogger": "2.3.1"
+  }
+}

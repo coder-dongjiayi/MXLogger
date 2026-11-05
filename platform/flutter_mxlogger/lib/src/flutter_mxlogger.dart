@@ -10,6 +10,9 @@ import 'package:flutter/services.dart';
 List<String> _levelIcons = ["🟩", "🟦", "🟨", "🟥", "❌"];
 List<String> _levelNames = ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"];
 
+// Keep compatibility with upstream Dart, which has no Platform.isOhos getter.
+bool get _isOhos => Platform.operatingSystem == 'ohos';
+
 /// 日志文件存储策略
 /// Log file storage policy
 enum MXStoragePolicyType {
@@ -88,7 +91,7 @@ class MXFileEntity {
   }
 }
 
-class MXLogger with WidgetsBindingObserver {
+class MXLogger with WidgetsBindingObserver implements Finalizable {
   /// 当前链接的 C++ Core 版本号，无需初始化 logger；与 pub 包版本号独立。
   /// The linked C++ Core version, available without creating a logger.
   static String coreVersion() => _coreVersion().toDartString();
@@ -174,7 +177,7 @@ class MXLogger with WidgetsBindingObserver {
   /// macOS/Windows cleanup is explicit and does not follow app lifecycle events.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if ((Platform.isAndroid || Platform.isIOS) &&
+    if ((Platform.isAndroid || Platform.isIOS || _isOhos) &&
         state == AppLifecycleState.paused &&
         _shouldRemoveExpiredDataWhenEnterBackground == true) {
       removeExpireData();
@@ -261,6 +264,11 @@ class MXLogger with WidgetsBindingObserver {
       return;
     }
 
+    if (_isOhos) {
+      // Release owned wrappers on isolate exit/hot restart as well as destroy.
+      // The native session remains available to its other ArkTS/Dart owners.
+      _ohosHandleFinalizer.attach(this, _handle, detach: this);
+    }
     WidgetsBinding.instance.addObserver(this);
 
     /// 注册到实例表：destroy时据此失效对应实例，防止use-after-free。
@@ -286,6 +294,7 @@ class MXLogger with WidgetsBindingObserver {
   /// directory: 自定义日志文件路径，不填时使用默认路径：
   ///            ios: /Library/com.mxlog.LoggerCache/nameSpace
   ///            android: /files/com.mxlog.LoggerCache/nameSpace
+  ///            ohos: /files/com.mxlog.LoggerCache/nameSpace
   ///            macos: `Application Support/<bundle-id>/MXLogger/nameSpace`
   ///                   无 bundle-id 时使用进程名 / uses the process name if no bundle ID exists
   ///            custom log directory; defaults to the paths above when omitted
@@ -938,6 +947,12 @@ class MXLogger with WidgetsBindingObserver {
   void _invalidate() {
     WidgetsBinding.instance.removeObserver(this);
     closeFailFile();
+    if (_isOhos && _handle != nullptr) {
+      // OHOS returns an independently owned wrapper for each initialize call.
+      // Releasing it leaves the shared session alive until destroy below.
+      _ohosHandleFinalizer.detach(this);
+      _releaseHandle(_handle);
+    }
     _handle = nullptr;
     _enable = false;
   }
@@ -953,12 +968,20 @@ DynamicLibrary _loadNativeLibrary() {
             .path;
     return DynamicLibrary.open(path);
   }
-  return Platform.isAndroid
+  return Platform.isAndroid || _isOhos
       ? DynamicLibrary.open('libmxlogger.so')
       : DynamicLibrary.process();
 }
 
 final DynamicLibrary _nativeLib = _loadNativeLibrary();
+
+final NativeFinalizer _ohosHandleFinalizer = NativeFinalizer(_nativeLib.lookup<
+    NativeFunction<Void Function(Pointer<Void>)>>('flutter_mxlogger_release_handle'));
+
+// Only resolved on OHOS; the other platforms use borrowed Core pointers.
+final void Function(Pointer<Void>) _releaseHandle = _nativeLib.lookupFunction<
+    Void Function(Pointer<Void>),
+    void Function(Pointer<Void>)>('flutter_mxlogger_release_handle');
 
 final Pointer<Utf8> Function() _windowsDefaultDirectory = _nativeLib
     .lookupFunction<Pointer<Utf8> Function(), Pointer<Utf8> Function()>(

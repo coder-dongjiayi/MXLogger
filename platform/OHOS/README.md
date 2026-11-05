@@ -3,7 +3,7 @@
 提供 ArkTS SDK、Release HAR、原生 Demo，以及独立 HAR 消费工程的构建与真机验证脚本。
 开发工程默认包版本 `0.1.0`，发布包版本由打包脚本参数指定；Core 版本由 `MXLogger.coreVersion()` 返回（本次为 `2.3.0`）。
 OHPM 包名为 `@djy/mxlogger`，发布版本为 `2.3.1`，通过 OHPM 中心仓安装。
-当前为原生 ArkTS 接入，Flutter 鸿蒙绑定尚未完成。
+本文介绍原生 ArkTS 接入。当前仓库也提供 Flutter 鸿蒙开发版绑定，见 [Flutter 示例与验证说明](../flutter_mxlogger/example/README.md#harmonyos)；Flutter 绑定尚未发布到 pub.dev。
 
 ## 通过 OHPM 安装
 
@@ -159,7 +159,7 @@ Core 的 stdout / 内部诊断打印在该构建中关闭，错误通过返回�
 鸿蒙适配层继续实现 `Core/ffi/mxlogger_ffi.h` 中的公共 C ABI，并共用其内存分配辅助代码。
 Core 与其他平台封装未改动。鸿蒙句柄为不透明包装对象，不能转换成 `mx_logger*`。
 销毁会话后句柄仍可安全判定失效；调用方最终需调用 `flutter_mxlogger_release_handle`，并永久丢弃指针。
-ArkTS 的 Native 对象 finalizer 会自动 release。后续 Flutter 鸿蒙绑定需要遵守同一约定。
+ArkTS 的 Native 对象 finalizer 会自动 release。Flutter 鸿蒙绑定在销毁 Dart 实例时显式 release 包装句柄，遵守同一约定。
 
 字符串及数组继续使用成对的 `free_string/free_logfiles/free_logmsg` 释放。
 新增鸿蒙扩展声明见 `mxlogger/src/main/cpp/mxlogger_ohos.h`。

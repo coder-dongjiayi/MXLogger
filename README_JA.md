@@ -128,7 +128,7 @@ implementation 'io.github.coder-dongjiayi:mxlogger:2.3.0'
 ohpm install @djy/mxlogger@2.3.1
 ```
 
-HAR には ArkTS API と ARM64 / x86_64 ネイティブライブラリが含まれます。最小 API は 12、実機検証は API 26 / ARM64 で実施済みです。x86_64 はビルドのみ確認しています。現在はネイティブ ArkTS SDK に対応し、Flutter の HarmonyOS 統合は未対応です。[HarmonyOS SDK / Demo ガイド](./platform/OHOS/README.md)を参照してください。
+HAR には ArkTS API と ARM64 / x86_64 ネイティブライブラリが含まれます。最小 API は 12、実機検証は API 26 / ARM64 で実施済みです。x86_64 はビルドのみ確認しています。ネイティブ ArkTS SDK は OHPM で公開済みです。Flutter HarmonyOS 開発版は現在のリポジトリに含まれ、pub.dev には未公開です。[Flutter ガイド](./platform/flutter_mxlogger/README_JA.md)を参照してください。[HarmonyOS SDK / Demo ガイド](./platform/OHOS/README.md)を参照してください。
 
 ## Windows
 

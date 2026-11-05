@@ -142,7 +142,7 @@ Install from the [OHPM central registry](https://ohpm.openharmony.cn/) in the co
 ohpm install @djy/mxlogger@2.3.1
 ```
 
-The HAR contains the ArkTS API and ARM64 / x86_64 native libraries. It declares API 12 as the minimum; runtime validation currently covers API 26 / ARM64. x86_64 is build-only. HarmonyOS support currently uses the native ArkTS SDK; Flutter HarmonyOS integration is pending. See the [HarmonyOS SDK and Demo guide](./platform/OHOS/README.md).
+The HAR contains the ArkTS API and ARM64 / x86_64 native libraries. It declares API 12 as the minimum; runtime validation currently covers API 26 / ARM64. x86_64 is build-only. The native ArkTS SDK is published on OHPM. The development Flutter HarmonyOS binding is available in this checkout; see the [Flutter plugin guide](./platform/flutter_mxlogger/README.md#harmonyos-current-repository-development-version). See the [HarmonyOS SDK and Demo guide](./platform/OHOS/README.md).
 
 ## Windows
 

@@ -8,7 +8,7 @@ MXLogger は mmap メモリマッピングを基盤とし、AES-CFB-128 暗号�
 
 - **バージョン**: 2.3.0
 - **要件**: Dart SDK `>=2.19.0 <4.0.0`、Flutter `>=3.7.0`
-- **対応プラットフォーム**: iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）、Windows 10/11 x64
+- **対応プラットフォーム**: iOS（>= 9.0）、macOS（>= 10.14）、Android（minSdk 21）、Windows 10/11 x64、HarmonyOS（現在のリポジトリ開発版）
 
 <img src="https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/platform/flutter_mxlogger/images/jiegoutu.webp" alt="MXLogger の構成：ネイティブプラットフォーム、Windows DLL、アナライザーの利用方法" width="960" />
 
@@ -71,6 +71,18 @@ STRIP_STYLE = non-global
 アーカイブ時に FFI シンボルが削除され、リリースで
 `Failed to lookup symbol 'flutter_mxlogger_initialize'` が発生するのを防ぎます。
 変更後はアプリを再ビルドしてください。
+
+### HarmonyOS（現在のリポジトリ開発版）
+
+HarmonyOS Flutter バインディングは現在のリポジトリに含まれ、pub.dev には未公開です。`platform/flutter_mxlogger` を `path` 依存に指定するか、この変更を含む Git コミットを使用してください。
+HarmonyOS Flutter SDK（使用バージョン：`3.41.9+ohos-1.0.2`）と DevEco Studio が必要です。サンプルの最小 API は 17 です。
+プラグインは OHPM 中央リポジトリの `@djy/mxlogger@2.3.1` を自動取得します。HAR の手動インストールや Core のコンパイルは不要です。
+
+既存の Dart API は `dart:ffi` から `libmxlogger.so` を呼び出します。MethodChannel はデフォルトのサンドボックスディレクトリ取得に使用します。
+デフォルトは `context.filesDir/com.mxlog.LoggerCache/<nameSpace>` です。バックグラウンドでの削除は iOS / Android と同じです。
+Dart logger の破棄時に HarmonyOS の所有ハンドルを解放し、セッションの破棄で ArkTS / Dart の別名も無効になります。
+
+実行と実機検証は[サンプルガイド](./example/README.md#harmonyos)を参照してください。
 
 ## クイックスタート
 

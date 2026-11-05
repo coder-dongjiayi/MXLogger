@@ -40,6 +40,8 @@ flutter:
         sharedDarwinSource: true
       windows:
         ffiPlugin: true
+      ohos:
+        pluginClass: FlutterMxloggerPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

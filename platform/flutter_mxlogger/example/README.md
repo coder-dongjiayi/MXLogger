@@ -1,4 +1,4 @@
-# MXLogger Flutter demo — iOS / Android / macOS / Windows
+# MXLogger Flutter demo — iOS / Android / macOS / Windows / HarmonyOS
 
 The example uses the plugin from the parent directory. The plugin requires
 Flutter 3.7+, while this example's dependencies require Dart 3.8+.
@@ -33,6 +33,61 @@ levels, JSON/generic/token writes, configuration, a 100,000-write benchmark,
 concurrent isolates with count/order verification, manual cleanup, rebuilding,
 file browsing, level/keyword filters and copying full log messages. Isolates share
 one process; the separate native macOS demo also demonstrates multiple processes.
+
+## HarmonyOS
+
+The binding is currently available from this checkout, ahead of the next pub.dev
+release. Use a HarmonyOS Flutter SDK and DevEco Studio; upstream Flutter does not
+build HAPs. The example requires API 17 or later and uses the central OHPM package
+`@djy/mxlogger@2.3.1` automatically. No local HAR installation is needed.
+
+From this example directory:
+
+```sh
+cp ohos/build-profile.template.json5 ohos/build-profile.json5
+/path/to/harmonyos/flutter/bin/flutter pub get
+```
+
+Open `ohos/` in DevEco Studio, configure the app's debug signing and then run:
+
+```sh
+/path/to/harmonyos/flutter/bin/flutter run -d DEVICE_ID
+```
+
+`lib/main.dart` is the feature Demo. It shares the iOS app icon and supports the
+same log APIs, AES viewing, benchmark, isolate writes and English/Chinese toggle.
+Language preferences use the logging plugin's sandbox-directory channel on OHOS,
+so a separate HarmonyOS `path_provider` fork is unnecessary.
+
+For automated verification, from the repository root:
+
+```sh
+python3 scripts/verify_flutter_ohos.py \
+  --flutter /path/to/harmonyos/flutter/bin/flutter
+# Build the interactive lib/main.dart Demo instead:
+python3 scripts/verify_flutter_ohos.py \
+  --flutter /path/to/harmonyos/flutter/bin/flutter --demo
+```
+
+This builds an isolated ARM64 Debug app from `lib/ohos_smoke.dart`, using only the
+central HAR. Its test-only ArkTS channel checks Dart/ArkTS token sharing. The
+verification channel is not part of the plugin or interactive Demo.
+
+To run twice on a device using an existing signed DevEco test project:
+
+```sh
+python3 scripts/verify_flutter_ohos.py \
+  --flutter /path/to/harmonyos/flutter/bin/flutter \
+  --signing-project platform/OHOS --device DEVICE_ID \
+  --restore-hap build/ohos-sdk/mxlogger-demo.hap
+```
+
+This temporarily reuses that test app's bundle ID and signing, then reinstalls
+the original signed HAP without uninstalling or clearing app data. Use a test app
+for `--signing-project`, and pass its matching original HAP to `--restore-hap`.
+Reports and build logs go to `build/flutter-ohos/<run>/`. Checks cover five levels,
+UTF-8, plain/AES, native token writes, Dart isolate writes, filtering, duplicate
+initialization, destroy/reopen and persistence across two processes.
 
 ## Run the unpublished macOS demo
 

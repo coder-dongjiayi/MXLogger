@@ -124,6 +124,8 @@ class LandingPage extends StatelessWidget {
                     ? 'Flutter Windows'
                     : Platform.isMacOS
                     ? 'Flutter macOS'
+                    : Platform.operatingSystem == 'ohos'
+                    ? 'Flutter HarmonyOS'
                     : 'Flutter'} Demo · Core $coreVersion',
                 style: TextStyle(fontSize: 12, color: tertiaryText(context)),
               ),

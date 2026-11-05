@@ -279,6 +279,22 @@ bash scripts/verify_android_demo.sh package
 
 ## 七、Flutter 插件运行与集成验证
 
+### HarmonyOS Flutter
+
+插件的 `ohos/` 模块从中心仓依赖 `@djy/mxlogger@2.3.1`；Dart 通过 FFI 复用其原生库，消费者不编译 Core。
+需要鸿蒙 Flutter SDK（使用 `3.41.9+ohos-1.0.2`）和 DevEco Studio。当前绑定是仓库开发版，尚未发布到 pub.dev。
+
+```sh
+python3 scripts/verify_flutter_ohos.py --flutter /path/to/harmonyos/flutter/bin/flutter
+python3 scripts/verify_flutter_ohos.py --flutter /path/to/harmonyos/flutter/bin/flutter --demo
+```
+
+默认编译最小验证入口；`--demo` 编译完整的 Flutter 功能 Demo。
+可传 `--device DEVICE_ID --signing-project platform/OHOS --restore-hap build/ohos-sdk/mxlogger-demo.hap`
+执行两次真机启动，检查明文 / AES、五级写入、ArkTS / Dart token 共享、Isolate、销毁重建及进程重启保留。
+复用签名时会临时使用该测试项目的 bundle ID，结束后恢复原 HAP，不卸载或清除应用数据。
+输出为 `build/flutter-ohos/<run>/`；详细说明见 [Flutter Demo](../platform/flutter_mxlogger/example/README.md#harmonyos)。
+
 ### [run_flutter_macos_demo.sh](run_flutter_macos_demo.sh)
 
 使用当前仓库尚未发布的原生源码运行 Flutter SDK Demo，工作目录是 `platform/flutter_mxlogger/example/`。

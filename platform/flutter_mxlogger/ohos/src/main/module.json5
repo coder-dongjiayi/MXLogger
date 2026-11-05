@@ -1,0 +1,7 @@
+{
+  "module": {
+    "name": "flutter_mxlogger",
+    "type": "har",
+    "deviceTypes": ["default", "tablet"]
+  }
+}

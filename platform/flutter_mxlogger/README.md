@@ -8,7 +8,7 @@ See the [main MXLogger repository](https://github.com/coder-dongjiayi/MXLogger) 
 
 - **Version**: 2.3.0
 - **Requirements**: Dart SDK `>=2.19.0 <4.0.0`, Flutter `>=3.7.0`
-- **Platforms**: iOS (>= 9.0), macOS (>= 10.14), Android (minSdk 21), Windows 10/11 x64
+- **Platforms**: iOS (>= 9.0), macOS (>= 10.14), Android (minSdk 21), Windows 10/11 x64, HarmonyOS (current repository development version)
 
 <img src="https://raw.githubusercontent.com/coder-dongjiayi/MXLogger/main/platform/flutter_mxlogger/images/jiegoutu.webp" alt="MXLogger architecture: native platforms, Windows DLL and analyzer integrations" width="960" />
 
@@ -75,6 +75,18 @@ STRIP_STYLE = non-global
 This preserves FFI symbols during archiving and avoids errors such as
 `Failed to lookup symbol 'flutter_mxlogger_initialize'` in release builds.
 Rebuild the app after changing the setting.
+
+### HarmonyOS (current repository development version)
+
+The HarmonyOS Flutter binding is in this checkout and has not been published to pub.dev. Use a `path` dependency on `platform/flutter_mxlogger`, or a Git commit containing this change.
+Use a HarmonyOS Flutter SDK (tested toolchain: `3.41.9+ohos-1.0.2`) and DevEco Studio; the example requires API 17 or later.
+The plugin resolves `@djy/mxlogger@2.3.1` from the central OHPM registry automatically, without manually installing a HAR or compiling Core.
+
+The existing Dart logging, file-list and decoding APIs use `dart:ffi` with `libmxlogger.so`. The MethodChannel only resolves the sandbox directory.
+The default is `context.filesDir/com.mxlog.LoggerCache/<nameSpace>`. Background cleanup follows iOS / Android behavior.
+Destroying Dart loggers releases their owned HarmonyOS wrappers; destroying a session invalidates its ArkTS and Dart aliases.
+
+See the [example guide](./example/README.md#harmonyos) for running and device verification.
 
 ## Quick start
 

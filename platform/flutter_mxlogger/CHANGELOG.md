@@ -1,5 +1,9 @@
 
 # MXLogger for Flutter Change Log
+# v2.3.1/2026-11-05
+* Add HarmonyOS Flutter plugin registration and the central OHPM dependency `@djy/mxlogger@2.3.1`. Dart keeps using the shared C ABI in `libmxlogger.so`; the MethodChannel only resolves the sandbox directory.
+* Release each owned HarmonyOS handle when Dart aliases are destroyed or the isolate exits, and enable mobile background cleanup on HarmonyOS without requiring `Platform.isOhos` in upstream Dart.
+* Add a HarmonyOS example project and reproducible device verification for plain/AES logs, ArkTS/Dart token sharing, isolate writes and process-restart persistence.
 # v2.3.1/2026-10-30
 * Update description.
 # v2.3.0/2026-10-30

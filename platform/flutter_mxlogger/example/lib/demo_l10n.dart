@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// demo 内置的语言管理: 默认英文 可在 App 内切换中文 与系统语言无关
@@ -47,6 +48,14 @@ class DemoL10n {
   }
 
   static Future<File> _storeFile() async {
+    if (Platform.operatingSystem == 'ohos') {
+      // The logging plugin already resolves the OHOS sandbox; no path_provider fork is needed.
+      final result = await const MethodChannel('flutter_mxlogger')
+          .invokeMapMethod<String, String>('initialize');
+      final directory = Directory(result!['directory']!);
+      await directory.create(recursive: true);
+      return File('${directory.path}/$_fileName');
+    }
     final directory = await getApplicationSupportDirectory();
     return File('${directory.path}/$_fileName');
   }
