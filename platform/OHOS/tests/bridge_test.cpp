@@ -81,9 +81,7 @@ int main() {
         mxlogger_ohos_destroy_handle(b.value);
         check(mxlogger_ohos_is_valid(fresh.value), "old generation cannot destroy reopened session");
         check(count(fresh.value) == 2, "reopen preserves committed data");
-        check(mxlogger_ohos_read_file(fresh.value, first_file(fresh.value).c_str()) != nullptr, "read managed file");
-        // Exercise paired ownership without leaking the test read result.
-        take(mxlogger_ohos_read_file(fresh.value, first_file(fresh.value).c_str()));
+        check(!take(mxlogger_ohos_read_file(fresh.value, first_file(fresh.value).c_str())).empty(), "read managed file");
 
         for (int round = 0; round < 25; ++round) {
             Handle racing{open(root.string(), "race" + std::to_string(round))};

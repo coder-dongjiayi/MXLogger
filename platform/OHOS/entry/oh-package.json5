@@ -1,6 +1,6 @@
 {
   "name": "entry",
   "version": "0.1.0",
-  "description": "ArkTS to MXLogger native smoke test",
-  "dependencies": { "libmxlogger.so": "file:./src/main/cpp/types/libmxlogger" }
+  "description": "MXLogger ArkTS SDK contract and persistence demo",
+  "dependencies": { "@mxlogger/mxlogger": "file:../mxlogger" }
 }

@@ -28,6 +28,7 @@ def run(command, *, cwd=ROOT, env=None, log=None):
                             text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                             timeout=180)
     if log:
+        Path(log).parent.mkdir(parents=True, exist_ok=True)
         Path(log).write_text(result.stdout)
     if result.returncode:
         raise RuntimeError('\n'.join(result.stdout.splitlines()[-55:]))
@@ -188,18 +189,21 @@ def device_check(deveco, target, hap):
     if 'install bundle successfully' not in install:
         raise RuntimeError('HAP installation was not confirmed: ' + install)
     launches = []
+    captured_logs = {}
     for _ in range(2):
         device('shell', 'aa', 'force-stop', BUNDLE)
         previous = device('shell', 'hilog', '-x', '-T', 'MXLoggerPOC')
         seen = {x['pid'] for x in parse_reports(previous)}
-        start = device('shell', 'aa', 'start', '-b', BUNDLE, '-a', 'EntryAbility')
+        start = device('shell', 'aa', 'start', '-b', BUNDLE, '-a', 'EntryAbility',
+                       '--ps', 'mxloggerPage', 'verification')
         if 'start ability successfully' not in start:
             raise RuntimeError(start)
         deadline = time.monotonic() + 30
         reports = []
         while time.monotonic() < deadline:
             logs = device('shell', 'hilog', '-x', '-T', 'MXLoggerPOC')
-            (output / 'device-hilog.txt').write_text(logs)
+            captured_logs.update(dict.fromkeys(logs.splitlines()))
+            (output / 'device-hilog.txt').write_text('\n'.join(captured_logs) + '\n')
             reports = [x for x in parse_reports(logs) if x['pid'] not in seen]
             if len(reports) >= 2:
                 break

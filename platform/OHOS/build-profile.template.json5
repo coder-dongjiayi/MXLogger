@@ -12,7 +12,9 @@
     }],
     "buildModeSet": [{ "name": "debug" }, { "name": "release" }]
   },
-  "modules": [{ "name": "entry", "srcPath": "./entry", "targets": [{
+  "modules": [{ "name": "mxlogger", "srcPath": "./mxlogger", "targets": [{
+    "name": "default", "applyToProducts": ["default"]
+  }] }, { "name": "entry", "srcPath": "./entry", "targets": [{
     "name": "default", "applyToProducts": ["default"]
   }] }]
 }

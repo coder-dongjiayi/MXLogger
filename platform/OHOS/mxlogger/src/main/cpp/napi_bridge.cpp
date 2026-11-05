@@ -51,7 +51,7 @@ template<class F> napi_value call(napi_env env, napi_callback_info info, size_t 
         return operation(args);
     } catch (const std::exception &error) {
         const char *codes[] = {"MXLOGGER_ERROR", "MXLOGGER_ARGUMENT", "MXLOGGER_CLOSED", "MXLOGGER_CONFLICT", "MXLOGGER_IO"};
-        const int code = mxlogger_ohos_last_error_code();
+        const int code = dynamic_cast<const std::invalid_argument *>(&error) ? 1 : mxlogger_ohos_last_error_code();
         napi_throw_error(env, code >= 1 && code <= 4 ? codes[code] : codes[0], error.what());
         return nullptr;
     }

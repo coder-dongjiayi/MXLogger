@@ -206,7 +206,10 @@ bool main_thread() {
 int write(Access &access, int level, const char *name, const char *message, const char *tag) {
     require(level >= 0 && level <= 4 && message, "level must be 0..4 and message must be a string");
     const auto result = access->log(level, name, message, tag, main_thread());
-    if (result != 0) throw Error(4, access->error_desc());
+    if (result != 0) {
+        last_error = access->error_desc(); last_code = 4;
+        return result; // Preserve Core's negative write codes for C ABI consumers.
+    }
 #if defined(__OHOS__)
     if (access.session->console && access->is_enable() && level >= access->log_level()) {
         const LogLevel levels[] = {LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL};

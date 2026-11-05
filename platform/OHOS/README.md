@@ -1,106 +1,208 @@
-# HarmonyOS 最小调用链 POC
+# MXLogger HarmonyOS SDK
 
-第一阶段工程：验证 ArkTS 加载 `libmxlogger.so`，读取 Core 版本，经现有 C ABI 和
-C++ 接口写入 `.mx`，关闭重开读取，以及应用进程重启后的持久化。
-这是开发验证工程，尚不是可发布的 ArkTS SDK / HAR，也未接入 Flutter 鸿蒙插件。
+第二阶段交付：ArkTS SDK、本地 Release HAR、Demo，以及独立 HAR 消费工程的构建与真机验证脚本。
+当前包版本 `0.1.0`，Core 版本由 `MXLogger.coreVersion()` 返回（本次为 `2.3.0`）。
+未发布到 OHPM；当前继续完善与 iOS / Android 对齐的原生鸿蒙 Demo。
 
-## 工程结构
+## 原生 Demo
 
-- `entry/`：Stage / ArkTS 应用，包名 `com.mxlogger.ohos.poc`。
-- `build-profile.template.json5`：可提交的无签名模板；脚本首次构建生成被 Git 忽略的
-  `build-profile.json5`，IDE 自动签名产生的本机证书配置保留在该本地文件中。
-- `native/`：共用 Core + `Core/ffi/mxlogger_ffi.cpp` + 两个 POC Node-API 入口。
-- `native/smoke.cpp`：明文和 AES 验证、相同 Core 实例检查及 JSON 报告。
-- `native/runner.cpp`：仅供主机验证共享库及跨进程持久化；鸿蒙验证使用真实应用进程。
+用 DevEco Studio 打开 `platform/OHOS`，选择 `entry` 运行。桌面名称为 **MXLogger Demo**，
+AppIcon 直接复用 iOS Demo 的 `AppIcon.appiconset/icon-1024.png`；欢迎页 Logo 也与 iOS / Android 相同。
+正常启动进入欢迎页，点击「进入演示」打开功能面板。右上角可切换中文 / English。
 
-原生源文件直接引用本仓库的 `Core/`，没有复制核心实现，也没有更改已有平台代码。
-POC 单独关闭 native 控制台和内部诊断打印，错误通过报告返回。
+默认参数与其他平台示例一致：namespace 为 `com.djy.mxlogger`，按小时分片，AES-CFB-128，
+key 为 `abcdefgabcdefgob`，IV 为 `abcdefgabcdefgcc`，保留 7 天 / 10 MB，Debug 等级，HiLog 默认关闭。
+密钥仅供演示。默认数据目录为 `context.filesDir/mxlogger_demo/<policy>_<aes|plain>/`，
+分开保存不同分片策略、明文和密文，避免切换参数时混用文件。
 
-## 已验证环境
+| 页面 / 操作 | 对应公开 API |
+| --- | --- |
+| 五级写入、模拟网络请求、自定义 name / tag / message | `debug/info/warn/error/fatal/log` |
+| token 写入、关联共享实例 | `logWithToken`、`fromLoggerToken` |
+| 日志等级、写入开关、控制台开关 | `setLevel/level`、`setEnable/enable`、`setConsoleEnable/consoleEnable` |
+| 保留时长、大小上限 | `setMaxDiskAge/maxDiskAge`、`setMaxDiskSize/maxDiskSize` |
+| 初始化 / 重建：目录、namespace、fileName、header、四种策略、AES 开关 | `initialize`、`initializeWithDirectory`、`MXLoggerOptions` |
+| 顶部状态、实例信息、复制 token / 路径 | `state`、`isValid`、`coreVersion`、`logSize`、`loggerToken`、`diskCachePath`、`errorDesc` |
+| 文件列表及大小 / 创建 / 修改时间、日志详情 | `logFiles`、`readLogFile` |
+| flush、按配置清理、清理历史 / 全部非活跃文件 | `flush`、`removeExpireData`、`removeBeforeAllData`、`removeAll` |
+| 销毁、重新初始化 | `destroy`、`isValid` |
 
-- DevEco Studio `26.0.0.865`。
-- 内置 HarmonyOS SDK `26.0.0.105` / API 26，Clang 15.0.4。
-- Hvigor `6.26.9`、工具链内置 Node `24.14.1`。
-- ARM64 模拟器：`emulator 7.0.0.107(SP8DEVC00E999R4P11)` / API 26。
-- ARM64 真机：ADY-AL00，`7.0.0.111(SP10C01E111R4P2)` / API 26，调试签名验证及安装通过。
-- ARM64、x86_64 动态库及应用内打包均通过；ARM64 模拟器、真机均完成运行验证，x86_64 尚未运行。
+文件详情展示等级、时间、name、tag、完整消息入口、主线程 / Worker 和 threadId；支持搜索和等级筛选，
+每页 100 条，点击记录可查看和复制完整 JSON。清理和销毁均有应用内确认提示。
+等级过滤或禁用写入时，界面明确显示记录未保存；销毁后可从「初始化参数 / 重建」恢复。
 
-2026-11-05 真机复验：两个不同 PID 的应用进程，明文和 AES 均从首次启动的
-`previousCount=0 / readBackCount=2`，推进到第二次启动的 `2 / 4`。
-导出的两类日志由现有 `MxBinaryParser` 分别解析出 4 条记录，UTF-8、字段及错误密钥检查通过。
-
-工程声明兼容 API 12，尚未在 API 12 系统上运行，不能据此宣称最低系统已经验收。
-当前 AES 在鸿蒙 ARM64 上使用既有通用 C 路径；加速汇编的选择和性能属于后续阶段。
-
-## 可复现验证
-
-从仓库根目录运行（Python 3.9+、主机检查另需 PATH 中有 CMake）：
-
-```sh
-# 主机独立进程检查 + 两种鸿蒙架构编译 / C ABI 导出检查
-python3 scripts/verify_ohos_poc.py --host --native
-
-# 构建包含两种架构的 ArkTS HAP
-python3 scripts/verify_ohos_poc.py --hap
-
-# 已启动的模拟器：安装本 POC，启动两次并导出沙箱日志
-python3 scripts/verify_ohos_poc.py --device 127.0.0.1:5555
-```
-
-可组合为 `--host --native --device 127.0.0.1:5555`。
-工具默认位于 `/Applications/DevEco-Studio.app/Contents`，其他位置使用 `--deveco` 指定。
-脚本使用 IDE 自带的 Hvigor 和 OHPM；只安装工程内的本地类型声明依赖。
-生成的工具路径、缓存和依赖链接均在忽略目录内，不修改系统 PATH。
-
-脚本只对识别为模拟器的设备尝试安装 unsigned HAP。真机先在 IDE 配置本工程的自动调试签名，
-再运行 `--device 真机序列号`；也可以用已签名的 POC Debug 包：
-
-```sh
-python3 scripts/verify_ohos_poc.py --device 真机序列号 --signed-hap /绝对路径/entry-default-signed.hap
-```
-
-脚本检查应用包名、Debug 标记，并用 SDK 的 `hap-sign-tool verify-app` 验证真机用包的签名，
-之后才安装。它不会关闭系统签名校验，也不会修改设备权限。
-两次运行仅停止本 POC 应用，保留日志。签名密码、证书和 profile 不应提交到 Git。
-
-验证报告位于 `build/ohos-poc/`：
-
-- `host-report.json`：主机明文 / AES 的两个独立进程报告。
-- `arm64-v8a-exports.txt`、`x86_64-exports.txt`：共享 C ABI 导出检查。
-- `hap-build.log`、`entry-default-unsigned.hap`：构建日志与安装包。
-- `devices/<target>/<run>/device-hilog.txt`、`device-report.json`：两个应用进程的独立报告。
-- `devices/<target>/<run>/logs/`：该次验证导出的 `.mx` 文件。
-- `device-report-<target>.json`：该设备最近一次成功报告，包含系统、架构、API、包摘要及导出目录。
-
-模拟器和真机各自保存证据，不会相互覆盖。旧版脚本生成的 `device-report.json` 仍可传给解析验证工具。
-
-每次启动分别给明文、加密 logger 写两条日志：一条走 FFI，一条走 C++。
-报告中的 `sharedCore` 通过 FFI token 回查 C++ 实例并核对指针身份；
-第二次启动必须具有不同 PID，且 `previousCount` 等于第一次的 `readBackCount`。
-测试同时检查关闭重开后保留旧记录、两条新记录都精确出现一次。
-
-## 使用现有解析器验证
-
-先确保解析器项目已经完成 `flutter pub get`，然后从仓库根目录运行：
+性能演示提供单 Worker 写入 100,000 条，以及 4 个 Worker 各写入 1,000 条。
+批量基准与 iOS / Android / macOS / Flutter 使用相同的六位序号消息
+`[000001] This is a benchmark loooooooooooooooooooooooooooooog`，序号从 `000001` 到 `100000`，
+每条 message 固定 61 个 UTF-8 字节，`name=benchmark`、`tag=perf`，调用 Info 写入。
+61 B 仅指 message；在该基准的 Info / 后台线程元数据下，Core 序列化为 152 B，
+加上每条记录的 4 B 长度字段共 156 B。AES-CFB 不增加记录长度。
+100,000 条有效记录占 15,600,000 B，不包含文件头；文件物理大小还受 mmap 预分配影响。
+导出 Demo 日志后可核对最近一次完整基准的消息、顺序、元数据及逐条编码大小：
 
 ```sh
 dart --packages=mxlogger_analyzer/mxlogger_analyzer_lib/.dart_tool/package_config.json \
-  scripts/verify_ohos_logs.dart build/ohos-poc/device-report-127.0.0.1_5555.json
+  scripts/verify_ohos_benchmark.dart EXPORTED_DEMO_DIRECTORY --aes
 ```
 
-该工具直接调用现有 `MxBinaryParser`，根据本次设备报告找到导出文件，检查实际记录数、
-UTF-8、等级、线程和时间戳、FFI / native 记录比例，以及错误密钥不能成功解密。
-使用的固定 key `poc-test-key-1234` 和 IV `poc-test-iv--1234` 仅供 POC 测试。
-也可以把导出的文件手动导入现有桌面 / Chrome 解析器。
+明文文件省略 `--aes`。传入同一个 Demo namespace 的导出目录，避免混入其他密钥的文件。
+这些操作复用主线程初始化的 token，界面等待全部 Worker 结束后才允许重建或销毁；
+显示的总耗时包含 Worker 启动、线程间传递及 flush，不能当作 Core 的独立吞吐基准。
+运行时需要开启写入并选择 Debug / Info 等级，期间临时关闭控制台，结束后恢复。
 
-## 在 IDE 中运行
+自动验收保留为「开发验证」入口，也可通过启动参数 `--ps mxloggerPage verification` 直接打开；
+它使用独立的测试 namespace。构建 / 安装与验收命令见后文。安装后可执行实际 UI 回归：
 
-先运行一次 `--hap`，或复制 `build-profile.template.json5` 为 `build-profile.json5`。
-随后打开 `platform/OHOS`，同步本地依赖后选择 `entry` 和设备运行。
-页面启动时自动执行明文与 AES 检查，可点“再次验证”追加检查。
-关闭后重新启动应用，报告应显示之前写入的记录仍然存在。
+```sh
+python3 scripts/verify_ohos_demo.py --device DEVICE_ID
+```
 
-## 后续工作
+该脚本操作 Demo 的真实控件，覆盖中英文、五级与自定义写入、过滤与 enable、配置、
+两种 Worker 写入、文件及记录分页、清理、销毁重建和明文 / AES 初始化。
+步骤报告、布局及截图输出到 `build/ohos-sdk/demo-ui/<run>/`，测试结束恢复按小时 / AES 示例。
 
-此 POC 的同步桥接仅用于小规模验证。完整公开 API、HiLog 策略、并发销毁保护、
-多线程 / isolate、日志清理、HAR / OHPM 发布和 Flutter 鸿蒙接入尚需后续实现与验收。
+## 接入本地 HAR
+
+将 `build/ohos-sdk/mxlogger-0.1.0.har` 复制到业务工程的 `libs/`，在 entry 的
+`oh-package.json5` 中添加（路径相对该文件）：
+
+```json
+{
+  "dependencies": {
+    "@mxlogger/mxlogger": "file:../libs/mxlogger-0.1.0.har"
+  }
+}
+```
+
+运行 `ohpm install`。业务工程需要 ArkTS 工具链，不需要 MXLogger Core 源码或 CMake 配置。
+HAR 自带 ARM64 / x86_64 的 `libmxlogger.so`；当前 DevEco 默认生成字节码 HAR，含公开类型声明与 `.abc`。
+
+```typescript
+import { MXLogger, MXLogLevel, MXStoragePolicy } from '@mxlogger/mxlogger';
+
+const logger = MXLogger.initialize(this.context, {
+  nameSpace: 'com.example.app',
+  storagePolicy: MXStoragePolicy.Daily,
+  fileHeader: '{"app_version":"1.0.0"}'
+});
+logger.setMaxDiskAge(7 * 24 * 60 * 60);
+logger.setMaxDiskSize(20 * 1024 * 1024);
+logger.setLevel(MXLogLevel.Debug);
+logger.info('开始校验 token', { name: 'login', tag: 'login,service' });
+logger.error('请求失败', { name: 'network', tag: 'network' });
+
+const token = logger.loggerToken;
+MXLogger.logWithToken(token, MXLogLevel.Info, '子模块日志');
+```
+
+默认基础目录为 `context.filesDir/com.mxlog.LoggerCache`，Core 追加 namespace。
+可通过 `options.directory` 自定义，或使用不需要 Context 的 `initializeWithDirectory(directory, options)`。
+目录必须是绝对路径；namespace 和 fileName 必须是单个非空路径分量。
+
+## API
+
+| 类别 | 接口 |
+| --- | --- |
+| 初始化 | `initialize`、`initializeWithDirectory`、`fromLoggerToken`、`coreVersion` |
+| 写入 | `log`、`debug/info/warn/error/fatal`、静态 `logWithToken` |
+| 状态 | `state`、`isValid`、`loggerToken`、`diskCachePath`、`errorDesc` |
+| 配置 | `setLevel`、`setEnable`、`setConsoleEnable`、`setMaxDiskAge`、`setMaxDiskSize` |
+| 配置读取 | `level`、`enable`、`consoleEnable`、`maxDiskAge`、`maxDiskSize`、`logSize` |
+| 文件 | `logFiles`、`readLogFile(filename)` |
+| 管理 | `flush`、`removeExpireData`、`removeBeforeAllData`、`removeAll`、`destroy` |
+
+- 等级：`Debug=0`、`Info=1`、`Warn=2`、`Error=3`、`Fatal=4`。
+- 策略：`Daily`、`Hourly`、`Weekly`、`Monthly`。
+- `log` 成功返回 `0`；被等级过滤或禁用时也返回 `0`。ArkTS 调用失败会抛出带 code 的 Error。
+- 错误 code：`MXLOGGER_ARGUMENT`、`MXLOGGER_CLOSED`、`MXLOGGER_CONFLICT`、`MXLOGGER_IO`。
+- 大小为字节，保留时长为秒；`0` 表示不限制。支持非负 JS 安全整数，原生边界额外检查。
+- `MXLogFile` 提供 `name/size/lastTimeStamp/createTimeStamp`，时间戳单位为秒；鸿蒙创建时间以 mtime 近似。
+- `MXLogRecord.timestamp` 为微秒；`isMainThread` 表示 OS 主线程，Worker 写入会标记为 false。
+- `readLogFile` 使用该 logger 的加密参数，同步返回记录，也包含原有 fileHeader 记录。
+- `flush` 请求映射数据写回，沿用 Core 的异步 flush 语义，不是断电持久化屏障。
+- 三个清理接口都保留当前正在使用的文件；`removeExpireData` 同时按 age / size 策略清理。
+
+AES 示例：在初始化参数中传 `cryptKey`、`iv`。沿用 AES-CFB-128：推荐各 16 个 UTF-8 字节，
+较长截断、较短补零；IV 缺省时使用 key。重开现有目录时应使用一致的加密参数。
+
+## 共享实例与生命周期
+
+同一个规范化 directory + namespace 共用一个会话，但每个包装对象独立持有 native handle。
+重复初始化不会重置运行时配置；初始化参数与存活会话冲突时抛出 `MXLOGGER_CONFLICT`。
+
+配置、写入、查询、清理和 flush 都在会话锁内执行。销毁等待在途操作退出，随后使所有别名失效；
+旧对象继续写入会安全失败。重新初始化创建新一代会话，旧对象再次 destroy 不会影响新会话。
+不同 logger 具有独立操作锁；token 查询和包装对象管理使用独立注册表锁。
+
+`destroy()` 为共享会话级操作，可重复调用。GC 仅释放当前包装对象，不自动销毁进程共享会话。
+使用 loggerToken 的 Worker 可以调用 `fromLoggerToken`；结束 Worker 不会关闭 UI 侧 logger。
+当前只承诺同进程共享；多进程共写尚未验收。
+
+## 控制台与 C ABI
+
+发行 HAR 保留 HiLog 控制台能力，默认关闭，`setConsoleEnable(true)` 后按等级输出。
+Core 的 stdout / 内部诊断打印在该构建中关闭，错误通过返回值、Error 和 errorDesc 保留。
+
+鸿蒙适配层继续实现 `Core/ffi/mxlogger_ffi.h` 中的公共 C ABI，并共用其内存分配辅助代码。
+Core 与其他平台封装未改动。鸿蒙句柄为不透明包装对象，不能转换成 `mx_logger*`。
+销毁会话后句柄仍可安全判定失效；调用方最终需调用 `flutter_mxlogger_release_handle`，并永久丢弃指针。
+ArkTS 的 Native 对象 finalizer 会自动 release。后续 Flutter 鸿蒙绑定需要遵守同一约定。
+
+字符串及数组继续使用成对的 `free_string/free_logfiles/free_logmsg` 释放。
+新增鸿蒙扩展声明见 `mxlogger/src/main/cpp/mxlogger_ohos.h`。
+独立路径的 legacy `select_logmsg` 不持有会话锁；并发读取活跃 logger 请使用 SDK 的 `readLogFile`。
+
+## 构建与验证
+
+从仓库根目录执行：
+
+```sh
+# ASan 主机合同测试 + Release HAR + 独立消费者构建
+python3 scripts/verify_ohos_sdk.py --host
+
+# 上述构建，并在指定设备安装独立消费者，启动两个进程进行合同验证
+python3 scripts/verify_ohos_sdk.py --device DEVICE_ID
+```
+
+工具默认位于 `/Applications/DevEco-Studio.app/Contents`，可通过 `--deveco` 修改。
+脚本首次构建从 `build-profile.template.json5` 生成被 Git 忽略的 `build-profile.json5`。
+真机需先在 IDE 配置自动调试签名，并为 default product 选择 signingConfig。
+证书、密码与本机配置保留在忽略目录，脚本使用 SDK verifier 校验签名后才安装真机。
+
+独立消费者位于 `build/ohos-sdk/consumer-*`：只有 Demo 和本地 HAR，没有 SDK 模块 / Core 源码依赖。
+脚本检查消费者没有生成 CMakeCache / C++ 对象，HAP 中每种架构只有一个 `libmxlogger.so`，
+并对 HAR 内两种架构的共用 C ABI 和鸿蒙扩展做导出符号检查。
+
+真机合同覆盖：五级日志、等级与 enable、共享配置、64 位设置、header、token、错误参数、
+三种清理与保留活跃文件、别名失效、重新初始化、四种存储策略及 AES、Worker 写入与线程标记。
+随后执行明文与加密的跨进程重启读取。主机 ASan 检查另外覆盖 10,000 次并发写入与销毁竞争。
+macOS ASan 不支持 LSan，本次不宣称做了 LeakSanitizer 验证。
+
+产物及证据位于 `build/ohos-sdk/`：
+
+- `mxlogger-0.1.0.har`：Release SDK。
+- `mxlogger-demo.hap`：仅依赖 HAR 构建的原生 Demo（真机安装需匹配本机签名设备）。
+- `har-contents.txt`、`har-libs/<abi>/exports.txt`：包内容及动态导出符号。
+- `consumer-report.json`：HAR 摘要及独立消费者的 HAP 路径。
+- `host-tests.log`：AddressSanitizer 合同测试。
+- `devices/<target>/<run>/device-report.json`、`device-hilog.txt`、`logs/`：设备合同及导出日志。
+- `device-report-<target>.json`：该设备最近一次成功报告。
+
+确保解析器项目已经运行 `flutter pub get` 后，可直接用现有解析器验证设备导出文件：
+
+```sh
+dart --packages=mxlogger_analyzer/mxlogger_analyzer_lib/.dart_tool/package_config.json \
+  scripts/verify_ohos_logs.dart build/ohos-sdk/device-report-DEVICE_ID.json
+```
+
+## 验证环境与边界
+
+2026-11-05：DevEco Studio `26.0.0.865`，HarmonyOS SDK `26.0.0.105` / API 26，
+Clang 15.0.4，Hvigor `6.26.9`，Node `24.14.1`。
+
+ARM64 真机 ADY-AL00 / `7.0.0.111(SP10C01E111R4P2)` 完成独立 HAR 消费者验收。
+ARM64、x86_64 均编译并打包；x86_64 尚未运行。工程声明最低 API 12，尚未在 API 12 设备执行。
+AES 在鸿蒙 ARM64 使用原有通用 C 路径，加速汇编与性能基准不在本阶段验收范围。
+
+第一阶段的独立 C++ 探针保留在 `native/`，可用 `scripts/verify_ohos_poc.py --host --native`
+重跑原始构建检查。正式 SDK 验收使用 `verify_ohos_sdk.py`。
