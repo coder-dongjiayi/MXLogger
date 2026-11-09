@@ -34,6 +34,10 @@ typedef MXShareHandler = Future<bool> Function(MXShareRequest request);
 /// 打开外部链接；返回 false 或抛错时，内核降级复制链接。
 typedef MXOpenExternalLink = Future<bool> Function(Uri uri);
 
+/// 在文件管理器中显示数据库：桌面端接收 file URI，Chrome 插件接收快照的 blob URI。
+/// 返回 false 或抛错表示打开失败；浏览器宿主负责释放 blob URI。
+typedef MXOpenDatabaseLocation = Future<bool> Function(Uri databaseFile);
+
 /// 把 [child] 包装成「拖入文件」目标：
 /// 文件落下时以绝对路径列表回调 `onDrop`，指针进出目标时回调 `onDragOver`
 /// （驱动虚线卡片的高亮）。
@@ -61,6 +65,7 @@ class MXHost {
     this.dropTargetBuilder,
     this.share,
     this.openExternalLink,
+    this.openDatabaseLocation,
   }) : prefs = prefs ?? MXMemoryPrefs();
 
   /// 设置的本地存储，默认仅存内存
@@ -77,6 +82,11 @@ class MXHost {
 
   /// 外部浏览器能力，由桌面壳或浏览器宿主提供。
   final MXOpenExternalLink? openExternalLink;
+
+  /// 取出数据库的入口；未提供时隐藏按钮（移动端嵌入与普通 Web）。
+  final MXOpenDatabaseLocation? openDatabaseLocation;
+
+  bool get canOpenDatabaseLocation => openDatabaseLocation != null;
 
   bool get canPickFiles => pickLogFiles != null;
 

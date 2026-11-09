@@ -119,6 +119,15 @@ class _BrowserDatabase {
         // Startup only chooses between the wizard and the data screen. The
         // repository fetches the visible page and statistics when needed.
         return {'total': database.count()};
+      case 'exportDatabase':
+        // All requests share this queue, so the snapshot is taken after COMMIT.
+        // Blob copies the committed VFS bytes and keeps large exports off JSON.
+        final data = _cache!.fileSystem.fileData[BrowserCache.databasePath]!;
+        final snapshot = web.Blob(
+          [data.buffer.asUint8List(0, data.length).toJS].toJS,
+          web.BlobPropertyBag(type: 'application/vnd.sqlite3'),
+        );
+        return {'url': web.URL.createObjectURL(snapshot)};
       case 'query':
         return _query(request);
       case 'logs':

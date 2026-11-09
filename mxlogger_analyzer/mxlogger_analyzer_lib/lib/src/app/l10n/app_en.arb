@@ -39,6 +39,8 @@
   "statStart": "Start",
   "statEnd": "End",
   "shareAllTip": "Share logs (current filter result)",
+  "openDatabaseFolderTip": "Open database folder",
+  "openDatabaseFolderFailed": "Could not open the database folder. Please try again.",
   "cryptoTip": "Edit decryption Key / IV",
   "changeFileTip": "Open another file",
   "refreshTip": "Rescan on-device logs",

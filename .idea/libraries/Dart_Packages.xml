@@ -133,6 +133,7 @@
           <value>
             <list>
               <option value="$USER_HOME$/fvm/versions/3.44.9/packages/flutter/lib" />
+              <option value="$USER_HOME$/fvm/versions/ohos/3.41.9+ohos-1.0.2/packages/flutter/lib" />
             </list>
           </value>
         </entry>
@@ -211,6 +212,7 @@
           <value>
             <list>
               <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/jni-1.1.0/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/jni-1.1.2/lib" />
               <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/jni-1.0.3/lib" />
             </list>
           </value>
@@ -284,6 +286,7 @@
           <value>
             <list>
               <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/meta-1.18.0/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/meta-1.17.0/lib" />
             </list>
           </value>
         </entry>
@@ -361,6 +364,7 @@
           <value>
             <list>
               <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/platform-3.2.0/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/platform-3.1.6/lib" />
             </list>
           </value>
         </entry>
@@ -459,6 +463,7 @@
           <value>
             <list>
               <option value="$USER_HOME$/fvm/versions/3.44.9/bin/cache/pkg/sky_engine/lib" />
+              <option value="$USER_HOME$/fvm/versions/ohos/3.41.9+ohos-1.0.2/bin/cache/pkg/sky_engine/lib" />
             </list>
           </value>
         </entry>
@@ -681,6 +686,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/intl-0.20.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/jni-1.0.3/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/jni-1.1.0/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/jni-1.1.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/jni_flutter-1.0.3/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/jni_flutter-1.0.4+1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/jni_util-1.0.0/lib" />
@@ -692,6 +698,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/logging-1.3.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/matcher-0.12.19/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/material_color_utilities-0.13.0/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/meta-1.17.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/meta-1.18.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/mime-2.1.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/objective_c-9.5.0/lib" />
@@ -703,6 +710,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_platform_interface-2.1.3/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/platform-3.1.6/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/platform-3.2.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/plugin_platform_interface-2.1.8/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/process-5.0.6/lib" />
@@ -753,6 +761,8 @@
       <root url="file://$USER_HOME$/fvm/versions/3.44.9/packages/flutter_web_plugins/lib" />
       <root url="file://$USER_HOME$/fvm/versions/3.44.9/packages/fuchsia_remote_debug_protocol/lib" />
       <root url="file://$USER_HOME$/fvm/versions/3.44.9/packages/integration_test/lib" />
+      <root url="file://$USER_HOME$/fvm/versions/ohos/3.41.9+ohos-1.0.2/bin/cache/pkg/sky_engine/lib" />
+      <root url="file://$USER_HOME$/fvm/versions/ohos/3.41.9+ohos-1.0.2/packages/flutter/lib" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

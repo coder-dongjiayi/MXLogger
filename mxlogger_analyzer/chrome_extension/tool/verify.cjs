@@ -3,7 +3,7 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 
 const root = path.resolve(__dirname, '..');
 const extension = path.join(root, 'dist/mxlogger-chrome-prototype');
@@ -188,6 +188,46 @@ async function screenshot(session, name) {
   fs.writeFileSync(path.join(root, 'dist', name), Buffer.from(shot.data, 'base64'));
 }
 
+async function verifyDatabaseExport(session, downloads = fs.mkdtempSync(path.join(os.tmpdir(), 'mxlogger-database-'))) {
+  await send('Browser.setDownloadBehavior', {behavior:'allow',downloadPath:downloads,eventsEnabled:true});
+  // Keep a filter active: the database export must include every row and meta.
+  // Intercept only the OS reveal call so headless verification opens no Finder.
+  await evaluate(session, `
+    window.mxRevealedDownloads = [];
+    chrome.downloads.show = id => window.mxRevealedDownloads.push(id);
+    const revealDatabase = window.mxRevealDatabase;
+    window.mxRevealDatabase = async url => {
+      try { return await revealDatabase(url); }
+      catch (error) { window.mxDatabaseExportError = String(error); throw error; }
+    };
+  `);
+  await click(session, '打开数据库目录');
+  await until(async () => {
+    const error = await evaluate(session, 'window.mxDatabaseExportError');
+    if (error) throw new Error(error);
+    return evaluate(session, 'window.mxRevealedDownloads.length === 1');
+  }, 'reveal completed database download');
+  const download = await evaluate(session, 'chrome.downloads.search({id:window.mxRevealedDownloads[0]}).then(items => items[0])');
+  assert.strictEqual(download.state, 'complete');
+  const inspected = spawnSync('python3', ['-c', `
+import json, sqlite3, sys
+database = sqlite3.connect(sys.argv[1])
+database.row_factory = sqlite3.Row
+print(json.dumps({
+  'integrity': database.execute('PRAGMA integrity_check').fetchone()[0],
+  'rows': [dict(row) for row in database.execute('SELECT * FROM mxlog ORDER BY timestamp')],
+  'meta': dict(database.execute('SELECT key, value FROM meta')),
+}))
+`, download.filename], {encoding:'utf8'});
+  assert.strictEqual(inspected.status, 0, inspected.stderr);
+  const databaseExport = JSON.parse(inspected.stdout);
+  assert.strictEqual(databaseExport.integrity, 'ok');
+  assert.deepStrictEqual(rows(databaseExport), expected.records);
+  assert.strictEqual(databaseExport.meta.fileName, (await query(session)).fileName);
+  assert.strictEqual((await state(session)).matched, 1);
+  check('Database export is a complete readable SQLite file with metadata; completed download is revealed');
+}
+
 async function verify() {
   const version = await send('Browser.getVersion');
   const { id } = await send('Extensions.loadUnpacked', { path: extension });
@@ -241,6 +281,18 @@ async function verify() {
   assert.strictEqual((await state(session)).fonts.recommendedCjk, true);
   check('Unsupported browser locale (Japanese) falls back to English');
   await click(session, '切换为中文');
+
+  if (process.argv.includes('--database-only')) {
+    await evaluate(session, 'window.mxPrototype.importSample(false)');
+    await until(async () => (await state(session)).loaded === expected.records.length, 'database sample import');
+    await fillText(session, '搜索日志', 'timeout');
+    await until(async () => (await state(session)).matched === 1, 'database export filter');
+    await verifyDatabaseExport(session);
+    await screenshot(session, 'database-export.png');
+    assert.deepStrictEqual(errors, []);
+    fs.writeFileSync(path.join(root, 'dist/database-verification.json'), JSON.stringify({browser:version.product,checks,errors},null,2));
+    return;
+  }
 
   const fontCheck = await evaluate(session, `(async () => {
     const manifest = await (await fetch('assets/FontManifest.json')).json();
@@ -383,6 +435,8 @@ async function verify() {
   assert(exported.includes('筛选结果 1/12 条'));
   assert(!exported.includes('cold start 412ms'));
   check('Browser download contains exactly the current filtered logs and header');
+
+  await verifyDatabaseExport(session, downloads);
   await click(session, '清除搜索内容');
   await until(async () => (await state(session)).matched === 12, 'clear keyword');
 

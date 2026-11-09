@@ -332,6 +332,18 @@ abstract class AppLocalizations {
   /// **'分享日志（当前筛选结果）'**
   String get shareAllTip;
 
+  /// No description provided for @openDatabaseFolderTip.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开数据库目录'**
+  String get openDatabaseFolderTip;
+
+  /// No description provided for @openDatabaseFolderFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法打开数据库目录，请重试'**
+  String get openDatabaseFolderFailed;
+
   /// No description provided for @cryptoTip.
   ///
   /// In zh, this message translates to:

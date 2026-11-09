@@ -5,6 +5,12 @@ import 'package:flutter/widgets.dart';
 import 'package:mxlogger_analyzer_lib/mxlogger_analyzer_app.dart';
 import 'package:web/web.dart' as web;
 
+@JS('mxCanRevealDatabase')
+external JSBoolean _canRevealDatabase();
+
+@JS('mxRevealDatabase')
+external JSPromise<JSBoolean> _revealDatabase(JSString url);
+
 /// Decryption parameters stay in memory unless the user opts into local storage.
 class BrowserPrefs extends MXMemoryPrefs implements MXCryptPersistencePrefs {
   static const _cryptPreference = 'mx_crypt_persist';
@@ -85,6 +91,9 @@ class BrowserHost {
     pickLogFiles: pickFiles,
     share: _share,
     openExternalLink: _openExternalLink,
+    openDatabaseLocation: _canRevealDatabase().toDart
+        ? _openDatabaseLocation
+        : null,
     dropTargetBuilder:
         ({required child, required onDrop, required onDragOver}) =>
             _BrowserDropTarget(
@@ -164,6 +173,14 @@ class BrowserHost {
     anchor.click();
     anchor.remove();
     return true;
+  }
+
+  Future<bool> _openDatabaseLocation(Uri uri) async {
+    try {
+      return (await _revealDatabase(uri.toString().toJS).toDart).toDart;
+    } finally {
+      web.URL.revokeObjectURL(uri.toString());
+    }
   }
 }
 

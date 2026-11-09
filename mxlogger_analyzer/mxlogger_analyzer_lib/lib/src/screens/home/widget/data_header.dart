@@ -72,6 +72,13 @@ class DataHeader extends MXConsumerWidget {
                     runSpacing: 7,
                     alignment: WrapAlignment.end,
                     children: [
+                      if (store.host.canOpenDatabaseLocation)
+                        MXIconButton(
+                          tooltip: context.l10n.openDatabaseFolderTip,
+                          icon: const Icon(Icons.folder_open_outlined),
+                          size: buttonSize,
+                          onTap: () => _openDatabaseLocation(context, store),
+                        ),
                       _ShareAllButton(info: info, size: buttonSize),
                       // 嵌入模式日志来源固定为本机目录：给「刷新」重新扫描解析，
                       // 而不是桌面端的「更换文件」
@@ -162,6 +169,15 @@ class DataHeader extends MXConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openDatabaseLocation(BuildContext context, MXStore store) async {
+    try {
+      if (await store.openDatabaseLocation()) return;
+    } catch (_) {}
+    if (context.mounted) {
+      showMXToast(context, context.l10n.openDatabaseFolderFailed);
+    }
   }
 
   /// 清除数据：二次确认 → 清库。桌面端回到首次引导页；

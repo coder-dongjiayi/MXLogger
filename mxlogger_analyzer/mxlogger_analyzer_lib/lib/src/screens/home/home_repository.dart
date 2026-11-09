@@ -60,6 +60,11 @@ class HomeRepository {
 
   Future<List<int>> fileSizes(List<String> paths) => platform.fileSizes(paths);
 
+  /// 等待整批写入完成后准备可取出的数据库，不受当前日志筛选影响。
+  /// 浏览器宿主覆写为生成完整数据库快照的 blob URI。
+  Future<Uri> prepareDatabaseFile() =>
+      _serial(() async => (await _database).prepareFileForCopy());
+
   Future<List<LoadedFile>> readFiles({
     required List<String> paths,
     required List<int> sizes,

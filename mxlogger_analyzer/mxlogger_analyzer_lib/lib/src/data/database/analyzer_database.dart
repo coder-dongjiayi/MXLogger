@@ -71,6 +71,18 @@ class AnalyzerDatabase {
     return db;
   }
 
+  /// 将已提交的 WAL 写回主库，保证此时单独复制 .db 文件也包含完整数据。
+  Uri prepareFileForCopy() {
+    if (_path.isEmpty) {
+      throw UnsupportedError('This database has no native file.');
+    }
+    final ResultSet result = _database.select('PRAGMA wal_checkpoint(TRUNCATE)');
+    if (result.single['busy'] != 0) {
+      throw StateError('The database is busy; checkpoint did not complete.');
+    }
+    return Uri.file(_path);
+  }
+
   void open() {
     if (_db != null) return;
     final CommonDatabase db = _injectedConnection ?? openNativeDatabase(_path);

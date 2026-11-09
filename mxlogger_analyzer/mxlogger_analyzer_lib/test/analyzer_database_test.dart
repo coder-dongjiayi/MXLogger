@@ -58,6 +58,57 @@ void main() {
     expect(database.count(), 4);
   });
 
+  test("取出数据库前同步 WAL，单独复制 db 保留全部日志和 meta", () {
+    database.insertRecords([
+      record(timestamp: 10, msg: 'first'),
+      record(timestamp: 20, msg: 'second'),
+    ], fileHeader: '{"os":"macOS"}');
+    database.setMeta('fileName', 'sample.mx');
+
+    final uri = database.prepareFileForCopy();
+    expect(File.fromUri(uri).parent.path, tempDir.path);
+    final copy = File.fromUri(uri).copySync('${tempDir.path}/export.db');
+    // 原连接保持打开，只复制主文件，不携带 -wal 或 -shm。
+    final exported = sqlite3.open(
+      '${copy.uri}?immutable=1',
+      uri: true,
+      mode: OpenMode.readOnly,
+    );
+    try {
+      expect(exported.select('PRAGMA integrity_check').single.values, ['ok']);
+      expect(
+        exported.select('SELECT msg, fileHeader FROM mxlog ORDER BY timestamp'),
+        [
+          {'msg': 'first', 'fileHeader': '{"os":"macOS"}'},
+          {'msg': 'second', 'fileHeader': '{"os":"macOS"}'},
+        ],
+      );
+      expect(
+        exported.select("SELECT value FROM meta WHERE key='fileName'").single['value'],
+        'sample.mx',
+      );
+    } finally {
+      exported.dispose();
+    }
+    // 取出文件不会关闭当前库，也不影响后续解析。
+    database.insertRecords([record(timestamp: 30)]);
+    expect(database.count(), 3);
+  });
+
+  test("WAL 被其他连接占用时不返回不完整的数据库文件", () {
+    final reader = sqlite3.open('${tempDir.path}/mxlogger_analyzer.db');
+    try {
+      reader.execute('BEGIN');
+      reader.select('SELECT * FROM mxlog');
+      database.insertRecords([record(timestamp: 1)]);
+      expect(database.prepareFileForCopy, throwsStateError);
+      reader.execute('ROLLBACK');
+      expect(database.prepareFileForCopy().scheme, 'file');
+    } finally {
+      reader.dispose();
+    }
+  });
+
   test("注入数据库连接：替换写入失败时保留原数据和 meta", () {
     final connection = sqlite3.openInMemory();
     final injected = AnalyzerDatabase.fromConnection(connection)..open();

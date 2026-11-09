@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
@@ -20,6 +21,10 @@ Future<MXHost> createDesktopHost() async {
     dropTargetBuilder: _buildDropTarget,
     share: _share,
     openExternalLink: (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
+    openDatabaseLocation: (uri) => launchUrl(
+      File.fromUri(uri).parent.uri,
+      mode: LaunchMode.externalApplication,
+    ),
   );
 }
 

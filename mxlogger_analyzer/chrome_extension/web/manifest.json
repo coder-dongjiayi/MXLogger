@@ -3,6 +3,7 @@
   "name": "MXLogger Analyzer",
   "version": "0.3.1",
   "description": "Import, decrypt and search local MXLogger .mx logs offline.",
+  "permissions": ["downloads"],
   "action": {
     "default_title": "Open MXLogger Analyzer",
     "default_icon": {

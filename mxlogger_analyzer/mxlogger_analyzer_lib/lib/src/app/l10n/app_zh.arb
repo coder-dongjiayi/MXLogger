@@ -39,6 +39,8 @@
   "statStart": "起始",
   "statEnd": "结束",
   "shareAllTip": "分享日志（当前筛选结果）",
+  "openDatabaseFolderTip": "打开数据库目录",
+  "openDatabaseFolderFailed": "无法打开数据库目录，请重试",
   "cryptoTip": "修改解密 Key / IV",
   "changeFileTip": "更换日志文件",
   "refreshTip": "重新扫描本机日志",

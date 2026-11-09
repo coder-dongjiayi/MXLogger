@@ -125,6 +125,12 @@ class MXStore {
   late final LogListStore logList;
   late final ImportStore importer;
 
+  Future<bool> openDatabaseLocation() async {
+    final MXOpenDatabaseLocation? open = host.openDatabaseLocation;
+    if (open == null || importer.value.isRunning) return false;
+    return open(await repository.prepareDatabaseFile());
+  }
+
   void dispose() {
     for (final MXState<Object?> state in <MXState<Object?>>[
       themeMode,

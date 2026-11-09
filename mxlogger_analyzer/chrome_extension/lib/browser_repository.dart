@@ -14,6 +14,10 @@ class BrowserRepository extends HomeRepository {
   final Map<String, web.File> files;
   final BrowserFonts? fonts;
 
+  @override
+  Future<Uri> prepareDatabaseFile() async =>
+      Uri.parse((await client.call('exportDatabase'))['url'] as String);
+
   Map<String, Object?> _filter(LogFilterState filter) => {
     'keyword': filter.keyword,
     'scope': filter.scope.name,

@@ -133,6 +133,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareAllTip => 'Share logs (current filter result)';
 
   @override
+  String get openDatabaseFolderTip => 'Open database folder';
+
+  @override
+  String get openDatabaseFolderFailed =>
+      'Could not open the database folder. Please try again.';
+
+  @override
   String get cryptoTip => 'Edit decryption Key / IV';
 
   @override

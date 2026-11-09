@@ -7,6 +7,52 @@ globalThis.mxAcquireWorkspace = () => new Promise((resolve, reject) => {
 });
 
 // These functions also run in the SQLite worker. Logs stay in local IndexedDB.
+globalThis.mxCanRevealDatabase = () =>
+  typeof chrome !== 'undefined' && Boolean(chrome.runtime?.id && chrome.downloads?.show);
+
+// A browser database has no user-accessible path. Download a complete SQLite
+// snapshot, then reveal that file instead of Chrome's private IndexedDB files.
+globalThis.mxRevealDatabase = async url => {
+  if (!mxCanRevealDatabase()) return false;
+  const downloads = chrome.downloads;
+  let downloadId;
+  let completed = false;
+  let resolveCompletion;
+  const completion = new Promise(resolve => {
+    resolveCompletion = resolve;
+  });
+  const finish = item => {
+    if (completed) return;
+    if (item.state === 'complete') {
+      completed = true;
+      resolveCompletion(true);
+    } else if (item.state === 'interrupted') {
+      completed = true;
+      resolveCompletion(false);
+    }
+  };
+  const onChanged = delta => {
+    if (delta.id === downloadId && delta.state) {
+      finish({state: delta.state.current});
+    }
+  };
+  downloads.onChanged.addListener(onChanged);
+  try {
+    downloadId = await downloads.download({
+      url, filename: 'mxlogger_analyzer.db', conflictAction: 'uniquify', saveAs: false,
+    });
+    // Very small snapshots can finish before download() resolves.
+    const [item] = await downloads.search({id: downloadId});
+    if (!item) return false;
+    finish(item);
+    if (!await completion) return false;
+    downloads.show(downloadId);
+    return true;
+  } finally {
+    downloads.onChanged.removeListener(onChanged);
+  }
+};
+
 const mxCacheName = 'mxlogger-analyzer-cache';
 const mxLegacyCacheName = 'mxlogger-analyzer-prototype';
 const mxDatabasePath = '/mxlogger_analyzer.db';

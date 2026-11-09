@@ -74,6 +74,8 @@ bash ../scripts/build_web.sh --base-href /mxlogger/
 **数据页**：
 - Header：总条数 / 起止时间 / 文件名，分享（导出 txt）、改 Key/IV 重解析、更换文件、
   清除数据（二次确认，清空后回到首次引导页）、深浅主题切换
+- 分享左侧的文件夹按钮：桌面端打开数据库目录，便于复制 `mxlogger_analyzer.db`；
+  Chrome 插件先下载完整数据库快照，再在文件夹中显示该文件（需 `downloads` 权限）。
 - 等级分布条（按占比分段、可点击过滤）+ DEBUG–FATAL 等级 chips（带紧凑计数 1.2k/5.8w）
 - Header 信息卡片：折叠摘要，展开后标量紧凑网格 + 嵌套对象 JSON 树（key 按日志原样显示）、一键复制
 - 搜索（180ms 防抖 + 全部/内容/Tag/Name 范围 + × 一键清除）、时间范围过滤、折叠/展开全部

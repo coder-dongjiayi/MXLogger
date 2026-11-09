@@ -127,6 +127,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shareAllTip => '分享日志（当前筛选结果）';
 
   @override
+  String get openDatabaseFolderTip => '打开数据库目录';
+
+  @override
+  String get openDatabaseFolderFailed => '无法打开数据库目录，请重试';
+
+  @override
   String get cryptoTip => '修改解密 Key / IV';
 
   @override
